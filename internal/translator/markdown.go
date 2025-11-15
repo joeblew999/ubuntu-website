@@ -10,8 +10,8 @@ import (
 
 // MarkdownDoc represents a parsed markdown document
 type MarkdownDoc struct {
-	FrontMatter map[string]interface{}
-	Body        string
+	FrontMatter    map[string]interface{}
+	Body           string
 	rawFrontMatter string
 }
 

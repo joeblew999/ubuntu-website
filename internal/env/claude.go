@@ -11,9 +11,9 @@ import (
 
 // ClaudeMessageRequest represents a minimal Claude API request
 type ClaudeMessageRequest struct {
-	Model      string          `json:"model"`
-	MaxTokens  int             `json:"max_tokens"`
-	Messages   []ClaudeMessage `json:"messages"`
+	Model     string          `json:"model"`
+	MaxTokens int             `json:"max_tokens"`
+	Messages  []ClaudeMessage `json:"messages"`
 }
 
 // ClaudeMessage represents a message in the request

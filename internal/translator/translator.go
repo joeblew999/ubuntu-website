@@ -26,10 +26,10 @@ type Config struct {
 // DefaultConfig returns the default configuration
 func DefaultConfig() *Config {
 	return &Config{
-		SourceLang:  "en",
-		TargetLangs: []string{"de", "sv", "zh", "ja", "th"},
-		ContentDir:  "content",
-		I18nDir:     "i18n",
+		SourceLang:    "en",
+		TargetLangs:   []string{"de", "sv", "zh", "ja", "th"},
+		ContentDir:    "content",
+		I18nDir:       "i18n",
 		CheckpointTag: "last-translation",
 	}
 }

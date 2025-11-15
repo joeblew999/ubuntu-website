@@ -10,7 +10,7 @@ import (
 
 // CloudflareVerifyResponse represents the token verification API response
 type CloudflareVerifyResponse struct {
-	Success bool   `json:"success"`
+	Success bool `json:"success"`
 	Errors  []struct {
 		Code    int    `json:"code"`
 		Message string `json:"message"`

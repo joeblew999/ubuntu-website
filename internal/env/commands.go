@@ -145,7 +145,7 @@ func ValidateCloudflareCredentials() error {
 	}
 
 	if isPlaceholder(cfg.CloudflareToken) {
-		return fmt.Errorf("Cloudflare token not configured in .env")
+		return fmt.Errorf("cloudflare token not configured in .env")
 	}
 
 	fmt.Println("Validating token...")
@@ -183,7 +183,7 @@ func ValidateClaudeCredentials() error {
 	}
 
 	if isPlaceholder(cfg.ClaudeAPIKey) {
-		return fmt.Errorf("Claude API key not configured in .env")
+		return fmt.Errorf("claude API key not configured in .env")
 	}
 
 	fmt.Println("Validating API key...")

@@ -126,10 +126,10 @@ type SyncOptions struct {
 
 // SyncResult represents the result of syncing a secret
 type SyncResult struct {
-	Name    string
-	Status  string // "synced", "skipped", "failed"
-	Reason  string
-	Error   error
+	Name   string
+	Status string // "synced", "skipped", "failed"
+	Reason string
+	Error  error
 }
 
 // validateSecret validates a secret value by calling the appropriate validation function
