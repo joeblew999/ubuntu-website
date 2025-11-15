@@ -1,0 +1,130 @@
+version: '3'
+
+dotenv: ['.env']
+
+vars:
+  PROJECT_NAME: ubuntusoftware-net
+  TRANSLATE_CMD: cmd/translate/main.go
+
+tasks:
+  # =====================================
+  # Setup & Installation
+  # =====================================
+
+  setup:
+    desc: Complete setup - install Hugo, Bun, and dependencies
+    cmds:
+      - task: install:hugo
+      - task: install:bun
+      - task: install:deps
+      - echo "✅ Setup complete! Run 'task dev' to start development server"
+
+  install:hugo:
+    desc: Install Hugo Extended via Go
+    cmds:
+      - echo "Installing Hugo Extended..."
+      - CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@latest
+      - hugo version
+    env:
+      CGO_ENABLED: 1
+
+  install:bun:
+    desc: Install Bun (if not already installed)
+    cmds:
+      - |
+        if command -v bun &> /dev/null; then
+          echo "Bun already installed"
+        else
+          curl -fsSL https://bun.sh/install | bash
+        fi
+      - bun --version
+
+  install:deps:
+    desc: Install Bun and Go dependencies
+    cmds:
+      - echo "Installing Bun dependencies..."
+      - bun install
+      - echo "Downloading Go modules..."
+      - go mod download
+      - echo "✅ Dependencies installed"
+
+  # =====================================
+  # Development
+  # =====================================
+
+  dev:
+    desc: Start Hugo development server
+    cmds:
+      - hugo server --buildDrafts --buildFuture --disableFastRender
+
+  build:
+    desc: Build production site
+    cmds:
+      - echo "Building production site..."
+      - hugo --gc --minify --templateMetrics
+      - echo "✅ Build complete! Output in public/"
+
+  preview:
+    desc: Preview production build locally
+    cmds:
+      - hugo server -e production --minify --disableFastRender
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - echo "Cleaning build artifacts..."
+      - rm -rf public resources .hugo_build.lock
+      - echo "✅ Clean complete"
+
+  # =====================================
+  # Translation (Go-based tool)
+  # =====================================
+
+  translate:check:
+    desc: Show which English files changed and need translation
+    cmds:
+      - go run {{.TRANSLATE_CMD}} --check
+
+  translate:all:
+    desc: Translate all changed English content to all languages
+    cmds:
+      - go run {{.TRANSLATE_CMD}} --all
+
+  translate:lang:
+    desc: "Translate to specific language (usage: task translate:lang LANG=de)"
+    cmds:
+      - go run {{.TRANSLATE_CMD}} --lang={{.LANG}}
+    requires:
+      vars: [LANG]
+
+  translate:i18n:
+    desc: Translate i18n TOML files
+    cmds:
+      - go run {{.TRANSLATE_CMD}} --i18n
+
+  translate:build:
+    desc: Build translation tool binary
+    cmds:
+      - echo "Building translation tool..."
+      - mkdir -p bin
+      - go build -o bin/translate {{.TRANSLATE_CMD}}
+      - ./bin/translate --version
+      - echo "✅ Translation tool built: bin/translate"
+
+  # =====================================
+  # Cloudflare Pages
+  # =====================================
+
+  cf:login:
+    desc: Login to Cloudflare
+    cmds:
+      - bunx wrangler login
+
+  cf:delete-old:
+    desc: Delete existing ubuntusoftware.net Pages deployment
+    cmds:
+      - echo "⚠️  This will delete the existing Cloudflare Pages project"
+      - read -p "Are you sure? (y/N) " -n 1 -r && echo && [[ $$REPLY =~ ^[Yy]$ ]]
+      - bunx wrangler pages project delete {{.PROJECT_NAME}}
+    interactive: true
+

@@ -7,26 +7,18 @@ vars:
   PROJECT_NAME: ubuntusoftware-net
   DOMAIN: www.ubuntusoftware.net
 
-  # Commands & Binaries
+  # Paths
   TRANSLATE_CMD: cmd/translate/main.go
-  BIN_DIR: bin
-
-  # Directories (for .gitignore generation)
   DIR_PUBLIC: public
   DIR_RESOURCES: resources
   DIR_NODE_MODULES: node_modules
   DIR_BIN: bin
 
-  # Files (for .gitignore)
-  FILE_HUGO_LOCK: .hugo_build.lock
-  FILE_ENV: .env
-  FILE_GO_SUM: go.sum
-
-  # Hugo flags
+  # Hugo
   HUGO_BUILD_FLAGS: --gc --minify
   HUGO_DEV_FLAGS: --buildDrafts --buildFuture
 
-  # Go settings
+  # Go
   GO_VERSION: "1.24"
   CGO_ENABLED: "1"
 
@@ -82,7 +74,7 @@ tasks:
   clean:
     desc: Clean build artifacts
     cmds:
-      - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
+      - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} .hugo_build.lock
 
   translate:check:
     desc: Check which files need translation
@@ -159,6 +151,34 @@ tasks:
     desc: Run tests
     cmds:
       - go test ./... -v
+
+  generate:gitignore:
+    desc: Generate .gitignore from vars
+    cmds:
+      - |
+        cat > .gitignore << 'EOF'
+        # Hugo
+        {{.DIR_PUBLIC}}/
+        {{.DIR_RESOURCES}}/
+        .hugo_build.lock
+        hugo_stats.json
+
+        # Node/Bun
+        {{.DIR_NODE_MODULES}}/
+        bun.lockb
+        package-lock.json
+
+        # Go
+        {{.DIR_BIN}}/
+        go.sum
+
+        # Environment
+        .env
+
+        # IDE & OS
+        .vscode/
+        .DS_Store
+        EOF
 
   help:
     desc: Show help
