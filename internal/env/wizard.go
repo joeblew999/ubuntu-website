@@ -237,6 +237,29 @@ func setupClaude() error {
 		break
 	}
 
+	// Ask for workspace name
+	fmt.Println("────────────────────────────────────────────────────────────")
+	fmt.Printf("Setting: %s (recommended)\n", EnvClaudeWorkspace)
+	fmt.Println("────────────────────────────────────────────────────────────")
+	fmt.Println()
+	fmt.Println("Enter your Claude Workspace name to keep this project's")
+	fmt.Println("usage isolated and organized.")
+	fmt.Println()
+
+	workspace := promptString("Workspace name (or press Enter to skip)")
+	if workspace != "" {
+		if err := UpdateEnv(EnvClaudeWorkspace, workspace); err != nil {
+			return err
+		}
+		fmt.Println()
+		fmt.Printf("✓ Workspace saved to %s\n", EnvClaudeWorkspace)
+		fmt.Println()
+	} else {
+		fmt.Println()
+		fmt.Println("⊘ Skipped - using default workspace")
+		fmt.Println()
+	}
+
 	return nil
 }
 

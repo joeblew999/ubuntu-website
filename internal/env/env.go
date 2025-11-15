@@ -17,6 +17,7 @@ const (
 	EnvCloudflareAccount = "CLOUDFLARE_ACCOUNT_ID"
 	EnvCloudflareProject = "CLOUDFLARE_PROJECT_NAME"
 	EnvClaudeAPIKey      = "CLAUDE_API_KEY"
+	EnvClaudeWorkspace   = "CLAUDE_WORKSPACE"
 )
 
 // Placeholder values - kept for backward compatibility
@@ -34,6 +35,7 @@ type EnvConfig struct {
 	CloudflareAccount string `env:"CLOUDFLARE_ACCOUNT_ID" default:"your-account-id" validate:"cloudflare_account"`
 	CloudflareProject string `env:"CLOUDFLARE_PROJECT_NAME" default:"your-project-name"`
 	ClaudeAPIKey      string `env:"CLAUDE_API_KEY" default:"your-api-key-here" comment:"Claude API key (for translation)" validate:"claude_api_key"`
+	ClaudeWorkspace   string `env:"CLAUDE_WORKSPACE" default:"your-workspace-name" comment:"Claude Workspace (recommended for project isolation)"`
 }
 
 // getEnvKey returns the env key name for a struct field using reflection
