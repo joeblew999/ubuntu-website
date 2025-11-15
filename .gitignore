@@ -19,6 +19,9 @@ go.sum
 .env
 .env.*
 
+# Testing
+.playwright-mcp/
+
 # IDE & OS
 .vscode/
 .DS_Store

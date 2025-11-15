@@ -13,6 +13,7 @@ vars:
   DIR_RESOURCES: resources
   DIR_NODE_MODULES: node_modules
   DIR_BIN: bin
+  DIR_PLAYWRIGHT: .playwright-mcp
 
   # Files
   FILE_HUGO_LOCK: .hugo_build.lock
@@ -205,6 +206,9 @@ tasks:
         # Environment
         {{.FILE_ENV}}
         {{.FILE_ENV}}.*
+
+        # Testing
+        {{.DIR_PLAYWRIGHT}}/
 
         # IDE & OS
         .vscode/
