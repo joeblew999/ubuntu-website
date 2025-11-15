@@ -1,0 +1,12 @@
+name = "ubuntusoftware-net"
+compatibility_date = "2024-01-01"
+
+# Cloudflare Pages configuration
+pages_build_output_dir = "public"
+
+[build]
+command = "task ci:setup && task ci:build"
+
+# Custom domain configuration
+[[pages.domains]]
+domain = "www.ubuntusoftware.net"
