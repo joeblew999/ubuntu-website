@@ -14,6 +14,13 @@ vars:
   DIR_NODE_MODULES: node_modules
   DIR_BIN: bin
 
+  # Files
+  FILE_HUGO_LOCK: .hugo_build.lock
+  FILE_HUGO_STATS: hugo_stats.json
+  FILE_BUN_LOCK: bun.lockb
+  FILE_NPM_LOCK: package-lock.json
+  FILE_ENV: .env
+
   # Hugo
   HUGO_BUILD_FLAGS: --gc --minify
   HUGO_DEV_FLAGS: --buildDrafts --buildFuture
@@ -90,7 +97,7 @@ tasks:
   clean:
     desc: Clean build artifacts
     cmds:
-      - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} .hugo_build.lock
+      - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
 
   translate:check:
     desc: Check which files need translation
@@ -128,7 +135,7 @@ tasks:
     desc: Deploy to Cloudflare Pages
     deps: [build]
     cmds:
-      - bunx wrangler pages deploy public --project-name={{.PROJECT_NAME}}
+      - bunx wrangler pages deploy {{.DIR_PUBLIC}} --project-name={{.PROJECT_NAME}}
 
   cf:status:
     desc: Check deployment status
@@ -156,7 +163,7 @@ tasks:
   ci:deploy:
     desc: Deploy from CI
     cmds:
-      - bunx wrangler pages deploy public --project-name={{.PROJECT_NAME}}
+      - bunx wrangler pages deploy {{.DIR_PUBLIC}} --project-name={{.PROJECT_NAME}}
 
   fmt:
     desc: Format code
@@ -181,13 +188,13 @@ tasks:
         # Hugo
         {{.DIR_PUBLIC}}/
         {{.DIR_RESOURCES}}/
-        .hugo_build.lock
-        hugo_stats.json
+        {{.FILE_HUGO_LOCK}}
+        {{.FILE_HUGO_STATS}}
 
         # Node/Bun
         {{.DIR_NODE_MODULES}}/
-        bun.lockb
-        package-lock.json
+        {{.FILE_BUN_LOCK}}
+        {{.FILE_NPM_LOCK}}
 
         # Go
         {{.DIR_BIN}}/
@@ -196,8 +203,8 @@ tasks:
         *.out
 
         # Environment
-        .env
-        .env.*
+        {{.FILE_ENV}}
+        {{.FILE_ENV}}.*
 
         # IDE & OS
         .vscode/
