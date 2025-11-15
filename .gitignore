@@ -1,0 +1,45 @@
+# Hugo
+public/
+resources/
+.hugo_build.lock
+hugo_stats.json
+
+# Node/Bun
+node_modules/
+.npm
+.yarn
+yarn.lock
+package-lock.json
+bun.lockb
+
+# Go
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+go.sum
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Build artifacts
+.dist/
+.tmp/
+builds/
+
+# Misc
+jsconfig.json
