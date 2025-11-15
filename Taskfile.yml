@@ -192,9 +192,12 @@ tasks:
         # Go
         {{.DIR_BIN}}/
         go.sum
+        *.test
+        *.out
 
         # Environment
         .env
+        .env.*
 
         # IDE & OS
         .vscode/

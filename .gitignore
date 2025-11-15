@@ -12,9 +12,12 @@ package-lock.json
 # Go
 bin/
 go.sum
+*.test
+*.out
 
 # Environment
 .env
+.env.*
 
 # IDE & OS
 .vscode/
