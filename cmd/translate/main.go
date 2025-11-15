@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/joeblew99/ubuntu-website/internal/translator"
+	"github.com/joeblew999/ubuntu-website/internal/translator"
 )
 
 const version = "0.1.0"

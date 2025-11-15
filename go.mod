@@ -1,4 +1,4 @@
-module github.com/joeblew99/ubuntu-website
+module github.com/joeblew999/ubuntu-website
 
 go 1.24
 

@@ -23,6 +23,22 @@ vars:
   CGO_ENABLED: "1"
 
 tasks:
+  # Environment Management
+  env:setup:
+    desc: "Setup environment - interactive wizard for API keys"
+    cmds:
+      - go run cmd/env/main.go wizard
+
+  env:show:
+    desc: "Show current environment configuration"
+    cmds:
+      - go run cmd/env/main.go show
+
+  env:sync:
+    desc: "Sync .env to GitHub repository secrets for CI/CD"
+    cmds:
+      - go run cmd/env/main.go sync-secrets {{.CLI_ARGS}}
+
   setup:
     desc: Complete setup - install Hugo, Bun, and dependencies
     cmds:
@@ -118,6 +134,11 @@ tasks:
     desc: Check deployment status
     cmds:
       - bunx wrangler pages deployment list --project-name={{.PROJECT_NAME}}
+
+  cf:delete:
+    desc: Delete Cloudflare Pages project
+    cmds:
+      - bunx wrangler pages project delete {{.PROJECT_NAME}}
 
   ci:setup:
     desc: Setup CI environment

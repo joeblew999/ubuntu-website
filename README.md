@@ -17,8 +17,8 @@ Multi-language website built with Hugo Plate, featuring automated translation an
 ## 🚀 Quick Start
 
 ```bash
-# 1. Setup
-cp .env.example .env              # Add your API keys
+# 1. Environment Setup (first time only)
+task env:setup                    # Interactive wizard for API keys
 task setup                        # Install Hugo, Bun, deps
 
 # 2. Develop
@@ -30,6 +30,18 @@ task translate:all                # Translate changed content
 # 4. Deploy
 task cf:deploy                    # Deploy to Cloudflare Pages
 ```
+
+## 🔑 Environment Setup
+
+Run the interactive wizard to configure your API keys:
+
+```bash
+task env:setup        # Setup API keys (interactive)
+task env:show         # Show current configuration
+task env:sync         # Sync to GitHub secrets for CI/CD
+```
+
+The wizard will guide you through getting your Cloudflare and Claude API keys, validate them, and save to `.env` file.
 
 ## 📋 Prerequisites
 
@@ -72,7 +84,9 @@ The translation tool:
 
 ```
 .
-├── cmd/translate/          # Go translation CLI
+├── cmd/env/                # Environment setup CLI
+├── cmd/translate/          # Translation CLI
+├── internal/env/           # Environment management
 ├── internal/translator/    # Translation logic
 ├── content/
 │   ├── english/           # Source (EN)
@@ -92,20 +106,19 @@ The translation tool:
 
 ## 🔧 Configuration
 
-### Environment Variables (.env)
+The `.env` file contains your API credentials:
 
 ```bash
-CLOUDFLARE_API_TOKEN=xxx    # From dash.cloudflare.com
-CLOUDFLARE_ACCOUNT_ID=xxx   # In dashboard URL
-CLAUDE_API_KEY=xxx          # From console.anthropic.com
+# Cloudflare credentials (for deployment)
+CLOUDFLARE_API_TOKEN=your-token-here
+CLOUDFLARE_ACCOUNT_ID=your-account-id
+CLOUDFLARE_PROJECT_NAME=your-project-name
+
+# Claude API key (for translation)
+CLAUDE_API_KEY=your-api-key-here
 ```
 
-### GitHub Secrets
-
-Add to repo Settings → Secrets:
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLAUDE_API_KEY`
+**Setup:** Run `task env:setup` for interactive wizard, then `task env:sync` to sync to GitHub for CI/CD.
 
 ## 🔗 References
 
