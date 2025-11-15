@@ -1,6 +1,43 @@
-################ English language ##################
+################ English (Default) ##################
 [en]
-languageName = "En"
+languageName = "English"
 languageCode = "en-us"
 contentDir = "content/english"
 weight = 1
+
+################ German ##################
+[de]
+languageName = "Deutsch"
+languageCode = "de-de"
+contentDir = "content/german"
+weight = 2
+
+################ Swedish ##################
+[sv]
+languageName = "Svenska"
+languageCode = "sv"
+contentDir = "content/swedish"
+weight = 3
+
+################ Chinese (Simplified) ##################
+[zh]
+languageName = "中文"
+languageCode = "zh-cn"
+contentDir = "content/chinese"
+weight = 4
+hasCJKLanguage = true
+
+################ Japanese ##################
+[ja]
+languageName = "日本語"
+languageCode = "ja"
+contentDir = "content/japanese"
+weight = 5
+hasCJKLanguage = true
+
+################ Thai ##################
+[th]
+languageName = "ภาษาไทย"
+languageCode = "th"
+contentDir = "content/thai"
+weight = 6
