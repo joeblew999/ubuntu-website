@@ -215,6 +215,14 @@ tasks:
         .DS_Store
         EOF
 
+  git:commit:
+    desc: Generate gitignore, commit and push changes
+    cmds:
+      - task: generate:gitignore
+      - git add -A
+      - git commit -m "{{.MESSAGE}}" || true
+      - git push
+
   help:
     desc: Show help
     cmds:
