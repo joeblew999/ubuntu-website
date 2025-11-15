@@ -3,21 +3,40 @@ version: '3'
 dotenv: ['.env']
 
 vars:
+  # Project
   PROJECT_NAME: ubuntusoftware-net
+  DOMAIN: www.ubuntusoftware.net
+
+  # Commands & Binaries
   TRANSLATE_CMD: cmd/translate/main.go
+  BIN_DIR: bin
+
+  # Directories (for .gitignore generation)
+  DIR_PUBLIC: public
+  DIR_RESOURCES: resources
+  DIR_NODE_MODULES: node_modules
+  DIR_BIN: bin
+
+  # Files (for .gitignore)
+  FILE_HUGO_LOCK: .hugo_build.lock
+  FILE_ENV: .env
+  FILE_GO_SUM: go.sum
+
+  # Hugo flags
+  HUGO_BUILD_FLAGS: --gc --minify
+  HUGO_DEV_FLAGS: --buildDrafts --buildFuture
+
+  # Go settings
+  GO_VERSION: "1.24"
+  CGO_ENABLED: "1"
 
 tasks:
-  # =====================================
-  # Setup & Installation
-  # =====================================
-
   setup:
     desc: Complete setup - install Hugo, Bun, and dependencies
     cmds:
       - task: install:hugo
       - task: install:bun
       - task: install:deps
-      - echo "✅ Setup complete! Run 'task dev' to start development server"
 
   install:hugo:
     desc: Install Hugo Extended via Go
@@ -26,10 +45,10 @@ tasks:
       - CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@latest
       - hugo version
     env:
-      CGO_ENABLED: 1
+      CGO_ENABLED: "1"
 
   install:bun:
-    desc: Install Bun (if not already installed)
+    desc: Install Bun
     cmds:
       - |
         if command -v bun &> /dev/null; then
@@ -40,196 +59,108 @@ tasks:
       - bun --version
 
   install:deps:
-    desc: Install Bun and Go dependencies
+    desc: Install dependencies
     cmds:
-      - echo "Installing Bun dependencies..."
       - bun install
-      - echo "Downloading Go modules..."
       - go mod download
-      - echo "✅ Dependencies installed"
-
-  # =====================================
-  # Development
-  # =====================================
 
   dev:
     desc: Start Hugo development server
     cmds:
-      - hugo server --buildDrafts --buildFuture --disableFastRender
+      - hugo server {{.HUGO_DEV_FLAGS}}
 
   build:
     desc: Build production site
     cmds:
-      - echo "Building production site..."
-      - hugo --gc --minify --templateMetrics
-      - echo "✅ Build complete! Output in public/"
+      - hugo {{.HUGO_BUILD_FLAGS}}
 
   preview:
-    desc: Preview production build locally
+    desc: Preview production build
     cmds:
-      - hugo server -e production --minify --disableFastRender
+      - hugo server -e production --minify
 
   clean:
     desc: Clean build artifacts
     cmds:
-      - echo "Cleaning build artifacts..."
-      - rm -rf public resources .hugo_build.lock
-      - echo "✅ Clean complete"
-
-  # =====================================
-  # Translation (Go-based tool)
-  # =====================================
+      - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
 
   translate:check:
-    desc: Show which English files changed and need translation
+    desc: Check which files need translation
     cmds:
       - go run {{.TRANSLATE_CMD}} --check
 
   translate:all:
-    desc: Translate all changed English content to all languages
+    desc: Translate all changed content
     cmds:
       - go run {{.TRANSLATE_CMD}} --all
 
   translate:lang:
-    desc: "Translate to specific language (usage: task translate:lang LANG=de)"
+    desc: Translate to specific language
     cmds:
       - go run {{.TRANSLATE_CMD}} --lang={{.LANG}}
     requires:
       vars: [LANG]
 
   translate:i18n:
-    desc: Translate i18n TOML files
+    desc: Translate i18n files
     cmds:
       - go run {{.TRANSLATE_CMD}} --i18n
-
-  translate:build:
-    desc: Build translation tool binary
-    cmds:
-      - echo "Building translation tool..."
-      - mkdir -p bin
-      - go build -o bin/translate {{.TRANSLATE_CMD}}
-      - ./bin/translate --version
-      - echo "✅ Translation tool built: bin/translate"
-
-  # =====================================
-  # Cloudflare Pages
-  # =====================================
 
   cf:login:
     desc: Login to Cloudflare
     cmds:
       - bunx wrangler login
 
-  cf:delete-old:
-    desc: Delete existing ubuntusoftware.net Pages deployment
-    cmds:
-      - echo "⚠️  This will delete the existing Cloudflare Pages project"
-      - read -p "Are you sure? (y/N) " -n 1 -r && echo && [[ $$REPLY =~ ^[Yy]$ ]]
-      - bunx wrangler pages project delete {{.PROJECT_NAME}}
-    interactive: true
-
   cf:init:
-    desc: Initialize new Cloudflare Pages project
+    desc: Initialize Cloudflare Pages project
     cmds:
-      - echo "Creating Cloudflare Pages project: {{.PROJECT_NAME}}"
       - bunx wrangler pages project create {{.PROJECT_NAME}} --production-branch=main
-      - echo "✅ Project created! Configure custom domain in Cloudflare dashboard"
 
   cf:deploy:
-    desc: Deploy to Cloudflare Pages production
+    desc: Deploy to Cloudflare Pages
+    deps: [build]
     cmds:
-      - task: build
-      - echo "Deploying to Cloudflare Pages..."
       - bunx wrangler pages deploy public --project-name={{.PROJECT_NAME}}
-      - echo "✅ Deployed to production!"
-
-  cf:deploy:preview:
-    desc: Deploy preview to Cloudflare Pages
-    cmds:
-      - task: build
-      - echo "Deploying preview..."
-      - bunx wrangler pages deploy public --project-name={{.PROJECT_NAME}} --branch=preview
-      - echo "✅ Preview deployed!"
 
   cf:status:
-    desc: Check Cloudflare Pages deployment status
+    desc: Check deployment status
     cmds:
       - bunx wrangler pages deployment list --project-name={{.PROJECT_NAME}}
 
-  cf:logs:
-    desc: View Cloudflare Pages deployment logs
-    cmds:
-      - bunx wrangler pages deployment tail --project-name={{.PROJECT_NAME}}
-
-  cf:cache:purge:
-    desc: Purge Cloudflare cache
-    cmds:
-      - echo "Purging Cloudflare cache..."
-      - bunx wrangler pages deployment tail --project-name={{.PROJECT_NAME}}
-
-  # =====================================
-  # CI/CD Tasks (called by GitHub Actions)
-  # =====================================
-
   ci:setup:
-    desc: Install Hugo and dependencies in CI environment
+    desc: Setup CI environment
     cmds:
-      - echo "Setting up CI environment..."
       - CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@latest
       - bun install
       - go mod download
-      - hugo version
-      - bun --version
-      - go version
-      - echo "✅ CI setup complete"
     env:
-      CGO_ENABLED: 1
+      CGO_ENABLED: "1"
 
   ci:build:
-    desc: Build for CI
-    cmds:
-      - task: build
+    desc: Build in CI
+    deps: [build]
 
   ci:deploy:
     desc: Deploy from CI
     cmds:
-      - echo "Deploying from CI..."
       - bunx wrangler pages deploy public --project-name={{.PROJECT_NAME}}
-      - echo "✅ CI deployment complete"
-
-  # =====================================
-  # Utilities
-  # =====================================
 
   fmt:
-    desc: Format code (Hugo templates, Go, JS)
+    desc: Format code
     cmds:
-      - echo "Formatting code..."
-      - bun run format || echo "No format script in package.json"
       - go fmt ./...
-      - echo "✅ Code formatted"
 
   lint:
     desc: Lint code
     cmds:
-      - echo "Linting Go code..."
       - go vet ./...
-      - echo "✅ Lint complete"
 
   test:
     desc: Run tests
     cmds:
-      - echo "Running Go tests..."
       - go test ./... -v
-      - echo "✅ Tests complete"
-
-  mod:tidy:
-    desc: Tidy Go modules
-    cmds:
-      - go mod tidy
-      - echo "✅ Go modules tidied"
 
   help:
-    desc: Show this help
+    desc: Show help
     cmds:
       - task --list
