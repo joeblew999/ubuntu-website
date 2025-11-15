@@ -46,6 +46,13 @@ tasks:
     desc: "Sync .env to GitHub repository secrets for CI/CD"
     cmds:
       - go run cmd/env/main.go sync-secrets {{.CLI_ARGS}}
+      - |
+        REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"' 2>/dev/null || echo "")
+        if [ -n "$REPO" ]; then
+          echo ""
+          echo "→ View secrets: https://github.com/$REPO/settings/secrets/actions"
+          echo ""
+        fi
 
   setup:
     desc: Complete setup - install Hugo, Bun, and dependencies
@@ -222,6 +229,13 @@ tasks:
       - git add -A
       - git commit -m "{{.MESSAGE}}" || true
       - git push
+      - |
+        REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"' 2>/dev/null || echo "")
+        if [ -n "$REPO" ]; then
+          echo ""
+          echo "✓ Pushed to: https://github.com/$REPO"
+          echo ""
+        fi
 
   help:
     desc: Show help
