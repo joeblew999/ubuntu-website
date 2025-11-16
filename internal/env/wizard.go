@@ -47,109 +47,128 @@ func setupCloudflare() error {
 		return err
 	}
 
-	// Check if token exists and is not placeholder
+	// Try to validate existing credentials
 	if cfg.CloudflareToken != "" && cfg.CloudflareToken != PlaceholderToken {
-		// Validate existing token first
-		fmt.Println("Validating existing Cloudflare credentials...")
-		tokenName, err := ValidateCloudflareToken(cfg.CloudflareToken)
-		if err != nil {
-			fmt.Println(Error(fmt.Sprintf("Token validation failed: %v", err)))
-			fmt.Println()
-			fmt.Println(Colorize("Will prompt for new token...", ColorYellow))
-			fmt.Println()
-			cfg.CloudflareToken = ""
-		} else {
-			// Validate or fetch account ID
-			if cfg.CloudflareAccount != "" && !isPlaceholder(cfg.CloudflareAccount) {
-				// Account ID exists - validate it
-				if accountName, err := ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount); err == nil {
-					fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
-					fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
-					fmt.Println()
-
-					// Ensure project name is set
-					return ensureProjectName()
-				} else {
-					// Account ID doesn't match token - fetch the correct one
-					fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
-					fmt.Println()
-					fmt.Println(Colorize("Token is valid but account ID doesn't match", ColorYellow))
-					fmt.Println(Colorize("Fetching correct account ID for this token...", ColorYellow))
-					fmt.Println()
-
-					accountID, accountName, err := GetCloudflareAccounts(cfg.CloudflareToken)
-					if err != nil {
-						fmt.Println(Error(fmt.Sprintf("Could not fetch account ID: %v", err)))
-						fmt.Println()
-						keep := promptYesNo("Keep token without account ID?", true)
-						if keep {
-							fmt.Println("✓ Keeping existing token")
-							fmt.Println()
-							return nil
-						} else {
-							cfg.CloudflareToken = ""
-							fmt.Println("Will prompt for new token...")
-							fmt.Println()
-						}
-					} else {
-						// Save the correct account ID
-						if err := UpdateEnv(EnvCloudflareAccount, accountID); err != nil {
-							fmt.Println(Error(fmt.Sprintf("Failed to save account ID: %v", err)))
-							fmt.Println()
-							return err
-						}
-						fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
-						fmt.Println(Colorize(fmt.Sprintf("  Old ID: %s (was incorrect)", cfg.CloudflareAccount), ColorGray))
-						fmt.Println(Colorize(fmt.Sprintf("  New ID: %s", accountID), ColorGray))
-						fmt.Println()
-
-					// Ensure project name is set
-					return ensureProjectName()
-					}
-				}
-			} else {
-				// Token valid but no account ID - try to fetch it
-				fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
-				fmt.Println()
-				fmt.Println("Fetching account information...")
-				accountID, accountName, err := GetCloudflareAccounts(cfg.CloudflareToken)
-				if err != nil {
-					fmt.Println(Colorize(fmt.Sprintf("Could not fetch account ID: %v", err), ColorYellow))
-					fmt.Println()
-					keep := promptYesNo("Keep token without account ID?", true)
-					if keep {
-						fmt.Println("✓ Keeping existing token")
-						fmt.Println()
-						return nil
-					} else {
-						cfg.CloudflareToken = ""
-						fmt.Println("Will prompt for new token...")
-						fmt.Println()
-					}
-				} else {
-					// Save the account ID
-					if err := UpdateEnv(EnvCloudflareAccount, accountID); err != nil {
-						fmt.Println(Error(fmt.Sprintf("Failed to save account ID: %v", err)))
-						fmt.Println()
-						return err
-					}
-					fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
-					fmt.Println(Colorize(fmt.Sprintf("  ID: %s", accountID), ColorGray))
-					fmt.Println()
-
-					// Ensure project name is set
-					return ensureProjectName()
-				}
-			}
+		if validated, err := validateExistingCloudflareSetup(cfg); validated {
+			return err // nil on success, error on failure
 		}
+		// If not validated, continue to prompt for new token
 	}
 
-	// Loop until valid token or skip
-	for cfg.CloudflareToken == "" || cfg.CloudflareToken == PlaceholderToken {
-		// Get repo name for token suggestion (ignore errors - it's just a suggestion)
-		_, repoName, _ := GetRepositoryInfo()
-		showCloudflareInstructions(repoName)
+	// Prompt for new token
+	if err := promptForCloudflareToken(); err != nil {
+		return err
+	}
 
+	// Ensure project name is set
+	return ensureProjectName()
+}
+
+// validateExistingCloudflareSetup validates existing Cloudflare credentials
+// Returns (true, nil) if validation succeeded and setup is complete
+// Returns (true, err) if validation failed with an error
+// Returns (false, nil) if validation failed but should continue to prompt
+func validateExistingCloudflareSetup(cfg *EnvConfig) (bool, error) {
+	fmt.Println("Validating existing Cloudflare credentials...")
+	tokenName, err := ValidateCloudflareToken(cfg.CloudflareToken)
+	if err != nil {
+		fmt.Println(Error(fmt.Sprintf("Token validation failed: %v", err)))
+		fmt.Println()
+		fmt.Println(Colorize("Will prompt for new token...", ColorYellow))
+		fmt.Println()
+		return false, nil
+	}
+
+	// Token is valid - handle account ID
+	if cfg.CloudflareAccount != "" && !isPlaceholder(cfg.CloudflareAccount) {
+		return validateOrFixAccountID(cfg, tokenName)
+	}
+	
+	return fetchAndSaveAccountID(cfg.CloudflareToken, tokenName)
+}
+
+// validateOrFixAccountID validates existing account ID or auto-fixes if mismatched
+func validateOrFixAccountID(cfg *EnvConfig, tokenName string) (bool, error) {
+	accountName, err := ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount)
+	if err == nil {
+		// Account ID is valid - setup complete!
+		fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
+		fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
+		fmt.Println()
+		return true, ensureProjectName()
+	}
+
+	// Account ID doesn't match - try to auto-fix
+	fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
+	fmt.Println()
+	fmt.Println(Colorize("Token is valid but account ID doesn't match", ColorYellow))
+	fmt.Println(Colorize("Fetching correct account ID for this token...", ColorYellow))
+	fmt.Println()
+
+	accountID, accountName, err := GetCloudflareAccounts(cfg.CloudflareToken)
+	if err != nil {
+		fmt.Println(Error(fmt.Sprintf("Could not fetch account ID: %v", err)))
+		fmt.Println()
+		if promptYesNo("Keep token without account ID?", true) {
+			fmt.Println("✓ Keeping existing token")
+			fmt.Println()
+			return true, nil
+		}
+		fmt.Println("Will prompt for new token...")
+		fmt.Println()
+		return false, nil
+	}
+
+	// Save the correct account ID
+	if err := UpdateEnv(EnvCloudflareAccount, accountID); err != nil {
+		return true, fmt.Errorf("failed to save account ID: %w", err)
+	}
+	
+	fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
+	fmt.Println(Colorize(fmt.Sprintf("  Old ID: %s (was incorrect)", cfg.CloudflareAccount), ColorGray))
+	fmt.Println(Colorize(fmt.Sprintf("  New ID: %s", accountID), ColorGray))
+	fmt.Println()
+	return true, ensureProjectName()
+}
+
+// fetchAndSaveAccountID fetches and saves account ID for a valid token
+func fetchAndSaveAccountID(token, tokenName string) (bool, error) {
+	fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
+	fmt.Println()
+	fmt.Println("Fetching account information...")
+	
+	accountID, accountName, err := GetCloudflareAccounts(token)
+	if err != nil {
+		fmt.Println(Colorize(fmt.Sprintf("Could not fetch account ID: %v", err), ColorYellow))
+		fmt.Println()
+		if promptYesNo("Keep token without account ID?", true) {
+			fmt.Println("✓ Keeping existing token")
+			fmt.Println()
+			return true, nil
+		}
+		fmt.Println("Will prompt for new token...")
+		fmt.Println()
+		return false, nil
+	}
+
+	// Save the account ID
+	if err := UpdateEnv(EnvCloudflareAccount, accountID); err != nil {
+		return true, fmt.Errorf("failed to save account ID: %w", err)
+	}
+	
+	fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
+	fmt.Println(Colorize(fmt.Sprintf("  ID: %s", accountID), ColorGray))
+	fmt.Println()
+	return true, ensureProjectName()
+}
+
+// promptForCloudflareToken prompts user for new Cloudflare token and validates it
+func promptForCloudflareToken() error {
+	_, repoName, _ := GetRepositoryInfo()
+	
+	for {
+		showCloudflareInstructions(repoName)
+		
 		token := promptString("Paste your Cloudflare API token (or press Enter to skip)")
 		if token == "" {
 			fmt.Println()
@@ -159,7 +178,7 @@ func setupCloudflare() error {
 			return nil
 		}
 
-		// Save token
+		// Save and validate token
 		if err := UpdateEnv(EnvCloudflareToken, token); err != nil {
 			return err
 		}
@@ -167,7 +186,6 @@ func setupCloudflare() error {
 		fmt.Printf("✓ Token saved to %s\n", EnvCloudflareToken)
 		fmt.Println()
 
-		// Validate token
 		fmt.Println("Validating Cloudflare credentials...")
 		tokenName, err := ValidateCloudflareToken(token)
 		if err != nil {
@@ -180,71 +198,61 @@ func setupCloudflare() error {
 
 		fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
 
-		// Fetch or validate account ID
-		cfg, _ := LoadEnv()
-		if cfg.CloudflareAccount != "" && !isPlaceholder(cfg.CloudflareAccount) {
-			// Account ID exists - validate it
-			if accountName, err := ValidateCloudflareAccount(token, cfg.CloudflareAccount); err == nil {
-				fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
-				fmt.Println()
-				break
-			} else {
-				// Account ID doesn't match token - fetch the correct one
-				fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
-				fmt.Println()
-				fmt.Println(Colorize("Token is valid but account ID doesn't match", ColorYellow))
-				fmt.Println(Colorize("Fetching correct account ID for this token...", ColorYellow))
-				fmt.Println()
-
-				accountID, accountName, err := GetCloudflareAccounts(token)
-				if err != nil {
-					fmt.Println(Error(fmt.Sprintf("Could not fetch account ID: %v", err)))
-					fmt.Println(Colorize("You can add it manually to .env later if needed", ColorYellow))
-					fmt.Println()
-					break
-				}
-
-				// Save the correct account ID
-				if err := UpdateEnv(EnvCloudflareAccount, accountID); err != nil {
-					fmt.Println(Error(fmt.Sprintf("Failed to save account ID: %v", err)))
-					fmt.Println()
-					continue
-				}
-
-				fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
-				fmt.Println(Colorize(fmt.Sprintf("  Old ID: %s (was incorrect)", cfg.CloudflareAccount), ColorGray))
-				fmt.Println(Colorize(fmt.Sprintf("  New ID: %s", accountID), ColorGray))
-				fmt.Println()
-				break
-			}
-		} else {
-			// No account ID - try to fetch it automatically
-			fmt.Println()
-			fmt.Println("Fetching account information...")
-			accountID, accountName, err := GetCloudflareAccounts(token)
-			if err != nil {
-				fmt.Println(Colorize(fmt.Sprintf("Could not fetch account ID automatically: %v", err), ColorYellow))
-				fmt.Println(Colorize("You can add it manually to .env later if needed", ColorYellow))
-				fmt.Println()
-				break
-			}
-
-			// Save the account ID
-			if err := UpdateEnv(EnvCloudflareAccount, accountID); err != nil {
-				fmt.Println(Error(fmt.Sprintf("Failed to save account ID: %v", err)))
-				fmt.Println()
-				continue
-			}
-
-			fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
-			fmt.Println(Colorize(fmt.Sprintf("  ID: %s", accountID), ColorGray))
-			fmt.Println()
-			break
+		// Try to fetch and save account ID
+		if err := handleAccountIDForNewToken(token); err != nil {
+			return err
 		}
+		return nil
+	}
+}
+
+// handleAccountIDForNewToken handles account ID validation/fetching for newly entered token
+func handleAccountIDForNewToken(token string) error {
+	cfg, _ := LoadEnv()
+	
+	// Check if there's an existing account ID to validate
+	if cfg.CloudflareAccount != "" && !isPlaceholder(cfg.CloudflareAccount) {
+		accountName, err := ValidateCloudflareAccount(token, cfg.CloudflareAccount)
+		if err == nil {
+			fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
+			fmt.Println()
+			return nil
+		}
+		
+		// Account ID mismatch - fetch correct one
+		fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
+		fmt.Println()
+		fmt.Println(Colorize("Token is valid but account ID doesn't match", ColorYellow))
+		fmt.Println(Colorize("Fetching correct account ID for this token...", ColorYellow))
+		fmt.Println()
+	}
+	
+	// Fetch account ID
+	fmt.Println()
+	fmt.Println("Fetching account information...")
+	accountID, accountName, err := GetCloudflareAccounts(token)
+	if err != nil {
+		fmt.Println(Colorize(fmt.Sprintf("Could not fetch account ID: %v", err), ColorYellow))
+		fmt.Println(Colorize("You can add it manually to .env later if needed", ColorYellow))
+		fmt.Println()
+		return nil
 	}
 
-	// Ensure project name is set
-	return ensureProjectName()
+	// Save the account ID
+	if err := UpdateEnv(EnvCloudflareAccount, accountID); err != nil {
+		return fmt.Errorf("failed to save account ID: %w", err)
+	}
+
+	if cfg.CloudflareAccount != "" && !isPlaceholder(cfg.CloudflareAccount) {
+		fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
+		fmt.Println(Colorize(fmt.Sprintf("  Old ID: %s (was incorrect)", cfg.CloudflareAccount), ColorGray))
+		fmt.Println(Colorize(fmt.Sprintf("  New ID: %s", accountID), ColorGray))
+	} else {
+		fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
+		fmt.Println(Colorize(fmt.Sprintf("  ID: %s", accountID), ColorGray))
+	}
+	fmt.Println()
+	return nil
 }
 
 func setupClaude() error {
