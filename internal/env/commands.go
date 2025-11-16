@@ -26,6 +26,21 @@ func printFooter(hint string) {
 	fmt.Println()
 }
 
+// joinParts joins string parts with bullet separator
+func joinParts(parts []string) string {
+	if len(parts) == 0 {
+		return "0"
+	}
+	result := ""
+	for i, part := range parts {
+		if i > 0 {
+			result += " • "
+		}
+		result += part
+	}
+	return result
+}
+
 // ShowConfig displays the current environment configuration
 func ShowConfig() error {
 	// Get absolute path to .env file
@@ -300,49 +315,88 @@ func SyncSecrets(dryRun, force, validate bool) error {
 	fmt.Println("Secrets status:")
 	fmt.Println()
 
-	synced := 0
+	created := 0
+	updated := 0
 	skipped := 0
 	failed := 0
 
 	for _, result := range results {
-		var icon, status string
+		var icon, badge, status string
 		switch result.Status {
 		case "synced":
 			icon = "✓"
-			status = result.Reason
-			synced++
+			if result.Reason == "created" {
+				badge = Colorize("[new]", ColorGreen)
+				status = "Created new secret"
+				created++
+			} else {
+				badge = Colorize("[upd]", ColorBlue)
+				status = "Updated existing secret"
+				updated++
+			}
 		case "would-sync":
 			icon = "→"
-			status = result.Reason
-			synced++ // Count for dry-run summary
+			if result.Reason == "would create new" {
+				badge = Colorize("[new]", ColorGreen)
+				status = "Would create new secret"
+				created++
+			} else {
+				badge = Colorize("[upd]", ColorBlue)
+				status = "Would update existing secret"
+				updated++
+			}
 		case "skipped":
 			icon = "⊘"
+			badge = Colorize("[skip]", ColorGray)
 			status = result.Reason
 			skipped++
 		case "failed":
 			icon = "✗"
+			badge = Colorize("[fail]", ColorRed)
 			status = fmt.Sprintf("%s: %v", result.Reason, result.Error)
 			failed++
 		}
 
-		fmt.Printf("  [%s] %s\n", icon, result.Name)
+		fmt.Printf("  [%s] %s %s\n", icon, badge, result.Name)
 		fmt.Printf("      %s\n", status)
 		fmt.Println()
 	}
 
+	synced := created + updated
+
 	// Summary
 	summary := ""
 	if dryRun {
-		summary = fmt.Sprintf("Would sync: %d • Skipped: %d", synced, skipped)
-		if failed > 0 {
-			summary += fmt.Sprintf(" • Failed: %d", failed)
+		parts := []string{}
+		if created > 0 {
+			parts = append(parts, fmt.Sprintf("New: %d", created))
 		}
+		if updated > 0 {
+			parts = append(parts, fmt.Sprintf("Update: %d", updated))
+		}
+		if skipped > 0 {
+			parts = append(parts, fmt.Sprintf("Skip: %d", skipped))
+		}
+		if failed > 0 {
+			parts = append(parts, fmt.Sprintf("Fail: %d", failed))
+		}
+		summary = fmt.Sprintf("Would sync: %s", joinParts(parts))
 		summary += "\n→ Run without --check to actually sync"
 	} else {
-		summary = fmt.Sprintf("Synced: %d • Skipped: %d", synced, skipped)
-		if failed > 0 {
-			summary += fmt.Sprintf(" • Failed: %d", failed)
+		parts := []string{}
+		if created > 0 {
+			parts = append(parts, fmt.Sprintf("New: %d", created))
 		}
+		if updated > 0 {
+			parts = append(parts, fmt.Sprintf("Update: %d", updated))
+		}
+		if skipped > 0 {
+			parts = append(parts, fmt.Sprintf("Skip: %d", skipped))
+		}
+		if failed > 0 {
+			parts = append(parts, fmt.Sprintf("Fail: %d", failed))
+		}
+		summary = fmt.Sprintf("Synced: %s", joinParts(parts))
 		if synced > 0 {
 			repoURL, _ := GetRepositoryURL()
 			summary += fmt.Sprintf("\n→ Verify at: %s/settings/secrets/actions", repoURL)
