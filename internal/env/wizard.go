@@ -263,9 +263,10 @@ func showCloudflareInstructions(repoName string) {
 		tokenSuggestion = repoName
 	}
 	fmt.Printf("     → Token name: Give it a descriptive name (e.g., '%s')\n", tokenSuggestion)
-	fmt.Println("     → Permissions: Add these permissions:")
+	fmt.Println("     → Permissions: Add these 3 permissions:")
 	fmt.Println("       • Account | Cloudflare Pages | Edit")
 	fmt.Println("       • Account | Account Settings | Read")
+	fmt.Println("       • User | API Tokens | Read")
 	fmt.Println("     → Account Resources:")
 	fmt.Println("       • Select your specific account")
 	fmt.Println("     → Click 'Continue to summary'")

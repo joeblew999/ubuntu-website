@@ -80,9 +80,9 @@ func ValidateCloudflareToken(token string) (string, error) {
 		return "", fmt.Errorf("token verification failed")
 	}
 
-	// Try to get token details to retrieve the name
-	// This is optional - token may not have permission to read its own details
-	// Requires "User: API Tokens: Read" permission which is not needed for deployment
+	// Get token details to retrieve the name
+	// This requires "User: API Tokens: Read" permission
+	// If token lacks this permission, validation will still succeed but won't show the name
 	tokenID := verifyResp.Result.ID
 	tokenReq, err := http.NewRequest("GET", fmt.Sprintf("https://api.cloudflare.com/client/v4/user/tokens/%s", tokenID), nil)
 	if err != nil {
