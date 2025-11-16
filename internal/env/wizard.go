@@ -59,8 +59,8 @@ func setupCloudflare() error {
 			fmt.Println()
 			cfg.CloudflareToken = ""
 		} else {
-			// Validate account ID if present
-			if cfg.CloudflareAccount != "" {
+			// Validate account ID if present and not a placeholder
+			if cfg.CloudflareAccount != "" && !isPlaceholder(cfg.CloudflareAccount) {
 				if accountName, err := ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount); err == nil {
 					fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
 					fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
@@ -69,7 +69,7 @@ func setupCloudflare() error {
 				} else {
 					fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
 					fmt.Println()
-					fmt.Println(Colorize("Token lacks account permissions. Will prompt for new token...", ColorYellow))
+					fmt.Println(Colorize("Will prompt for new token...", ColorYellow))
 					fmt.Println()
 					cfg.CloudflareToken = ""
 				}
@@ -130,7 +130,7 @@ func setupCloudflare() error {
 
 		// Validate account ID
 		cfg, _ := LoadEnv()
-		if cfg.CloudflareAccount != "" {
+		if cfg.CloudflareAccount != "" && !isPlaceholder(cfg.CloudflareAccount) {
 			if accountName, err := ValidateCloudflareAccount(token, cfg.CloudflareAccount); err == nil {
 				fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
 				fmt.Println()
@@ -138,7 +138,7 @@ func setupCloudflare() error {
 			} else {
 				fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
 				fmt.Println()
-				fmt.Println(Colorize("Token lacks account permissions. Please try again or press Enter to skip...", ColorYellow))
+				fmt.Println(Colorize("Please try again or press Enter to skip...", ColorYellow))
 				fmt.Println()
 				continue
 			}
