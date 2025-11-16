@@ -18,7 +18,7 @@ Multi-language website built with Hugo Plate, featuring automated translation an
 
 ```bash
 # 1. Environment Setup (first time only)
-task env:setup                    # Interactive wizard for API keys
+task env:local:setup              # Interactive wizard for API keys
 task setup                        # Install Hugo, Bun, deps
 
 # 2. Develop
@@ -36,7 +36,7 @@ task cf:deploy                    # Deploy to Cloudflare Pages
 Run the interactive wizard to configure your API keys:
 
 ```bash
-task env:setup        # Setup API keys (interactive)
+task env:local:setup  # Setup local .env (interactive wizard)
 task env:local:list   # List local .env configuration
 task env:gh:list      # List GitHub secrets
 task env:gh:push      # Push to GitHub secrets for CI/CD
@@ -119,7 +119,7 @@ CLOUDFLARE_PROJECT_NAME=your-project-name
 CLAUDE_API_KEY=your-api-key-here
 ```
 
-**Setup:** Run `task env:setup` for interactive wizard, then `task env:gh:push` to sync to GitHub for CI/CD.
+**Setup:** Run `task env:local:setup` for interactive wizard, then `task env:gh:push` to sync to GitHub for CI/CD.
 
 ## 🔗 References
 

@@ -16,7 +16,7 @@ func main() {
 	command := os.Args[1]
 
 	switch command {
-	case "setup":
+	case "local-setup":
 		if err := env.RunWizard(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
@@ -42,6 +42,12 @@ func main() {
 		}
 
 	// Legacy aliases
+	case "setup":
+		if err := env.RunWizard(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
 	case "list":
 		if err := env.ShowConfig(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -135,10 +141,8 @@ func parseSyncSecretsFlags() (dryRun, force, validate bool) {
 func printUsage() {
 	fmt.Println("Usage: go run cmd/env/main.go <command> [options]")
 	fmt.Println()
-	fmt.Println("Setup:")
-	fmt.Println("  setup               Run interactive setup wizard")
-	fmt.Println()
 	fmt.Println("Local Commands:")
+	fmt.Println("  local-setup         Setup local .env - interactive wizard")
 	fmt.Println("  local-list          List local .env configuration")
 	fmt.Println()
 	fmt.Println("GitHub Commands:")

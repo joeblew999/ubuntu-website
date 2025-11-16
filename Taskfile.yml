@@ -32,10 +32,10 @@ vars:
 
 tasks:
   # Environment Management
-  env:setup:
-    desc: "Setup environment - interactive wizard for API keys"
+  env:local:setup:
+    desc: "Setup local .env - interactive wizard for API keys"
     cmds:
-      - go run cmd/env/main.go setup
+      - go run cmd/env/main.go local-setup
 
   env:local:list:
     desc: "List local .env configuration"
@@ -53,9 +53,9 @@ tasks:
       - go run cmd/env/main.go gh-push {{.CLI_ARGS}}
 
   env:all:
-    desc: "Complete environment workflow: setup → local:list → gh:push → gh:list"
+    desc: "Complete environment workflow: local:setup → local:list → gh:push → gh:list"
     cmds:
-      - task: env:setup
+      - task: env:local:setup
       - task: env:local:list
       - task: env:gh:push
       - task: env:gh:list
