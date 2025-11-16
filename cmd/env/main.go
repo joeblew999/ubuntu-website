@@ -14,54 +14,32 @@ func main() {
 	}
 
 	command := os.Args[1]
+	var err error
 
 	switch command {
 	case "local-setup":
-		if err := env.RunWizard(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
+		err = env.RunWizard()
 	case "local-list":
-		if err := env.ShowConfig(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
+		err = env.ShowConfig()
 	case "gh-list":
-		if err := env.ShowRemoteSecrets(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
+		err = env.ShowRemoteSecrets()
 	case "gh-push":
 		dryRun, force, validate := parseSyncSecretsFlags()
-		if err := env.SyncSecrets(dryRun, force, validate); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
+		err = env.SyncSecrets(dryRun, force, validate)
 	case "validate":
-		if err := env.ValidateAll(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
+		err = env.ValidateAll()
 	case "validate-cloudflare":
-		if err := env.ValidateCloudflareCredentials(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
+		err = env.ValidateCloudflareCredentials()
 	case "validate-claude":
-		if err := env.ValidateClaudeCredentials(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
+		err = env.ValidateClaudeCredentials()
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", command)
 		printUsage()
+		os.Exit(1)
+	}
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 }
