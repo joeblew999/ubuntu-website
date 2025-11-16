@@ -54,6 +54,26 @@ tasks:
           echo ""
         fi
 
+  env:sync:show:
+    desc: "Show GitHub secrets status"
+    cmds:
+      - |
+        REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"' 2>/dev/null || echo "")
+        if [ -z "$REPO" ]; then
+          echo "Error: Not in a GitHub repository"
+          exit 1
+        fi
+        echo ""
+        echo "════════════════════════════════════════════════════════════"
+        echo "  GitHub Secrets for $REPO"
+        echo "════════════════════════════════════════════════════════════"
+        echo ""
+        gh secret list
+        echo ""
+        echo "────────────────────────────────────────────────────────────"
+        echo "→ Manage at: https://github.com/$REPO/settings/secrets/actions"
+        echo ""
+
   setup:
     desc: Complete setup - install Hugo, Bun, and dependencies
     cmds:
