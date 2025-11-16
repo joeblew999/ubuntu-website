@@ -243,8 +243,7 @@ func setupClaude() error {
 }
 
 func showCloudflareInstructions() {
-	fmt.Println("You need a Cloudflare API token to deploy your website.")
-	fmt.Println("This allows the 'task cf:deploy' command to publish your site.")
+	fmt.Println("You need a Cloudflare API token to deploy to Cloudflare Pages.")
 	fmt.Println()
 	fmt.Println("Follow these steps:")
 	fmt.Println()
@@ -272,7 +271,6 @@ func showCloudflareInstructions() {
 
 func showClaudeInstructions() {
 	fmt.Println("You need a Claude API key for automated translation.")
-	fmt.Println("This allows 'task translate:all' to translate your content.")
 	fmt.Println()
 	fmt.Println("Follow these steps:")
 	fmt.Println()
