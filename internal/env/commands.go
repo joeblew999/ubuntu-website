@@ -148,11 +148,16 @@ func ValidateAll() error {
 	if isPlaceholder(cfg.CloudflareToken) {
 		fmt.Println(Skipped("Token not configured"))
 	} else {
-		if err := ValidateCloudflareToken(cfg.CloudflareToken); err != nil {
+		tokenName, err := ValidateCloudflareToken(cfg.CloudflareToken)
+		if err != nil {
 			fmt.Println(Error(fmt.Sprintf("Token invalid: %v", err)))
 			hasErrors = true
 		} else {
-			fmt.Println(Success("Token is valid"))
+			if tokenName != "" {
+				fmt.Println(Success(fmt.Sprintf("Token is valid: %s", tokenName)))
+			} else {
+				fmt.Println(Success("Token is valid"))
+			}
 
 			if !isPlaceholder(cfg.CloudflareAccount) {
 				if accountName, err := ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount); err != nil {
@@ -202,22 +207,25 @@ func ValidateCloudflareCredentials() error {
 	}
 
 	fmt.Println("Validating token...")
-	if err := ValidateCloudflareToken(cfg.CloudflareToken); err != nil {
+	tokenName, err := ValidateCloudflareToken(cfg.CloudflareToken)
+	if err != nil {
 		return fmt.Errorf("token is invalid: %w", err)
 	}
+
+	fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
 
 	accountName := ""
 	if !isPlaceholder(cfg.CloudflareAccount) {
 		fmt.Println()
 		fmt.Println("Validating account ID...")
-		var err error
 		accountName, err = ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount)
 		if err != nil {
 			return fmt.Errorf("account ID is invalid: %w", err)
 		}
+		fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
 	}
 
-	printCloudflareValidationSuccess(accountName)
+	fmt.Println()
 	return nil
 }
 

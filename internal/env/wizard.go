@@ -51,7 +51,8 @@ func setupCloudflare() error {
 	if cfg.CloudflareToken != "" && cfg.CloudflareToken != PlaceholderToken {
 		// Validate existing token first
 		fmt.Println("Validating existing Cloudflare credentials...")
-		if err := ValidateCloudflareToken(cfg.CloudflareToken); err != nil {
+		tokenName, err := ValidateCloudflareToken(cfg.CloudflareToken)
+		if err != nil {
 			fmt.Println(Error(fmt.Sprintf("Token validation failed: %v", err)))
 			fmt.Println()
 			fmt.Println(Colorize("Will prompt for new token...", ColorYellow))
@@ -61,7 +62,7 @@ func setupCloudflare() error {
 			// Validate account ID if present
 			if cfg.CloudflareAccount != "" {
 				if accountName, err := ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount); err == nil {
-					fmt.Println(Success("Cloudflare API token is valid"))
+					fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
 					fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
 					fmt.Println()
 					return nil
@@ -74,9 +75,7 @@ func setupCloudflare() error {
 				}
 			} else {
 				// Token valid but no account ID - ask if they want to keep it
-				fmt.Println("✓ Cloudflare API token is valid")
-				fmt.Println()
-				fmt.Printf("Current token: %s... (%d chars)\n", cfg.CloudflareToken[:min(20, len(cfg.CloudflareToken))], len(cfg.CloudflareToken))
+				fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
 				fmt.Println()
 
 				keep := promptYesNo("Keep existing token?", true)
@@ -116,7 +115,8 @@ func setupCloudflare() error {
 
 		// Validate token
 		fmt.Println("Validating Cloudflare credentials...")
-		if err := ValidateCloudflareToken(token); err != nil {
+		tokenName, err := ValidateCloudflareToken(token)
+		if err != nil {
 			fmt.Println(Error(err.Error()))
 			fmt.Println()
 			fmt.Println(Colorize("Please try again or press Enter to skip...", ColorYellow))
@@ -124,7 +124,7 @@ func setupCloudflare() error {
 			continue
 		}
 
-		fmt.Println("✓ Cloudflare API token is valid")
+		fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
 
 		// Validate account ID
 		cfg, _ := LoadEnv()

@@ -22,6 +22,15 @@ type CloudflareVerifyResponse struct {
 	} `json:"result"`
 }
 
+// CloudflareTokenResponse represents a token details API response
+type CloudflareTokenResponse struct {
+	Success bool `json:"success"`
+	Result  struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"result"`
+}
+
 // CloudflareAccountResponse represents the account info API response
 type CloudflareAccountResponse struct {
 	Success bool `json:"success"`
@@ -31,10 +40,10 @@ type CloudflareAccountResponse struct {
 	} `json:"result"`
 }
 
-// ValidateCloudflareToken validates a Cloudflare API token
-func ValidateCloudflareToken(token string) error {
+// ValidateCloudflareToken validates a Cloudflare API token and returns the token name
+func ValidateCloudflareToken(token string) (string, error) {
 	if token == "" || token == PlaceholderToken {
-		return fmt.Errorf("no token to validate")
+		return "", fmt.Errorf("no token to validate")
 	}
 
 	client := &http.Client{Timeout: 10 * time.Second}
@@ -42,7 +51,7 @@ func ValidateCloudflareToken(token string) error {
 	// Verify token
 	req, err := http.NewRequest("GET", "https://api.cloudflare.com/client/v4/user/tokens/verify", nil)
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -50,28 +59,58 @@ func ValidateCloudflareToken(token string) error {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to verify token: %w", err)
+		return "", fmt.Errorf("failed to verify token: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("failed to read response: %w", err)
+		return "", fmt.Errorf("failed to read response: %w", err)
 	}
 
 	var verifyResp CloudflareVerifyResponse
 	if err := json.Unmarshal(body, &verifyResp); err != nil {
-		return fmt.Errorf("failed to parse response: %w", err)
+		return "", fmt.Errorf("failed to parse response: %w", err)
 	}
 
 	if !verifyResp.Success {
 		if len(verifyResp.Errors) > 0 {
-			return fmt.Errorf("invalid token: %s", verifyResp.Errors[0].Message)
+			return "", fmt.Errorf("invalid token: %s", verifyResp.Errors[0].Message)
 		}
-		return fmt.Errorf("token verification failed")
+		return "", fmt.Errorf("token verification failed")
 	}
 
-	return nil
+	// Get token details to retrieve the name
+	tokenID := verifyResp.Result.ID
+	tokenReq, err := http.NewRequest("GET", fmt.Sprintf("https://api.cloudflare.com/client/v4/user/tokens/%s", tokenID), nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create token details request: %w", err)
+	}
+
+	tokenReq.Header.Set("Authorization", "Bearer "+token)
+	tokenReq.Header.Set("Content-Type", "application/json")
+
+	tokenResp, err := client.Do(tokenReq)
+	if err != nil {
+		return "", fmt.Errorf("failed to get token details: %w", err)
+	}
+	defer tokenResp.Body.Close()
+
+	tokenBody, err := io.ReadAll(tokenResp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read token details: %w", err)
+	}
+
+	var tokenDetails CloudflareTokenResponse
+	if err := json.Unmarshal(tokenBody, &tokenDetails); err != nil {
+		return "", fmt.Errorf("failed to parse token details: %w", err)
+	}
+
+	if !tokenDetails.Success {
+		return "", fmt.Errorf("failed to get token name")
+	}
+
+	return tokenDetails.Result.Name, nil
 }
 
 // ValidateCloudflareAccount validates the account ID with the given token

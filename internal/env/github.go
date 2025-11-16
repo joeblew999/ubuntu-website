@@ -149,7 +149,8 @@ func validateSecret(cfg *EnvConfig, envKey, value string) error {
 			// Call the appropriate validation function
 			switch validateName {
 			case "cloudflare_token":
-				return ValidateCloudflareToken(value)
+				_, err := ValidateCloudflareToken(value)
+				return err
 			case "cloudflare_account":
 				// Account validation needs the token
 				token, _ := getFieldByEnvKey(cfg, EnvCloudflareToken)
