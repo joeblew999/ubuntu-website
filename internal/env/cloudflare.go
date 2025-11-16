@@ -40,6 +40,15 @@ type CloudflareAccountResponse struct {
 	} `json:"result"`
 }
 
+// CloudflareAccountsResponse represents the accounts list API response
+type CloudflareAccountsResponse struct {
+	Success bool `json:"success"`
+	Result  []struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"result"`
+}
+
 // ValidateCloudflareToken validates a Cloudflare API token and returns the token name
 func ValidateCloudflareToken(token string) (string, error) {
 	if token == "" || token == PlaceholderToken {
@@ -165,4 +174,49 @@ func ValidateCloudflareAccount(token, accountID string) (string, error) {
 	}
 
 	return accountResp.Result.Name, nil
+}
+
+// GetCloudflareAccounts fetches all accounts accessible by the token
+// Returns the first account ID and name if exactly one account is found
+func GetCloudflareAccounts(token string) (accountID, accountName string, err error) {
+	if token == "" || token == PlaceholderToken {
+		return "", "", fmt.Errorf("no token provided")
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	req, err := http.NewRequest("GET", "https://api.cloudflare.com/client/v4/accounts", nil)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to fetch accounts: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to read response: %w", err)
+	}
+
+	var accountsResp CloudflareAccountsResponse
+	if err := json.Unmarshal(body, &accountsResp); err != nil {
+		return "", "", fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if !accountsResp.Success {
+		return "", "", fmt.Errorf("failed to fetch accounts (status: %d)", resp.StatusCode)
+	}
+
+	if len(accountsResp.Result) == 0 {
+		return "", "", fmt.Errorf("no accounts found for this token")
+	}
+
+	// Return the first account (most tokens only have access to one account)
+	return accountsResp.Result[0].ID, accountsResp.Result[0].Name, nil
 }
