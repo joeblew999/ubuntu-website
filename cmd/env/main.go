@@ -41,61 +41,6 @@ func main() {
 			os.Exit(1)
 		}
 
-	// Legacy aliases
-	case "setup":
-		if err := env.RunWizard(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-	case "list":
-		if err := env.ShowConfig(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-	case "show":
-		if err := env.ShowConfig(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-	case "gh-show":
-		if err := env.ShowRemoteSecrets(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-	case "push":
-		dryRun, force, validate := parseSyncSecretsFlags()
-		if err := env.SyncSecrets(dryRun, force, validate); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-	case "remote":
-		if err := env.ShowRemoteSecrets(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-	case "wizard":
-		if err := env.RunWizard(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-	case "sync-secrets":
-		dryRun, force, validate := parseSyncSecretsFlags()
-		if err := env.SyncSecrets(dryRun, force, validate); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-	case "show-remote":
-		if err := env.ShowRemoteSecrets(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
 	case "validate":
 		if err := env.ValidateAll(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
