@@ -11,7 +11,7 @@ import (
 // GitHubSecret represents a GitHub repository secret
 type GitHubSecret struct {
 	Name      string `json:"name"`
-	UpdatedAt string `json:"updated_at"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 // SecretConfig defines how a secret should be handled

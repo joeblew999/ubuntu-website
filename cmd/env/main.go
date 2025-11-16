@@ -53,6 +53,12 @@ func main() {
 			os.Exit(1)
 		}
 
+	case "show-remote":
+		if err := env.ShowRemoteSecrets(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", command)
 		printUsage()
@@ -87,6 +93,7 @@ func printUsage() {
 	fmt.Println("  validate-cloudflare Validate Cloudflare token only")
 	fmt.Println("  validate-claude     Validate Claude API key only")
 	fmt.Println("  sync-secrets        Sync .env secrets to GitHub repository")
+	fmt.Println("  show-remote         Show GitHub secrets status")
 	fmt.Println()
 	fmt.Println("Options for sync-secrets:")
 	fmt.Println("  --check, --dry-run  Show what would be synced without syncing")

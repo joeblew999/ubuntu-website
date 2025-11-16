@@ -198,6 +198,53 @@ func ValidateClaudeCredentials() error {
 	return nil
 }
 
+// ShowRemoteSecrets displays GitHub secrets status
+func ShowRemoteSecrets() error {
+	fmt.Println()
+	fmt.Println("════════════════════════════════════════════════════════════")
+	fmt.Println("  Remote GitHub Secrets")
+	fmt.Println("════════════════════════════════════════════════════════════")
+	fmt.Println()
+
+	// Validate GitHub setup
+	if err := ValidateGitHubSetup(); err != nil {
+		return err
+	}
+
+	// Get repository info
+	owner, name, err := GetRepositoryInfo()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Repository: %s/%s\n", owner, name)
+	fmt.Println()
+
+	// List secrets
+	secrets, err := ListGitHubSecrets()
+	if err != nil {
+		return err
+	}
+
+	if len(secrets) == 0 {
+		fmt.Println("No secrets configured")
+	} else {
+		for _, secret := range secrets {
+			fmt.Printf("  %s\n", secret.Name)
+			fmt.Printf("    Updated: %s\n", secret.UpdatedAt)
+			fmt.Println()
+		}
+	}
+
+	// Show management URL
+	repoURL, _ := GetRepositoryURL()
+	fmt.Println("────────────────────────────────────────────────────────────")
+	fmt.Printf("→ Manage at: %s/settings/secrets/actions\n", repoURL)
+	fmt.Println()
+
+	return nil
+}
+
 // SyncSecrets syncs environment variables to GitHub secrets
 func SyncSecrets(dryRun, force, validate bool) error {
 	fmt.Println()
