@@ -5,26 +5,41 @@ import (
 	"reflect"
 )
 
+// printHeader prints a consistent header for all env commands
+func printHeader(title, subtitle string) {
+	fmt.Println()
+	fmt.Println("════════════════════════════════════════════════════════════")
+	fmt.Printf("  %s\n", title)
+	if subtitle != "" {
+		fmt.Printf("  %s\n", subtitle)
+	}
+	fmt.Println("════════════════════════════════════════════════════════════")
+	fmt.Println()
+}
+
+// printFooter prints a consistent footer with optional action hint
+func printFooter(hint string) {
+	fmt.Println("────────────────────────────────────────────────────────────")
+	if hint != "" {
+		fmt.Printf("%s\n", hint)
+	}
+	fmt.Println()
+}
+
 // ShowConfig displays the current environment configuration
 func ShowConfig() error {
-	fmt.Println()
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println("  Current Configuration")
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println()
-
-	cfg, err := LoadEnv()
-	if err != nil {
-		return err
-	}
-
 	// Get absolute path to .env file
 	envPath, err := GetEnvPath()
 	if err != nil {
 		envPath = ".env"
 	}
-	fmt.Printf("File: %s\n", envPath)
-	fmt.Println()
+
+	printHeader("Local Environment Configuration", envPath)
+
+	cfg, err := LoadEnv()
+	if err != nil {
+		return err
+	}
 
 	v := reflect.ValueOf(cfg).Elem()
 	t := v.Type()
@@ -72,9 +87,7 @@ func ShowConfig() error {
 	}
 
 	fmt.Println()
-	fmt.Println("────────────────────────────────────────────────────────────")
-	fmt.Println("To update: edit .env or run the wizard")
-	fmt.Println()
+	printFooter("→ To update: task env:local:setup")
 
 	return nil
 }
@@ -208,12 +221,6 @@ func ValidateClaudeCredentials() error {
 
 // ShowRemoteSecrets displays GitHub secrets status
 func ShowRemoteSecrets() error {
-	fmt.Println()
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println("  Remote GitHub Secrets")
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println()
-
 	// Validate GitHub setup
 	if err := ValidateGitHubSetup(); err != nil {
 		return err
@@ -225,8 +232,8 @@ func ShowRemoteSecrets() error {
 		return err
 	}
 
-	fmt.Printf("Repository: %s/%s\n", owner, name)
-	fmt.Println()
+	repoName := fmt.Sprintf("%s/%s", owner, name)
+	printHeader("GitHub Secrets", repoName)
 
 	// List secrets
 	secrets, err := ListGitHubSecrets()
@@ -236,6 +243,7 @@ func ShowRemoteSecrets() error {
 
 	if len(secrets) == 0 {
 		fmt.Println("No secrets configured")
+		fmt.Println()
 	} else {
 		for _, secret := range secrets {
 			fmt.Printf("  %s\n", secret.Name)
@@ -246,21 +254,13 @@ func ShowRemoteSecrets() error {
 
 	// Show management URL
 	repoURL, _ := GetRepositoryURL()
-	fmt.Println("────────────────────────────────────────────────────────────")
-	fmt.Printf("→ Manage at: %s/settings/secrets/actions\n", repoURL)
-	fmt.Println()
+	printFooter(fmt.Sprintf("→ Manage at: %s/settings/secrets/actions", repoURL))
 
 	return nil
 }
 
 // SyncSecrets syncs environment variables to GitHub secrets
 func SyncSecrets(dryRun, force, validate bool) error {
-	fmt.Println()
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println("  Sync Environment Variables to GitHub Secrets")
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println()
-
 	// Validate GitHub setup
 	if err := ValidateGitHubSetup(); err != nil {
 		return err
@@ -272,9 +272,12 @@ func SyncSecrets(dryRun, force, validate bool) error {
 		return err
 	}
 
-	fmt.Printf("✓ GitHub CLI authenticated\n")
-	fmt.Printf("✓ Repository: %s/%s\n", owner, name)
-	fmt.Println()
+	repoName := fmt.Sprintf("%s/%s", owner, name)
+	mode := "Push to GitHub"
+	if dryRun {
+		mode = "Push to GitHub (Dry Run)"
+	}
+	printHeader(mode, repoName)
 
 	if dryRun {
 		fmt.Println("DRY RUN MODE - No secrets will be modified")
@@ -328,28 +331,28 @@ func SyncSecrets(dryRun, force, validate bool) error {
 	}
 
 	// Summary
-	fmt.Println("────────────────────────────────────────────────────────────")
+	summary := ""
 	if dryRun {
-		fmt.Printf("Would sync: %d\n", synced)
+		summary = fmt.Sprintf("Would sync: %d • Skipped: %d", synced, skipped)
+		if failed > 0 {
+			summary += fmt.Sprintf(" • Failed: %d", failed)
+		}
+		summary += "\n→ Run without --check to actually sync"
 	} else {
-		fmt.Printf("Synced: %d\n", synced)
+		summary = fmt.Sprintf("Synced: %d • Skipped: %d", synced, skipped)
+		if failed > 0 {
+			summary += fmt.Sprintf(" • Failed: %d", failed)
+		}
+		if synced > 0 {
+			repoURL, _ := GetRepositoryURL()
+			summary += fmt.Sprintf("\n→ Verify at: %s/settings/secrets/actions", repoURL)
+		}
 	}
-	fmt.Printf("Skipped: %d\n", skipped)
+
+	printFooter(summary)
+
 	if failed > 0 {
-		fmt.Printf("Failed: %d\n", failed)
-	}
-	fmt.Println()
-
-	if !dryRun && synced > 0 {
-		repoURL, _ := GetRepositoryURL()
-		fmt.Println("Next steps:")
-		fmt.Printf("  Verify secrets at: %s/settings/secrets/actions\n", repoURL)
-		fmt.Println()
-	}
-
-	if dryRun {
-		fmt.Println("Run without --check to actually sync secrets")
-		fmt.Println()
+		return fmt.Errorf("failed to sync %d secrets", failed)
 	}
 
 	return nil
