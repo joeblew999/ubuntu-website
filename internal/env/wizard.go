@@ -211,11 +211,14 @@ func fetchAndSaveAccountID(token, tokenName string) (bool, error) {
 
 // promptForCloudflareToken prompts user for new Cloudflare token and validates it
 func promptForCloudflareToken() error {
-	_, repoName, _ := GetRepositoryInfo()
-	
+	_, repoName, err := GetRepositoryInfo()
+	if err != nil {
+		repoName = "your-project" // Fallback if not in a git repo
+	}
+
 	for {
 		showCloudflareInstructions(repoName)
-		
+
 		token := promptString("Paste your Cloudflare API token (or press Enter to skip)")
 		if token == "" {
 			fmt.Println()
@@ -255,7 +258,10 @@ func promptForCloudflareToken() error {
 
 // handleAccountIDForNewToken handles account ID validation/fetching for newly entered token
 func handleAccountIDForNewToken(token string) error {
-	cfg, _ := LoadEnv()
+	cfg, err := LoadEnv()
+	if err != nil {
+		return fmt.Errorf("failed to reload config: %w", err)
+	}
 
 	// Check if there's an existing account ID to validate
 	if cfg.CloudflareAccount != "" && !isPlaceholder(cfg.CloudflareAccount) {
@@ -330,7 +336,10 @@ func setupClaude() error {
 	// Loop until valid key or skip
 	for cfg.ClaudeAPIKey == "" || cfg.ClaudeAPIKey == PlaceholderKey {
 		// Get repository name for workspace suggestion
-		_, repoName, _ := GetRepositoryInfo()
+		_, repoName, err := GetRepositoryInfo()
+		if err != nil {
+			repoName = "your-project" // Fallback if not in a git repo
+		}
 		showClaudeInstructions(repoName)
 
 		key := promptString("Paste your Claude API key (or press Enter to skip)")
@@ -373,8 +382,8 @@ func setupClaude() error {
 	fmt.Println()
 
 	// Get repository name for default workspace
-	_, repoName, _ := GetRepositoryInfo()
-	if repoName == "" {
+	_, repoName, err := GetRepositoryInfo()
+	if err != nil || repoName == "" {
 		repoName = "my-project"
 	}
 
@@ -423,8 +432,8 @@ func ensureProjectName() error {
 	fmt.Println()
 
 	// Get repository name for default project name
-	_, repoName, _ := GetRepositoryInfo()
-	if repoName == "" {
+	_, repoName, err := GetRepositoryInfo()
+	if err != nil || repoName == "" {
 		repoName = "my-project"
 	}
 

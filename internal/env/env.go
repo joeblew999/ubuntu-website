@@ -199,7 +199,7 @@ func WriteEnv(cfg *EnvConfig) error {
 		content.WriteString(envKey)
 		content.WriteString("=")
 		content.WriteString(value)
-		
+
 		// Add inline comment with timestamp if value is not a placeholder
 		if !isPlaceholder(value) {
 			content.WriteString("  # Updated: ")

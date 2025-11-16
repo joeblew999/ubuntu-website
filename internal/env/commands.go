@@ -51,15 +51,6 @@ func printWizardStep(step, title, envKey string) {
 	fmt.Println()
 }
 
-// printCloudflareValidationSuccess prints standardized Cloudflare validation success messages
-func printCloudflareValidationSuccess(accountName string) {
-	fmt.Println(Success("Cloudflare API token is valid"))
-	if accountName != "" {
-		fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
-	}
-	fmt.Println()
-}
-
 // printClaudeValidationSuccess prints standardized Claude validation success messages
 func printClaudeValidationSuccess() {
 	fmt.Println(Success("Claude API key is valid"))
@@ -114,7 +105,6 @@ func ShowConfig() error {
 			fmt.Println(Colorize(comment, ColorCyan))
 			fmt.Println("┬" + strings.Repeat("─", 60))
 			lastComment = comment
-			firstInSection = true
 		}
 
 		// Get value
