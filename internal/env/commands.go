@@ -41,6 +41,31 @@ func joinParts(parts []string) string {
 	return result
 }
 
+// printWizardStep prints a wizard step header
+func printWizardStep(step, title, envKey string) {
+	fmt.Println("────────────────────────────────────────────────────────────")
+	fmt.Printf("%s: %s\n", step, title)
+	fmt.Printf("Setting: %s\n", envKey)
+	fmt.Println("────────────────────────────────────────────────────────────")
+	fmt.Println()
+}
+
+// printCloudflareValidationSuccess prints standardized Cloudflare validation success messages
+func printCloudflareValidationSuccess(accountName string) {
+	fmt.Println(Success("Cloudflare API token is valid"))
+	if accountName != "" {
+		fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
+	}
+	fmt.Println()
+}
+
+// printClaudeValidationSuccess prints standardized Claude validation success messages
+func printClaudeValidationSuccess() {
+	fmt.Println(Success("Claude API key is valid"))
+	fmt.Println(Success("API key has active credits"))
+	fmt.Println()
+}
+
 // ShowConfig displays the current environment configuration
 func ShowConfig() error {
 	// Get absolute path to .env file
@@ -189,19 +214,18 @@ func ValidateCloudflareCredentials() error {
 		return fmt.Errorf("token is invalid: %w", err)
 	}
 
-	fmt.Println(Success("Cloudflare API token is valid"))
-
+	accountName := ""
 	if !isPlaceholder(cfg.CloudflareAccount) {
 		fmt.Println()
 		fmt.Println("Validating account ID...")
-		if accountName, err := ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount); err != nil {
+		var err error
+		accountName, err = ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount)
+		if err != nil {
 			return fmt.Errorf("account ID is invalid: %w", err)
-		} else {
-			fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
 		}
 	}
 
-	fmt.Println()
+	printCloudflareValidationSuccess(accountName)
 	return nil
 }
 
@@ -227,10 +251,7 @@ func ValidateClaudeCredentials() error {
 		return fmt.Errorf("API key is invalid: %w", err)
 	}
 
-	fmt.Println(Success("Claude API key is valid"))
-	fmt.Println(Success("API key has active credits"))
-	fmt.Println()
-
+	printClaudeValidationSuccess()
 	return nil
 }
 

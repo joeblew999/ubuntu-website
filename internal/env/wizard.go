@@ -44,11 +44,7 @@ func RunWizard() error {
 }
 
 func setupCloudflare() error {
-	fmt.Println("────────────────────────────────────────────────────────────")
-	fmt.Println("Step 1 of 2: Cloudflare API Token (Optional)")
-	fmt.Printf("Setting: %s\n", EnvCloudflareToken)
-	fmt.Println("────────────────────────────────────────────────────────────")
-	fmt.Println()
+	printWizardStep("Step 1 of 2", "Cloudflare API Token (Optional)", EnvCloudflareToken)
 
 	cfg, err := LoadEnv()
 	if err != nil {
