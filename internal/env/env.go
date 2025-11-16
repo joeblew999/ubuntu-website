@@ -121,6 +121,11 @@ func LoadEnv() (*EnvConfig, error) {
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
 
+		// Strip inline comments (e.g., "value  # Updated: timestamp")
+		if idx := strings.Index(value, "#"); idx != -1 {
+			value = strings.TrimSpace(value[:idx])
+		}
+
 		// Use reflection to set field by env key
 		setFieldByEnvKey(cfg, key, value)
 	}

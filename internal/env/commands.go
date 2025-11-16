@@ -8,20 +8,18 @@ import (
 // printHeader prints a consistent header for all env commands
 func printHeader(title, subtitle string) {
 	fmt.Println()
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Printf("  %s\n", title)
+	fmt.Println(Colorize(title, ColorBoldGreen))
 	if subtitle != "" {
-		fmt.Printf("  %s\n", subtitle)
+		fmt.Println(Colorize(subtitle, ColorGray))
 	}
-	fmt.Println("════════════════════════════════════════════════════════════")
 	fmt.Println()
 }
 
 // printFooter prints a consistent footer with optional action hint
 func printFooter(hint string) {
-	fmt.Println("────────────────────────────────────────────────────────────")
 	if hint != "" {
-		fmt.Printf("%s\n", hint)
+		fmt.Println()
+		fmt.Println(Colorize(hint, ColorGray))
 	}
 	fmt.Println()
 }
@@ -43,10 +41,9 @@ func joinParts(parts []string) string {
 
 // printWizardStep prints a wizard step header
 func printWizardStep(step, title, envKey string) {
-	fmt.Println("────────────────────────────────────────────────────────────")
-	fmt.Printf("%s: %s\n", step, title)
-	fmt.Printf("Setting: %s\n", envKey)
-	fmt.Println("────────────────────────────────────────────────────────────")
+	fmt.Println()
+	fmt.Println(Colorize(fmt.Sprintf("%s: %s", step, title), ColorBoldGreen))
+	fmt.Println(Colorize(fmt.Sprintf("Setting: %s", envKey), ColorGray))
 	fmt.Println()
 }
 
@@ -99,8 +96,7 @@ func ShowConfig() error {
 			if i > 0 {
 				fmt.Println()
 			}
-			fmt.Println(Colorize(comment, ColorCyan))
-			fmt.Println()
+			fmt.Println(Colorize("━━ "+comment, ColorCyan))
 			lastComment = comment
 		}
 
@@ -110,34 +106,40 @@ func ShowConfig() error {
 		// Format value for display
 		var displayValue string
 		var statusIcon string
+		var statusColor string
 		if isPlaceholder(value) {
-			displayValue = Colorize("<not set>", ColorGray)
+			displayValue = "not configured"
 			statusIcon = "○"
+			statusColor = ColorGray
 		} else {
-			// Show preview for secrets
-			preview := value
-			if len(preview) > 40 {
-				preview = preview[:20] + "..." + preview[len(preview)-17:]
+			// Show preview for secrets (first 8 chars + ...)
+			if len(value) > 20 {
+				displayValue = value[:8] + "..." + value[len(value)-8:]
+			} else {
+				displayValue = value
 			}
-			displayValue = preview
-			statusIcon = Colorize("✓", ColorGreen)
+			statusIcon = "✓"
+			statusColor = ColorGreen
 		}
 
-		// Format key with padding
-		keyDisplay := Colorize(fmt.Sprintf("%-*s", maxKeyLen, envKey), ColorBlue)
-
-		required := ""
+		// Format key
+		keyDisplay := Colorize(envKey, ColorBlue)
+		requiredTag := ""
 		if isRequired(field) {
-			required = Colorize("*", ColorRed)
-		} else {
-			required = " "
+			requiredTag = " " + Colorize("(required)", ColorRed)
 		}
 
-		fmt.Printf("  %s %s  %-*s  %s\n", statusIcon, required, maxKeyLen, keyDisplay, displayValue)
+		// Print key and status
+		fmt.Printf("  %s %s%s\n",
+			Colorize(statusIcon, statusColor),
+			keyDisplay,
+			requiredTag)
+
+		// Print value on separate line with indent
+		fmt.Printf("    %s\n", Colorize(displayValue, statusColor))
 	}
 
-	fmt.Println()
-	printFooter("→ To update: task env:local:setup  (* = required)")
+	printFooter("To update configuration: task env:local:setup")
 
 	return nil
 }
