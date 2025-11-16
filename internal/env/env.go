@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 )
 
 const envFile = ".env"
@@ -160,6 +161,14 @@ func WriteEnv(cfg *EnvConfig) error {
 
 	var content strings.Builder
 	var lastComment string
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+
+	// Add file header with timestamp
+	content.WriteString("# Environment Configuration\n")
+	content.WriteString("# Last updated: ")
+	content.WriteString(timestamp)
+	content.WriteString("\n")
+	content.WriteString("# DO NOT commit this file to git\n")
 
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
@@ -180,16 +189,22 @@ func WriteEnv(cfg *EnvConfig) error {
 			if i > 0 {
 				content.WriteString("\n")
 			}
-			content.WriteString("# ")
+			content.WriteString("\n# ")
 			content.WriteString(comment)
 			content.WriteString("\n")
 			lastComment = comment
 		}
 
-		// Write the key=value line
+		// Write the key=value line with inline timestamp
 		content.WriteString(envKey)
 		content.WriteString("=")
 		content.WriteString(value)
+		
+		// Add inline comment with timestamp if value is not a placeholder
+		if !isPlaceholder(value) {
+			content.WriteString("  # Updated: ")
+			content.WriteString(timestamp)
+		}
 		content.WriteString("\n")
 	}
 

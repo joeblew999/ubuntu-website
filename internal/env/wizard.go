@@ -66,7 +66,9 @@ func setupCloudflare() error {
 					fmt.Println(Success(fmt.Sprintf("Cloudflare API token is valid: %s", tokenName)))
 					fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
 					fmt.Println()
-					return nil
+
+					// Ensure project name is set
+					return ensureProjectName()
 				} else {
 					// Account ID doesn't match token - fetch the correct one
 					fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
@@ -100,7 +102,9 @@ func setupCloudflare() error {
 						fmt.Println(Colorize(fmt.Sprintf("  Old ID: %s (was incorrect)", cfg.CloudflareAccount), ColorGray))
 						fmt.Println(Colorize(fmt.Sprintf("  New ID: %s", accountID), ColorGray))
 						fmt.Println()
-						return nil
+
+					// Ensure project name is set
+					return ensureProjectName()
 					}
 				}
 			} else {
@@ -132,7 +136,9 @@ func setupCloudflare() error {
 					fmt.Println(Success(fmt.Sprintf("Account ID automatically configured: %s", accountName)))
 					fmt.Println(Colorize(fmt.Sprintf("  ID: %s", accountID), ColorGray))
 					fmt.Println()
-					return nil
+
+					// Ensure project name is set
+					return ensureProjectName()
 				}
 			}
 		}
@@ -237,7 +243,8 @@ func setupCloudflare() error {
 		}
 	}
 
-	return nil
+	// Ensure project name is set
+	return ensureProjectName()
 }
 
 func setupClaude() error {
@@ -267,7 +274,8 @@ func setupClaude() error {
 			fmt.Println("✓ Claude API key is valid")
 			fmt.Println("✓ API key has active credits")
 			fmt.Println()
-			return nil
+			// Continue to workspace setup
+			cfg.ClaudeAPIKey = "valid" // Mark as valid to skip the loop
 		}
 	}
 
@@ -341,6 +349,57 @@ func setupClaude() error {
 	}
 	fmt.Println()
 	fmt.Printf("✓ Workspace saved to %s: %s\n", EnvClaudeWorkspace, workspace)
+	fmt.Println()
+
+	return nil
+}
+
+// ensureProjectName ensures CLOUDFLARE_PROJECT_NAME is set with repository name as default
+func ensureProjectName() error {
+	cfg, err := LoadEnv()
+	if err != nil {
+		return err
+	}
+
+	// Check if project name is already set (not a placeholder)
+	if cfg.CloudflareProject != "" && !isPlaceholder(cfg.CloudflareProject) {
+		fmt.Println(Success(fmt.Sprintf("Cloudflare project name: %s", cfg.CloudflareProject)))
+		fmt.Println()
+		return nil
+	}
+
+	// Prompt for project name
+	fmt.Println("────────────────────────────────────────────────────────────")
+	fmt.Printf("Setting: %s\n", EnvCloudflareProject)
+	fmt.Println("────────────────────────────────────────────────────────────")
+	fmt.Println()
+
+	// Get repository name for default project name
+	_, repoName, _ := GetRepositoryInfo()
+	if repoName == "" {
+		repoName = "my-project"
+	}
+
+	fmt.Println("This is the name of your Cloudflare Pages project.")
+	fmt.Println("Your site will be deployed to: <project-name>.pages.dev")
+	fmt.Println()
+	fmt.Printf("Project name [default: %s]: ", repoName)
+
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+	projectName := strings.TrimSpace(input)
+
+	// Use default if empty
+	if projectName == "" {
+		projectName = repoName
+	}
+
+	if err := UpdateEnv(EnvCloudflareProject, projectName); err != nil {
+		return err
+	}
+	fmt.Println()
+	fmt.Printf("✓ Project name saved to %s: %s\n", EnvCloudflareProject, projectName)
+	fmt.Printf("  Your site will deploy to: %s.pages.dev\n", projectName)
 	fmt.Println()
 
 	return nil
