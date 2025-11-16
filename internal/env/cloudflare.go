@@ -108,7 +108,14 @@ func ValidateCloudflareAccount(token, accountID string) (string, error) {
 	}
 
 	if !accountResp.Success {
-		return "", fmt.Errorf("account ID validation failed")
+		// Check for specific error in response
+		if resp.StatusCode == 403 {
+			return "", fmt.Errorf("token lacks permission to access account %s (need Account:Read permission)", accountID)
+		}
+		if resp.StatusCode == 404 {
+			return "", fmt.Errorf("account ID %s not found or not accessible with this token", accountID)
+		}
+		return "", fmt.Errorf("account validation failed (status: %d)", resp.StatusCode)
 	}
 
 	return accountResp.Result.Name, nil
