@@ -64,17 +64,25 @@ func isRequired(field reflect.StructField) bool {
 	return field.Tag.Get("required") == "true"
 }
 
+// findFieldIndexByEnvKey finds the field index for a given env key
+func findFieldIndexByEnvKey(t reflect.Type, envKey string) int {
+	for i := 0; i < t.NumField(); i++ {
+		if getEnvKey(t.Field(i)) == envKey {
+			return i
+		}
+	}
+	return -1
+}
+
 // setFieldByEnvKey sets a struct field value by env key name using reflection
 func setFieldByEnvKey(cfg *EnvConfig, envKey string, value string) bool {
 	v := reflect.ValueOf(cfg).Elem()
 	t := v.Type()
 
-	for i := 0; i < v.NumField(); i++ {
-		field := t.Field(i)
-		if getEnvKey(field) == envKey {
-			v.Field(i).SetString(value)
-			return true
-		}
+	idx := findFieldIndexByEnvKey(t, envKey)
+	if idx >= 0 {
+		v.Field(idx).SetString(value)
+		return true
 	}
 	return false
 }
@@ -84,13 +92,38 @@ func getFieldByEnvKey(cfg *EnvConfig, envKey string) (string, bool) {
 	v := reflect.ValueOf(cfg).Elem()
 	t := v.Type()
 
-	for i := 0; i < v.NumField(); i++ {
-		field := t.Field(i)
-		if getEnvKey(field) == envKey {
-			return v.Field(i).String(), true
-		}
+	idx := findFieldIndexByEnvKey(t, envKey)
+	if idx >= 0 {
+		return v.Field(idx).String(), true
 	}
 	return "", false
+}
+
+// parseEnvLine parses a key=value line from .env file
+// Returns (key, value, ok) where ok is true if line is valid
+func parseEnvLine(line string) (string, string, bool) {
+	line = strings.TrimSpace(line)
+
+	// Skip empty lines and comments
+	if line == "" || strings.HasPrefix(line, "#") {
+		return "", "", false
+	}
+
+	// Split on first =
+	parts := strings.SplitN(line, "=", 2)
+	if len(parts) != 2 {
+		return "", "", false
+	}
+
+	key := strings.TrimSpace(parts[0])
+	value := strings.TrimSpace(parts[1])
+
+	// Strip inline comments (e.g., "value  # Updated: timestamp")
+	if idx := strings.Index(value, "#"); idx != -1 {
+		value = strings.TrimSpace(value[:idx])
+	}
+
+	return key, value, true
 }
 
 // LoadEnv reads the .env file and returns the configuration
@@ -108,25 +141,10 @@ func LoadEnv() (*EnvConfig, error) {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
+		key, value, ok := parseEnvLine(scanner.Text())
+		if !ok {
 			continue
 		}
-
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-
-		key := strings.TrimSpace(parts[0])
-		value := strings.TrimSpace(parts[1])
-
-		// Strip inline comments (e.g., "value  # Updated: timestamp")
-		if idx := strings.Index(value, "#"); idx != -1 {
-			value = strings.TrimSpace(value[:idx])
-		}
-
-		// Use reflection to set field by env key
 		setFieldByEnvKey(cfg, key, value)
 	}
 
@@ -159,6 +177,42 @@ func UpdateEnv(key, value string) error {
 	return WriteEnv(cfg)
 }
 
+// writeEnvHeader writes the .env file header
+func writeEnvHeader(b *strings.Builder, timestamp string) {
+	b.WriteString("# Environment Configuration\n")
+	b.WriteString("# Last updated: ")
+	b.WriteString(timestamp)
+	b.WriteString("\n")
+	b.WriteString("# DO NOT commit this file to git\n")
+}
+
+// writeEnvComment writes a comment section header if it's new
+func writeEnvComment(b *strings.Builder, comment string, lastComment *string, isFirst bool) {
+	if comment != "" && comment != *lastComment {
+		if !isFirst {
+			b.WriteString("\n")
+		}
+		b.WriteString("\n# ")
+		b.WriteString(comment)
+		b.WriteString("\n")
+		*lastComment = comment
+	}
+}
+
+// writeEnvLine writes a key=value line with optional timestamp
+func writeEnvLine(b *strings.Builder, key, value, timestamp string) {
+	b.WriteString(key)
+	b.WriteString("=")
+	b.WriteString(value)
+
+	// Add inline comment with timestamp if value is not a placeholder
+	if !isPlaceholder(value) {
+		b.WriteString("  # Updated: ")
+		b.WriteString(timestamp)
+	}
+	b.WriteString("\n")
+}
+
 // WriteEnv writes the complete configuration to .env
 func WriteEnv(cfg *EnvConfig) error {
 	v := reflect.ValueOf(cfg).Elem()
@@ -168,12 +222,7 @@ func WriteEnv(cfg *EnvConfig) error {
 	var lastComment string
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 
-	// Add file header with timestamp
-	content.WriteString("# Environment Configuration\n")
-	content.WriteString("# Last updated: ")
-	content.WriteString(timestamp)
-	content.WriteString("\n")
-	content.WriteString("# DO NOT commit this file to git\n")
+	writeEnvHeader(&content, timestamp)
 
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
@@ -188,29 +237,12 @@ func WriteEnv(cfg *EnvConfig) error {
 			value = getDefaultValue(field)
 		}
 
-		// Add comment header if this field has one and it's different from last
+		// Add comment section header if new section
 		comment := getComment(field)
-		if comment != "" && comment != lastComment {
-			if i > 0 {
-				content.WriteString("\n")
-			}
-			content.WriteString("\n# ")
-			content.WriteString(comment)
-			content.WriteString("\n")
-			lastComment = comment
-		}
+		writeEnvComment(&content, comment, &lastComment, i == 0)
 
-		// Write the key=value line with inline timestamp
-		content.WriteString(envKey)
-		content.WriteString("=")
-		content.WriteString(value)
-
-		// Add inline comment with timestamp if value is not a placeholder
-		if !isPlaceholder(value) {
-			content.WriteString("  # Updated: ")
-			content.WriteString(timestamp)
-		}
-		content.WriteString("\n")
+		// Write the key=value line
+		writeEnvLine(&content, envKey, value, timestamp)
 	}
 
 	if err := os.WriteFile(envFile, []byte(content.String()), 0600); err != nil {
