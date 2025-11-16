@@ -3,6 +3,7 @@ package env
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // printHeader prints a consistent header for all env commands
@@ -95,6 +96,7 @@ func ShowConfig() error {
 	}
 
 	var lastComment string
+	firstInSection := true
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
 		envKey := getEnvKey(field)
@@ -106,10 +108,13 @@ func ShowConfig() error {
 		comment := getComment(field)
 		if comment != "" && comment != lastComment {
 			if i > 0 {
+				fmt.Println("└" + strings.Repeat("─", 60))
 				fmt.Println()
 			}
-			fmt.Printf("┌─ %s\n", comment)
+			fmt.Println(Colorize(comment, ColorCyan))
+			fmt.Println("┬" + strings.Repeat("─", 60))
 			lastComment = comment
+			firstInSection = true
 		}
 
 		// Get value
@@ -120,26 +125,33 @@ func ShowConfig() error {
 		var statusIcon string
 		if isPlaceholder(value) {
 			displayValue = Colorize("<not set>", ColorGray)
-			statusIcon = Colorize("○", ColorGray)
+			statusIcon = "○"
 		} else {
 			// Show preview for secrets
 			preview := value
 			if len(preview) > 40 {
 				preview = preview[:20] + "..." + preview[len(preview)-17:]
 			}
-			displayValue = Colorize(preview, ColorGreen)
-			statusIcon = Colorize("●", ColorGreen)
+			displayValue = preview
+			statusIcon = Colorize("✓", ColorGreen)
 		}
 
 		// Format key with padding
-		keyDisplay := fmt.Sprintf("%-*s", maxKeyLen, envKey)
+		keyDisplay := Colorize(fmt.Sprintf("%-*s", maxKeyLen, envKey), ColorBlue)
 
 		required := ""
 		if isRequired(field) {
-			required = Colorize(" *", ColorRed)
+			required = Colorize("*", ColorRed)
+		} else {
+			required = " "
 		}
 
-		fmt.Printf("│ %s  %s%s  %s\n", statusIcon, keyDisplay, required, displayValue)
+		fmt.Printf("│ %s %s  %s  %s\n", statusIcon, required, keyDisplay, displayValue)
+		firstInSection = false
+	}
+
+	if !firstInSection {
+		fmt.Println("└" + strings.Repeat("─", 60))
 	}
 
 	fmt.Println()
