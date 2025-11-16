@@ -9,11 +9,7 @@ import (
 
 // RunWizard runs the interactive setup wizard
 func RunWizard() error {
-	fmt.Println()
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println("  Environment Setup Wizard")
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println()
+	printHeader("Environment Setup Wizard", "")
 
 	// Check/create .env file
 	if !EnvExists() {
@@ -308,18 +304,13 @@ func showClaudeInstructions() {
 }
 
 func showNextSteps() {
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println("  Setup Complete!")
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println()
-
-	// Show .env file path
+	// Get .env file path
 	envPath, err := GetEnvPath()
 	if err != nil {
 		envPath = ".env"
 	}
-	fmt.Printf("Configuration saved to: %s\n", envPath)
-	fmt.Println()
+
+	printHeader("Setup Complete!", fmt.Sprintf("Configuration saved to: %s", envPath))
 
 	fmt.Println("Next steps:")
 	fmt.Println()

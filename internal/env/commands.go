@@ -134,11 +134,7 @@ func ShowConfig() error {
 
 // ValidateAll validates all configured credentials
 func ValidateAll() error {
-	fmt.Println()
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println("  Validating Credentials")
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println()
+	printHeader("Validating Credentials", "")
 
 	cfg, err := LoadEnv()
 	if err != nil {
@@ -194,11 +190,7 @@ func ValidateAll() error {
 
 // ValidateCloudflareCredentials validates only Cloudflare credentials
 func ValidateCloudflareCredentials() error {
-	fmt.Println()
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println("  Validating Cloudflare Credentials")
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println()
+	printHeader("Validating Cloudflare Credentials", "")
 
 	cfg, err := LoadEnv()
 	if err != nil {
@@ -231,11 +223,7 @@ func ValidateCloudflareCredentials() error {
 
 // ValidateClaudeCredentials validates only Claude API credentials
 func ValidateClaudeCredentials() error {
-	fmt.Println()
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println("  Validating Claude API Key")
-	fmt.Println("════════════════════════════════════════════════════════════")
-	fmt.Println()
+	printHeader("Validating Claude API Key", "")
 
 	cfg, err := LoadEnv()
 	if err != nil {
