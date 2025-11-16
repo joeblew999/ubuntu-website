@@ -94,7 +94,9 @@ func setupCloudflare() error {
 
 	// Loop until valid token or skip
 	for cfg.CloudflareToken == "" || cfg.CloudflareToken == PlaceholderToken {
-		showCloudflareInstructions()
+		// Get repo name for token suggestion (ignore errors - it's just a suggestion)
+		_, repoName, _ := GetRepositoryInfo()
+		showCloudflareInstructions(repoName)
 
 		token := promptString("Paste your Cloudflare API token (or press Enter to skip)")
 		if token == "" {
@@ -242,7 +244,7 @@ func setupClaude() error {
 	return nil
 }
 
-func showCloudflareInstructions() {
+func showCloudflareInstructions(repoName string) {
 	fmt.Println("You need a Cloudflare API token to deploy to Cloudflare Pages.")
 	fmt.Println()
 	fmt.Println("Follow these steps:")
@@ -254,7 +256,13 @@ func showCloudflareInstructions() {
 	fmt.Println("     → Click the blue 'Create Token' button")
 	fmt.Println()
 	fmt.Println("  3. Click 'Create Custom Token' (there's no Cloudflare Pages template)")
-	fmt.Println("     → Token name: Give it a descriptive name (e.g., 'My Pages Deploy')")
+
+	// Build token name suggestion
+	tokenSuggestion := "My Pages Deploy"
+	if repoName != "" {
+		tokenSuggestion = repoName
+	}
+	fmt.Printf("     → Token name: Give it a descriptive name (e.g., '%s')\n", tokenSuggestion)
 	fmt.Println("     → Permissions: Add these permissions:")
 	fmt.Println("       • Account | Cloudflare Pages | Edit")
 	fmt.Println("       • Account | Account Settings | Read")
