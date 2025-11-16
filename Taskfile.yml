@@ -35,7 +35,7 @@ tasks:
   env:setup:
     desc: "Setup environment - interactive wizard for API keys"
     cmds:
-      - go run cmd/env/main.go wizard
+      - go run cmd/env/main.go setup
 
   env:show:
     desc: "Show current environment configuration"
@@ -53,19 +53,12 @@ tasks:
   env:push:
     desc: "Push .env to GitHub repository secrets for CI/CD"
     cmds:
-      - go run cmd/env/main.go sync-secrets {{.CLI_ARGS}}
-      - |
-        REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"' 2>/dev/null || echo "")
-        if [ -n "$REPO" ]; then
-          echo ""
-          echo "→ View secrets: https://github.com/$REPO/settings/secrets/actions"
-          echo ""
-        fi
+      - go run cmd/env/main.go push {{.CLI_ARGS}}
 
   env:remote:
     desc: "Show remote GitHub secrets"
     cmds:
-      - go run cmd/env/main.go show-remote
+      - go run cmd/env/main.go remote
 
   setup:
     desc: Complete setup - install Hugo, Bun, and dependencies

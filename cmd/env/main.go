@@ -16,7 +16,7 @@ func main() {
 	command := os.Args[1]
 
 	switch command {
-	case "wizard":
+	case "setup":
 		if err := env.RunWizard(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
@@ -24,6 +24,39 @@ func main() {
 
 	case "show":
 		if err := env.ShowConfig(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "push":
+		dryRun, force, validate := parseSyncSecretsFlags()
+		if err := env.SyncSecrets(dryRun, force, validate); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "remote":
+		if err := env.ShowRemoteSecrets(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	// Legacy aliases
+	case "wizard":
+		if err := env.RunWizard(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "sync-secrets":
+		dryRun, force, validate := parseSyncSecretsFlags()
+		if err := env.SyncSecrets(dryRun, force, validate); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "show-remote":
+		if err := env.ShowRemoteSecrets(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -42,19 +75,6 @@ func main() {
 
 	case "validate-claude":
 		if err := env.ValidateClaudeCredentials(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-	case "sync-secrets":
-		dryRun, force, validate := parseSyncSecretsFlags()
-		if err := env.SyncSecrets(dryRun, force, validate); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-	case "show-remote":
-		if err := env.ShowRemoteSecrets(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -84,18 +104,20 @@ func parseSyncSecretsFlags() (dryRun, force, validate bool) {
 }
 
 func printUsage() {
-	fmt.Println("Usage: setup <command> [options]")
+	fmt.Println("Usage: go run cmd/env/main.go <command> [options]")
 	fmt.Println()
-	fmt.Println("Commands:")
-	fmt.Println("  wizard              Run interactive setup wizard")
-	fmt.Println("  show                Show current configuration")
+	fmt.Println("Main Commands:")
+	fmt.Println("  setup               Run interactive setup wizard")
+	fmt.Println("  show                Show local .env configuration")
+	fmt.Println("  push                Push .env to GitHub secrets")
+	fmt.Println("  remote              Show GitHub secrets status")
+	fmt.Println()
+	fmt.Println("Validation Commands:")
 	fmt.Println("  validate            Validate all credentials")
 	fmt.Println("  validate-cloudflare Validate Cloudflare token only")
 	fmt.Println("  validate-claude     Validate Claude API key only")
-	fmt.Println("  sync-secrets        Sync .env secrets to GitHub repository")
-	fmt.Println("  show-remote         Show GitHub secrets status")
 	fmt.Println()
-	fmt.Println("Options for sync-secrets:")
+	fmt.Println("Options for push:")
 	fmt.Println("  --check, --dry-run  Show what would be synced without syncing")
 	fmt.Println("  --force             Overwrite existing secrets without prompting")
 	fmt.Println("  --no-validate       Skip credential validation before syncing")
