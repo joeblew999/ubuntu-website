@@ -37,9 +37,9 @@ Run the interactive wizard to configure your API keys:
 
 ```bash
 task env:setup        # Setup API keys (interactive)
-task env:list         # List current configuration
-task env:gh:push      # Push to GitHub secrets for CI/CD
+task env:local:list   # List local .env configuration
 task env:gh:list      # List GitHub secrets
+task env:gh:push      # Push to GitHub secrets for CI/CD
 ```
 
 The wizard will guide you through getting your Cloudflare and Claude API keys, validate them, and save to `.env` file.

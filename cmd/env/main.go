@@ -22,8 +22,14 @@ func main() {
 			os.Exit(1)
 		}
 
-	case "list":
+	case "local-list":
 		if err := env.ShowConfig(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "gh-list":
+		if err := env.ShowRemoteSecrets(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -35,13 +41,13 @@ func main() {
 			os.Exit(1)
 		}
 
-	case "gh-list":
-		if err := env.ShowRemoteSecrets(); err != nil {
+	// Legacy aliases
+	case "list":
+		if err := env.ShowConfig(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
 
-	// Legacy aliases
 	case "show":
 		if err := env.ShowConfig(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -129,13 +135,15 @@ func parseSyncSecretsFlags() (dryRun, force, validate bool) {
 func printUsage() {
 	fmt.Println("Usage: go run cmd/env/main.go <command> [options]")
 	fmt.Println()
-	fmt.Println("Local Commands:")
+	fmt.Println("Setup:")
 	fmt.Println("  setup               Run interactive setup wizard")
-	fmt.Println("  list                List local .env configuration")
+	fmt.Println()
+	fmt.Println("Local Commands:")
+	fmt.Println("  local-list          List local .env configuration")
 	fmt.Println()
 	fmt.Println("GitHub Commands:")
-	fmt.Println("  gh-push             Push .env to GitHub secrets")
 	fmt.Println("  gh-list             List GitHub secrets")
+	fmt.Println("  gh-push             Push .env to GitHub secrets")
 	fmt.Println()
 	fmt.Println("Validation Commands:")
 	fmt.Println("  validate            Validate all credentials")
