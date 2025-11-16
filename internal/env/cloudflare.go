@@ -80,11 +80,14 @@ func ValidateCloudflareToken(token string) (string, error) {
 		return "", fmt.Errorf("token verification failed")
 	}
 
-	// Get token details to retrieve the name
+	// Try to get token details to retrieve the name
+	// This is optional - token may not have permission to read its own details
+	// Requires "User: API Tokens: Read" permission which is not needed for deployment
 	tokenID := verifyResp.Result.ID
 	tokenReq, err := http.NewRequest("GET", fmt.Sprintf("https://api.cloudflare.com/client/v4/user/tokens/%s", tokenID), nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to create token details request: %w", err)
+		// Can't create request - return without name
+		return "", nil
 	}
 
 	tokenReq.Header.Set("Authorization", "Bearer "+token)
@@ -92,22 +95,26 @@ func ValidateCloudflareToken(token string) (string, error) {
 
 	tokenResp, err := client.Do(tokenReq)
 	if err != nil {
-		return "", fmt.Errorf("failed to get token details: %w", err)
+		// Can't fetch details - return without name
+		return "", nil
 	}
 	defer tokenResp.Body.Close()
 
 	tokenBody, err := io.ReadAll(tokenResp.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to read token details: %w", err)
+		// Can't read response - return without name
+		return "", nil
 	}
 
 	var tokenDetails CloudflareTokenResponse
 	if err := json.Unmarshal(tokenBody, &tokenDetails); err != nil {
-		return "", fmt.Errorf("failed to parse token details: %w", err)
+		// Can't parse response - return without name
+		return "", nil
 	}
 
 	if !tokenDetails.Success {
-		return "", fmt.Errorf("failed to get token name")
+		// Token doesn't have permission to read its own details - return without name
+		return "", nil
 	}
 
 	return tokenDetails.Result.Name, nil
