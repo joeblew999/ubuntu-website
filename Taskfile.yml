@@ -38,27 +38,27 @@ tasks:
       - go run cmd/env/main.go setup
 
   env:show:
-    desc: "Show current environment configuration"
+    desc: "Show local .env configuration"
     cmds:
       - go run cmd/env/main.go show
 
   env:all:
-    desc: "Complete environment workflow: setup → show → push → verify"
+    desc: "Complete environment workflow: setup → show → gh:push → gh:show"
     cmds:
       - task: env:setup
       - task: env:show
-      - task: env:push
-      - task: env:remote
+      - task: env:gh:push
+      - task: env:gh:show
 
-  env:push:
-    desc: "Push .env to GitHub repository secrets for CI/CD"
+  env:gh:push:
+    desc: "Push .env to GitHub secrets"
     cmds:
-      - go run cmd/env/main.go push {{.CLI_ARGS}}
+      - go run cmd/env/main.go gh-push {{.CLI_ARGS}}
 
-  env:remote:
-    desc: "Show remote GitHub secrets"
+  env:gh:show:
+    desc: "Show GitHub secrets"
     cmds:
-      - go run cmd/env/main.go remote
+      - go run cmd/env/main.go gh-show
 
   setup:
     desc: Complete setup - install Hugo, Bun, and dependencies

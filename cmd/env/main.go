@@ -28,6 +28,20 @@ func main() {
 			os.Exit(1)
 		}
 
+	case "gh-push":
+		dryRun, force, validate := parseSyncSecretsFlags()
+		if err := env.SyncSecrets(dryRun, force, validate); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "gh-show":
+		if err := env.ShowRemoteSecrets(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+	// Legacy aliases
 	case "push":
 		dryRun, force, validate := parseSyncSecretsFlags()
 		if err := env.SyncSecrets(dryRun, force, validate); err != nil {
@@ -40,8 +54,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
-
-	// Legacy aliases
 	case "wizard":
 		if err := env.RunWizard(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -106,18 +118,20 @@ func parseSyncSecretsFlags() (dryRun, force, validate bool) {
 func printUsage() {
 	fmt.Println("Usage: go run cmd/env/main.go <command> [options]")
 	fmt.Println()
-	fmt.Println("Main Commands:")
+	fmt.Println("Local Commands:")
 	fmt.Println("  setup               Run interactive setup wizard")
 	fmt.Println("  show                Show local .env configuration")
-	fmt.Println("  push                Push .env to GitHub secrets")
-	fmt.Println("  remote              Show GitHub secrets status")
+	fmt.Println()
+	fmt.Println("GitHub Commands:")
+	fmt.Println("  gh-push             Push .env to GitHub secrets")
+	fmt.Println("  gh-show             Show GitHub secrets")
 	fmt.Println()
 	fmt.Println("Validation Commands:")
 	fmt.Println("  validate            Validate all credentials")
 	fmt.Println("  validate-cloudflare Validate Cloudflare token only")
 	fmt.Println("  validate-claude     Validate Claude API key only")
 	fmt.Println()
-	fmt.Println("Options for push:")
+	fmt.Println("Options for gh-push:")
 	fmt.Println("  --check, --dry-run  Show what would be synced without syncing")
 	fmt.Println("  --force             Overwrite existing secrets without prompting")
 	fmt.Println("  --no-validate       Skip credential validation before syncing")
