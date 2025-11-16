@@ -3,7 +3,6 @@ package env
 import (
 	"fmt"
 	"reflect"
-	"strings"
 )
 
 // printHeader prints a consistent header for all env commands
@@ -87,7 +86,6 @@ func ShowConfig() error {
 	}
 
 	var lastComment string
-	firstInSection := true
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
 		envKey := getEnvKey(field)
@@ -99,11 +97,10 @@ func ShowConfig() error {
 		comment := getComment(field)
 		if comment != "" && comment != lastComment {
 			if i > 0 {
-				fmt.Println("└" + strings.Repeat("─", 60))
 				fmt.Println()
 			}
 			fmt.Println(Colorize(comment, ColorCyan))
-			fmt.Println("┬" + strings.Repeat("─", 60))
+			fmt.Println()
 			lastComment = comment
 		}
 
@@ -136,12 +133,7 @@ func ShowConfig() error {
 			required = " "
 		}
 
-		fmt.Printf("│ %s %s  %s  %s\n", statusIcon, required, keyDisplay, displayValue)
-		firstInSection = false
-	}
-
-	if !firstInSection {
-		fmt.Println("└" + strings.Repeat("─", 60))
+		fmt.Printf("  %s %s  %-*s  %s\n", statusIcon, required, maxKeyLen, keyDisplay, displayValue)
 	}
 
 	fmt.Println()
@@ -304,17 +296,15 @@ func ShowRemoteSecrets() error {
 		}
 
 		fmt.Println(Colorize("GitHub Secrets", ColorCyan))
-		fmt.Println("┬" + strings.Repeat("─", 60))
+		fmt.Println()
 
 		for _, secret := range secrets {
 			nameDisplay := Colorize(fmt.Sprintf("%-*s", maxNameLen, secret.Name), ColorBlue)
-			fmt.Printf("│ %s  %s  %s\n",
+			fmt.Printf("  %s  %s  %s\n",
 				Colorize("✓", ColorGreen),
 				nameDisplay,
 				Colorize(secret.UpdatedAt, ColorGray))
 		}
-
-		fmt.Println("└" + strings.Repeat("─", 60))
 		fmt.Println()
 	}
 
@@ -382,7 +372,7 @@ func SyncSecrets(dryRun, force, validate bool) error {
 	}
 
 	fmt.Println(Colorize("Secrets Status", ColorCyan))
-	fmt.Println("┬" + strings.Repeat("─", 60))
+	fmt.Println()
 
 	for _, result := range results {
 		var icon, status string
@@ -421,10 +411,9 @@ func SyncSecrets(dryRun, force, validate bool) error {
 		}
 
 		nameDisplay := Colorize(fmt.Sprintf("%-*s", maxNameLen, result.Name), nameColor)
-		fmt.Printf("│ %s  %s  %s\n", icon, nameDisplay, status)
+		fmt.Printf("  %s  %s  %s\n", icon, nameDisplay, status)
 	}
 
-	fmt.Println("└" + strings.Repeat("─", 60))
 	fmt.Println()
 
 	synced := created + updated
