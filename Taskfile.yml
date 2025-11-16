@@ -42,8 +42,16 @@ tasks:
     cmds:
       - go run cmd/env/main.go show
 
-  env:sync:
-    desc: "Sync .env to GitHub repository secrets for CI/CD"
+  env:all:
+    desc: "Complete environment workflow: setup → show → push → verify"
+    cmds:
+      - task: env:setup
+      - task: env:show
+      - task: env:push
+      - task: env:remote
+
+  env:push:
+    desc: "Push .env to GitHub repository secrets for CI/CD"
     cmds:
       - go run cmd/env/main.go sync-secrets {{.CLI_ARGS}}
       - |
@@ -54,8 +62,8 @@ tasks:
           echo ""
         fi
 
-  env:sync:show:
-    desc: "Show GitHub secrets status"
+  env:remote:
+    desc: "Show remote GitHub secrets"
     cmds:
       - |
         REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"' 2>/dev/null || echo "")

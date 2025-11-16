@@ -57,46 +57,45 @@ func setupCloudflare() error {
 
 	// Check if token exists and is not placeholder
 	if cfg.CloudflareToken != "" && cfg.CloudflareToken != PlaceholderToken {
-		fmt.Printf("Current token: %s... (%d chars)\n", cfg.CloudflareToken[:min(20, len(cfg.CloudflareToken))], len(cfg.CloudflareToken))
-		fmt.Println()
-
-		keep := promptYesNo("Keep existing token?", true)
-		if !keep {
+		// Validate existing token first
+		fmt.Println("Validating existing Cloudflare credentials...")
+		if err := ValidateCloudflareToken(cfg.CloudflareToken); err != nil {
+			fmt.Println(Error(fmt.Sprintf("Token validation failed: %v", err)))
+			fmt.Println()
+			fmt.Println(Colorize("Will prompt for new token...", ColorYellow))
+			fmt.Println()
 			cfg.CloudflareToken = ""
-			fmt.Println("Will prompt for new token...")
-			fmt.Println()
 		} else {
-			fmt.Println("✓ Keeping existing token")
-			fmt.Println()
-
-			// Validate existing token
-			fmt.Println("Validating Cloudflare credentials...")
-			if err := ValidateCloudflareToken(cfg.CloudflareToken); err != nil {
-				fmt.Println(Error(err.Error()))
-				fmt.Println()
-				fmt.Println(Colorize("Please enter a new token...", ColorYellow))
-				fmt.Println()
-				cfg.CloudflareToken = ""
-			} else {
-				fmt.Println("✓ Cloudflare API token is valid")
-
-				// Validate account ID
-				if cfg.CloudflareAccount != "" {
-					if accountName, err := ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount); err == nil {
-						fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
-						fmt.Println()
-						return nil
-					} else {
-						fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
-						fmt.Println()
-						fmt.Println(Colorize("Token lacks account permissions. Please enter a new token...", ColorYellow))
-						fmt.Println()
-						cfg.CloudflareToken = ""
-						// Don't return - continue loop to prompt for new token
-					}
-				} else {
+			// Validate account ID if present
+			if cfg.CloudflareAccount != "" {
+				if accountName, err := ValidateCloudflareAccount(cfg.CloudflareToken, cfg.CloudflareAccount); err == nil {
+					fmt.Println(Success("Cloudflare API token is valid"))
+					fmt.Println(Success(fmt.Sprintf("Account ID is valid: %s", accountName)))
 					fmt.Println()
 					return nil
+				} else {
+					fmt.Println(Error(fmt.Sprintf("Account ID validation failed: %v", err)))
+					fmt.Println()
+					fmt.Println(Colorize("Token lacks account permissions. Will prompt for new token...", ColorYellow))
+					fmt.Println()
+					cfg.CloudflareToken = ""
+				}
+			} else {
+				// Token valid but no account ID - ask if they want to keep it
+				fmt.Println("✓ Cloudflare API token is valid")
+				fmt.Println()
+				fmt.Printf("Current token: %s... (%d chars)\n", cfg.CloudflareToken[:min(20, len(cfg.CloudflareToken))], len(cfg.CloudflareToken))
+				fmt.Println()
+
+				keep := promptYesNo("Keep existing token?", true)
+				if keep {
+					fmt.Println("✓ Keeping existing token")
+					fmt.Println()
+					return nil
+				} else {
+					cfg.CloudflareToken = ""
+					fmt.Println("Will prompt for new token...")
+					fmt.Println()
 				}
 			}
 		}
@@ -171,32 +170,20 @@ func setupClaude() error {
 
 	// Check if key exists and is not placeholder
 	if cfg.ClaudeAPIKey != "" && cfg.ClaudeAPIKey != PlaceholderKey {
-		fmt.Printf("Current key: %s... (%d chars)\n", cfg.ClaudeAPIKey[:min(20, len(cfg.ClaudeAPIKey))], len(cfg.ClaudeAPIKey))
-		fmt.Println()
-
-		keep := promptYesNo("Keep existing key?", true)
-		if !keep {
+		// Validate existing key first
+		fmt.Println("Validating existing Claude API key...")
+		if err := ValidateClaudeAPIKey(cfg.ClaudeAPIKey); err != nil {
+			fmt.Println(Error(fmt.Sprintf("API key validation failed: %v", err)))
+			fmt.Println()
+			fmt.Println(Colorize("Will prompt for new key...", ColorYellow))
+			fmt.Println()
 			cfg.ClaudeAPIKey = ""
-			fmt.Println("Will prompt for new key...")
-			fmt.Println()
 		} else {
-			fmt.Println("✓ Keeping existing key")
+			// Validation passed - key is valid
+			fmt.Println("✓ Claude API key is valid")
+			fmt.Println("✓ API key has active credits")
 			fmt.Println()
-
-			// Validate existing key
-			fmt.Println("Validating Claude API key...")
-			if err := ValidateClaudeAPIKey(cfg.ClaudeAPIKey); err != nil {
-				fmt.Println(Error(err.Error()))
-				fmt.Println()
-				fmt.Println(Colorize("Please enter a new key...", ColorYellow))
-				fmt.Println()
-				cfg.ClaudeAPIKey = ""
-			} else {
-				fmt.Println("✓ Claude API key is valid")
-				fmt.Println("✓ API key has active credits")
-				fmt.Println()
-				return nil
-			}
+			return nil
 		}
 	}
 
