@@ -48,6 +48,50 @@ func printWizardStep(step, title, envKey string) {
 	fmt.Println()
 }
 
+// printKeyValue prints a key-value pair with proper alignment
+func printKeyValue(key, value string, keyWidth int) {
+	padding := keyWidth - len(key)
+	coloredKey := Colorize(key, ColorBlue)
+	coloredValue := Colorize(value, ColorGray)
+	fmt.Printf("  %s%s %s\n", coloredKey, strings.Repeat(" ", padding), coloredValue)
+}
+
+// printSection prints a section header
+func printSection(title string) {
+	fmt.Println(Colorize(title+":", ColorBoldGreen))
+}
+
+// formatValueForDisplay formats a value for display (handles placeholders and truncation)
+func formatValueForDisplay(value string) string {
+	if isPlaceholder(value) {
+		return Colorize("(not set)", ColorGray)
+	}
+	// Show preview for secrets
+	if len(value) > 24 {
+		preview := value[:10] + "..." + value[len(value)-10:]
+		return Colorize(preview, ColorGray)
+	}
+	return Colorize(value, ColorGray)
+}
+
+// buildSummaryParts builds summary parts from counts
+func buildSummaryParts(created, updated, skipped, failed int) []string {
+	parts := []string{}
+	if created > 0 {
+		parts = append(parts, fmt.Sprintf("New: %d", created))
+	}
+	if updated > 0 {
+		parts = append(parts, fmt.Sprintf("Update: %d", updated))
+	}
+	if skipped > 0 {
+		parts = append(parts, fmt.Sprintf("Skip: %d", skipped))
+	}
+	if failed > 0 {
+		parts = append(parts, fmt.Sprintf("Fail: %d", failed))
+	}
+	return parts
+}
+
 // printClaudeValidationSuccess prints standardized Claude validation success messages
 func printClaudeValidationSuccess() {
 	fmt.Println(Success("Claude API key is valid"))
@@ -97,43 +141,30 @@ func ShowConfig() error {
 			continue
 		}
 
-		// Print comment header if new section
+		// Print section header if new section
 		comment := getComment(field)
 		if comment != "" && comment != lastComment {
 			if i > 0 {
 				fmt.Println()
 			}
-			fmt.Println(Colorize(comment+":", ColorBoldGreen))
+			printSection(comment)
 			lastComment = comment
 		}
 
-		// Get value
+		// Get value and format for display
 		value := v.Field(i).String()
+		displayValue := formatValueForDisplay(value)
 
-		// Format display based on whether value is set
-		var displayValue string
-		if isPlaceholder(value) {
-			displayValue = Colorize("(not set)", ColorGray)
-		} else {
-			// Show preview for secrets
-			if len(value) > 24 {
-				preview := value[:10] + "..." + value[len(value)-10:]
-				displayValue = Colorize(preview, ColorGray)
-			} else {
-				displayValue = Colorize(value, ColorGray)
-			}
-		}
-
-		// Build the line with proper alignment
-		keyWithMarker := envKey
+		// Build key with required marker
+		key := envKey
 		if isRequired(field) {
-			keyWithMarker += " *"
+			key += " *"
 		}
 
-		// Calculate padding to align values
-		padding := maxKeyLen - len(keyWithMarker)
+		// Calculate padding for alignment
+		padding := maxKeyLen - len(key)
 
-		// Apply color to key and marker separately
+		// Print with colored key and marker
 		coloredKey := Colorize(envKey, ColorBlue)
 		if isRequired(field) {
 			coloredKey += Colorize(" *", ColorRed)
@@ -307,15 +338,10 @@ func ShowRemoteSecrets() error {
 			}
 		}
 
-		fmt.Println(Colorize("GitHub Secrets", ColorCyan))
-		fmt.Println()
+		printSection("GitHub Secrets")
 
 		for _, secret := range secrets {
-			nameDisplay := Colorize(fmt.Sprintf("%-*s", maxNameLen, secret.Name), ColorBlue)
-			fmt.Printf("  %s  %s  %s\n",
-				Colorize("✓", ColorGreen),
-				nameDisplay,
-				Colorize(secret.UpdatedAt, ColorGray))
+			printKeyValue(secret.Name, secret.UpdatedAt, maxNameLen)
 		}
 		fmt.Println()
 	}
@@ -383,8 +409,7 @@ func SyncSecrets(dryRun, force, validate bool) error {
 		}
 	}
 
-	fmt.Println(Colorize("Secrets Status", ColorCyan))
-	fmt.Println()
+	printSection("Secrets Status")
 
 	for _, result := range results {
 		var icon, status string
@@ -430,38 +455,12 @@ func SyncSecrets(dryRun, force, validate bool) error {
 
 	synced := created + updated
 
-	// Summary
-	summary := ""
+	// Build summary
+	parts := buildSummaryParts(created, updated, skipped, failed)
+	var summary string
 	if dryRun {
-		parts := []string{}
-		if created > 0 {
-			parts = append(parts, fmt.Sprintf("New: %d", created))
-		}
-		if updated > 0 {
-			parts = append(parts, fmt.Sprintf("Update: %d", updated))
-		}
-		if skipped > 0 {
-			parts = append(parts, fmt.Sprintf("Skip: %d", skipped))
-		}
-		if failed > 0 {
-			parts = append(parts, fmt.Sprintf("Fail: %d", failed))
-		}
-		summary = fmt.Sprintf("Would sync: %s", joinParts(parts))
-		summary += "\n→ Run without --check to actually sync"
+		summary = fmt.Sprintf("Would sync: %s\n→ Run without --check to actually sync", joinParts(parts))
 	} else {
-		parts := []string{}
-		if created > 0 {
-			parts = append(parts, fmt.Sprintf("New: %d", created))
-		}
-		if updated > 0 {
-			parts = append(parts, fmt.Sprintf("Update: %d", updated))
-		}
-		if skipped > 0 {
-			parts = append(parts, fmt.Sprintf("Skip: %d", skipped))
-		}
-		if failed > 0 {
-			parts = append(parts, fmt.Sprintf("Fail: %d", failed))
-		}
 		summary = fmt.Sprintf("Synced: %s", joinParts(parts))
 		if synced > 0 {
 			repoURL, _ := GetRepositoryURL()
