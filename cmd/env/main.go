@@ -122,14 +122,15 @@ func main() {
 }
 
 func parseSyncSecretsFlags() (dryRun, force, validate bool) {
-	validate = true // Default to true
+	force = true    // Default to true - overwrite existing secrets
+	validate = true // Default to true - validate before pushing
 
 	for _, arg := range os.Args[2:] {
 		switch arg {
 		case "--check", "--dry-run":
 			dryRun = true
-		case "--force":
-			force = true
+		case "--no-force":
+			force = false
 		case "--no-validate":
 			validate = false
 		}
@@ -156,6 +157,6 @@ func printUsage() {
 	fmt.Println()
 	fmt.Println("Options for gh-push:")
 	fmt.Println("  --check, --dry-run  Show what would be synced without syncing")
-	fmt.Println("  --force             Overwrite existing secrets without prompting")
+	fmt.Println("  --no-force          Prompt before overwriting existing secrets")
 	fmt.Println("  --no-validate       Skip credential validation before syncing")
 }
