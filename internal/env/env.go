@@ -206,6 +206,15 @@ func EnvExists() bool {
 	return err == nil
 }
 
+// GetEnvPath returns the absolute path to the .env file
+func GetEnvPath() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/%s", wd, envFile), nil
+}
+
 // isPlaceholder checks if a value is a placeholder/default value
 func isPlaceholder(value string) bool {
 	return value == "" || strings.HasPrefix(value, "your-") || strings.HasPrefix(value, "your_")

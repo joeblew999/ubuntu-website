@@ -316,15 +316,24 @@ func showNextSteps() {
 	fmt.Println("  Setup Complete!")
 	fmt.Println("════════════════════════════════════════════════════════════")
 	fmt.Println()
-	fmt.Println("Your .env file is configured. Next steps:")
+
+	// Show .env file path
+	envPath, err := GetEnvPath()
+	if err != nil {
+		envPath = ".env"
+	}
+	fmt.Printf("Configuration saved to: %s\n", envPath)
+	fmt.Println()
+
+	fmt.Println("Next steps:")
 	fmt.Println()
 	fmt.Println("  task setup      # Install Hugo, Bun, and dependencies")
 	fmt.Println("  task dev        # Start development server")
 	fmt.Println("  task build      # Build the site")
 	fmt.Println()
 	fmt.Println("Optional commands:")
-	fmt.Println("  go run cmd/setup/main.go show      # Show current configuration")
-	fmt.Println("  go run cmd/setup/main.go wizard    # Re-run this wizard")
+	fmt.Println("  task env:local:list    # Show current configuration")
+	fmt.Println("  task env:gh:push       # Push secrets to GitHub for CI/CD")
 	fmt.Println()
 }
 

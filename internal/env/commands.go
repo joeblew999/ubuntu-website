@@ -18,6 +18,14 @@ func ShowConfig() error {
 		return err
 	}
 
+	// Get absolute path to .env file
+	envPath, err := GetEnvPath()
+	if err != nil {
+		envPath = ".env"
+	}
+	fmt.Printf("File: %s\n", envPath)
+	fmt.Println()
+
 	v := reflect.ValueOf(cfg).Elem()
 	t := v.Type()
 
