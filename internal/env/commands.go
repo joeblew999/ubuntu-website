@@ -84,6 +84,16 @@ func ShowConfig() error {
 	v := reflect.ValueOf(cfg).Elem()
 	t := v.Type()
 
+	// Find longest key name for alignment
+	maxKeyLen := 0
+	for i := 0; i < v.NumField(); i++ {
+		field := t.Field(i)
+		envKey := getEnvKey(field)
+		if envKey != "" && len(envKey) > maxKeyLen {
+			maxKeyLen = len(envKey)
+		}
+	}
+
 	var lastComment string
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
@@ -98,7 +108,7 @@ func ShowConfig() error {
 			if i > 0 {
 				fmt.Println()
 			}
-			fmt.Printf("# %s\n", comment)
+			fmt.Printf("┌─ %s\n", comment)
 			lastComment = comment
 		}
 
@@ -107,27 +117,33 @@ func ShowConfig() error {
 
 		// Format value for display
 		var displayValue string
+		var statusIcon string
 		if isPlaceholder(value) {
 			displayValue = Colorize("<not set>", ColorGray)
+			statusIcon = Colorize("○", ColorGray)
 		} else {
 			// Show preview for secrets
 			preview := value
 			if len(preview) > 40 {
 				preview = preview[:20] + "..." + preview[len(preview)-17:]
 			}
-			displayValue = preview
+			displayValue = Colorize(preview, ColorGreen)
+			statusIcon = Colorize("●", ColorGreen)
 		}
+
+		// Format key with padding
+		keyDisplay := fmt.Sprintf("%-*s", maxKeyLen, envKey)
 
 		required := ""
 		if isRequired(field) {
-			required = Colorize(" (required)", ColorRed)
+			required = Colorize(" *", ColorRed)
 		}
 
-		fmt.Printf("  %s%s = %s\n", envKey, required, displayValue)
+		fmt.Printf("│ %s  %s%s  %s\n", statusIcon, keyDisplay, required, displayValue)
 	}
 
 	fmt.Println()
-	printFooter("→ To update: task env:local:setup")
+	printFooter("→ To update: task env:local:setup  (* = required)")
 
 	return nil
 }
