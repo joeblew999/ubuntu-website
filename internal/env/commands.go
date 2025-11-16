@@ -302,14 +302,30 @@ func ShowRemoteSecrets() error {
 	}
 
 	if len(secrets) == 0 {
-		fmt.Println("No secrets configured")
+		fmt.Println(Colorize("No secrets configured", ColorGray))
 		fmt.Println()
 	} else {
+		// Find longest secret name for alignment
+		maxNameLen := 0
 		for _, secret := range secrets {
-			fmt.Printf("  %s\n", secret.Name)
-			fmt.Printf("    Updated: %s\n", secret.UpdatedAt)
-			fmt.Println()
+			if len(secret.Name) > maxNameLen {
+				maxNameLen = len(secret.Name)
+			}
 		}
+
+		fmt.Println(Colorize("GitHub Secrets", ColorCyan))
+		fmt.Println("┬" + strings.Repeat("─", 60))
+
+		for _, secret := range secrets {
+			nameDisplay := Colorize(fmt.Sprintf("%-*s", maxNameLen, secret.Name), ColorBlue)
+			fmt.Printf("│ %s  %s  %s\n",
+				Colorize("✓", ColorGreen),
+				nameDisplay,
+				Colorize(secret.UpdatedAt, ColorGray))
+		}
+
+		fmt.Println("└" + strings.Repeat("─", 60))
+		fmt.Println()
 	}
 
 	// Show management URL
@@ -362,55 +378,64 @@ func SyncSecrets(dryRun, force, validate bool) error {
 	}
 
 	// Display results
-	fmt.Println("Secrets status:")
-	fmt.Println()
-
 	created := 0
 	updated := 0
 	skipped := 0
 	failed := 0
 
+	// Find longest secret name for alignment
+	maxNameLen := 0
 	for _, result := range results {
-		var icon, badge, status string
+		if len(result.Name) > maxNameLen {
+			maxNameLen = len(result.Name)
+		}
+	}
+
+	fmt.Println(Colorize("Secrets Status", ColorCyan))
+	fmt.Println("┬" + strings.Repeat("─", 60))
+
+	for _, result := range results {
+		var icon, status string
+		var nameColor string
 		switch result.Status {
 		case "synced":
-			icon = "✓"
+			icon = Colorize("✓", ColorGreen)
+			nameColor = ColorGreen
 			if result.Reason == "created" {
-				badge = Colorize("[new]", ColorGreen)
-				status = "Created new secret"
+				status = "Created new"
 				created++
 			} else {
-				badge = Colorize("[upd]", ColorBlue)
-				status = "Updated existing secret"
+				status = "Updated"
 				updated++
 			}
 		case "would-sync":
 			icon = "→"
+			nameColor = ColorBlue
 			if result.Reason == "would create new" {
-				badge = Colorize("[new]", ColorGreen)
-				status = "Would create new secret"
+				status = "Would create"
 				created++
 			} else {
-				badge = Colorize("[upd]", ColorBlue)
-				status = "Would update existing secret"
+				status = "Would update"
 				updated++
 			}
 		case "skipped":
-			icon = "⊘"
-			badge = Colorize("[skip]", ColorGray)
+			icon = Colorize("○", ColorGray)
+			nameColor = ColorGray
 			status = result.Reason
 			skipped++
 		case "failed":
-			icon = "✗"
-			badge = Colorize("[fail]", ColorRed)
+			icon = Colorize("✗", ColorRed)
+			nameColor = ColorRed
 			status = fmt.Sprintf("%s: %v", result.Reason, result.Error)
 			failed++
 		}
 
-		fmt.Printf("  [%s] %s %s\n", icon, badge, result.Name)
-		fmt.Printf("      %s\n", status)
-		fmt.Println()
+		nameDisplay := Colorize(fmt.Sprintf("%-*s", maxNameLen, result.Name), nameColor)
+		fmt.Printf("│ %s  %s  %s\n", icon, nameDisplay, status)
 	}
+
+	fmt.Println("└" + strings.Repeat("─", 60))
+	fmt.Println()
 
 	synced := created + updated
 
