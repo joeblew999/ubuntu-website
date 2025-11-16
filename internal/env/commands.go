@@ -3,6 +3,7 @@ package env
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // printHeader prints a consistent header for all env commands
@@ -72,13 +73,19 @@ func ShowConfig() error {
 	v := reflect.ValueOf(cfg).Elem()
 	t := v.Type()
 
-	// Find longest key name for alignment
+	// Find longest key name for alignment (including required marker)
 	maxKeyLen := 0
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
 		envKey := getEnvKey(field)
-		if envKey != "" && len(envKey) > maxKeyLen {
-			maxKeyLen = len(envKey)
+		if envKey != "" {
+			keyLen := len(envKey)
+			if isRequired(field) {
+				keyLen += 2 // Add space for " *"
+			}
+			if keyLen > maxKeyLen {
+				maxKeyLen = keyLen
+			}
 		}
 	}
 
@@ -96,50 +103,53 @@ func ShowConfig() error {
 			if i > 0 {
 				fmt.Println()
 			}
-			fmt.Println(Colorize("━━ "+comment, ColorCyan))
+			fmt.Println(Colorize(comment+":", ColorBoldGreen))
 			lastComment = comment
 		}
 
 		// Get value
 		value := v.Field(i).String()
 
-		// Format value for display
+		// Format display based on whether value is set
 		var displayValue string
-		var statusIcon string
-		var statusColor string
 		if isPlaceholder(value) {
-			displayValue = "not configured"
-			statusIcon = "○"
-			statusColor = ColorGray
+			displayValue = Colorize("(not set)", ColorGray)
 		} else {
-			// Show preview for secrets (first 8 chars + ...)
-			if len(value) > 20 {
-				displayValue = value[:8] + "..." + value[len(value)-8:]
+			// Show preview for secrets
+			if len(value) > 24 {
+				preview := value[:10] + "..." + value[len(value)-10:]
+				displayValue = Colorize(preview, ColorGray)
 			} else {
-				displayValue = value
+				displayValue = Colorize(value, ColorGray)
 			}
-			statusIcon = "✓"
-			statusColor = ColorGreen
 		}
 
-		// Format key
-		keyDisplay := Colorize(envKey, ColorBlue)
-		requiredTag := ""
+		// Build the line with proper alignment
+		keyWithMarker := envKey
 		if isRequired(field) {
-			requiredTag = " " + Colorize("(required)", ColorRed)
+			keyWithMarker += " *"
 		}
 
-		// Print key and status
-		fmt.Printf("  %s %s%s\n",
-			Colorize(statusIcon, statusColor),
-			keyDisplay,
-			requiredTag)
+		// Calculate padding to align values
+		padding := maxKeyLen - len(keyWithMarker)
 
-		// Print value on separate line with indent
-		fmt.Printf("    %s\n", Colorize(displayValue, statusColor))
+		// Apply color to key and marker separately
+		coloredKey := Colorize(envKey, ColorBlue)
+		if isRequired(field) {
+			coloredKey += Colorize(" *", ColorRed)
+		}
+
+		fmt.Printf("  %s%s %s\n",
+			coloredKey,
+			strings.Repeat(" ", padding),
+			displayValue)
 	}
 
-	printFooter("To update configuration: task env:local:setup")
+	fmt.Println()
+	if maxKeyLen > 0 {
+		fmt.Println(Colorize("  * Required for deployment", ColorGray))
+	}
+	printFooter("Run 'task env:local:setup' to configure")
 
 	return nil
 }
