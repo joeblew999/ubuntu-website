@@ -17,8 +17,8 @@ Multi-language website built with Hugo Plate, featuring automated translation an
 ## 🚀 Quick Start
 
 ```bash
-# 1. Environment Setup (first time only)
-task env:local:setup              # Interactive wizard for API keys
+# 1. Environment Setup (first time only - or anytime to sync)
+task env:all                      # Complete env workflow (recommended)
 task setup                        # Install Hugo, Bun, deps
 
 # 2. Develop
