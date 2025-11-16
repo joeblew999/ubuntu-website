@@ -299,6 +299,11 @@ func SyncSecrets(dryRun, force, validate bool) error {
 		fmt.Println()
 	}
 
+	if validate {
+		fmt.Println("Validating credentials before push...")
+		fmt.Println()
+	}
+
 	// Sync secrets
 	opts := SyncOptions{
 		DryRun:   dryRun,
