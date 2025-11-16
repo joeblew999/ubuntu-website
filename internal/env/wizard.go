@@ -273,7 +273,9 @@ func setupClaude() error {
 
 	// Loop until valid key or skip
 	for cfg.ClaudeAPIKey == "" || cfg.ClaudeAPIKey == PlaceholderKey {
-		showClaudeInstructions()
+		// Get repository name for workspace suggestion
+		_, repoName, _ := GetRepositoryInfo()
+		showClaudeInstructions(repoName)
 
 		key := promptString("Paste your Claude API key (or press Enter to skip)")
 		if key == "" {
@@ -308,28 +310,38 @@ func setupClaude() error {
 		break
 	}
 
-	// Ask for workspace name
+	// Ask for workspace name - use repo name as default
 	fmt.Println("────────────────────────────────────────────────────────────")
 	fmt.Printf("Setting: %s (recommended)\n", EnvClaudeWorkspace)
 	fmt.Println("────────────────────────────────────────────────────────────")
 	fmt.Println()
-	fmt.Println("Enter your Claude Workspace name to keep this project's")
-	fmt.Println("usage isolated and organized.")
-	fmt.Println()
 
-	workspace := promptString("Workspace name (or press Enter to skip)")
-	if workspace != "" {
-		if err := UpdateEnv(EnvClaudeWorkspace, workspace); err != nil {
-			return err
-		}
-		fmt.Println()
-		fmt.Printf("✓ Workspace saved to %s\n", EnvClaudeWorkspace)
-		fmt.Println()
-	} else {
-		fmt.Println()
-		fmt.Println("⊘ Skipped - using default workspace")
-		fmt.Println()
+	// Get repository name for default workspace
+	_, repoName, _ := GetRepositoryInfo()
+	if repoName == "" {
+		repoName = "my-project"
 	}
+
+	fmt.Println("Claude Workspaces help keep your project's API usage isolated")
+	fmt.Println("and organized. Use your project name as the workspace name.")
+	fmt.Println()
+	fmt.Printf("Workspace name [default: %s]: ", repoName)
+
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+	workspace := strings.TrimSpace(input)
+
+	// Use default if empty
+	if workspace == "" {
+		workspace = repoName
+	}
+
+	if err := UpdateEnv(EnvClaudeWorkspace, workspace); err != nil {
+		return err
+	}
+	fmt.Println()
+	fmt.Printf("✓ Workspace saved to %s: %s\n", EnvClaudeWorkspace, workspace)
+	fmt.Println()
 
 	return nil
 }
@@ -347,12 +359,12 @@ func showCloudflareInstructions(repoName string) {
 	fmt.Println()
 	fmt.Println("  3. Click 'Create Custom Token' (there's no Cloudflare Pages template)")
 
-	// Build token name suggestion
-	tokenSuggestion := "My Pages Deploy"
-	if repoName != "" {
-		tokenSuggestion = repoName
+	// Build token name - use repo name if available
+	tokenName := repoName
+	if tokenName == "" {
+		tokenName = "my-project"
 	}
-	fmt.Printf("     → Token name: Give it a descriptive name (e.g., '%s')\n", tokenSuggestion)
+	fmt.Printf("     → Token name: Use your project name: '%s'\n", tokenName)
 	fmt.Println("     → Permissions: Add these 3 permissions:")
 	fmt.Println("       • Account | Cloudflare Pages | Edit")
 	fmt.Println("       • Account | Account Settings | Read")
@@ -368,7 +380,7 @@ func showCloudflareInstructions(repoName string) {
 	fmt.Println()
 }
 
-func showClaudeInstructions() {
+func showClaudeInstructions(repoName string) {
 	fmt.Println("You need a Claude API key for automated translation.")
 	fmt.Println()
 	fmt.Println("Follow these steps:")
@@ -386,7 +398,13 @@ func showClaudeInstructions() {
 	fmt.Println("  3. Create a Workspace for this project:")
 	fmt.Println("     → Open: https://console.anthropic.com/settings/workspaces")
 	fmt.Println("     → Click 'Create Workspace'")
-	fmt.Println("     → Name it after your project (e.g., 'ubuntu-website')")
+
+	// Use actual project name
+	workspaceName := repoName
+	if workspaceName == "" {
+		workspaceName = "my-project"
+	}
+	fmt.Printf("     → Name it: '%s'\n", workspaceName)
 	fmt.Println("     → This keeps this project's usage separate")
 	fmt.Println()
 	fmt.Println("  4. Create API key in your workspace:")
