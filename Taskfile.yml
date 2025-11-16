@@ -53,7 +53,7 @@ tasks:
       - go run cmd/env/main.go gh-push {{.CLI_ARGS}}
 
   env:all:
-    desc: "Complete environment workflow: local:setup → local:list → gh:push → gh:list"
+    desc: "Complete environment workflow (recommended - idempotent, safe to re-run)"
     cmds:
       - task: env:local:setup
       - task: env:local:list

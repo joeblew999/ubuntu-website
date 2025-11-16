@@ -33,7 +33,15 @@ task cf:deploy                    # Deploy to Cloudflare Pages
 
 ## 🔑 Environment Setup
 
-Run the interactive wizard to configure your API keys:
+The recommended way to manage environment configuration:
+
+```bash
+task env:all  # Complete workflow (idempotent - safe to re-run anytime)
+```
+
+This runs the complete unidirectional flow: `setup → list → push → verify`
+
+Individual commands (for advanced use):
 
 ```bash
 task env:local:setup  # Setup local .env (interactive wizard)
@@ -42,7 +50,7 @@ task env:gh:list      # List GitHub secrets
 task env:gh:push      # Push to GitHub secrets for CI/CD
 ```
 
-The wizard will guide you through getting your Cloudflare and Claude API keys, validate them, and save to `.env` file.
+All commands are idempotent - safe to run multiple times without side effects.
 
 ## 📋 Prerequisites
 
