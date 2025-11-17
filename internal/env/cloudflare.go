@@ -58,7 +58,7 @@ func ValidateCloudflareToken(token string) (string, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
 
 	// Verify token
-	req, err := http.NewRequest("GET", "https://api.cloudflare.com/client/v4/user/tokens/verify", nil)
+	req, err := http.NewRequest("GET", CloudflareAPITokenVerifyURL, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
@@ -93,7 +93,7 @@ func ValidateCloudflareToken(token string) (string, error) {
 	// This requires "User: API Tokens: Read" permission
 	// If token lacks this permission, validation will still succeed but won't show the name
 	tokenID := verifyResp.Result.ID
-	tokenReq, err := http.NewRequest("GET", fmt.Sprintf("https://api.cloudflare.com/client/v4/user/tokens/%s", tokenID), nil)
+	tokenReq, err := http.NewRequest("GET", fmt.Sprintf(CloudflareAPITokenInfoURL, tokenID), nil)
 	if err != nil {
 		// Can't create request - return without name
 		return "", nil
@@ -137,7 +137,7 @@ func ValidateCloudflareAccount(token, accountID string) (string, error) {
 
 	client := &http.Client{Timeout: 10 * time.Second}
 
-	url := fmt.Sprintf("https://api.cloudflare.com/client/v4/accounts/%s", accountID)
+	url := fmt.Sprintf(CloudflareAPIAccountURL, accountID)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
@@ -185,7 +185,7 @@ func GetCloudflareAccounts(token string) (accountID, accountName string, err err
 
 	client := &http.Client{Timeout: 10 * time.Second}
 
-	req, err := http.NewRequest("GET", "https://api.cloudflare.com/client/v4/accounts", nil)
+	req, err := http.NewRequest("GET", CloudflareAPIAccountsURL, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to create request: %w", err)
 	}

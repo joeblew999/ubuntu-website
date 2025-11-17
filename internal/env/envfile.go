@@ -4,99 +4,149 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
-	"time"
 )
 
 const envFile = ".env"
+const envFileTest = ".env.test"
 
-// Environment variable keys - kept for backward compatibility with existing code
-// New code should use getEnvKey() to get keys from struct tags
+// currentEnvFile holds the active env file path (can be changed for testing)
+var currentEnvFile = envFile
+
+// SetEnvFileForTesting sets a custom env file path for testing
+func SetEnvFileForTesting(path string) {
+	currentEnvFile = path
+}
+
+// ResetEnvFile resets to the default .env file
+func ResetEnvFile() {
+	currentEnvFile = envFile
+}
+
+// GetTestEnvFile returns the test env file path
+func GetTestEnvFile() string {
+	return envFileTest
+}
+
+// Environment variable keys used throughout the codebase
 const (
-	EnvCloudflareToken   = "CLOUDFLARE_API_TOKEN"
-	EnvCloudflareAccount = "CLOUDFLARE_ACCOUNT_ID"
-	EnvCloudflareProject = "CLOUDFLARE_PROJECT_NAME"
-	EnvClaudeAPIKey      = "CLAUDE_API_KEY"
-	EnvClaudeWorkspace   = "CLAUDE_WORKSPACE"
+	KeyCloudflareAPIToken     = "CLOUDFLARE_API_TOKEN"
+	KeyCloudflareAPITokenName = "CLOUDFLARE_API_TOKEN_NAME"
+	KeyCloudflareAccountID    = "CLOUDFLARE_ACCOUNT_ID"
+	KeyCloudflarePageProject  = "CLOUDFLARE_PAGE_PROJECT_NAME"
+	KeyClaudeAPIKey           = "CLAUDE_API_KEY"
+	KeyClaudeWorkspaceName    = "CLAUDE_WORKSPACE_NAME"
 )
 
-// Placeholder values - kept for backward compatibility
-// New code should use isPlaceholder() helper function
+// Placeholder values used in .env.example and validation
 const (
 	PlaceholderToken = "your-token-here"
 	PlaceholderKey   = "your-api-key-here"
 )
 
 // EnvConfig holds environment configuration
-// All env vars are defined here with struct tags for metadata
-// This is the single source of truth for all environment variables
 type EnvConfig struct {
-	CloudflareToken   string `env:"CLOUDFLARE_API_TOKEN" default:"your-token-here" comment:"Cloudflare credentials (for deployment)" validate:"cloudflare_token" required:"true"`
-	CloudflareAccount string `env:"CLOUDFLARE_ACCOUNT_ID" default:"your-account-id" validate:"cloudflare_account"`
-	CloudflareProject string `env:"CLOUDFLARE_PROJECT_NAME" default:"your-project-name"`
-	ClaudeAPIKey      string `env:"CLAUDE_API_KEY" default:"your-api-key-here" comment:"Claude API key (for translation)" validate:"claude_api_key"`
-	ClaudeWorkspace   string `env:"CLAUDE_WORKSPACE" default:"your-workspace-name" comment:"Claude Workspace (recommended for project isolation)"`
+	CloudflareToken     string
+	CloudflareTokenName string
+	CloudflareAccount   string
+	CloudflareProject   string
+	ClaudeAPIKey        string
+	ClaudeWorkspace     string
 }
 
-// getEnvKey returns the env key name for a struct field using reflection
-func getEnvKey(field reflect.StructField) string {
-	return field.Tag.Get("env")
+// FieldInfo holds metadata about an environment variable field
+type FieldInfo struct {
+	Key          string
+	Default      string
+	Description  string // Inline comment describing the field
+	DisplayName  string // Human-readable label for web GUI
+	SyncToGitHub bool   // Should sync to GitHub secrets (for CI/CD deployment)
+	Validate     bool   // Should validate the value before GitHub sync
 }
 
-// getDefaultValue returns the default value for a field
-func getDefaultValue(field reflect.StructField) string {
-	return field.Tag.Get("default")
+// envFieldsInOrder defines all env vars with their metadata in display order
+var envFieldsInOrder = []FieldInfo{
+	{Key: KeyCloudflareAPIToken, Default: "your-token-here", Description: "Cloudflare API token (required for deployment)", DisplayName: "Cloudflare API Token", SyncToGitHub: true, Validate: true},
+	{Key: KeyCloudflareAPITokenName, Default: "your-token-name", Description: "Cloudflare token name (helps you remember which token)", DisplayName: "Cloudflare API Token Name", SyncToGitHub: false, Validate: false},
+	{Key: KeyCloudflareAccountID, Default: "your-account-id", Description: "Cloudflare Account ID", DisplayName: "Cloudflare Account ID", SyncToGitHub: true, Validate: false},
+	{Key: KeyCloudflarePageProject, Default: "your-project-name", Description: "Cloudflare Pages project name", DisplayName: "Cloudflare Pages Project", SyncToGitHub: false, Validate: false},
+	{Key: KeyClaudeAPIKey, Default: "your-api-key-here", Description: "Claude API key (required for translation)", DisplayName: "Claude API Key", SyncToGitHub: false, Validate: true},
+	{Key: KeyClaudeWorkspaceName, Default: "your-workspace-name", Description: "Claude workspace name", DisplayName: "Claude Workspace Name", SyncToGitHub: false, Validate: false},
 }
 
-// getComment returns the comment for a field (for grouping in .env file)
-func getComment(field reflect.StructField) string {
-	return field.Tag.Get("comment")
-}
-
-// getValidateName returns the validation function name for a field
-func getValidateName(field reflect.StructField) string {
-	return field.Tag.Get("validate")
-}
-
-// isRequired returns whether a field is required
-func isRequired(field reflect.StructField) bool {
-	return field.Tag.Get("required") == "true"
-}
-
-// findFieldIndexByEnvKey finds the field index for a given env key
-func findFieldIndexByEnvKey(t reflect.Type, envKey string) int {
-	for i := 0; i < t.NumField(); i++ {
-		if getEnvKey(t.Field(i)) == envKey {
-			return i
+// GetDisplayName returns the display name for a given environment variable key
+func GetDisplayName(key string) string {
+	for _, field := range envFieldsInOrder {
+		if field.Key == key {
+			return field.DisplayName
 		}
 	}
-	return -1
+	return key // Fallback to key if not found
 }
 
-// setFieldByEnvKey sets a struct field value by env key name using reflection
-func setFieldByEnvKey(cfg *EnvConfig, envKey string, value string) bool {
-	v := reflect.ValueOf(cfg).Elem()
-	t := v.Type()
-
-	idx := findFieldIndexByEnvKey(t, envKey)
-	if idx >= 0 {
-		v.Field(idx).SetString(value)
-		return true
+// GetFieldInfo returns the complete FieldInfo for a given environment variable key
+func GetFieldInfo(key string) *FieldInfo {
+	for _, field := range envFieldsInOrder {
+		if field.Key == key {
+			return &field
+		}
 	}
-	return false
+	return nil
 }
 
-// getFieldByEnvKey gets a struct field value by env key name using reflection
-func getFieldByEnvKey(cfg *EnvConfig, envKey string) (string, bool) {
-	v := reflect.ValueOf(cfg).Elem()
-	t := v.Type()
-
-	idx := findFieldIndexByEnvKey(t, envKey)
-	if idx >= 0 {
-		return v.Field(idx).String(), true
+// GetFieldLabel returns the display name with optional " *" suffix for GitHub sync fields
+// Used by web GUI to show which fields are required for GitHub deployment
+func GetFieldLabel(key string) string {
+	field := GetFieldInfo(key)
+	if field == nil {
+		return key
 	}
-	return "", false
+
+	label := field.DisplayName
+	if field.SyncToGitHub {
+		label += " *"
+	}
+	return label
+}
+
+// Get returns the value of a field by env key
+func (cfg *EnvConfig) Get(key string) string {
+	switch key {
+	case KeyCloudflareAPIToken:
+		return cfg.CloudflareToken
+	case KeyCloudflareAPITokenName:
+		return cfg.CloudflareTokenName
+	case KeyCloudflareAccountID:
+		return cfg.CloudflareAccount
+	case KeyCloudflarePageProject:
+		return cfg.CloudflareProject
+	case KeyClaudeAPIKey:
+		return cfg.ClaudeAPIKey
+	case KeyClaudeWorkspaceName:
+		return cfg.ClaudeWorkspace
+	}
+	return ""
+}
+
+// Set sets the value of a field by env key
+func (cfg *EnvConfig) Set(key, value string) bool {
+	switch key {
+	case KeyCloudflareAPIToken:
+		cfg.CloudflareToken = value
+	case KeyCloudflareAPITokenName:
+		cfg.CloudflareTokenName = value
+	case KeyCloudflareAccountID:
+		cfg.CloudflareAccount = value
+	case KeyCloudflarePageProject:
+		cfg.CloudflareProject = value
+	case KeyClaudeAPIKey:
+		cfg.ClaudeAPIKey = value
+	case KeyClaudeWorkspaceName:
+		cfg.ClaudeWorkspace = value
+	default:
+		return false
+	}
+	return true
 }
 
 // parseEnvLine parses a key=value line from .env file
@@ -130,7 +180,7 @@ func parseEnvLine(line string) (string, string, bool) {
 func LoadEnv() (*EnvConfig, error) {
 	cfg := &EnvConfig{}
 
-	file, err := os.Open(envFile)
+	file, err := os.Open(currentEnvFile)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return cfg, nil // Return empty config if file doesn't exist
@@ -145,7 +195,7 @@ func LoadEnv() (*EnvConfig, error) {
 		if !ok {
 			continue
 		}
-		setFieldByEnvKey(cfg, key, value)
+		cfg.Set(key, value)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -168,8 +218,8 @@ func UpdateEnv(key, value string) error {
 		return err
 	}
 
-	// Use reflection to update field by env key
-	if !setFieldByEnvKey(cfg, key, value) {
+	// Update field by env key
+	if !cfg.Set(key, value) {
 		return fmt.Errorf("unknown environment key: %s", key)
 	}
 
@@ -177,75 +227,67 @@ func UpdateEnv(key, value string) error {
 	return WriteEnv(cfg)
 }
 
+// UpdateEnvPartial updates only the non-empty fields from the provided config
+// This preserves all other fields in the .env file
+func UpdateEnvPartial(updates *EnvConfig) error {
+	// Load current config
+	current, err := LoadEnv()
+	if err != nil {
+		return err
+	}
+
+	// Apply updates for each field that has a value
+	for _, field := range envFieldsInOrder {
+		updateValue := updates.Get(field.Key)
+		if updateValue != "" && !IsPlaceholder(updateValue) {
+			current.Set(field.Key, updateValue)
+		}
+	}
+
+	// Write back the entire file
+	return WriteEnv(current)
+}
+
 // writeEnvHeader writes the .env file header
-func writeEnvHeader(b *strings.Builder, timestamp string) {
+func writeEnvHeader(b *strings.Builder) {
 	b.WriteString("# Environment Configuration\n")
-	b.WriteString("# Last updated: ")
-	b.WriteString(timestamp)
-	b.WriteString("\n")
 	b.WriteString("# DO NOT commit this file to git\n")
 }
 
-// writeEnvComment writes a comment section header if it's new
-func writeEnvComment(b *strings.Builder, comment string, lastComment *string, isFirst bool) {
-	if comment != "" && comment != *lastComment {
-		if !isFirst {
-			b.WriteString("\n")
-		}
-		b.WriteString("\n# ")
-		b.WriteString(comment)
-		b.WriteString("\n")
-		*lastComment = comment
-	}
-}
-
-// writeEnvLine writes a key=value line with optional timestamp
-func writeEnvLine(b *strings.Builder, key, value, timestamp string) {
+// writeEnvLine writes a key=value line with optional inline comment
+func writeEnvLine(b *strings.Builder, key, value, description string) {
 	b.WriteString(key)
 	b.WriteString("=")
 	b.WriteString(value)
 
-	// Add inline comment with timestamp if value is not a placeholder
-	if !isPlaceholder(value) {
-		b.WriteString("  # Updated: ")
-		b.WriteString(timestamp)
+	// Add inline description comment
+	if description != "" {
+		b.WriteString("  # ")
+		b.WriteString(description)
 	}
+
 	b.WriteString("\n")
 }
 
 // WriteEnv writes the complete configuration to .env
 func WriteEnv(cfg *EnvConfig) error {
-	v := reflect.ValueOf(cfg).Elem()
-	t := v.Type()
-
 	var content strings.Builder
-	var lastComment string
-	timestamp := time.Now().Format("2006-01-02 15:04:05")
 
-	writeEnvHeader(&content, timestamp)
+	writeEnvHeader(&content)
+	content.WriteString("\n")
 
-	for i := 0; i < v.NumField(); i++ {
-		field := t.Field(i)
-		envKey := getEnvKey(field)
-		if envKey == "" {
-			continue // Skip fields without env tag
-		}
-
+	for _, field := range envFieldsInOrder {
 		// Get field value or default
-		value := v.Field(i).String()
+		value := cfg.Get(field.Key)
 		if value == "" {
-			value = getDefaultValue(field)
+			value = field.Default
 		}
 
-		// Add comment section header if new section
-		comment := getComment(field)
-		writeEnvComment(&content, comment, &lastComment, i == 0)
-
-		// Write the key=value line
-		writeEnvLine(&content, envKey, value, timestamp)
+		// Write the key=value line with description
+		writeEnvLine(&content, field.Key, value, field.Description)
 	}
 
-	if err := os.WriteFile(envFile, []byte(content.String()), 0600); err != nil {
+	if err := os.WriteFile(currentEnvFile, []byte(content.String()), 0600); err != nil {
 		return fmt.Errorf("failed to write .env: %w", err)
 	}
 
@@ -254,7 +296,7 @@ func WriteEnv(cfg *EnvConfig) error {
 
 // EnvExists checks if .env file exists
 func EnvExists() bool {
-	_, err := os.Stat(envFile)
+	_, err := os.Stat(currentEnvFile)
 	return err == nil
 }
 
@@ -264,10 +306,98 @@ func GetEnvPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/%s", wd, envFile), nil
+	return fmt.Sprintf("%s/%s", wd, currentEnvFile), nil
 }
 
-// isPlaceholder checks if a value is a placeholder/default value
-func isPlaceholder(value string) bool {
+// IsPlaceholder checks if a value is a placeholder/default value
+func IsPlaceholder(value string) bool {
 	return value == "" || strings.HasPrefix(value, "your-") || strings.HasPrefix(value, "your_")
+}
+
+// Service provides a unified interface for config operations used by both CLI and web
+type Service struct {
+	mockMode bool
+}
+
+// NewService creates a new config service
+func NewService(mockMode bool) *Service {
+	return &Service{mockMode: mockMode}
+}
+
+// GetCurrentConfig safely loads the current configuration from disk
+func (s *Service) GetCurrentConfig() (*EnvConfig, error) {
+	return LoadEnv()
+}
+
+// ValidateConfig validates all fields in the provided config
+func (s *Service) ValidateConfig(cfg *EnvConfig) map[string]ValidationResult {
+	results := make(map[string]ValidationResult)
+
+	for _, field := range envFieldsInOrder {
+		value := cfg.Get(field.Key)
+		result := ValidateField(field.Key, value, cfg, s.mockMode)
+		results[field.Key] = result
+	}
+
+	return results
+}
+
+// ValidateAndUpdateFields validates and atomically updates the specified fields
+// This always reloads from disk before saving to prevent stale data issues
+func (s *Service) ValidateAndUpdateFields(fieldUpdates map[string]string) (map[string]ValidationResult, error) {
+	// Build a config with the updates for validation
+	updateCfg := &EnvConfig{}
+	for key, value := range fieldUpdates {
+		updateCfg.Set(key, value)
+	}
+
+	// Validate the updates
+	results := s.ValidateConfig(updateCfg)
+
+	// Check if all required validations passed
+	allValid := true
+	for _, field := range envFieldsInOrder {
+		if value, exists := fieldUpdates[field.Key]; exists && value != "" {
+			result := results[field.Key]
+			if !result.Skipped && !result.Valid {
+				allValid = false
+				break
+			}
+		}
+	}
+
+	if !allValid {
+		return results, nil // Return validation errors, no save
+	}
+
+	// All valid - perform atomic update
+	// UpdateEnvPartial reloads from disk, so no stale data issues
+	if err := UpdateEnvPartial(updateCfg); err != nil {
+		return results, err
+	}
+
+	return results, nil
+}
+
+// UpdateFields updates the specified fields without validation
+// Useful when you've already validated or for non-validated fields
+func (s *Service) UpdateFields(fieldUpdates map[string]string) error {
+	updateCfg := &EnvConfig{}
+	for key, value := range fieldUpdates {
+		updateCfg.Set(key, value)
+	}
+
+	return UpdateEnvPartial(updateCfg)
+}
+
+// ResultsToSlice converts map results to slice format for legacy functions
+// This maintains field order from envFieldsInOrder
+func ResultsToSlice(resultsMap map[string]ValidationResult) []ValidationResult {
+	results := make([]ValidationResult, 0, len(resultsMap))
+	for _, field := range envFieldsInOrder {
+		if result, ok := resultsMap[field.Key]; ok {
+			results = append(results, result)
+		}
+	}
+	return results
 }

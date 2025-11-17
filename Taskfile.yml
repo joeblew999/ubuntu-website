@@ -7,8 +7,11 @@ vars:
   PROJECT_NAME: ubuntusoftware-net
   DOMAIN: www.ubuntusoftware.net
 
-  # Paths
+  # Commands
+  ENV_CMD: cmd/env/main.go
   TRANSLATE_CMD: cmd/translate/main.go
+
+  # Directories
   DIR_PUBLIC: public
   DIR_RESOURCES: resources
   DIR_NODE_MODULES: node_modules
@@ -25,40 +28,19 @@ vars:
   # Hugo
   HUGO_BUILD_FLAGS: --gc --minify
   HUGO_DEV_FLAGS: --buildDrafts --buildFuture
+  HUGO_PREVIEW_FLAGS: -e production --minify
 
   # Go
   GO_VERSION: "1.24"
   CGO_ENABLED: "1"
 
+  # Wrangler
+  WRANGLER_CMD: bunx wrangler
+
 tasks:
-  # Environment Management
-  env:local:setup:
-    desc: "Setup local .env - interactive wizard for API keys"
-    cmds:
-      - go run cmd/env/main.go local-setup
-
-  env:local:list:
-    desc: "List local .env configuration"
-    cmds:
-      - go run cmd/env/main.go local-list
-
-  env:gh:list:
-    desc: "List GitHub secrets"
-    cmds:
-      - go run cmd/env/main.go gh-list
-
-  env:gh:push:
-    desc: "Push .env to GitHub secrets"
-    cmds:
-      - go run cmd/env/main.go gh-push {{.CLI_ARGS}}
-
-  env:all:
-    desc: "Complete environment workflow (recommended - idempotent, safe to re-run)"
-    cmds:
-      - task: env:local:setup
-      - task: env:local:list
-      - task: env:gh:push
-      - task: env:gh:list
+  # ============================================================================
+  # Setup & Installation
+  # ============================================================================
 
   setup:
     desc: Complete setup - install Hugo, Bun, and dependencies
@@ -71,10 +53,10 @@ tasks:
     desc: Install Hugo Extended via Go
     cmds:
       - echo "Installing Hugo Extended..."
-      - CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@latest
+      - go install -tags extended github.com/gohugoio/hugo@latest
       - hugo version
     env:
-      CGO_ENABLED: "1"
+      CGO_ENABLED: '{{.CGO_ENABLED}}'
 
   install:bun:
     desc: Install Bun
@@ -93,6 +75,51 @@ tasks:
       - bun install
       - go mod download
 
+  # ============================================================================
+  # Environment Management
+  # ============================================================================
+
+  env:local:setup:
+    desc: "Validate local .env credentials"
+    cmds:
+      - go run {{.ENV_CMD}} local-setup
+
+  env:local:list:
+    desc: "List local .env configuration"
+    cmds:
+      - go run {{.ENV_CMD}} local-list
+
+  env:web:gui:
+    desc: "Open web GUI for environment setup"
+    cmds:
+      - go run {{.ENV_CMD}} web-gui
+
+  env:web:gui-mock:
+    desc: "Open web GUI with mock validation (for testing)"
+    cmds:
+      - go run {{.ENV_CMD}} web-gui-mock
+
+  env:gh:list:
+    desc: "List GitHub secrets"
+    cmds:
+      - go run {{.ENV_CMD}} gh-list
+
+  env:gh:push:
+    desc: "Push .env to GitHub secrets"
+    cmds:
+      - go run {{.ENV_CMD}} gh-push {{.CLI_ARGS}}
+
+  env:all:
+    desc: "Complete environment workflow (setup → push to GitHub)"
+    cmds:
+      - task: env:local:setup
+      - task: env:gh:push
+      - task: env:gh:list
+
+  # ============================================================================
+  # Development
+  # ============================================================================
+
   dev:
     desc: Start Hugo development server
     cmds:
@@ -106,12 +133,16 @@ tasks:
   preview:
     desc: Preview production build
     cmds:
-      - hugo server -e production --minify
+      - hugo server {{.HUGO_PREVIEW_FLAGS}}
 
   clean:
     desc: Clean build artifacts
     cmds:
       - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
+
+  # ============================================================================
+  # Translation
+  # ============================================================================
 
   translate:check:
     desc: Check which files need translation
@@ -135,40 +166,48 @@ tasks:
     cmds:
       - go run {{.TRANSLATE_CMD}} --i18n
 
+  # ============================================================================
+  # Cloudflare Pages
+  # ============================================================================
+
   cf:login:
     desc: Login to Cloudflare
     cmds:
-      - bunx wrangler login
+      - '{{.WRANGLER_CMD}} login'
 
   cf:init:
     desc: Initialize Cloudflare Pages project
     cmds:
-      - bunx wrangler pages project create {{.PROJECT_NAME}} --production-branch=main
+      - '{{.WRANGLER_CMD}} pages project create {{.PROJECT_NAME}} --production-branch=main'
 
   cf:deploy:
     desc: Deploy to Cloudflare Pages
     deps: [build]
     cmds:
-      - bunx wrangler pages deploy {{.DIR_PUBLIC}} --project-name={{.PROJECT_NAME}}
+      - '{{.WRANGLER_CMD}} pages deploy {{.DIR_PUBLIC}} --project-name={{.PROJECT_NAME}}'
 
   cf:status:
     desc: Check deployment status
     cmds:
-      - bunx wrangler pages deployment list --project-name={{.PROJECT_NAME}}
+      - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}}'
 
   cf:delete:
     desc: Delete Cloudflare Pages project
     cmds:
-      - bunx wrangler pages project delete {{.PROJECT_NAME}}
+      - '{{.WRANGLER_CMD}} pages project delete {{.PROJECT_NAME}}'
+
+  # ============================================================================
+  # CI/CD
+  # ============================================================================
 
   ci:setup:
     desc: Setup CI environment
     cmds:
-      - CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@latest
+      - go install -tags extended github.com/gohugoio/hugo@latest
       - bun install
       - go mod download
     env:
-      CGO_ENABLED: "1"
+      CGO_ENABLED: '{{.CGO_ENABLED}}'
 
   ci:build:
     desc: Build in CI
@@ -177,7 +216,11 @@ tasks:
   ci:deploy:
     desc: Deploy from CI
     cmds:
-      - bunx wrangler pages deploy {{.DIR_PUBLIC}} --project-name={{.PROJECT_NAME}}
+      - '{{.WRANGLER_CMD}} pages deploy {{.DIR_PUBLIC}} --project-name={{.PROJECT_NAME}}'
+
+  # ============================================================================
+  # Code Quality
+  # ============================================================================
 
   fmt:
     desc: Format code
@@ -193,6 +236,10 @@ tasks:
     desc: Run tests
     cmds:
       - go test ./... -v
+
+  # ============================================================================
+  # Git Utilities
+  # ============================================================================
 
   generate:gitignore:
     desc: Generate .gitignore from vars
@@ -242,6 +289,10 @@ tasks:
           echo "✓ Pushed to: https://github.com/$REPO"
           echo ""
         fi
+
+  # ============================================================================
+  # Help
+  # ============================================================================
 
   help:
     desc: Show help

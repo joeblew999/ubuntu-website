@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
-	"reflect"
-	"strings"
 )
 
 // GitHubSecret represents a GitHub repository secret
@@ -14,41 +12,24 @@ type GitHubSecret struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
-// SecretConfig defines how a secret should be handled
-type SecretConfig struct {
-	Name        string
-	Description string
-	Required    bool // Required for CI/CD
-	Validate    bool // Should validate before syncing
-}
-
-// SecretsToSync defines which secrets should be synced to GitHub
-var SecretsToSync = []SecretConfig{
-	{
-		Name:        EnvCloudflareToken,
-		Description: "Cloudflare API Token (required for deployment)",
-		Required:    true,
-		Validate:    true,
-	},
-	{
-		Name:        EnvCloudflareAccount,
-		Description: "Cloudflare Account ID",
-		Required:    true,
-		Validate:    false,
-	},
-	{
-		Name:        EnvClaudeAPIKey,
-		Description: "Claude API Key (optional, for CI translation)",
-		Required:    false,
-		Validate:    true,
-	},
+// GetSecretsToSync returns fields that should be synced to GitHub
+// Returns only fields marked for GitHub CI/CD deployment
+func GetSecretsToSync() []FieldInfo {
+	secrets := []FieldInfo{}
+	for _, field := range envFieldsInOrder {
+		// Only sync fields needed by GitHub Actions CI/CD
+		if field.SyncToGitHub {
+			secrets = append(secrets, field)
+		}
+	}
+	return secrets
 }
 
 // CheckGitHubCLI checks if gh CLI is installed and authenticated
 func CheckGitHubCLI() error {
 	// Check if gh is installed
 	if _, err := exec.LookPath("gh"); err != nil {
-		return fmt.Errorf("GitHub CLI (gh) is not installed. Install from: https://cli.github.com/")
+		return fmt.Errorf("GitHub CLI (gh) is not installed. Install from: %s", GitHubCLIInstallURL)
 	}
 
 	// Check if authenticated
@@ -132,46 +113,13 @@ type SyncResult struct {
 	Error  error
 }
 
-// validateSecret validates a secret value by calling the appropriate validation function
-func validateSecret(cfg *EnvConfig, envKey, value string) error {
-	// Use reflection to get the validate tag for this env key
-	v := reflect.ValueOf(&EnvConfig{}).Elem()
-	t := v.Type()
-
-	for i := 0; i < v.NumField(); i++ {
-		field := t.Field(i)
-		if getEnvKey(field) == envKey {
-			validateName := getValidateName(field)
-			if validateName == "" {
-				return nil // No validation configured
-			}
-
-			// Call the appropriate validation function
-			switch validateName {
-			case "cloudflare_token":
-				_, err := ValidateCloudflareToken(value)
-				return err
-			case "cloudflare_account":
-				// Account validation needs the token
-				token, _ := getFieldByEnvKey(cfg, EnvCloudflareToken)
-				_, err := ValidateCloudflareAccount(token, value)
-				return err
-			case "claude_api_key":
-				return ValidateClaudeAPIKey(value)
-			default:
-				return nil
-			}
-		}
-	}
-	return nil
-}
-
 // SyncSecretsToGitHub syncs environment variables to GitHub secrets
 func SyncSecretsToGitHub(opts SyncOptions) ([]SyncResult, error) {
 	var results []SyncResult
 
-	// Load .env configuration
-	cfg, err := LoadEnv()
+	// Use service to load config
+	svc := NewService(false)
+	cfg, err := svc.GetCurrentConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load .env: %w", err)
 	}
@@ -183,40 +131,34 @@ func SyncSecretsToGitHub(opts SyncOptions) ([]SyncResult, error) {
 	}
 
 	// Process each secret
-	for _, secretCfg := range SecretsToSync {
-		result := SyncResult{Name: secretCfg.Name}
+	for _, secretCfg := range GetSecretsToSync() {
+		result := SyncResult{Name: secretCfg.Key}
 
-		// Get value from config using reflection
-		value, found := getFieldByEnvKey(cfg, secretCfg.Name)
-		if !found {
-			result.Status = "failed"
-			result.Reason = "unknown field"
-			result.Error = fmt.Errorf("no field found for env key: %s", secretCfg.Name)
-			results = append(results, result)
-			continue
-		}
+		// Get value from config
+		value := cfg.Get(secretCfg.Key)
 
 		// Skip placeholders
-		if isPlaceholder(value) {
-			result.Status = "skipped"
-			result.Reason = "placeholder value"
+		if IsPlaceholder(value) {
+			result.Status = SyncStatusSkipped
+			result.Reason = SyncReasonPlaceholder
 			results = append(results, result)
 			continue
 		}
 
 		// Validate if requested
 		if opts.Validate && secretCfg.Validate {
-			if validationErr := validateSecret(cfg, secretCfg.Name, value); validationErr != nil {
+			validationResult := ValidateField(secretCfg.Key, value, cfg, false)
+			if !validationResult.Valid {
 				result.Status = "failed"
 				result.Reason = "validation failed"
-				result.Error = validationErr
+				result.Error = validationResult.Error
 				results = append(results, result)
 				continue
 			}
 		}
 
 		// Check if exists
-		exists := SecretExists(secretCfg.Name, existingSecrets)
+		exists := SecretExists(secretCfg.Key, existingSecrets)
 		if exists && !opts.Force {
 			result.Status = "skipped"
 			result.Reason = "already exists (use --force to overwrite)"
@@ -237,7 +179,7 @@ func SyncSecretsToGitHub(opts SyncOptions) ([]SyncResult, error) {
 		}
 
 		// Actually set the secret
-		if err := SetGitHubSecret(secretCfg.Name, value); err != nil {
+		if err := SetGitHubSecret(secretCfg.Key, value); err != nil {
 			result.Status = "failed"
 			result.Reason = "failed to set"
 			result.Error = err
@@ -263,7 +205,7 @@ func GetRepositoryURL() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("https://github.com/%s/%s", owner, name), nil
+	return fmt.Sprintf(GitHubRepoURLTemplate, owner, name), nil
 }
 
 // ValidateGitHubSetup checks if everything is ready for syncing
@@ -284,18 +226,4 @@ func ValidateGitHubSetup() error {
 	}
 
 	return nil
-}
-
-// FormatSecretValue returns a preview of the secret value
-func FormatSecretValue(value string, maxLen int) string {
-	if isPlaceholder(value) {
-		return "<not set>"
-	}
-
-	if len(value) <= maxLen {
-		return strings.Repeat("*", len(value))
-	}
-
-	preview := value[:min(20, len(value))]
-	return preview + "..." + strings.Repeat("*", maxLen-len(preview)-3)
 }
