@@ -36,6 +36,40 @@ func BuildCloudflareURL(baseURL, accountID string) string {
 	return baseURL
 }
 
+// LazyLoader handles one-time loading of expensive data in Via pages.
+// Use this for API calls or expensive operations that should only run
+// when a page is actually visited, not during Via's startup validation.
+//
+// Via validates all page init functions at startup by running them,
+// which can trigger unwanted API calls. LazyLoader defers the expensive
+// operation until Get() is called inside c.View().
+type LazyLoader[T any] struct {
+	data   T
+	loaded bool
+	loader func() (T, error)
+}
+
+// NewLazyLoader creates a new LazyLoader with the given loader function.
+// The loader function will be called exactly once, the first time Get() is called.
+func NewLazyLoader[T any](loader func() (T, error)) *LazyLoader[T] {
+	return &LazyLoader[T]{loader: loader}
+}
+
+// Get returns the loaded data, calling the loader function if this is the first call.
+// Subsequent calls return the cached data without calling the loader again.
+func (l *LazyLoader[T]) Get() (T, error) {
+	if !l.loaded {
+		data, err := l.loader()
+		if err != nil {
+			var zero T
+			return zero, err
+		}
+		l.data = data
+		l.loaded = true
+	}
+	return l.data, nil
+}
+
 // ConfigTableRow represents a row in the configuration overview table
 type ConfigTableRow struct {
 	Display   string // Human-readable display name

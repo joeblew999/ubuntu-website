@@ -24,10 +24,29 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	saveMessage := c.Signal("")
 	zonesMessage := c.Signal("") // For zones loading status
 
-	// Zones state - populated lazily in View (not at startup)
-	// Use closure variables to cache loaded zones
-	var zonesCache []env.Zone
-	var zonesLoaded bool
+	// Zones loader - populated lazily when first accessed
+	zonesLoader := NewLazyLoader(func() ([]env.Zone, error) {
+		token := cfg.Get(env.KeyCloudflareAPIToken)
+		accountID := cfg.Get(env.KeyCloudflareAccountID)
+
+		if mockMode {
+			// Mock data for testing
+			return []env.Zone{
+				{ID: "mock-zone-1", Name: "example.com"},
+				{ID: "mock-zone-2", Name: "example.net"},
+				{ID: "mock-zone-3", Name: "example.org"},
+				{ID: "mock-zone-4", Name: "ubuntusoftware.net"},
+				{ID: "mock-zone-5", Name: "mysite.com"},
+				{ID: "mock-zone-6", Name: "testdomain.io"},
+			}, nil
+		}
+
+		if token == "" || accountID == "" || env.IsPlaceholder(token) || env.IsPlaceholder(accountID) {
+			return []env.Zone{}, nil
+		}
+
+		return env.ListZones(token, accountID)
+	})
 
 	// Next action - save domain selection and go to step 4
 	nextAction := c.Action(func() {
@@ -82,35 +101,13 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	})
 
 	c.View(func() h.H {
-		// Lazy load zones ONLY when view is rendered (not at startup)
-		// This runs when the user actually visits this page
-		if !zonesLoaded {
-			// Load zones from Cloudflare API or mock data
-			token := cfg.Get(env.KeyCloudflareAPIToken)
-			accountID := cfg.Get(env.KeyCloudflareAccountID)
-
-			if !mockMode && token != "" && accountID != "" && !env.IsPlaceholder(token) && !env.IsPlaceholder(accountID) {
-				zonesResult, zonesErr := env.ListZones(token, accountID)
-				if zonesErr != nil {
-					log.Printf("Failed to fetch zones: %v", zonesErr)
-					zonesMessage.SetValue("error:Failed to load domains: " + zonesErr.Error())
-				} else if len(zonesResult) == 0 {
-					zonesMessage.SetValue("info:No domains found in this account")
-				} else {
-					zonesCache = zonesResult
-				}
-			} else if mockMode {
-				// Mock data for testing
-				zonesCache = []env.Zone{
-					{ID: "mock-zone-1", Name: "example.com"},
-					{ID: "mock-zone-2", Name: "example.net"},
-					{ID: "mock-zone-3", Name: "example.org"},
-					{ID: "mock-zone-4", Name: "ubuntusoftware.net"},
-					{ID: "mock-zone-5", Name: "mysite.com"},
-					{ID: "mock-zone-6", Name: "testdomain.io"},
-				}
-			}
-			zonesLoaded = true
+		// Load zones using LazyLoader
+		zonesCache, zonesErr := zonesLoader.Get()
+		if zonesErr != nil {
+			log.Printf("Failed to fetch zones: %v", zonesErr)
+			zonesMessage.SetValue("error:Failed to load domains: " + zonesErr.Error())
+		} else if len(zonesCache) == 0 {
+			zonesMessage.SetValue("info:No domains found in this account")
 		}
 
 		// Build dropdown options from zones

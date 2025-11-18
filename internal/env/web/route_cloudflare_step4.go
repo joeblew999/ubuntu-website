@@ -33,10 +33,26 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	createInProgress := c.Signal(false) // For project creation in-progress state
 	newProjectName := c.Signal("")  // Holds new project name input
 
-	// Projects state - populated lazily in View (not at startup)
-	// Use closure variables to cache loaded projects
-	var projectsCache []env.PagesProject
-	var projectsLoaded bool
+	// Projects loader - populated lazily when first accessed
+	projectsLoader := NewLazyLoader(func() ([]env.PagesProject, error) {
+		token := cfg.Get(env.KeyCloudflareAPIToken)
+		accountID := cfg.Get(env.KeyCloudflareAccountID)
+
+		if mockMode {
+			// Mock data for testing
+			return []env.PagesProject{
+				{Name: "my-hugo-site", CreatedOn: "2024-01-15T10:00:00Z"},
+				{Name: "ubuntusoftware-net", CreatedOn: "2024-02-20T14:30:00Z"},
+				{Name: "test-project", CreatedOn: "2024-03-10T09:15:00Z"},
+			}, nil
+		}
+
+		if token == "" || accountID == "" || env.IsPlaceholder(token) || env.IsPlaceholder(accountID) {
+			return []env.PagesProject{}, nil
+		}
+
+		return env.ListPagesProjects(token, accountID)
+	})
 
 	// Cancel delete operation
 	cancelDeleteAction := c.Action(func() {
@@ -157,32 +173,13 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	})
 
 	c.View(func() h.H {
-		// Lazy load projects ONLY when view is rendered (not at startup)
-		// This runs when the user actually visits this page
-		if !projectsLoaded {
-			// Load projects from Cloudflare API or mock data
-			token := cfg.Get(env.KeyCloudflareAPIToken)
-			accountID := cfg.Get(env.KeyCloudflareAccountID)
-
-			if !mockMode && token != "" && accountID != "" && !env.IsPlaceholder(token) && !env.IsPlaceholder(accountID) {
-				projectsResult, projectsErr := env.ListPagesProjects(token, accountID)
-				if projectsErr != nil {
-					log.Printf("Failed to fetch Pages projects: %v", projectsErr)
-					projectsMessage.SetValue("error:Failed to load projects: " + projectsErr.Error())
-				} else if len(projectsResult) == 0 {
-					projectsMessage.SetValue("info:No projects found in this account")
-				} else {
-					projectsCache = projectsResult
-				}
-			} else if mockMode {
-				// Mock data for testing
-				projectsCache = []env.PagesProject{
-					{Name: "my-hugo-site", CreatedOn: "2024-01-15T10:00:00Z"},
-					{Name: "ubuntusoftware-net", CreatedOn: "2024-02-20T14:30:00Z"},
-					{Name: "test-project", CreatedOn: "2024-03-10T09:15:00Z"},
-				}
-			}
-			projectsLoaded = true
+		// Load projects using LazyLoader
+		projectsCache, projectsErr := projectsLoader.Get()
+		if projectsErr != nil {
+			log.Printf("Failed to fetch Pages projects: %v", projectsErr)
+			projectsMessage.SetValue("error:Failed to load projects: " + projectsErr.Error())
+		} else if len(projectsCache) == 0 {
+			projectsMessage.SetValue("info:No projects found in this account")
 		}
 
 		// Build dropdown options from projects
