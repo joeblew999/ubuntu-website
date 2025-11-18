@@ -24,52 +24,10 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	saveMessage := c.Signal("")
 	zonesMessage := c.Signal("") // For zones loading status
 
-	// Load zones from Cloudflare API
-	// Read directly from config (not from form signals which may be cleared by placeholder detection)
-	token := cfg.Get(env.KeyCloudflareAPIToken)
-	accountID := cfg.Get(env.KeyCloudflareAccountID)
-
-	var zones []env.Zone
-	var zonesErr error
-
-	if !mockMode && token != "" && accountID != "" && !env.IsPlaceholder(token) && !env.IsPlaceholder(accountID) {
-		zones, zonesErr = env.ListZones(token, accountID)
-		if zonesErr != nil {
-			log.Printf("Failed to fetch zones: %v", zonesErr)
-			zonesMessage.SetValue("error:Failed to load domains: " + zonesErr.Error())
-		} else if len(zones) == 0 {
-			zonesMessage.SetValue("info:No domains found in this account")
-		}
-	} else if mockMode {
-		// Mock data for testing
-		zones = []env.Zone{
-			{ID: "mock-zone-1", Name: "example.com"},
-			{ID: "mock-zone-2", Name: "example.net"},
-			{ID: "mock-zone-3", Name: "example.org"},
-			{ID: "mock-zone-4", Name: "ubuntusoftware.net"},
-			{ID: "mock-zone-5", Name: "mysite.com"},
-			{ID: "mock-zone-6", Name: "testdomain.io"},
-		}
-	}
-
-	// Build dropdown options from zones
-	domainOptions := make([]SelectOption, 0, len(zones)+1)
-	domainOptions = append(domainOptions, SelectOption{Value: "", Label: "-- Select a domain --"})
-	for _, zone := range zones {
-		domainOptions = append(domainOptions, SelectOption{Value: zone.Name + "|" + zone.ID, Label: zone.Name})
-	}
-
-	// Build smart "Add Site" URL with account ID if available
-	addSiteURL := BuildCloudflareURL(env.CloudflareAddSiteURL, accountID)
-
-	// Pre-populate dropdown with saved domain+zone if both exist
-	// This allows the dropdown to remember the previously selected domain
-	savedDomain := cfg.Get(env.KeyCloudflareDomain)
-	savedZoneID := cfg.Get(env.KeyCloudflareZoneID)
-	if savedDomain != "" && savedZoneID != "" && !env.IsPlaceholder(savedDomain) && !env.IsPlaceholder(savedZoneID) {
-		// Replace the domain field signal with a composite value that matches dropdown option format
-		fields[2].ValueSignal = c.Signal(savedDomain + "|" + savedZoneID)
-	}
+	// Zones state - populated lazily in View (not at startup)
+	// Use closure variables to cache loaded zones
+	var zonesCache []env.Zone
+	var zonesLoaded bool
 
 	// Next action - save domain selection and go to step 4
 	nextAction := c.Action(func() {
@@ -124,6 +82,65 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	})
 
 	c.View(func() h.H {
+		// Lazy load zones ONLY when view is rendered (not at startup)
+		// This runs when the user actually visits this page
+		if !zonesLoaded {
+			// Load zones from Cloudflare API or mock data
+			token := cfg.Get(env.KeyCloudflareAPIToken)
+			accountID := cfg.Get(env.KeyCloudflareAccountID)
+
+			if !mockMode && token != "" && accountID != "" && !env.IsPlaceholder(token) && !env.IsPlaceholder(accountID) {
+				zonesResult, zonesErr := env.ListZones(token, accountID)
+				if zonesErr != nil {
+					log.Printf("Failed to fetch zones: %v", zonesErr)
+					zonesMessage.SetValue("error:Failed to load domains: " + zonesErr.Error())
+				} else if len(zonesResult) == 0 {
+					zonesMessage.SetValue("info:No domains found in this account")
+				} else {
+					zonesCache = zonesResult
+				}
+			} else if mockMode {
+				// Mock data for testing
+				zonesCache = []env.Zone{
+					{ID: "mock-zone-1", Name: "example.com"},
+					{ID: "mock-zone-2", Name: "example.net"},
+					{ID: "mock-zone-3", Name: "example.org"},
+					{ID: "mock-zone-4", Name: "ubuntusoftware.net"},
+					{ID: "mock-zone-5", Name: "mysite.com"},
+					{ID: "mock-zone-6", Name: "testdomain.io"},
+				}
+			}
+			zonesLoaded = true
+		}
+
+		// Build dropdown options from zones
+		domainOptions := make([]SelectOption, 0, len(zonesCache)+1)
+		domainOptions = append(domainOptions, SelectOption{Value: "", Label: "-- Select a domain --"})
+		for _, zone := range zonesCache {
+			domainOptions = append(domainOptions, SelectOption{Value: zone.Name + "|" + zone.ID, Label: zone.Name})
+		}
+
+		// Build smart "Add Site" URL with account ID if available
+		accountID := cfg.Get(env.KeyCloudflareAccountID)
+		addSiteURL := BuildCloudflareURL(env.CloudflareAddSiteURL, accountID)
+
+		// Pre-populate dropdown with saved domain+zone if both exist (only on first load)
+		// This allows the dropdown to remember the previously selected domain
+		savedDomain := cfg.Get(env.KeyCloudflareDomain)
+		savedZoneID := cfg.Get(env.KeyCloudflareZoneID)
+		if savedDomain != "" && savedZoneID != "" && !env.IsPlaceholder(savedDomain) && !env.IsPlaceholder(savedZoneID) {
+			// fields[2] is the domain field - check if it needs initialization
+			if fields[2].ValueSignal.String() == "" {
+				// We can't call SetValue here in the view, so we need to set it at initialization
+				// Let's use a different approach - just rebuild the signal
+				fields[2] = FormFieldData{
+					EnvKey:       env.KeyCloudflareDomain,
+					ValueSignal:  c.Signal(savedDomain + "|" + savedZoneID),
+					StatusSignal: fields[2].StatusSignal,
+				}
+			}
+		}
+
 		return h.Main(
 			h.Class("container"),
 			h.H1(h.Text("Cloudflare Setup - Step 3 of 4")),

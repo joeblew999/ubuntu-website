@@ -32,6 +32,9 @@ func cleanupPort(port string) {
 
 // serveSetupGUIWithOptions is the internal implementation using Via
 func serveSetupGUIWithOptions(mockMode bool) {
+	// Setup enhanced logging to add page context to Via errors
+	SetupEnhancedLogging()
+
 	// Clean up port 3000 before starting
 	cleanupPort("3000")
 

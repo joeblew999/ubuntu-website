@@ -33,66 +33,10 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	createInProgress := c.Signal(false) // For project creation in-progress state
 	newProjectName := c.Signal("")  // Holds new project name input
 
-	// Load projects from Cloudflare API
-	// Read directly from config (not from form signals which may be cleared by placeholder detection)
-	token := cfg.Get(env.KeyCloudflareAPIToken)
-	accountID := cfg.Get(env.KeyCloudflareAccountID)
-
-	var projects []env.PagesProject
-	var projectsErr error
-
-	if !mockMode && token != "" && accountID != "" && !env.IsPlaceholder(token) && !env.IsPlaceholder(accountID) {
-		projects, projectsErr = env.ListPagesProjects(token, accountID)
-		if projectsErr != nil {
-			log.Printf("Failed to fetch Pages projects: %v", projectsErr)
-			projectsMessage.SetValue("error:Failed to load projects: " + projectsErr.Error())
-		} else if len(projects) == 0 {
-			projectsMessage.SetValue("info:No projects found in this account")
-		}
-	} else if mockMode {
-		// Mock data for testing
-		projects = []env.PagesProject{
-			{Name: "my-hugo-site", CreatedOn: "2024-01-15T10:00:00Z"},
-			{Name: "ubuntusoftware-net", CreatedOn: "2024-02-20T14:30:00Z"},
-			{Name: "test-project", CreatedOn: "2024-03-10T09:15:00Z"},
-		}
-	}
-
-	// Build dropdown options from projects
-	projectOptions := make([]SelectOption, 0, len(projects)+1)
-	projectOptions = append(projectOptions, SelectOption{Value: "", Label: "-- Select a project --"})
-	for _, project := range projects {
-		projectOptions = append(projectOptions, SelectOption{Value: project.Name, Label: project.Name})
-	}
-
-	// Build project list UI elements with delete buttons
-	projectListElements := make([]h.H, 0, len(projects))
-	for _, project := range projects {
-		projectName := project.Name       // Capture in closure
-		createdOn := project.CreatedOn    // Capture in closure
-		deleteAction := c.Action(func() {
-			projectToDelete.SetValue(projectName)
-			showDeleteConfirm.SetValue(true)
-			deleteMessage.SetValue("")
-			c.Sync()
-		})
-
-		projectListElements = append(projectListElements, h.Div(
-			h.Style("display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--pico-card-background-color); border-radius: 0.25rem;"),
-			h.Div(
-				h.Strong(h.Text(projectName)),
-				h.Small(
-					h.Style("margin-left: 1rem; color: var(--pico-muted-color);"),
-					h.Text("Created: "+createdOn),
-				),
-			),
-			h.Button(
-				h.Attr("class", "secondary outline"),
-				h.Text("Delete"),
-				deleteAction.OnClick(),
-			),
-		))
-	}
+	// Projects state - populated lazily in View (not at startup)
+	// Use closure variables to cache loaded projects
+	var projectsCache []env.PagesProject
+	var projectsLoaded bool
 
 	// Cancel delete operation
 	cancelDeleteAction := c.Action(func() {
@@ -213,6 +157,70 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	})
 
 	c.View(func() h.H {
+		// Lazy load projects ONLY when view is rendered (not at startup)
+		// This runs when the user actually visits this page
+		if !projectsLoaded {
+			// Load projects from Cloudflare API or mock data
+			token := cfg.Get(env.KeyCloudflareAPIToken)
+			accountID := cfg.Get(env.KeyCloudflareAccountID)
+
+			if !mockMode && token != "" && accountID != "" && !env.IsPlaceholder(token) && !env.IsPlaceholder(accountID) {
+				projectsResult, projectsErr := env.ListPagesProjects(token, accountID)
+				if projectsErr != nil {
+					log.Printf("Failed to fetch Pages projects: %v", projectsErr)
+					projectsMessage.SetValue("error:Failed to load projects: " + projectsErr.Error())
+				} else if len(projectsResult) == 0 {
+					projectsMessage.SetValue("info:No projects found in this account")
+				} else {
+					projectsCache = projectsResult
+				}
+			} else if mockMode {
+				// Mock data for testing
+				projectsCache = []env.PagesProject{
+					{Name: "my-hugo-site", CreatedOn: "2024-01-15T10:00:00Z"},
+					{Name: "ubuntusoftware-net", CreatedOn: "2024-02-20T14:30:00Z"},
+					{Name: "test-project", CreatedOn: "2024-03-10T09:15:00Z"},
+				}
+			}
+			projectsLoaded = true
+		}
+
+		// Build dropdown options from projects
+		projectOptions := make([]SelectOption, 0, len(projectsCache)+1)
+		projectOptions = append(projectOptions, SelectOption{Value: "", Label: "-- Select a project --"})
+		for _, project := range projectsCache {
+			projectOptions = append(projectOptions, SelectOption{Value: project.Name, Label: project.Name})
+		}
+
+		// Build project list UI elements with delete buttons
+		projectListElements := make([]h.H, 0, len(projectsCache))
+		for _, project := range projectsCache {
+			projectName := project.Name       // Capture in closure
+			createdOn := project.CreatedOn    // Capture in closure
+			deleteAction := c.Action(func() {
+				projectToDelete.SetValue(projectName)
+				showDeleteConfirm.SetValue(true)
+				deleteMessage.SetValue("")
+				c.Sync()
+			})
+
+			projectListElements = append(projectListElements, h.Div(
+				h.Style("display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--pico-card-background-color); border-radius: 0.25rem;"),
+				h.Div(
+					h.Strong(h.Text(projectName)),
+					h.Small(
+						h.Style("margin-left: 1rem; color: var(--pico-muted-color);"),
+						h.Text("Created: "+createdOn),
+					),
+				),
+				h.Button(
+					h.Attr("class", "secondary outline"),
+					h.Text("Delete"),
+					deleteAction.OnClick(),
+				),
+			))
+		}
+
 		return h.Main(
 			h.Class("container"),
 			h.H1(h.Text("Cloudflare Setup - Step 4 of 4")),
@@ -244,7 +252,7 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 
 			// Manage Projects section - delete existing projects
-			h.If(len(projects) > 0,
+			h.If(len(projectsCache) > 0,
 				h.Div(
 					h.Style("margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--pico-muted-border-color);"),
 					h.H2(h.Text("Manage Existing Projects")),
