@@ -179,6 +179,27 @@ func cloudflareStep5Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				),
 			),
 
+			// Error 1014 Troubleshooting
+			h.If(len(domainsCache) > 0,
+				h.Article(
+					h.Style("background-color: var(--pico-card-background-color); border-left: 4px solid var(--pico-muted-color); padding: 1rem; margin-bottom: 1rem;"),
+					h.H4(h.Text("⚠️ Troubleshooting Error 1014")),
+					h.P(h.Text("If you see \"Error 1014: CNAME Cross-User Banned\" when visiting your custom domain:")),
+					h.Ul(
+						h.Style("margin: 0.5rem 0 0 1.5rem;"),
+						h.Li(h.Text("The domain status is not yet 'active' (still initializing or pending)")),
+						h.Li(h.Text("Cloudflare is provisioning SSL certificates and configuring DNS")),
+						h.Li(h.Text("This typically takes 10-30 minutes after attachment")),
+						h.Li(h.Text("Refresh this page to check if domain status has changed to 'active'")),
+						h.Li(h.Text("Once status shows 'active', Error 1014 will be resolved")),
+					),
+					h.P(
+						h.Style("margin-top: 0.5rem;"),
+						h.Text("Use the preview URL (*.pages.dev) while waiting for custom domain activation."),
+					),
+				),
+			),
+
 			// Current Configuration
 			h.Article(
 				h.Style("background-color: var(--pico-card-background-color); padding: 1rem; margin-bottom: 1rem;"),
