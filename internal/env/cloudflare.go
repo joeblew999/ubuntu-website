@@ -1,6 +1,7 @@
 package env
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -513,19 +514,24 @@ func AddPagesDomain(token, accountID, projectName, domainName string) error {
 
 	url := fmt.Sprintf(CloudflareAPIPagesDomainsURL, accountID, projectName)
 
-	// POST request to add domain
-	req, err := http.NewRequest("POST", url, nil)
+	// Prepare JSON request body
+	requestBody := map[string]string{
+		"name": domainName,
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// POST request to add domain with JSON body
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
-
-	// The domain name is sent as a query parameter
-	q := req.URL.Query()
-	q.Add("name", domainName)
-	req.URL.RawQuery = q.Encode()
 
 	resp, err := client.Do(req)
 	if err != nil {
