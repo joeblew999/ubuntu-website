@@ -40,14 +40,6 @@ func serveSetupGUIWithOptions(mockMode bool) {
 		defer env.ResetEnvFile()
 	}
 
-	// Use service to load config
-	svc := env.NewService(mockMode)
-	cfg, err := svc.GetCurrentConfig()
-	if err != nil {
-		log.Printf("Error loading env: %v", err)
-		return
-	}
-
 	log.Printf("\n")
 	title := "Environment Setup GUI"
 	if mockMode {
@@ -70,26 +62,37 @@ func serveSetupGUIWithOptions(mockMode bool) {
 		LogLvl:        via.LogLevelWarn,  // Reduce noise from benign SSE race conditions
 	})
 
-	// Register routes
+	// Helper to load fresh config for each page request
+	loadConfig := func() *env.EnvConfig {
+		svc := env.NewService(mockMode)
+		cfg, err := svc.GetCurrentConfig()
+		if err != nil {
+			log.Printf("Error loading config: %v", err)
+			return &env.EnvConfig{}
+		}
+		return cfg
+	}
+
+	// Register routes - each loads fresh config
 	v.Page("/", func(c *via.Context) {
-		homePage(c, cfg, mockMode)
+		homePage(c, loadConfig(), mockMode)
 	})
 
 	// Cloudflare setup wizard - 3 steps
 	v.Page("/cloudflare", func(c *via.Context) {
-		cloudflarePage(c, cfg, mockMode)
+		cloudflarePage(c, loadConfig(), mockMode)
 	})
 
 	v.Page("/cloudflare/step2", func(c *via.Context) {
-		cloudflareStep2Page(c, cfg, mockMode)
+		cloudflareStep2Page(c, loadConfig(), mockMode)
 	})
 
 	v.Page("/cloudflare/step3", func(c *via.Context) {
-		cloudflareStep3Page(c, cfg, mockMode)
+		cloudflareStep3Page(c, loadConfig(), mockMode)
 	})
 
 	v.Page("/claude", func(c *via.Context) {
-		claudePage(c, cfg, mockMode)
+		claudePage(c, loadConfig(), mockMode)
 	})
 
 	v.Start()
