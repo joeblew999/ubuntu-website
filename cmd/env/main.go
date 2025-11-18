@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joeblew999/ubuntu-website/internal/env"
 	"github.com/joeblew999/ubuntu-website/internal/env/web"
 )
 
@@ -21,6 +22,12 @@ func main() {
 		err = web.ServeSetupGUI()
 	case "web-gui-mock":
 		err = web.ServeSetupGUIMock()
+	case "build":
+		err = env.RunBuild()
+	case "deploy-preview":
+		err = env.RunDeployPreview()
+	case "deploy-production":
+		err = env.RunDeployProduction()
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", command)
 		printUsage()
@@ -39,4 +46,8 @@ func printUsage() {
 	fmt.Println("Commands:")
 	fmt.Println("  web-gui             Open web GUI for environment setup")
 	fmt.Println("  web-gui-mock        Open web GUI with mock validation (for testing)")
+	fmt.Println()
+	fmt.Println("  build               Build Hugo site only (no deployment)")
+	fmt.Println("  deploy-preview      Build + deploy to Cloudflare Pages preview")
+	fmt.Println("  deploy-production   Build + deploy to Cloudflare Pages production (main branch)")
 }
