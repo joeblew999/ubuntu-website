@@ -14,28 +14,44 @@ type ValidationResult struct {
 
 // ValidateField validates a single field by env key
 func ValidateField(envKey, value string, cfg *EnvConfig, mockMode bool) ValidationResult {
-	// Get display name from envFieldsInOrder
+	// Get display name and validation requirement from envFieldsInOrder
 	displayName := envKey
+	requiresValidation := false
 	for _, field := range envFieldsInOrder {
 		if field.Key == envKey {
 			displayName = field.DisplayName
+			requiresValidation = field.Validate
 			break
 		}
 	}
 
+	// Skip placeholder values only for fields that don't require validation
 	if IsPlaceholder(value) {
+		if !requiresValidation {
+			return ValidationResult{
+				Name:    displayName,
+				Skipped: true,
+			}
+		}
+		// For fields that require validation, treat empty/placeholder as invalid
 		return ValidationResult{
-			Name:    displayName,
-			Skipped: true,
+			Name:  displayName,
+			Valid: false,
+			Error: fmt.Errorf("%s is required", displayName),
 		}
 	}
 
 	// Mock mode - simple length check
 	if mockMode {
 		valid := len(value) > 5
+		var err error
+		if !valid {
+			err = fmt.Errorf("%s must be longer than 5 characters (mock validation)", displayName)
+		}
 		return ValidationResult{
 			Name:  displayName,
 			Valid: valid,
+			Error: err,
 		}
 	}
 
@@ -47,6 +63,8 @@ func ValidateField(envKey, value string, cfg *EnvConfig, mockMode bool) Validati
 	case KeyCloudflareAccountID:
 		token := cfg.Get(KeyCloudflareAPIToken)
 		_, err = ValidateCloudflareAccount(token, value)
+	case KeyCloudflarePageProject:
+		err = ValidateCloudflareProjectName(value)
 	case KeyClaudeAPIKey:
 		err = ValidateClaudeAPIKey(value)
 	default:
@@ -139,4 +157,14 @@ func GetInvalidFields(results []ValidationResult) []string {
 		}
 	}
 	return fields
+}
+
+// HasInvalidCredentialsMap returns true if any credentials are invalid in a map
+func HasInvalidCredentialsMap(results map[string]ValidationResult) bool {
+	for _, result := range results {
+		if !result.Skipped && !result.Valid {
+			return true
+		}
+	}
+	return false
 }

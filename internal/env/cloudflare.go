@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -174,6 +175,32 @@ func ValidateCloudflareAccount(token, accountID string) (string, error) {
 	}
 
 	return accountResp.Result.Name, nil
+}
+
+// ValidateCloudflareProjectName validates a Cloudflare Pages project name
+// Project names must be lowercase alphanumeric with hyphens, 1-63 characters
+func ValidateCloudflareProjectName(projectName string) error {
+	if projectName == "" {
+		return fmt.Errorf("project name cannot be empty")
+	}
+
+	// Cloudflare project name requirements
+	if len(projectName) > 63 {
+		return fmt.Errorf("project name must be 63 characters or less")
+	}
+
+	// Must match: lowercase letters, numbers, hyphens only
+	// Cannot start or end with hyphen
+	matched, err := regexp.MatchString(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, projectName)
+	if err != nil {
+		return fmt.Errorf("failed to validate project name format: %w", err)
+	}
+
+	if !matched {
+		return fmt.Errorf("project name must contain only lowercase letters, numbers, and hyphens")
+	}
+
+	return nil
 }
 
 // GetCloudflareAccounts fetches all accounts accessible by the token

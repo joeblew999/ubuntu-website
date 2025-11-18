@@ -67,11 +67,11 @@ type FieldInfo struct {
 // envFieldsInOrder defines all env vars with their metadata in display order
 var envFieldsInOrder = []FieldInfo{
 	{Key: KeyCloudflareAPIToken, Default: "your-token-here", Description: "Cloudflare API token (required for deployment)", DisplayName: "Cloudflare API Token", SyncToGitHub: true, Validate: true},
-	{Key: KeyCloudflareAPITokenName, Default: "your-token-name", Description: "Cloudflare token name (helps you remember which token)", DisplayName: "Cloudflare API Token Name", SyncToGitHub: false, Validate: false},
-	{Key: KeyCloudflareAccountID, Default: "your-account-id", Description: "Cloudflare Account ID", DisplayName: "Cloudflare Account ID", SyncToGitHub: true, Validate: false},
-	{Key: KeyCloudflarePageProject, Default: "your-project-name", Description: "Cloudflare Pages project name", DisplayName: "Cloudflare Pages Project", SyncToGitHub: false, Validate: false},
+	{Key: KeyCloudflareAPITokenName, Default: "your-token-name", Description: "Cloudflare token name (helps you remember which token)", DisplayName: "Cloudflare API Token Name", SyncToGitHub: false, Validate: true},
+	{Key: KeyCloudflareAccountID, Default: "your-account-id", Description: "Cloudflare Account ID", DisplayName: "Cloudflare Account ID", SyncToGitHub: true, Validate: true},
+	{Key: KeyCloudflarePageProject, Default: "your-project-name", Description: "Cloudflare Pages project name", DisplayName: "Cloudflare Pages Project", SyncToGitHub: true, Validate: true},
 	{Key: KeyClaudeAPIKey, Default: "your-api-key-here", Description: "Claude API key (required for translation)", DisplayName: "Claude API Key", SyncToGitHub: false, Validate: true},
-	{Key: KeyClaudeWorkspaceName, Default: "your-workspace-name", Description: "Claude workspace name", DisplayName: "Claude Workspace Name", SyncToGitHub: false, Validate: false},
+	{Key: KeyClaudeWorkspaceName, Default: "", Description: "Claude workspace name", DisplayName: "Claude Workspace Name", SyncToGitHub: false, Validate: true},
 }
 
 // GetDisplayName returns the display name for a given environment variable key
@@ -94,8 +94,8 @@ func GetFieldInfo(key string) *FieldInfo {
 	return nil
 }
 
-// GetFieldLabel returns the display name with optional " *" suffix for GitHub sync fields
-// Used by web GUI to show which fields are required for GitHub deployment
+// GetFieldLabel returns the display name with optional " *" suffix for mandatory fields
+// Used by web GUI to show which fields are required
 func GetFieldLabel(key string) string {
 	field := GetFieldInfo(key)
 	if field == nil {
@@ -103,7 +103,7 @@ func GetFieldLabel(key string) string {
 	}
 
 	label := field.DisplayName
-	if field.SyncToGitHub {
+	if field.Validate {
 		label += " *"
 	}
 	return label
@@ -345,13 +345,19 @@ func (s *Service) ValidateConfig(cfg *EnvConfig) map[string]ValidationResult {
 // ValidateAndUpdateFields validates and atomically updates the specified fields
 // This always reloads from disk before saving to prevent stale data issues
 func (s *Service) ValidateAndUpdateFields(fieldUpdates map[string]string) (map[string]ValidationResult, error) {
-	// Build a config with the updates for validation
-	updateCfg := &EnvConfig{}
+	// Load current config from disk to preserve existing values for validation dependencies
+	updateCfg, err := s.GetCurrentConfig()
+	if err != nil {
+		// If config doesn't exist yet, start with empty config
+		updateCfg = &EnvConfig{}
+	}
+
+	// Apply updates to the current config
 	for key, value := range fieldUpdates {
 		updateCfg.Set(key, value)
 	}
 
-	// Validate the updates
+	// Validate the complete config with all dependencies available
 	results := s.ValidateConfig(updateCfg)
 
 	// Check if all required validations passed

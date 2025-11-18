@@ -25,6 +25,7 @@ const (
 	CloudflareDashboardURL = "https://dash.cloudflare.com"
 	CloudflareLoginURL     = "https://dash.cloudflare.com/login"
 	CloudflareAPITokensURL = "https://dash.cloudflare.com/profile/api-tokens"
+	CloudflarePagesURL     = "https://dash.cloudflare.com/?to=/:account/workers-and-pages"
 
 	// GitHub URLs
 	GitHubCLIInstallURL      = "https://cli.github.com/"

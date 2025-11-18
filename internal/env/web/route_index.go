@@ -14,6 +14,9 @@ func homePage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			h.H1(h.Text("Environment Setup")),
 			h.P(h.Text("Configure your Cloudflare and Claude credentials for deployment and translation")),
 
+			// Navigation
+			renderNavigation("home"),
+
 			// Status overview (non-interactive)
 			h.H2(h.Text("Configuration Status")),
 			h.P(h.Text("Click on a section below to configure credentials:")),
