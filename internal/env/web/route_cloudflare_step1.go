@@ -6,7 +6,7 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
-// cloudflareStep1Page - API Token setup (Step 1 of 4)
+// cloudflareStep1Page - API Token setup (Step 1 of 5)
 func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	svc := env.NewService(mockMode)
 
@@ -52,7 +52,7 @@ func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	c.View(func() h.H {
 		return h.Main(
 			h.Class("container"),
-			h.H1(h.Text("Cloudflare Setup - Step 1 of 4")),
+			h.H1(h.Text("Cloudflare Setup - Step 1 of 5")),
 			h.P(h.Text("API Token")),
 
 			RenderNavigation("cloudflare"),

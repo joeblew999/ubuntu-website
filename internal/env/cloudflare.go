@@ -494,6 +494,70 @@ func ListPagesDomains(token, accountID, projectName string) ([]PagesDomain, erro
 	return domainsResp.Result, nil
 }
 
+// AddPagesDomain adds a custom domain to a Pages project
+func AddPagesDomain(token, accountID, projectName, domainName string) error {
+	if token == "" {
+		return fmt.Errorf("no token provided")
+	}
+	if accountID == "" {
+		return fmt.Errorf("no account ID provided")
+	}
+	if projectName == "" {
+		return fmt.Errorf("no project name provided")
+	}
+	if domainName == "" {
+		return fmt.Errorf("no domain name provided")
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	url := fmt.Sprintf(CloudflareAPIPagesDomainsURL, accountID, projectName)
+
+	// POST request to add domain
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	// The domain name is sent as a query parameter
+	q := req.URL.Query()
+	q.Add("name", domainName)
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to add domain: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("failed to add domain %s (status: %d): %s", domainName, resp.StatusCode, string(body))
+	}
+
+	// Parse response to check success field
+	var addResp CloudflareVerifyResponse
+	if err := json.Unmarshal(body, &addResp); err != nil {
+		return fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if !addResp.Success {
+		if len(addResp.Errors) > 0 {
+			return fmt.Errorf("failed to add domain: %s", addResp.Errors[0].Message)
+		}
+		return fmt.Errorf("failed to add domain %s", domainName)
+	}
+
+	return nil
+}
+
 // DeletePagesDomain removes a custom domain from a Pages project
 func DeletePagesDomain(token, accountID, projectName, domainName string) error {
 	if token == "" {

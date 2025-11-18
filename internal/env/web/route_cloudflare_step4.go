@@ -10,7 +10,7 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
-// cloudflareStep4Page - Project details (Step 4 of 4)
+// cloudflareStep4Page - Project details (Step 4 of 5)
 func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	svc := env.NewService(mockMode)
 
@@ -167,9 +167,10 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			return
 		}
 
-		// Success!
+		// Success! Redirect to Step 5 (Custom Domain Setup)
 		saveMessage.SetValue("success:✅ Configuration saved successfully!")
 		c.Sync()
+		c.ExecScript("window.location.href = '/cloudflare/step5'")
 	})
 
 	c.View(func() h.H {
@@ -220,7 +221,7 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 		return h.Main(
 			h.Class("container"),
-			h.H1(h.Text("Cloudflare Setup - Step 4 of 4")),
+			h.H1(h.Text("Cloudflare Setup - Step 4 of 5")),
 			h.P(h.Text("Project Name (Optional)")),
 
 			RenderNavigation("cloudflare"),
@@ -390,7 +391,7 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				h.Style("margin-top: 2rem;"),
 				h.A(h.Href("/cloudflare/step3"), h.Text("← Back: Domain Selection")),
 				h.Text(" "),
-				h.Button(h.Text("Finish & Save"), finishAction.OnClick()),
+				h.Button(h.Text("Next: Custom Domain Setup →"), finishAction.OnClick()),
 			),
 
 			RenderErrorMessage(saveMessage),

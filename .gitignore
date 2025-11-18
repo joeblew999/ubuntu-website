@@ -31,3 +31,4 @@ logs/
 # IDE & OS
 .vscode/
 .DS_Store
+env

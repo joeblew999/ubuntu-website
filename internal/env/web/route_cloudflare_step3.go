@@ -9,7 +9,7 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
-// cloudflareStep3Page - Domain selection (Step 3 of 4)
+// cloudflareStep3Page - Domain selection (Step 3 of 5)
 func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	svc := env.NewService(mockMode)
 
@@ -135,7 +135,7 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 		return h.Main(
 			h.Class("container"),
-			h.H1(h.Text("Cloudflare Setup - Step 3 of 4")),
+			h.H1(h.Text("Cloudflare Setup - Step 3 of 5")),
 			h.P(h.Text("Domain Selection")),
 
 			RenderNavigation("cloudflare"),
