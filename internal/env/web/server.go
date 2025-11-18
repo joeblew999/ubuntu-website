@@ -66,6 +66,8 @@ func serveSetupGUIWithOptions(mockMode bool) {
 	v.Config(via.Options{
 		DocumentTitle: "Environment Setup",
 		Plugins:       []via.Plugin{picocss.Default},
+		DevMode:       true,              // Enable state persistence and better debugging
+		LogLvl:        via.LogLevelWarn,  // Reduce noise from benign SSE race conditions
 	})
 
 	// Register routes
@@ -73,8 +75,17 @@ func serveSetupGUIWithOptions(mockMode bool) {
 		homePage(c, cfg, mockMode)
 	})
 
+	// Cloudflare setup wizard - 3 steps
 	v.Page("/cloudflare", func(c *via.Context) {
 		cloudflarePage(c, cfg, mockMode)
+	})
+
+	v.Page("/cloudflare/step2", func(c *via.Context) {
+		cloudflareStep2Page(c, cfg, mockMode)
+	})
+
+	v.Page("/cloudflare/step3", func(c *via.Context) {
+		cloudflareStep3Page(c, cfg, mockMode)
 	})
 
 	v.Page("/claude", func(c *via.Context) {

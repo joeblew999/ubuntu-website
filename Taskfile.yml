@@ -17,6 +17,7 @@ vars:
   DIR_NODE_MODULES: node_modules
   DIR_BIN: bin
   DIR_PLAYWRIGHT: .playwright-mcp
+  DIR_VIA: .via
 
   # Files
   FILE_HUGO_LOCK: .hugo_build.lock
@@ -269,6 +270,9 @@ tasks:
 
         # Testing
         {{.DIR_PLAYWRIGHT}}/
+
+        # Via framework
+        {{.DIR_VIA}}/
 
         # IDE & OS
         .vscode/

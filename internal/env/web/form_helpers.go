@@ -37,13 +37,33 @@ func CreateFormFields(c *via.Context, cfg *env.EnvConfig, envKeys []string) []Fo
 
 // RenderFormField renders a single form field with label, input, and validation status
 func RenderFormField(field FormFieldData) h.H {
+	status := field.StatusSignal.String()
+	isError := strings.HasPrefix(status, "error:")
+	isValid := status == "valid"
+
+	// Build input attributes
+	inputAttrs := []h.H{
+		h.Type("text"),
+		h.Value(field.ValueSignal.String()),
+		field.ValueSignal.Bind(),
+	}
+
+	// Add PicoCSS validation styling
+	if isError {
+		inputAttrs = append(inputAttrs, h.Attr("aria-invalid", "true")) // Red border
+	} else if isValid {
+		inputAttrs = append(inputAttrs, h.Attr("aria-invalid", "false")) // Green border
+	}
+
 	return h.Div(
 		h.Label(h.Text(env.GetFieldLabel(field.EnvKey))),
-		h.Input(h.Type("text"), h.Value(field.ValueSignal.String()), field.ValueSignal.Bind()),
-		h.If(field.StatusSignal.String() == "valid", h.Span(h.Text("✓"))),
-		h.If(strings.HasPrefix(field.StatusSignal.String(), "error:"), h.Span(h.Text("✗"))),
-		h.If(strings.HasPrefix(field.StatusSignal.String(), "error:"),
-			h.Div(h.Text(strings.TrimPrefix(field.StatusSignal.String(), "error:"))),
+		h.Input(inputAttrs...),
+		// Error message as <small> helper text (PicoCSS styling)
+		h.If(isError,
+			h.Small(
+				h.Style("color: var(--pico-del-color);"), // Use PicoCSS error color
+				h.Text(strings.TrimPrefix(status, "error:")),
+			),
 		),
 	)
 }
@@ -107,14 +127,26 @@ func CreateSaveAction(c *via.Context, svc *env.Service, fields []FormFieldData, 
 	}
 }
 
-// RenderSaveMessage renders the save message with appropriate styling
+// RenderSaveMessage renders the save message with PicoCSS alert styling
 func RenderSaveMessage(saveMessage interface{ String() string }) []h.H {
 	return []h.H{
 		h.If(strings.HasPrefix(saveMessage.String(), "error:"),
-			h.Div(h.Text("❌ "+strings.TrimPrefix(saveMessage.String(), "error:"))),
+			h.Article(
+				h.Style("background-color: var(--pico-del-background); border-left: 4px solid var(--pico-del-color); padding: 1rem; margin-top: 1rem;"),
+				h.P(
+					h.Style("margin: 0; color: var(--pico-del-color);"),
+					h.Text(strings.TrimPrefix(saveMessage.String(), "error:")),
+				),
+			),
 		),
 		h.If(strings.HasPrefix(saveMessage.String(), "success:"),
-			h.Div(h.Text("✅ "+strings.TrimPrefix(saveMessage.String(), "success:"))),
+			h.Article(
+				h.Style("background-color: var(--pico-ins-background); border-left: 4px solid var(--pico-ins-color); padding: 1rem; margin-top: 1rem;"),
+				h.P(
+					h.Style("margin: 0; color: var(--pico-ins-color);"),
+					h.Text(strings.TrimPrefix(saveMessage.String(), "success:")),
+				),
+			),
 		),
 	}
 }

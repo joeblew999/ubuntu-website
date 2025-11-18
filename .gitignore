@@ -22,6 +22,9 @@ go.sum
 # Testing
 .playwright-mcp/
 
+# Via framework
+.via/
+
 # IDE & OS
 .vscode/
 .DS_Store

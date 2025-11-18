@@ -360,15 +360,16 @@ func (s *Service) ValidateAndUpdateFields(fieldUpdates map[string]string) (map[s
 	// Validate the complete config with all dependencies available
 	results := s.ValidateConfig(updateCfg)
 
-	// Check if all required validations passed
+	// Check if all required validations passed for fields being updated
 	allValid := true
-	for _, field := range envFieldsInOrder {
-		if value, exists := fieldUpdates[field.Key]; exists && value != "" {
-			result := results[field.Key]
-			if !result.Skipped && !result.Valid {
-				allValid = false
-				break
-			}
+	for key := range fieldUpdates {
+		result, exists := results[key]
+		if !exists {
+			continue // Field not in results (shouldn't happen, but skip if it does)
+		}
+		if !result.Skipped && !result.Valid {
+			allValid = false
+			break
 		}
 	}
 

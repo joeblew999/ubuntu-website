@@ -60,6 +60,11 @@ func ValidateField(envKey, value string, cfg *EnvConfig, mockMode bool) Validati
 	switch envKey {
 	case KeyCloudflareAPIToken:
 		_, err = ValidateCloudflareToken(value)
+	case KeyCloudflareAPITokenName:
+		// Token name is just metadata - just check it exists
+		if len(value) == 0 {
+			err = fmt.Errorf("token name is required")
+		}
 	case KeyCloudflareAccountID:
 		token := cfg.Get(KeyCloudflareAPIToken)
 		_, err = ValidateCloudflareAccount(token, value)
