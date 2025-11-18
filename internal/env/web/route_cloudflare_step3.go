@@ -1,34 +1,104 @@
 package web
 
 import (
+	"log"
+	"strings"
+
 	"github.com/go-via/via"
 	"github.com/go-via/via/h"
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
-// cloudflareStep3Page - Project details (Step 3 of 3)
+// cloudflareStep3Page - Domain selection (Step 3 of 4)
 func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	svc := env.NewService(mockMode)
 
-	// All fields for final save (token fields already set in previous steps)
+	// Fields for all previously entered data plus domain/zone
 	fields := CreateFormFields(c, cfg, []string{
 		env.KeyCloudflareAPIToken,
-		env.KeyCloudflareAPITokenName,
 		env.KeyCloudflareAccountID,
-		env.KeyCloudflarePageProject,
+		env.KeyCloudflareDomain,
+		env.KeyCloudflareZoneID,
 	})
 
 	saveMessage := c.Signal("")
+	zonesMessage := c.Signal("") // For zones loading status
 
-	// Finish action - save everything
-	finishAction := c.Action(func() {
+	// Load zones from Cloudflare API
+	// Read directly from config (not from form signals which may be cleared by placeholder detection)
+	token := cfg.Get(env.KeyCloudflareAPIToken)
+	accountID := cfg.Get(env.KeyCloudflareAccountID)
+
+	var zones []env.Zone
+	var zonesErr error
+
+	if !mockMode && token != "" && accountID != "" && !env.IsPlaceholder(token) && !env.IsPlaceholder(accountID) {
+		zones, zonesErr = env.ListZones(token, accountID)
+		if zonesErr != nil {
+			log.Printf("Failed to fetch zones: %v", zonesErr)
+			zonesMessage.SetValue("error:Failed to load domains: " + zonesErr.Error())
+		} else if len(zones) == 0 {
+			zonesMessage.SetValue("info:No domains found in this account")
+		}
+	} else if mockMode {
+		// Mock data for testing
+		zones = []env.Zone{
+			{ID: "mock-zone-1", Name: "example.com"},
+			{ID: "mock-zone-2", Name: "example.net"},
+			{ID: "mock-zone-3", Name: "example.org"},
+			{ID: "mock-zone-4", Name: "ubuntusoftware.net"},
+			{ID: "mock-zone-5", Name: "mysite.com"},
+			{ID: "mock-zone-6", Name: "testdomain.io"},
+		}
+	}
+
+	// Build dropdown options from zones
+	domainOptions := make([]SelectOption, 0, len(zones)+1)
+	domainOptions = append(domainOptions, SelectOption{Value: "", Label: "-- Select a domain --"})
+	for _, zone := range zones {
+		domainOptions = append(domainOptions, SelectOption{Value: zone.Name + "|" + zone.ID, Label: zone.Name})
+	}
+
+	// Build smart "Add Site" URL with account ID if available
+	addSiteURL := BuildCloudflareURL(env.CloudflareAddSiteURL, accountID)
+
+	// Pre-populate dropdown with saved domain+zone if both exist
+	// This allows the dropdown to remember the previously selected domain
+	savedDomain := cfg.Get(env.KeyCloudflareDomain)
+	savedZoneID := cfg.Get(env.KeyCloudflareZoneID)
+	if savedDomain != "" && savedZoneID != "" && !env.IsPlaceholder(savedDomain) && !env.IsPlaceholder(savedZoneID) {
+		// Replace the domain field signal with a composite value that matches dropdown option format
+		fields[2].ValueSignal = c.Signal(savedDomain + "|" + savedZoneID)
+	}
+
+	// Next action - save domain selection and go to step 4
+	nextAction := c.Action(func() {
 		saveMessage.SetValue("")
 
+		// Parse selected domain value (format: "domain.com|zone-id")
+		selectedValue := fields[2].ValueSignal.String()
+		if selectedValue == "" {
+			saveMessage.SetValue("error:Please select a domain")
+			c.Sync()
+			return
+		}
+
+		// Split domain|zone-id
+		parts := strings.Split(selectedValue, "|")
+		if len(parts) != 2 {
+			saveMessage.SetValue("error:Invalid domain selection")
+			c.Sync()
+			return
+		}
+
+		domain := parts[0]
+		zoneID := parts[1]
+
 		fieldUpdates := map[string]string{
-			env.KeyCloudflareAPIToken:     fields[0].ValueSignal.String(),
-			env.KeyCloudflareAPITokenName: fields[1].ValueSignal.String(),
-			env.KeyCloudflareAccountID:    fields[2].ValueSignal.String(),
-			env.KeyCloudflarePageProject:  fields[3].ValueSignal.String(),
+			env.KeyCloudflareAPIToken:  fields[0].ValueSignal.String(),
+			env.KeyCloudflareAccountID: fields[1].ValueSignal.String(),
+			env.KeyCloudflareDomain:    domain,
+			env.KeyCloudflareZoneID:    zoneID,
 		}
 
 		results, err := svc.ValidateAndUpdateFields(fieldUpdates)
@@ -40,56 +110,76 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			return
 		}
 
-		// Check only the fields we're updating, not all fields
-		hasErrors := false
-		for key := range fieldUpdates {
-			if result, exists := results[key]; exists {
-				if !result.Skipped && !result.Valid {
-					hasErrors = true
-					break
-				}
-			}
-		}
-
-		if hasErrors {
-			saveMessage.SetValue("error:Please fix validation errors before saving")
+		// Check for validation errors
+		if HasValidationErrors(results, fieldUpdates) {
+			saveMessage.SetValue("error:Please fix validation errors before continuing")
 			c.Sync()
 			return
 		}
 
-		// Success!
-		saveMessage.SetValue("success:✅ Configuration saved successfully!")
+		// Success - redirect to step 4
+		saveMessage.SetValue("success:Domain selected! Moving to step 4...")
 		c.Sync()
+		c.ExecScript("window.location.href = '/cloudflare/step4'")
 	})
 
 	c.View(func() h.H {
 		return h.Main(
 			h.Class("container"),
-			h.H1(h.Text("Cloudflare Setup - Step 3 of 3")),
-			h.P(h.Text("Project Name (Optional)")),
+			h.H1(h.Text("Cloudflare Setup - Step 3 of 4")),
+			h.P(h.Text("Domain Selection")),
 
 			RenderNavigation("cloudflare"),
 
-			h.H2(h.Text("Cloudflare Pages Project")),
-			h.P(h.Text("Enter your Cloudflare Pages project name, or leave blank to create it later.")),
+			h.H2(h.Text("Select Your Domain")),
+			h.P(h.Text("Choose which domain you want to deploy your Hugo site to.")),
 
-			h.Ul(
-				h.Li(h.Text("If you already have a project, enter its name")),
-				h.Li(h.Text("Must be lowercase letters, numbers, and hyphens only (1-63 chars)")),
-				h.Li(h.Text("Examples: 'ubuntusoftware-net' or 'my-hugo-site'")),
+			// Show zones loading status - info message
+			h.If(zonesMessage.String() == "info:No domains found in this account",
+				h.Article(
+					h.Style("background-color: var(--pico-ins-background); border-left: 4px solid var(--pico-ins-color); padding: 1rem; margin-bottom: 1rem;"),
+					h.P(
+						h.Style("margin: 0;"),
+						h.Text("No domains found in this account. "),
+						h.A(h.Href(addSiteURL), h.Attr("target", "_blank"), h.Text("Add a domain ↗")),
+						h.Text(" to Cloudflare first."),
+					),
+				),
+			),
+			// Show zones loading status - error message
+			h.If(strings.HasPrefix(zonesMessage.String(), "error:"),
+				h.Article(
+					h.Style("background-color: var(--pico-del-background); border-left: 4px solid var(--pico-del-color); padding: 1rem; margin-bottom: 1rem;"),
+					h.P(
+						h.Style("margin: 0; color: var(--pico-del-color);"),
+						h.Text(strings.TrimPrefix(zonesMessage.String(), "error:")),
+					),
+				),
 			),
 
-			h.P(h.Text("To create a new project: "), h.A(h.Href(env.CloudflarePagesURL), h.Attr("target", "_blank"), h.Text("Workers & Pages ↗")),
-				h.Text(" → Create application → Pages → Connect to Git")),
-
-			h.H3(h.Text("Project Name (optional):")),
-			RenderFormField(fields[3]),
+			// Domain dropdown
+			h.If(len(domainOptions) > 1,
+				h.Div(
+					h.H3(h.Text("Choose Domain:")),
+					RenderSelectField("Domain", fields[2].ValueSignal, domainOptions),
+					h.Small(
+						h.Style("color: var(--pico-muted-color);"),
+						h.Text("The domain where your Hugo site will be deployed"),
+					),
+				),
+			),
 
 			h.Div(
 				h.Style("margin-top: 2rem;"),
 				h.A(h.Href("/cloudflare/step2"), h.Text("← Back: Account ID")),
 				h.Text(" "),
-				h.Button(h.Text("Finish & Save"), finishAction.OnClick()),
+				h.If(len(domainOptions) > 1,
+					h.Button(h.Text("Next: Project Details →"), nextAction.OnClick()),
+				),
+				h.If(len(domainOptions) > 1,
+					h.Text(" or "),
+				),
+				h.A(h.Href("/cloudflare/step4"), h.Text("Skip")),
 			),
 
 			RenderSaveMessage(saveMessage)[0],

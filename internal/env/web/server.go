@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 
 	"github.com/go-via/via"
@@ -58,7 +59,10 @@ func serveSetupGUIWithOptions(mockMode bool) {
 	v.Config(via.Options{
 		DocumentTitle: "Environment Setup",
 		Plugins:       []via.Plugin{picocss.Default},
-		DevMode:       true,              // Enable state persistence and better debugging
+		// DevMode enables the dataSPA Inspector debugging tool in the browser.
+		// Set VIA_DEV_MODE=false to disable for production deployments.
+		// Defaults to enabled when VIA_DEV_MODE is unset or any value other than "false".
+		DevMode:       os.Getenv("VIA_DEV_MODE") != "false",
 		LogLvl:        via.LogLevelWarn,  // Reduce noise from benign SSE race conditions
 	})
 
@@ -78,7 +82,7 @@ func serveSetupGUIWithOptions(mockMode bool) {
 		homePage(c, loadConfig(), mockMode)
 	})
 
-	// Cloudflare setup wizard - 3 steps
+	// Cloudflare setup wizard - 4 steps
 	v.Page("/cloudflare", func(c *via.Context) {
 		cloudflarePage(c, loadConfig(), mockMode)
 	})
@@ -89,6 +93,10 @@ func serveSetupGUIWithOptions(mockMode bool) {
 
 	v.Page("/cloudflare/step3", func(c *via.Context) {
 		cloudflareStep3Page(c, loadConfig(), mockMode)
+	})
+
+	v.Page("/cloudflare/step4", func(c *via.Context) {
+		cloudflareStep4Page(c, loadConfig(), mockMode)
 	})
 
 	v.Page("/claude", func(c *via.Context) {

@@ -33,6 +33,8 @@ const (
 	KeyCloudflareAPIToken     = "CLOUDFLARE_API_TOKEN"
 	KeyCloudflareAPITokenName = "CLOUDFLARE_API_TOKEN_NAME"
 	KeyCloudflareAccountID    = "CLOUDFLARE_ACCOUNT_ID"
+	KeyCloudflareDomain       = "CLOUDFLARE_DOMAIN"
+	KeyCloudflareZoneID       = "CLOUDFLARE_ZONE_ID"
 	KeyCloudflarePageProject  = "CLOUDFLARE_PAGE_PROJECT_NAME"
 	KeyClaudeAPIKey           = "CLAUDE_API_KEY"
 	KeyClaudeWorkspaceName    = "CLAUDE_WORKSPACE_NAME"
@@ -49,6 +51,8 @@ type EnvConfig struct {
 	CloudflareToken     string
 	CloudflareTokenName string
 	CloudflareAccount   string
+	CloudflareDomain    string
+	CloudflareZoneID    string
 	CloudflareProject   string
 	ClaudeAPIKey        string
 	ClaudeWorkspace     string
@@ -69,6 +73,8 @@ var envFieldsInOrder = []FieldInfo{
 	{Key: KeyCloudflareAPIToken, Default: "your-token-here", Description: "Cloudflare API token (required for deployment)", DisplayName: "Cloudflare API Token", SyncToGitHub: true, Validate: true},
 	{Key: KeyCloudflareAPITokenName, Default: "your-token-name", Description: "Cloudflare token name (helps you remember which token)", DisplayName: "Cloudflare API Token Name", SyncToGitHub: false, Validate: true},
 	{Key: KeyCloudflareAccountID, Default: "your-account-id", Description: "Cloudflare Account ID", DisplayName: "Cloudflare Account ID", SyncToGitHub: true, Validate: true},
+	{Key: KeyCloudflareDomain, Default: "your-domain.com", Description: "Cloudflare domain name for Hugo site", DisplayName: "Cloudflare Domain", SyncToGitHub: true, Validate: false},
+	{Key: KeyCloudflareZoneID, Default: "your-zone-id", Description: "Cloudflare Zone ID for the domain", DisplayName: "Cloudflare Zone ID", SyncToGitHub: true, Validate: false},
 	{Key: KeyCloudflarePageProject, Default: "your-project-name", Description: "Cloudflare Pages project name", DisplayName: "Cloudflare Pages Project", SyncToGitHub: true, Validate: true},
 	{Key: KeyClaudeAPIKey, Default: "your-api-key-here", Description: "Claude API key (required for translation)", DisplayName: "Claude API Key", SyncToGitHub: false, Validate: true},
 	{Key: KeyClaudeWorkspaceName, Default: "", Description: "Claude workspace name", DisplayName: "Claude Workspace Name", SyncToGitHub: false, Validate: true},
@@ -92,6 +98,16 @@ func GetFieldInfo(key string) *FieldInfo {
 		}
 	}
 	return nil
+}
+
+// GetKeyFromDisplayName returns the env key for a given display name
+func GetKeyFromDisplayName(displayName string) string {
+	for _, field := range envFieldsInOrder {
+		if field.DisplayName == displayName {
+			return field.Key
+		}
+	}
+	return displayName // Fallback to display name if not found
 }
 
 // GetFieldLabel returns the display name with optional " *" suffix for mandatory fields
@@ -118,6 +134,10 @@ func (cfg *EnvConfig) Get(key string) string {
 		return cfg.CloudflareTokenName
 	case KeyCloudflareAccountID:
 		return cfg.CloudflareAccount
+	case KeyCloudflareDomain:
+		return cfg.CloudflareDomain
+	case KeyCloudflareZoneID:
+		return cfg.CloudflareZoneID
 	case KeyCloudflarePageProject:
 		return cfg.CloudflareProject
 	case KeyClaudeAPIKey:
@@ -137,6 +157,10 @@ func (cfg *EnvConfig) Set(key, value string) bool {
 		cfg.CloudflareTokenName = value
 	case KeyCloudflareAccountID:
 		cfg.CloudflareAccount = value
+	case KeyCloudflareDomain:
+		cfg.CloudflareDomain = value
+	case KeyCloudflareZoneID:
+		cfg.CloudflareZoneID = value
 	case KeyCloudflarePageProject:
 		cfg.CloudflareProject = value
 	case KeyClaudeAPIKey:

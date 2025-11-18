@@ -95,6 +95,18 @@ func UpdateValidationStatus(results map[string]env.ValidationResult, fields []Fo
 	c.Sync()
 }
 
+// HasValidationErrors checks if there are any validation errors in the results
+func HasValidationErrors(results map[string]env.ValidationResult, fieldUpdates map[string]string) bool {
+	for key := range fieldUpdates {
+		if result, exists := results[key]; exists {
+			if !result.Skipped && !result.Valid {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // CreateSaveAction creates a save action for form fields
 func CreateSaveAction(c *via.Context, svc *env.Service, fields []FormFieldData, saveMessage interface{ String() string; SetValue(any) }) func() {
 	return func() {
@@ -171,5 +183,37 @@ func RenderNavigation(currentPage string) h.H {
 				h.A(h.Href("/claude"), h.Text("Claude Only")),
 			)),
 		),
+	)
+}
+
+// SelectOption represents a dropdown option
+type SelectOption struct {
+	Value string
+	Label string
+}
+
+// RenderSelectField renders a dropdown select field with label and options
+func RenderSelectField(label string, selectedValue interface{ String() string; Bind() h.H }, options []SelectOption) h.H {
+	// Build option elements
+	optionElements := make([]h.H, len(options))
+	for i, opt := range options {
+		optAttrs := []h.H{
+			h.Value(opt.Value),
+			h.Text(opt.Label),
+		}
+		// Mark selected option
+		if opt.Value == selectedValue.String() {
+			optAttrs = append(optAttrs, h.Attr("selected", "selected"))
+		}
+		optionElements[i] = h.Option(optAttrs...)
+	}
+
+	// Flatten the option elements with the bind attribute
+	selectChildren := []h.H{selectedValue.Bind()}
+	selectChildren = append(selectChildren, optionElements...)
+
+	return h.Div(
+		h.Label(h.Text(label)),
+		h.Select(selectChildren...),
 	)
 }

@@ -7,9 +7,14 @@ const (
 
 	// Cloudflare API endpoints
 	CloudflareAPITokenVerifyURL = "https://api.cloudflare.com/client/v4/user/tokens/verify"
-	CloudflareAPITokenInfoURL   = "https://api.cloudflare.com/client/v4/user/tokens/%s" // requires tokenID
-	CloudflareAPIAccountURL     = "https://api.cloudflare.com/client/v4/accounts/%s"    // requires accountID
+	CloudflareAPITokenInfoURL   = "https://api.cloudflare.com/client/v4/user/tokens/%s"         // requires tokenID
+	CloudflareAPIAccountURL     = "https://api.cloudflare.com/client/v4/accounts/%s"            // requires accountID
 	CloudflareAPIAccountsURL    = "https://api.cloudflare.com/client/v4/accounts"
+	CloudflareAPIZonesURL       = "https://api.cloudflare.com/client/v4/zones"                  // GET zones (domains)
+	CloudflareAPIPagesURL           = "https://api.cloudflare.com/client/v4/accounts/%s/pages/projects"              // requires accountID
+	CloudflareAPIPagesDeleteURL     = "https://api.cloudflare.com/client/v4/accounts/%s/pages/projects/%s"          // requires accountID, projectName
+	CloudflareAPIPagesDomainsURL    = "https://api.cloudflare.com/client/v4/accounts/%s/pages/projects/%s/domains"  // requires accountID, projectName
+	CloudflareAPIPagesDeleteDomainURL = "https://api.cloudflare.com/client/v4/accounts/%s/pages/projects/%s/domains/%s" // requires accountID, projectName, domainName
 )
 
 // Console URLs
@@ -25,7 +30,8 @@ const (
 	CloudflareDashboardURL = "https://dash.cloudflare.com"
 	CloudflareLoginURL     = "https://dash.cloudflare.com/login"
 	CloudflareAPITokensURL = "https://dash.cloudflare.com/profile/api-tokens"
-	CloudflarePagesURL     = "https://dash.cloudflare.com/?to=/:account/workers-and-pages"
+	CloudflareAddSiteURL   = "https://dash.cloudflare.com/:account/add-site"
+	CloudflarePagesURL     = "https://dash.cloudflare.com/:account/workers-and-pages"
 
 	// GitHub URLs
 	GitHubCLIInstallURL      = "https://cli.github.com/"

@@ -6,7 +6,7 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
-// cloudflareStep1Page - API Token setup (Step 1 of 3)
+// cloudflareStep1Page - API Token setup (Step 1 of 4)
 func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	svc := env.NewService(mockMode)
 
@@ -36,18 +36,8 @@ func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			return
 		}
 
-		// Check only the fields we're updating, not all fields
-		hasErrors := false
-		for key := range fieldUpdates {
-			if result, exists := results[key]; exists {
-				if !result.Skipped && !result.Valid {
-					hasErrors = true
-					break
-				}
-			}
-		}
-
-		if hasErrors {
+		// Check for validation errors
+		if HasValidationErrors(results, fieldUpdates) {
 			saveMessage.SetValue("error:Please fix validation errors before continuing")
 			c.Sync()
 			return
@@ -62,7 +52,7 @@ func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	c.View(func() h.H {
 		return h.Main(
 			h.Class("container"),
-			h.H1(h.Text("Cloudflare Setup - Step 1 of 3")),
+			h.H1(h.Text("Cloudflare Setup - Step 1 of 4")),
 			h.P(h.Text("API Token")),
 
 			RenderNavigation("cloudflare"),

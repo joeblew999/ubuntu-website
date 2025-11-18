@@ -8,6 +8,16 @@ import (
 
 // homePage creates a static welcome page with navigation (no reactive forms)
 func homePage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
+	// Build configuration table data
+	tableRows, envPath, err := BuildConfigTableRows(mockMode)
+	var configTableElement h.H
+
+	if err != nil {
+		configTableElement = h.P(h.Text("Error loading configuration: " + err.Error()))
+	} else {
+		configTableElement = renderConfigTable(tableRows, envPath)
+	}
+
 	c.View(func() h.H {
 		return h.Main(
 			h.Class("container"),
@@ -17,8 +27,12 @@ func homePage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			// Navigation
 			renderNavigation("home"),
 
+			// Configuration Overview Table
+			h.H2(h.Text("Configuration Overview")),
+			configTableElement,
+
 			// Status overview (non-interactive)
-			h.H2(h.Text("Configuration Status")),
+			h.H2(h.Text("Quick Setup")),
 			h.P(h.Text("Click on a section below to configure credentials:")),
 
 			// Navigation cards
@@ -45,28 +59,6 @@ func homePage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 					),
 				),
 			),
-
-			// Current Configuration Summary (non-interactive)
-			h.H2(h.Text("Current Configuration")),
-			h.Dl(
-				h.Dt(h.Strong(h.Text(env.GetDisplayName(env.KeyCloudflareAPIToken)))),
-				h.Dd(renderConfigValue(cfg.CloudflareToken)),
-
-				h.Dt(h.Strong(h.Text(env.GetDisplayName(env.KeyCloudflareAPITokenName)))),
-				h.Dd(renderConfigValue(cfg.CloudflareTokenName)),
-
-				h.Dt(h.Strong(h.Text(env.GetDisplayName(env.KeyCloudflareAccountID)))),
-				h.Dd(renderConfigValue(cfg.CloudflareAccount)),
-
-				h.Dt(h.Strong(h.Text(env.GetDisplayName(env.KeyCloudflarePageProject)))),
-				h.Dd(renderConfigValue(cfg.CloudflareProject)),
-
-				h.Dt(h.Strong(h.Text(env.GetDisplayName(env.KeyClaudeAPIKey)))),
-				h.Dd(renderConfigValue(cfg.ClaudeAPIKey)),
-
-				h.Dt(h.Strong(h.Text(env.GetDisplayName(env.KeyClaudeWorkspaceName)))),
-				h.Dd(renderConfigValue(cfg.ClaudeWorkspace)),
-			),
 		)
 	})
 }
@@ -81,4 +73,61 @@ func renderConfigValue(value string) h.H {
 		return h.Text(value[:10] + "..." + value[len(value)-10:])
 	}
 	return h.Text(value)
+}
+
+// renderConfigTable renders the configuration overview table
+func renderConfigTable(rows []ConfigTableRow, envPath string) h.H {
+	// Build table header
+	tableHeader := h.THead(
+		h.Tr(
+			h.Th(h.Text("Display")),
+			h.Th(h.Text("Key")),
+			h.Th(h.Text("Value")),
+			h.Th(h.Text("Required")),
+			h.Th(h.Text("Validated")),
+			h.Th(h.Text("Error")),
+		),
+	)
+
+	// Build table body rows
+	tableBodyRows := make([]h.H, len(rows))
+	for i, row := range rows {
+		// Color code the validation status
+		validatedStyle := ""
+		if row.Validated == "✓" {
+			validatedStyle = "color: var(--pico-ins-color);"
+		} else if row.Validated == "✗" {
+			validatedStyle = "color: var(--pico-del-color);"
+		}
+
+		// Color code the error column
+		errorStyle := ""
+		if row.Error != "-" {
+			errorStyle = "color: var(--pico-del-color); font-size: 0.875rem;"
+		}
+
+		tableBodyRows[i] = h.Tr(
+			h.Td(h.Text(row.Display)),
+			h.Td(h.Code(h.Text(row.Key))),                                // Monospace for env var names
+			h.Td(h.Code(h.Text(row.Value))),                              // Monospace for values
+			h.Td(h.Text(row.Required)),
+			h.Td(h.Style(validatedStyle), h.Text(row.Validated)),
+			h.Td(h.Style(errorStyle), h.Text(row.Error)),
+		)
+	}
+
+	tableBody := h.TBody(tableBodyRows...)
+
+	return h.Div(
+		h.P(
+			h.Style("margin-bottom: 1rem; color: var(--pico-muted-color);"),
+			h.Text(envPath),
+		),
+		h.Figure(
+			h.Table(
+				tableHeader,
+				tableBody,
+			),
+		),
+	)
 }
