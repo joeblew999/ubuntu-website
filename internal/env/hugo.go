@@ -2,7 +2,10 @@ package env
 
 import (
 	"fmt"
+	"net"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 )
 
@@ -13,29 +16,90 @@ var (
 	hugoServerPort = 1313 // Default Hugo server port
 )
 
-// StartHugoServer starts a simple HTTP server for local preview of the built site
+// GetLocalIP returns the non-loopback local IPv4 address for LAN access
+func GetLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+
+	for _, address := range addrs {
+		// Check the address type and if it is not a loopback
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			// Get IPv4 address
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
+}
+
+// StartHugoServer starts a simple HTTPS server for local preview of the built site
+// Uses Hugo's --tlsAuto flag for automatic certificate generation via mkcert
+// Binds to 0.0.0.0 for LAN access (mobile testing)
 func StartHugoServer(mockMode bool) CommandOutput {
 	hugoServerMux.Lock()
 	defer hugoServerMux.Unlock()
 
 	// Stop any existing server first
 	if hugoServerCmd != nil {
-		StopHugoServer()
+		stopHugoServerInternal()
 	}
 
+	// Detect LAN IP address for mobile testing
+	lanIP := GetLocalIP()
+
 	if mockMode {
-		localURL := fmt.Sprintf("http://localhost:%d", hugoServerPort)
+		localURL := fmt.Sprintf("https://localhost:%d", hugoServerPort)
+		lanURL := ""
+		if lanIP != "" {
+			lanURL = fmt.Sprintf("https://%s:%d", lanIP, hugoServerPort)
+		}
+		output := fmt.Sprintf("Starting preview server (mock mode)...\n  Local: %s\n  LAN:   %s", localURL, lanURL)
 		return CommandOutput{
-			Output:   fmt.Sprintf("Starting preview server (mock mode)...\nServer running at %s", localURL),
+			Output:   output,
 			Error:    nil,
 			LocalURL: localURL,
+			LANURL:   lanURL,
 		}
 	}
 
-	// Use Hugo's built-in server to serve the built site
-	// hugo server serves in production mode, no live reload
-	localURL := fmt.Sprintf("http://localhost:%d", hugoServerPort)
-	hugoServerCmd = exec.Command("hugo", "server", "-e", "production", "--disableLiveReload", "--port", fmt.Sprintf("%d", hugoServerPort))
+	// Generate HTTPS certificates with mkcert (includes LAN IP explicitly)
+	// Store in temp directory and regenerate each time for simplicity
+	tmpDir := os.TempDir()
+	certFile := filepath.Join(tmpDir, "hugo-cert.pem")
+	keyFile := filepath.Join(tmpDir, "hugo-key.pem")
+
+	// Build mkcert arguments - explicitly include LAN IP for iOS Safari compatibility
+	mkcertArgs := []string{
+		"-cert-file", certFile,
+		"-key-file", keyFile,
+		"localhost", "127.0.0.1", "::1",
+	}
+	if lanIP != "" {
+		mkcertArgs = append(mkcertArgs, lanIP) // Add LAN IP (e.g., 192.168.1.49)
+	}
+
+	// Run mkcert to generate certificates
+	mkcertCmd := exec.Command("mkcert", mkcertArgs...)
+	if err := mkcertCmd.Run(); err != nil {
+		return CommandOutput{
+			Output: "",
+			Error:  fmt.Errorf("failed to generate certificates with mkcert: %w (ensure mkcert is installed)", err),
+		}
+	}
+
+	// Start Hugo server with generated certificates
+	// Use development environment which enables relativeURLs for multi-hostname support
+	hugoServerCmd = exec.Command("hugo", "server",
+		"--environment", "development", // Loads config/development/config.toml with relativeURLs
+		"--disableLiveReload",
+		"--port", fmt.Sprintf("%d", hugoServerPort),
+		"--tlsCertFile", certFile,  // Use mkcert-generated certificate
+		"--tlsKeyFile", keyFile,     // Use mkcert-generated key
+		"--bind", "0.0.0.0",         // Bind to all interfaces for LAN access
+	)
 
 	// Start the server in background
 	if err := hugoServerCmd.Start(); err != nil {
@@ -45,18 +109,26 @@ func StartHugoServer(mockMode bool) CommandOutput {
 		}
 	}
 
+	// Build URLs for display
+	localURL := fmt.Sprintf("https://localhost:%d", hugoServerPort)
+	lanURL := ""
+	if lanIP != "" {
+		lanURL = fmt.Sprintf("https://%s:%d", lanIP, hugoServerPort)
+	}
+
+	output := fmt.Sprintf("Preview server started\n  Local: %s\n  LAN:   %s", localURL, lanURL)
+
 	return CommandOutput{
-		Output:   fmt.Sprintf("Preview server started at %s", localURL),
+		Output:   output,
 		Error:    nil,
 		LocalURL: localURL,
+		LANURL:   lanURL,
 	}
 }
 
-// StopHugoServer stops the running Hugo server
-func StopHugoServer() CommandOutput {
-	hugoServerMux.Lock()
-	defer hugoServerMux.Unlock()
-
+// stopHugoServerInternal stops the Hugo server without acquiring the mutex.
+// This internal function should only be called when the caller already holds hugoServerMux.
+func stopHugoServerInternal() CommandOutput {
 	if hugoServerCmd == nil {
 		return CommandOutput{
 			Output: "No Hugo server is running",
@@ -80,15 +152,30 @@ func StopHugoServer() CommandOutput {
 	}
 }
 
+// StopHugoServer stops the running Hugo server
+func StopHugoServer() CommandOutput {
+	hugoServerMux.Lock()
+	defer hugoServerMux.Unlock()
+
+	return stopHugoServerInternal()
+}
+
 // BuildHugoSite runs `hugo --gc --minify` and returns streaming output
-// Also starts a local preview server
+// Also starts a local HTTPS preview server with LAN access
 func BuildHugoSite(mockMode bool) CommandOutput {
 	if mockMode {
-		localURL := fmt.Sprintf("http://localhost:%d", hugoServerPort)
+		lanIP := GetLocalIP()
+		localURL := fmt.Sprintf("https://localhost:%d", hugoServerPort)
+		lanURL := ""
+		if lanIP != "" {
+			lanURL = fmt.Sprintf("https://%s:%d", lanIP, hugoServerPort)
+		}
+		output := fmt.Sprintf("Building Hugo site (mock mode)...\nBuild complete! (mock)\n\nStarting preview server...\nPreview server running\n  Local: %s\n  LAN:   %s", localURL, lanURL)
 		return CommandOutput{
-			Output:   "Building Hugo site (mock mode)...\nBuild complete! (mock)\n\nStarting preview server...\nPreview server running at " + localURL,
+			Output:   output,
 			Error:    nil,
 			LocalURL: localURL,
+			LANURL:   lanURL,
 		}
 	}
 
@@ -98,7 +185,7 @@ func BuildHugoSite(mockMode bool) CommandOutput {
 		return buildResult
 	}
 
-	// Start preview server
+	// Start preview server with HTTPS and LAN access
 	serverResult := StartHugoServer(mockMode)
 	if serverResult.Error != nil {
 		// Build succeeded but server failed - return build output with warning
@@ -106,6 +193,7 @@ func BuildHugoSite(mockMode bool) CommandOutput {
 			Output:   buildResult.Output + "\n\nWarning: Failed to start preview server: " + serverResult.Error.Error(),
 			Error:    nil,
 			LocalURL: "",
+			LANURL:   "",
 		}
 	}
 
@@ -114,5 +202,6 @@ func BuildHugoSite(mockMode bool) CommandOutput {
 		Output:   buildResult.Output + "\n\n" + serverResult.Output,
 		Error:    nil,
 		LocalURL: serverResult.LocalURL,
+		LANURL:   serverResult.LANURL,
 	}
 }

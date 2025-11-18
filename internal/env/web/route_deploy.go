@@ -15,12 +15,16 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 	// Deployment signals
 	deployOutput := c.Signal("")
-	deployInProgress := c.Signal(false)
+	buildInProgress := c.Signal(false)       // "Build Site Only" button progress
+	previewInProgress := c.Signal(false)     // "Deploy to Preview" button progress
+	productionInProgress := c.Signal(false)  // "Deploy to Production" button progress
 	localURL := c.Signal("")
-	deploymentURL := c.Signal("")
+	lanURL := c.Signal("")        // LAN URL for mobile testing
+	previewURL := c.Signal("")    // Cloudflare preview URL (*.pages.dev)
+	deploymentURL := c.Signal("") // Custom domain URL (production)
 
-	// Build & Deploy action
-	buildDeployAction := c.Action(func() {
+	// Deploy to Preview action (no branch flag)
+	buildDeployPreviewAction := c.Action(func() {
 		currentProject := cfg.Get(env.KeyCloudflarePageProject)
 		if currentProject == "" || env.IsPlaceholder(currentProject) {
 			deployOutput.SetValue("error:No project configured. Please complete Step 4 of the Cloudflare setup first.")
@@ -28,39 +32,78 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			return
 		}
 
-		deployInProgress.SetValue(true)
-		deployOutput.SetValue("Starting build and deployment...\n")
+		previewInProgress.SetValue(true)
+		deployOutput.SetValue("Starting build and preview deployment...\n")
 		c.Sync()
 
-		// Run build and deploy
-		result := env.BuildAndDeploy(currentProject, mockMode)
+		// Run build and deploy (no branch = preview only)
+		result := env.BuildAndDeploy(currentProject, "", mockMode)
 
-		deployInProgress.SetValue(false)
+		previewInProgress.SetValue(false)
 		if result.Error != nil {
 			deployOutput.SetValue("error:" + result.Output + "\nError: " + result.Error.Error())
 		} else {
 			deployOutput.SetValue("success:" + result.Output)
 		}
 		localURL.SetValue(result.LocalURL)
-		deploymentURL.SetValue(result.DeploymentURL)
+		lanURL.SetValue(result.LANURL)
+		previewURL.SetValue(result.PreviewURL)
+		deploymentURL.SetValue("") // Clear production URL for preview deployments
+		c.Sync()
+	})
+
+	// Deploy to Production action (with --branch=main)
+	buildDeployProductionAction := c.Action(func() {
+		currentProject := cfg.Get(env.KeyCloudflarePageProject)
+		if currentProject == "" || env.IsPlaceholder(currentProject) {
+			deployOutput.SetValue("error:No project configured. Please complete Step 4 of the Cloudflare setup first.")
+			c.Sync()
+			return
+		}
+
+		productionInProgress.SetValue(true)
+		deployOutput.SetValue("Starting build and production deployment...\n")
+		c.Sync()
+
+		// Run build and deploy (branch=main = production)
+		result := env.BuildAndDeploy(currentProject, "main", mockMode)
+
+		productionInProgress.SetValue(false)
+		if result.Error != nil {
+			deployOutput.SetValue("error:" + result.Output + "\nError: " + result.Error.Error())
+		} else {
+			deployOutput.SetValue("success:" + result.Output)
+		}
+		localURL.SetValue(result.LocalURL)
+		lanURL.SetValue(result.LANURL)
+		previewURL.SetValue(result.PreviewURL)
+
+		// Set production URL from config (custom domain)
+		customDomain := cfg.Get(env.KeyCloudflareDomain)
+		if customDomain != "" && !env.IsPlaceholder(customDomain) && result.Error == nil {
+			deploymentURL.SetValue("https://" + customDomain)
+		} else {
+			deploymentURL.SetValue(result.DeploymentURL)
+		}
 		c.Sync()
 	})
 
 	// Build only action
 	buildOnlyAction := c.Action(func() {
-		deployInProgress.SetValue(true)
+		buildInProgress.SetValue(true)
 		deployOutput.SetValue("Building Hugo site...\n")
 		c.Sync()
 
 		result := env.BuildHugoSite(mockMode)
 
-		deployInProgress.SetValue(false)
+		buildInProgress.SetValue(false)
 		if result.Error != nil {
 			deployOutput.SetValue("error:" + result.Output + "\nError: " + result.Error.Error())
 		} else {
 			deployOutput.SetValue("success:" + result.Output)
 		}
 		localURL.SetValue(result.LocalURL)
+		lanURL.SetValue(result.LANURL)
 		c.Sync()
 	})
 
@@ -104,21 +147,29 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 				// Build and deploy buttons
 				h.Div(
-					h.Style("display: flex; gap: 1rem; margin-bottom: 1rem;"),
+					h.Style("display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;"),
 					h.Button(
 						h.Attr("class", "secondary"),
 						h.Text("Build Site Only"),
-						h.If(deployInProgress.String() == "true", h.Attr("aria-busy", "true")),
-						h.If(deployInProgress.String() == "true", h.Attr("disabled", "disabled")),
+						h.If(buildInProgress.String() == "true", h.Attr("aria-busy", "true")),
+						h.If(buildInProgress.String() == "true", h.Attr("disabled", "disabled")),
 						h.If(projectName == "" || env.IsPlaceholder(projectName), h.Attr("disabled", "disabled")),
 						buildOnlyAction.OnClick(),
 					),
 					h.Button(
-						h.Text("Build & Deploy"),
-						h.If(deployInProgress.String() == "true", h.Attr("aria-busy", "true")),
-						h.If(deployInProgress.String() == "true", h.Attr("disabled", "disabled")),
+						h.Attr("class", "secondary"),
+						h.Text("Deploy to Preview"),
+						h.If(previewInProgress.String() == "true", h.Attr("aria-busy", "true")),
+						h.If(previewInProgress.String() == "true", h.Attr("disabled", "disabled")),
 						h.If(projectName == "" || env.IsPlaceholder(projectName), h.Attr("disabled", "disabled")),
-						buildDeployAction.OnClick(),
+						buildDeployPreviewAction.OnClick(),
+					),
+					h.Button(
+						h.Text("Deploy to Production"),
+						h.If(productionInProgress.String() == "true", h.Attr("aria-busy", "true")),
+						h.If(productionInProgress.String() == "true", h.Attr("disabled", "disabled")),
+						h.If(projectName == "" || env.IsPlaceholder(projectName), h.Attr("disabled", "disabled")),
+						buildDeployProductionAction.OnClick(),
 					),
 				),
 
@@ -158,7 +209,7 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 						),
 
 						// Preview URLs section
-						h.If(localURL.String() != "" || deploymentURL.String() != "",
+						h.If(localURL.String() != "" || lanURL.String() != "" || previewURL.String() != "" || deploymentURL.String() != "",
 							h.Div(
 								h.Style("margin-top: 1.5rem;"),
 								h.H3(h.Text("Preview URLs")),
@@ -168,9 +219,19 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 									RenderURLLink(localURL.String(), "Local Preview", "🌐"),
 								),
 
-								// Deployment URL
+								// LAN preview URL for mobile testing
+								h.If(lanURL.String() != "",
+									RenderURLLink(lanURL.String(), "LAN Preview (Mobile)", "📱"),
+								),
+
+								// Cloudflare preview URL (*.pages.dev)
+								h.If(previewURL.String() != "",
+									RenderURLLink(previewURL.String(), "Preview Deployment", "🔗"),
+								),
+
+								// Production deployment URL (custom domain)
 								h.If(deploymentURL.String() != "",
-									RenderURLLink(deploymentURL.String(), "Live Deployment", "☁️"),
+									RenderURLLink(deploymentURL.String(), "Production (Custom Domain)", "☁️"),
 								),
 							),
 						),

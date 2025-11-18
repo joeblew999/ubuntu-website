@@ -1,0 +1,7 @@
+# Development-only configuration for local preview
+# This config is loaded when running `hugo server --environment development`
+
+# Use relative URLs so the server works from both localhost and LAN IP
+# Without this, Hugo would use the production baseURL from hugo.toml
+baseURL = "/"
+relativeURLs = true
