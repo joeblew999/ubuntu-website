@@ -182,8 +182,8 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				h.A(h.Href("/cloudflare/step4"), h.Text("Skip")),
 			),
 
-			RenderSaveMessage(saveMessage)[0],
-			RenderSaveMessage(saveMessage)[1],
+			RenderErrorMessage(saveMessage),
+			RenderSuccessMessage(saveMessage),
 		)
 	})
 }

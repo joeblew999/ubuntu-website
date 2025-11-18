@@ -82,8 +82,8 @@ func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				h.A(h.Href("/cloudflare/step2"), h.Text("Skip validation")),
 			),
 
-			RenderSaveMessage(saveMessage)[0],
-			RenderSaveMessage(saveMessage)[1],
+			RenderErrorMessage(saveMessage),
+			RenderSuccessMessage(saveMessage),
 		)
 	})
 }

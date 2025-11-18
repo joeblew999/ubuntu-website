@@ -100,6 +100,14 @@ func GetFieldInfo(key string) *FieldInfo {
 	return nil
 }
 
+// GetAllFieldsInOrder returns all field metadata in display order
+func GetAllFieldsInOrder() []FieldInfo {
+	// Return a copy to prevent modification
+	result := make([]FieldInfo, len(envFieldsInOrder))
+	copy(result, envFieldsInOrder)
+	return result
+}
+
 // GetKeyFromDisplayName returns the env key for a given display name
 func GetKeyFromDisplayName(displayName string) string {
 	for _, field := range envFieldsInOrder {

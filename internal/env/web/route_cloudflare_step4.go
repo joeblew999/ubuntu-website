@@ -29,6 +29,9 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	deleteMessage := c.Signal("")   // For delete operation feedback
 	projectToDelete := c.Signal("") // Holds project name pending deletion confirmation
 	showDeleteConfirm := c.Signal(false) // Controls visibility of delete confirmation dialog
+	createMessage := c.Signal("")   // For project creation feedback
+	createInProgress := c.Signal(false) // For project creation in-progress state
+	newProjectName := c.Signal("")  // Holds new project name input
 
 	// Load projects from Cloudflare API
 	// Read directly from config (not from form signals which may be cleared by placeholder detection)
@@ -54,9 +57,6 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			{Name: "test-project", CreatedOn: "2024-03-10T09:15:00Z"},
 		}
 	}
-
-	// Build smart Pages URL with account ID if available
-	pagesURL := BuildCloudflareURL(env.CloudflarePagesURL, accountID)
 
 	// Build dropdown options from projects
 	projectOptions := make([]SelectOption, 0, len(projects)+1)
@@ -150,73 +150,26 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 		c.ExecScript("setTimeout(() => window.location.reload(), 1500)")
 	})
 
-	// Deployment signals
-	deployOutput := c.Signal("")
-	deployInProgress := c.Signal(false)
-	newProjectName := c.Signal("")
-
-	// Build & Deploy action
-	buildDeployAction := c.Action(func() {
-		projectName := fields[5].ValueSignal.String()
-		if projectName == "" || env.IsPlaceholder(projectName) {
-			deployOutput.SetValue("error:Please select or create a project first")
-			c.Sync()
-			return
-		}
-
-		deployInProgress.SetValue(true)
-		deployOutput.SetValue("Starting build and deployment...\n")
-		c.Sync()
-
-		// Run build and deploy
-		result := env.BuildAndDeploy(projectName, mockMode)
-
-		deployInProgress.SetValue(false)
-		if result.Error != nil {
-			deployOutput.SetValue("error:" + result.Output + "\nError: " + result.Error.Error())
-		} else {
-			deployOutput.SetValue("success:" + result.Output)
-		}
-		c.Sync()
-	})
-
-	// Build only action
-	buildOnlyAction := c.Action(func() {
-		deployInProgress.SetValue(true)
-		deployOutput.SetValue("Building Hugo site...\n")
-		c.Sync()
-
-		result := env.BuildHugoSite(mockMode)
-
-		deployInProgress.SetValue(false)
-		if result.Error != nil {
-			deployOutput.SetValue("error:" + result.Output + "\nError: " + result.Error.Error())
-		} else {
-			deployOutput.SetValue("success:" + result.Output)
-		}
-		c.Sync()
-	})
-
 	// Create project action
 	createProjectAction := c.Action(func() {
 		projectName := newProjectName.String()
 		if projectName == "" {
-			deployOutput.SetValue("error:Please enter a project name")
+			createMessage.SetValue("error:Please enter a project name")
 			c.Sync()
 			return
 		}
 
-		deployInProgress.SetValue(true)
-		deployOutput.SetValue("Creating project '" + projectName + "'...\n")
+		createInProgress.SetValue(true)
+		createMessage.SetValue("Creating project '" + projectName + "'...\n")
 		c.Sync()
 
 		result := env.CreatePagesProject(projectName, mockMode)
 
-		deployInProgress.SetValue(false)
+		createInProgress.SetValue(false)
 		if result.Error != nil {
-			deployOutput.SetValue("error:" + result.Output + "\nError: " + result.Error.Error())
+			createMessage.SetValue("error:" + result.Output + "\nError: " + result.Error.Error())
 		} else {
-			deployOutput.SetValue("success:" + result.Output + "\n\nRefreshing page to show new project...")
+			createMessage.SetValue("success:" + result.Output + "\n\nRefreshing page to show new project...")
 			c.Sync()
 			// Reload page to refresh project list
 			c.ExecScript("setTimeout(() => window.location.reload(), 2000)")
@@ -270,18 +223,6 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			h.H2(h.Text("Cloudflare Pages Project")),
 			h.P(h.Text("Select a Pages project to deploy your Hugo site to.")),
 
-			// Show projects loading status - info message
-			h.If(projectsMessage.String() == "info:No projects found in this account",
-				h.Article(
-					h.Style("background-color: var(--pico-ins-background); border-left: 4px solid var(--pico-ins-color); padding: 1rem; margin-bottom: 1rem;"),
-					h.P(
-						h.Style("margin: 0;"),
-						h.Text("No projects found. You can leave this blank and create one later via "),
-						h.A(h.Href(pagesURL), h.Attr("target", "_blank"), h.Text("Workers & Pages ↗")),
-						h.Text("."),
-					),
-				),
-			),
 			// Show projects loading status - error message
 			h.If(strings.HasPrefix(projectsMessage.String(), "error:"),
 				h.Article(
@@ -301,23 +242,6 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				h.Text("Select a Pages project to deploy your Hugo site to"),
 			),
 
-			// Show creation instructions if user wants to create a new project
-			h.Details(
-				h.Style("margin-top: 1.5rem;"),
-				h.Summary(h.Text("How to create a new Cloudflare Pages project")),
-				h.P(h.Text("To create a new project:")),
-				h.Ol(
-					h.Li(h.Text("Visit "), h.A(h.Href(pagesURL), h.Attr("target", "_blank"), h.Text("Workers & Pages ↗"))),
-					h.Li(h.Text("Click 'Create application' → 'Pages' → 'Connect to Git'")),
-					h.Li(h.Text("Follow the setup wizard to connect your repository")),
-					h.Li(h.Text("Once created, return here and refresh to see it in the dropdown")),
-				),
-				h.P(
-					h.Style("margin-top: 1rem;"),
-					h.Strong(h.Text("Project naming rules: ")),
-					h.Text("Lowercase letters, numbers, and hyphens only (1-63 chars). Examples: 'ubuntusoftware-net' or 'my-hugo-site'"),
-				),
-			),
 
 			// Manage Projects section - delete existing projects
 			h.If(len(projects) > 0,
@@ -387,17 +311,14 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				),
 			),
 
-			// Deployment section
+			// Create new project section
 			h.Div(
 				h.Style("margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--pico-muted-border-color);"),
-				h.H2(h.Text("Build & Deploy")),
-				h.P(h.Text("Build your Hugo site and deploy it to Cloudflare Pages.")),
+				h.H2(h.Text("Create New Project")),
+				h.P(h.Text("Create a new Cloudflare Pages project using Wrangler CLI.")),
 
-				// Create new project section
-				h.Details(
+				h.Div(
 					h.Style("margin-bottom: 2rem;"),
-					h.Summary(h.Text("Create New Project via Wrangler")),
-					h.P(h.Text("Enter a project name and create it directly using Wrangler CLI.")),
 					h.Div(
 						h.Style("display: flex; gap: 1rem; align-items: flex-end;"),
 						h.Div(
@@ -415,62 +336,44 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 						),
 						h.Button(
 							h.Text("Create Project"),
-							h.If(deployInProgress.String() == "true", h.Attr("aria-busy", "true")),
-							h.If(deployInProgress.String() == "true", h.Attr("disabled", "disabled")),
+							h.If(createInProgress.String() == "true", h.Attr("aria-busy", "true")),
+							h.If(createInProgress.String() == "true", h.Attr("disabled", "disabled")),
 							createProjectAction.OnClick(),
 						),
 					),
-				),
 
-				// Build and deploy buttons
-				h.Div(
-					h.Style("display: flex; gap: 1rem; margin-bottom: 1rem;"),
-					h.Button(
-						h.Attr("class", "secondary"),
-						h.Text("Build Site Only"),
-						h.If(deployInProgress.String() == "true", h.Attr("aria-busy", "true")),
-						h.If(deployInProgress.String() == "true", h.Attr("disabled", "disabled")),
-						buildOnlyAction.OnClick(),
-					),
-					h.Button(
-						h.Text("Build & Deploy"),
-						h.If(deployInProgress.String() == "true", h.Attr("aria-busy", "true")),
-						h.If(deployInProgress.String() == "true", h.Attr("disabled", "disabled")),
-						buildDeployAction.OnClick(),
-					),
-				),
-
-				// Output display
-				h.If(deployOutput.String() != "",
-					h.Div(
-						h.Style("margin-top: 1.5rem;"),
-						// Success output
-						h.If(strings.HasPrefix(deployOutput.String(), "success:"),
-							h.Article(
-								h.Style("background-color: var(--pico-ins-background); border-left: 4px solid var(--pico-ins-color); padding: 1rem;"),
-								h.Pre(
-									h.Style("margin: 0; white-space: pre-wrap; font-size: 0.875rem; color: var(--pico-ins-color);"),
-									h.Text(strings.TrimPrefix(deployOutput.String(), "success:")),
+					// Output display for project creation
+					h.If(createMessage.String() != "",
+						h.Div(
+							h.Style("margin-top: 1.5rem;"),
+							// Success output
+							h.If(strings.HasPrefix(createMessage.String(), "success:"),
+								h.Article(
+									h.Style("background-color: var(--pico-ins-background); border-left: 4px solid var(--pico-ins-color); padding: 1rem;"),
+									h.Pre(
+										h.Style("margin: 0; white-space: pre-wrap; font-size: 0.875rem; color: var(--pico-ins-color);"),
+										h.Text(strings.TrimPrefix(createMessage.String(), "success:")),
+									),
 								),
 							),
-						),
-						// Error output
-						h.If(strings.HasPrefix(deployOutput.String(), "error:"),
-							h.Article(
-								h.Style("background-color: var(--pico-del-background); border-left: 4px solid var(--pico-del-color); padding: 1rem;"),
-								h.Pre(
-									h.Style("margin: 0; white-space: pre-wrap; font-size: 0.875rem; color: var(--pico-del-color);"),
-									h.Text(strings.TrimPrefix(deployOutput.String(), "error:")),
+							// Error output
+							h.If(strings.HasPrefix(createMessage.String(), "error:"),
+								h.Article(
+									h.Style("background-color: var(--pico-del-background); border-left: 4px solid var(--pico-del-color); padding: 1rem;"),
+									h.Pre(
+										h.Style("margin: 0; white-space: pre-wrap; font-size: 0.875rem; color: var(--pico-del-color);"),
+										h.Text(strings.TrimPrefix(createMessage.String(), "error:")),
+									),
 								),
 							),
-						),
-						// In-progress output
-						h.If(!strings.HasPrefix(deployOutput.String(), "success:") && !strings.HasPrefix(deployOutput.String(), "error:"),
-							h.Article(
-								h.Style("background-color: var(--pico-card-background-color); border-left: 4px solid var(--pico-primary); padding: 1rem;"),
-								h.Pre(
-									h.Style("margin: 0; white-space: pre-wrap; font-size: 0.875rem;"),
-									h.Text(deployOutput.String()),
+							// In-progress output
+							h.If(!strings.HasPrefix(createMessage.String(), "success:") && !strings.HasPrefix(createMessage.String(), "error:"),
+								h.Article(
+									h.Style("background-color: var(--pico-card-background-color); border-left: 4px solid var(--pico-primary); padding: 1rem;"),
+									h.Pre(
+										h.Style("margin: 0; white-space: pre-wrap; font-size: 0.875rem;"),
+										h.Text(createMessage.String()),
+									),
 								),
 							),
 						),
@@ -485,8 +388,8 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				h.Button(h.Text("Finish & Save"), finishAction.OnClick()),
 			),
 
-			RenderSaveMessage(saveMessage)[0],
-			RenderSaveMessage(saveMessage)[1],
+			RenderErrorMessage(saveMessage),
+			RenderSuccessMessage(saveMessage),
 		)
 	})
 }

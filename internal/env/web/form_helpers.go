@@ -139,28 +139,30 @@ func CreateSaveAction(c *via.Context, svc *env.Service, fields []FormFieldData, 
 	}
 }
 
-// RenderSaveMessage renders the save message with PicoCSS alert styling
-func RenderSaveMessage(saveMessage interface{ String() string }) []h.H {
-	return []h.H{
-		h.If(strings.HasPrefix(saveMessage.String(), "error:"),
-			h.Article(
-				h.Style("background-color: var(--pico-del-background); border-left: 4px solid var(--pico-del-color); padding: 1rem; margin-top: 1rem;"),
-				h.P(
-					h.Style("margin: 0; color: var(--pico-del-color);"),
-					h.Text(strings.TrimPrefix(saveMessage.String(), "error:")),
-				),
+// RenderErrorMessage renders error messages with PicoCSS alert styling
+func RenderErrorMessage(saveMessage interface{ String() string }) h.H {
+	return h.If(strings.HasPrefix(saveMessage.String(), "error:"),
+		h.Article(
+			h.Style("background-color: var(--pico-del-background); border-left: 4px solid var(--pico-del-color); padding: 1rem; margin-top: 1rem;"),
+			h.P(
+				h.Style("margin: 0; color: var(--pico-del-color);"),
+				h.Text(strings.TrimPrefix(saveMessage.String(), "error:")),
 			),
 		),
-		h.If(strings.HasPrefix(saveMessage.String(), "success:"),
-			h.Article(
-				h.Style("background-color: var(--pico-ins-background); border-left: 4px solid var(--pico-ins-color); padding: 1rem; margin-top: 1rem;"),
-				h.P(
-					h.Style("margin: 0; color: var(--pico-ins-color);"),
-					h.Text(strings.TrimPrefix(saveMessage.String(), "success:")),
-				),
+	)
+}
+
+// RenderSuccessMessage renders success messages with PicoCSS alert styling
+func RenderSuccessMessage(saveMessage interface{ String() string }) h.H {
+	return h.If(strings.HasPrefix(saveMessage.String(), "success:"),
+		h.Article(
+			h.Style("background-color: var(--pico-ins-background); border-left: 4px solid var(--pico-ins-color); padding: 1rem; margin-top: 1rem;"),
+			h.P(
+				h.Style("margin: 0; color: var(--pico-ins-color);"),
+				h.Text(strings.TrimPrefix(saveMessage.String(), "success:")),
 			),
 		),
-	}
+	)
 }
 
 // RenderNavigation renders the navigation menu

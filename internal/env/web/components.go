@@ -8,7 +8,7 @@ import (
 )
 
 // renderNavigation renders the shared navigation menu
-// currentPage: "home", "cloudflare", or "claude"
+// currentPage: "home", "cloudflare", "claude", or "deploy"
 func renderNavigation(currentPage string) h.H {
 	// Helper to render a nav item (link or bold text)
 	navItem := func(page, label, href string) h.H {
@@ -23,6 +23,7 @@ func renderNavigation(currentPage string) h.H {
 			navItem("home", "Overview", "/"),
 			navItem("cloudflare", "Cloudflare", "/cloudflare"),
 			navItem("claude", "Claude AI", "/claude"),
+			navItem("deploy", "Deploy", "/deploy"),
 		),
 	)
 }
@@ -46,7 +47,7 @@ type ConfigTableRow struct {
 }
 
 // BuildConfigTableRows builds the configuration overview table data
-func BuildConfigTableRows(mockMode bool) ([]ConfigTableRow, string, error) {
+func BuildConfigTableRows(mockMode bool, skipValidation bool) ([]ConfigTableRow, string, error) {
 	svc := env.NewService(mockMode)
 
 	// Get current config
@@ -61,50 +62,79 @@ func BuildConfigTableRows(mockMode bool) ([]ConfigTableRow, string, error) {
 		envPath = ".env" // fallback
 	}
 
-	// Validate all fields to get current status
-	validationResults := env.ValidateAllWithMode(cfg, mockMode)
+	var webRows []ConfigTableRow
 
-	// Build table rows from validation results
-	webRows := make([]ConfigTableRow, 0, len(validationResults))
-	for _, result := range validationResults {
-		// Get the key name from the display name (result.Name is DisplayName)
-		keyName := env.GetKeyFromDisplayName(result.Name)
-		fieldInfo := env.GetFieldInfo(keyName)
+	if skipValidation {
+		// Fast path: Build rows without validation - just show config values
+		allFields := env.GetAllFieldsInOrder()
+		webRows = make([]ConfigTableRow, 0, len(allFields))
 
-		// Determine "Required" status
-		required := "-"
-		if fieldInfo != nil && fieldInfo.SyncToGitHub {
-			required = "Yes"
-		}
-
-		// Determine "Validated" status
-		validated := "-"
-		if !result.Skipped {
-			if result.Valid {
-				validated = "✓"
-			} else {
-				validated = "✗"
+		for _, field := range allFields {
+			// Determine "Required" status
+			required := "-"
+			if field.SyncToGitHub {
+				required = "Yes"
 			}
+
+			// Get display value (formatted/masked)
+			value := cfg.Get(field.Key)
+			displayValue := formatValueForDisplay(value)
+
+			webRows = append(webRows, ConfigTableRow{
+				Display:   field.DisplayName,
+				Key:       field.Key,
+				Value:     displayValue,
+				Required:  required,
+				Validated: "-", // No validation performed
+				Error:     "-", // No validation performed
+			})
 		}
+	} else {
+		// Slow path: Validate all fields to get current status
+		validationResults := env.ValidateAllWithMode(cfg, mockMode)
 
-		// Get error message
-		errorMsg := "-"
-		if result.Error != nil {
-			errorMsg = result.Error.Error()
+		// Build table rows from validation results
+		webRows = make([]ConfigTableRow, 0, len(validationResults))
+		for _, result := range validationResults {
+			// Get the key name from the display name (result.Name is DisplayName)
+			keyName := env.GetKeyFromDisplayName(result.Name)
+			fieldInfo := env.GetFieldInfo(keyName)
+
+			// Determine "Required" status
+			required := "-"
+			if fieldInfo != nil && fieldInfo.SyncToGitHub {
+				required = "Yes"
+			}
+
+			// Determine "Validated" status
+			validated := "-"
+			if !result.Skipped {
+				if result.Valid {
+					validated = "✓"
+				} else {
+					validated = "✗"
+				}
+			}
+
+			// Get error message
+			errorMsg := "-"
+			if result.Error != nil {
+				errorMsg = result.Error.Error()
+			}
+
+			// Get display value (formatted/masked)
+			value := cfg.Get(keyName)
+			displayValue := formatValueForDisplay(value)
+
+			webRows = append(webRows, ConfigTableRow{
+				Display:   result.Name,
+				Key:       keyName,
+				Value:     displayValue,
+				Required:  required,
+				Validated: validated,
+				Error:     errorMsg,
+			})
 		}
-
-		// Get display value (formatted/masked)
-		value := cfg.Get(keyName)
-		displayValue := formatValueForDisplay(value)
-
-		webRows = append(webRows, ConfigTableRow{
-			Display:   result.Name,
-			Key:       keyName,
-			Value:     displayValue,
-			Required:  required,
-			Validated: validated,
-			Error:     errorMsg,
-		})
 	}
 
 	return webRows, envPath, nil
@@ -121,4 +151,30 @@ func formatValueForDisplay(value string) string {
 		return preview
 	}
 	return value
+}
+
+// RenderURLLink renders a clickable URL link with an icon
+func RenderURLLink(url, label, icon string) h.H {
+	if url == "" {
+		return h.Text("")
+	}
+
+	return h.Div(
+		h.Style("margin: 1rem 0; padding: 1rem; background-color: var(--pico-card-background-color); border-radius: 0.5rem;"),
+		h.P(
+			h.Style("margin: 0; display: flex; align-items: center; gap: 0.5rem;"),
+			h.Span(
+				h.Style("font-size: 1.5rem;"),
+				h.Text(icon),
+			),
+			h.Strong(h.Text(label+": ")),
+			h.A(
+				h.Href(url),
+				h.Attr("target", "_blank"),
+				h.Attr("rel", "noopener noreferrer"),
+				h.Style("color: var(--pico-primary);"),
+				h.Text(url),
+			),
+		),
+	)
 }

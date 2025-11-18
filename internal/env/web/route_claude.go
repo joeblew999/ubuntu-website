@@ -72,8 +72,8 @@ func claudePage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			),
 
 			// Save message using helper
-			RenderSaveMessage(saveMessage)[0],
-			RenderSaveMessage(saveMessage)[1],
+			RenderErrorMessage(saveMessage),
+			RenderSuccessMessage(saveMessage),
 		)
 	})
 }

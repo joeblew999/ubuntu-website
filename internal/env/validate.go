@@ -114,35 +114,6 @@ func ValidateAllWithMode(cfg *EnvConfig, mockMode bool) []ValidationResult {
 	return results
 }
 
-// PrintValidationResults prints validation results in a table format
-func PrintValidationResults(results []ValidationResult, cfg *EnvConfig) {
-	printHeader("Credential Validation", "")
-
-	// Build table rows using helper
-	rows := buildRowsFromValidation(results, cfg)
-	renderCredentialTable(rows)
-
-	fmt.Println()
-
-	// Count results for summary
-	valid, invalid, skipped := countValidationResults(results)
-
-	// Summary
-	parts := []string{}
-	if valid > 0 {
-		parts = append(parts, fmt.Sprintf("Valid: %d", valid))
-	}
-	if invalid > 0 {
-		parts = append(parts, fmt.Sprintf("Invalid: %d", invalid))
-	}
-	if skipped > 0 {
-		parts = append(parts, fmt.Sprintf("Not set: %d", skipped))
-	}
-
-	fmt.Printf("  %s\n", joinParts(parts))
-	printFooter("")
-}
-
 // HasInvalidCredentials returns true if any credentials are invalid
 func HasInvalidCredentials(results []ValidationResult) bool {
 	for _, result := range results {

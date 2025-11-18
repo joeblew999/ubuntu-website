@@ -80,16 +80,6 @@ tasks:
   # Environment Management
   # ============================================================================
 
-  env:local:setup:
-    desc: "Validate local .env credentials"
-    cmds:
-      - go run {{.ENV_CMD}} local-setup
-
-  env:local:list:
-    desc: "List local .env configuration"
-    cmds:
-      - go run {{.ENV_CMD}} local-list
-
   env:web:gui:
     desc: "Open web GUI for environment setup"
     cmds:
@@ -99,23 +89,6 @@ tasks:
     desc: "Open web GUI with mock validation (for testing)"
     cmds:
       - go run {{.ENV_CMD}} web-gui-mock
-
-  env:gh:list:
-    desc: "List GitHub secrets"
-    cmds:
-      - go run {{.ENV_CMD}} gh-list
-
-  env:gh:push:
-    desc: "Push .env to GitHub secrets"
-    cmds:
-      - go run {{.ENV_CMD}} gh-push {{.CLI_ARGS}}
-
-  env:all:
-    desc: "Complete environment workflow (setup → push to GitHub)"
-    cmds:
-      - task: env:local:setup
-      - task: env:gh:push
-      - task: env:gh:list
 
   # ============================================================================
   # Development

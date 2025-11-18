@@ -6,29 +6,75 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
-// homePage creates a static welcome page with navigation (no reactive forms)
+// homePage creates a welcome page with optional validation
 func homePage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
-	// Build configuration table data
-	tableRows, envPath, err := BuildConfigTableRows(mockMode)
-	var configTableElement h.H
+	// Reactive signals for validation state
+	isValidated := c.Signal(false) // Track if we've run validation
+	validationInProgress := c.Signal(false)
+	validationMessage := c.Signal("")
 
-	if err != nil {
-		configTableElement = h.P(h.Text("Error loading configuration: " + err.Error()))
-	} else {
-		configTableElement = renderConfigTable(tableRows, envPath)
-	}
+	// Validate action - trigger validation on demand
+	validateAction := c.Action(func() {
+		validationInProgress.SetValue(true)
+		validationMessage.SetValue("Validating credentials...")
+		c.Sync()
+
+		// Just set the flag - the view will regenerate with validation
+		validationInProgress.SetValue(false)
+		isValidated.SetValue(true)
+		validationMessage.SetValue("Validation complete!")
+		c.Sync()
+	})
 
 	c.View(func() h.H {
+		// Build table data based on validation state
+		// This runs every time the view is rendered
+		skipValidation := isValidated.String() != "true"
+		tableRows, envPath, err := BuildConfigTableRows(mockMode, skipValidation)
+
+		var configTableElement h.H
+		if err != nil {
+			configTableElement = h.Article(
+				h.Style("background-color: var(--pico-del-background); border-left: 4px solid var(--pico-del-color); padding: 1rem; margin-bottom: 1rem;"),
+				h.P(
+					h.Style("margin: 0; color: var(--pico-del-color);"),
+					h.Text("Error loading configuration: "+err.Error()),
+				),
+			)
+		} else {
+			configTableElement = renderConfigTable(tableRows, envPath)
+		}
+
 		return h.Main(
 			h.Class("container"),
 			h.H1(h.Text("Environment Setup")),
 			h.P(h.Text("Configure your Cloudflare and Claude credentials for deployment and translation")),
 
 			// Navigation
-			renderNavigation("home"),
+			RenderNavigation("home"),
 
 			// Configuration Overview Table
 			h.H2(h.Text("Configuration Overview")),
+
+			// Validate button and status message
+			h.Div(
+				h.Style("margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;"),
+				h.Button(
+					h.Text("Validate Credentials"),
+					h.If(validationInProgress.String() == "true", h.Attr("aria-busy", "true")),
+					h.If(validationInProgress.String() == "true", h.Attr("disabled", "disabled")),
+					h.If(isValidated.String() == "true", h.Attr("disabled", "disabled")),
+					validateAction.OnClick(),
+				),
+				h.If(validationMessage.String() != "",
+					h.Span(
+						h.Style("color: var(--pico-ins-color);"),
+						h.Text(validationMessage.String()),
+					),
+				),
+			),
+
+			// Render table
 			configTableElement,
 
 			// Status overview (non-interactive)
@@ -56,6 +102,16 @@ func homePage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 						h.Style("text-decoration: none; color: inherit;"),
 						h.H3(h.Text("Claude AI Setup")),
 						h.P(h.Text("Configure Claude AI credentials for content translation")),
+					),
+				),
+
+				// Deploy Card
+				h.Article(
+					h.A(
+						h.Href("/deploy"),
+						h.Style("text-decoration: none; color: inherit;"),
+						h.H3(h.Text("Deploy Site")),
+						h.P(h.Text("Build and deploy your Hugo site to Cloudflare Pages")),
 					),
 				),
 			),

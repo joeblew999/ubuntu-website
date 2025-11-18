@@ -103,5 +103,9 @@ func serveSetupGUIWithOptions(mockMode bool) {
 		claudePage(c, loadConfig(), mockMode)
 	})
 
+	v.Page("/deploy", func(c *via.Context) {
+		deployPage(c, loadConfig(), mockMode)
+	})
+
 	v.Start()
 }
