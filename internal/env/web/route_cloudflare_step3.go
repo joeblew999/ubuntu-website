@@ -21,6 +21,19 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 		env.KeyCloudflareZoneID,
 	})
 
+	// Pre-populate domain dropdown with saved domain+zone if both exist
+	// fields[2] is the domain field - we need to set it to "domain|zoneID" format for the dropdown
+	savedDomain := cfg.Get(env.KeyCloudflareDomain)
+	savedZoneID := cfg.Get(env.KeyCloudflareZoneID)
+	if savedDomain != "" && savedZoneID != "" && !env.IsPlaceholder(savedDomain) && !env.IsPlaceholder(savedZoneID) {
+		// Replace fields[2] with the combined value for dropdown binding
+		fields[2] = FormFieldData{
+			EnvKey:       env.KeyCloudflareDomain,
+			ValueSignal:  c.Signal(savedDomain + "|" + savedZoneID),
+			StatusSignal: fields[2].StatusSignal,
+		}
+	}
+
 	saveMessage := c.Signal("")
 	zonesMessage := c.Signal("") // For zones loading status
 
@@ -120,23 +133,6 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 		// Build smart "Add Site" URL with account ID if available
 		accountID := cfg.Get(env.KeyCloudflareAccountID)
 		addSiteURL := BuildCloudflareURL(env.CloudflareAddSiteURL, accountID)
-
-		// Pre-populate dropdown with saved domain+zone if both exist (only on first load)
-		// This allows the dropdown to remember the previously selected domain
-		savedDomain := cfg.Get(env.KeyCloudflareDomain)
-		savedZoneID := cfg.Get(env.KeyCloudflareZoneID)
-		if savedDomain != "" && savedZoneID != "" && !env.IsPlaceholder(savedDomain) && !env.IsPlaceholder(savedZoneID) {
-			// fields[2] is the domain field - check if it needs initialization
-			if fields[2].ValueSignal.String() == "" {
-				// We can't call SetValue here in the view, so we need to set it at initialization
-				// Let's use a different approach - just rebuild the signal
-				fields[2] = FormFieldData{
-					EnvKey:       env.KeyCloudflareDomain,
-					ValueSignal:  c.Signal(savedDomain + "|" + savedZoneID),
-					StatusSignal: fields[2].StatusSignal,
-				}
-			}
-		}
 
 		return h.Main(
 			h.Class("container"),
