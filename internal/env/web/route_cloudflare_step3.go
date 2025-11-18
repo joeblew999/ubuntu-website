@@ -92,7 +92,6 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 		}
 
 		results, err := svc.ValidateAndUpdateFields(fieldUpdates)
-		UpdateValidationStatus(results, fields, c)
 
 		if err != nil {
 			saveMessage.SetValue("error:" + err.Error())
