@@ -1,6 +1,8 @@
 ######################## default configuration ####################
 # The base URL of your site (required). This will be prepended to all relative URLs.
-baseURL = "https://www.ubuntusoftware.net"
+# Use relative URLs by default for preview deployments
+# Production override in config/production/config.toml
+baseURL = "/"
 # Title of your website (required).
 title = "Ubuntu Software"
 # Your theme name
