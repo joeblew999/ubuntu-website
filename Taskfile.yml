@@ -130,13 +130,17 @@ tasks:
       - task: install:deps
 
   install:hugo:
-    desc: Install Hugo Extended via Go
+    desc: Install Hugo Extended (via Homebrew)
     cmds:
-      - echo "Installing Hugo Extended..."
-      - go install -tags extended github.com/gohugoio/hugo@latest
-      - hugo version
-    env:
-      CGO_ENABLED: '{{.CGO_ENABLED}}'
+      - |
+        if command -v hugo &> /dev/null; then
+          echo "Hugo already installed"
+          hugo version
+        else
+          echo "Installing Hugo Extended via Homebrew..."
+          brew install hugo
+          hugo version
+        fi
 
   install:bun:
     desc: Install Bun
