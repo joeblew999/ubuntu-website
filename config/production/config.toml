@@ -1,4 +1,5 @@
 # Production-specific configuration
 # This is used when building with: hugo -e production
+# Ensures absolute URLs for SEO and social sharing
 
 baseURL = "https://www.ubuntusoftware.net"
