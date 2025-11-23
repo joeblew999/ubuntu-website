@@ -7,6 +7,19 @@ vars:
   PROJECT_NAME: ubuntu-website
   DOMAIN: www.ubuntusoftware.net
 
+  # Cloudflare Account
+  CF_ACCOUNT_ID: 7384af54e33b8a54ff240371ea368440
+
+  # Deployment URLs
+  URL_PRODUCTION: https://www.ubuntusoftware.net
+  URL_PREVIEW: https://ubuntu-website.pages.dev
+
+  # Cloudflare Dashboard URLs
+  CF_DASH_BASE: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}
+  CF_DASH_DOMAIN: '{{.CF_DASH_BASE}}/ubuntusoftware.net'
+  CF_DASH_PAGES: '{{.CF_DASH_BASE}}/pages/view/{{.PROJECT_NAME}}'
+  CF_DASH_PAGES_SETTINGS: '{{.CF_DASH_PAGES}}/settings/production'
+
   # Commands
   ENV_CMD: cmd/env/main.go
   TRANSLATE_CMD: cmd/translate/main.go
@@ -39,6 +52,51 @@ vars:
   WRANGLER_CMD: bunx wrangler
 
 tasks:
+  # ============================================================================
+  # Default & Info
+  # ============================================================================
+
+  default:
+    desc: Show project information (runs when you type 'task')
+    cmds:
+      - task: info
+
+  info:
+    desc: Show all URLs and project information
+    cmds:
+      - |
+        echo "========================================"
+        echo "Ubuntu Website - Project Info"
+        echo "========================================"
+        echo ""
+        echo "Project: {{.PROJECT_NAME}}"
+        echo "Domain: {{.DOMAIN}}"
+        echo ""
+        echo "Production URLs:"
+        echo "  Main: {{.URL_PRODUCTION}}"
+        echo "  Preview: {{.URL_PREVIEW}}"
+        echo ""
+        COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+        if [ "$COMMIT" != "unknown" ]; then
+          echo "Current Commit Preview:"
+          echo "  https://$COMMIT.ubuntu-website.pages.dev"
+          echo ""
+        fi
+        echo "Cloudflare Dashboards:"
+        echo "  Domain: {{.CF_DASH_DOMAIN}}"
+        echo "  Pages: {{.CF_DASH_PAGES}}"
+        echo "  Settings: {{.CF_DASH_PAGES_SETTINGS}}"
+        echo ""
+        echo "Quick Commands:"
+        echo "  task setup             - Install Hugo, Bun, dependencies"
+        echo "  task dev               - Start development server"
+        echo "  task build             - Build production site"
+        echo "  task git:deploy        - Commit and deploy to production"
+        echo "  task cf:status         - Check deployment status"
+        echo "  task url:prod          - Open production site"
+        echo "  task help              - Show all available tasks"
+        echo "========================================"
+
   # ============================================================================
   # Setup & Installation
   # ============================================================================
@@ -169,18 +227,44 @@ tasks:
   cf:status:
     desc: Check deployment status
     cmds:
+      - |
+        echo "========================================"
+        echo "Cloudflare Pages Status"
+        echo "========================================"
+        echo "Project: {{.PROJECT_NAME}}"
+        echo ""
+        echo "URLs:"
+        echo "  Production: {{.URL_PRODUCTION}}"
+        echo "  Preview: {{.URL_PREVIEW}}"
+        echo ""
+        echo "Dashboards:"
+        echo "  Pages: {{.CF_DASH_PAGES}}"
+        echo "  Settings: {{.CF_DASH_PAGES_SETTINGS}}"
+        echo ""
+        echo "Recent Deployments:"
+        echo "========================================"
       - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}}'
 
   cf:logs:
     desc: View deployment logs
     cmds:
-      - 'echo "Recent deployments:"'
+      - |
+        echo "========================================"
+        echo "Recent Deployments"
+        echo "========================================"
+        echo "Dashboard: {{.CF_DASH_PAGES}}"
+        echo ""
       - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}} | head -10'
 
   cf:tail:
     desc: Tail latest deployment logs
     cmds:
-      - 'echo "Tailing deployment logs..."'
+      - |
+        echo "========================================"
+        echo "Tailing Deployment Logs"
+        echo "========================================"
+        echo "Dashboard: {{.CF_DASH_PAGES}}"
+        echo ""
       - '{{.WRANGLER_CMD}} pages deployment tail --project-name={{.PROJECT_NAME}}'
 
   cf:secret:set:
@@ -302,12 +386,36 @@ tasks:
       - git push
       - |
         REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"' 2>/dev/null || echo "")
+        COMMIT=$(git rev-parse --short HEAD)
+
+        echo ""
+        echo "========================================"
+        echo "Deployment Triggered"
+        echo "========================================"
+
         if [ -n "$REPO" ]; then
-          echo ""
-          echo "✓ Pushed to: https://github.com/$REPO"
-          echo "🚀 Cloudflare Pages will automatically deploy this commit"
-          echo ""
+          echo "GitHub: https://github.com/$REPO"
         fi
+
+        echo ""
+        echo "Production URL:"
+        echo "  {{.URL_PRODUCTION}}"
+        echo ""
+        echo "Preview URL:"
+        echo "  {{.URL_PREVIEW}}"
+        echo ""
+        echo "Commit Preview (after deployment):"
+        echo "  https://$COMMIT.ubuntu-website.pages.dev"
+        echo ""
+        echo "Cloudflare Dashboards:"
+        echo "  Pages: {{.CF_DASH_PAGES}}"
+        echo "  Settings: {{.CF_DASH_PAGES_SETTINGS}}"
+        echo ""
+        echo "Quick Commands:"
+        echo "  task cf:status  - Check deployment status"
+        echo "  task cf:logs    - View deployment logs"
+        echo "  task url:prod   - Open production site"
+        echo "========================================"
 
   git:deploy:
     desc: Quick commit and deploy to Cloudflare Pages
@@ -321,9 +429,25 @@ tasks:
     cmds:
       - git checkout -b preview/{{.BRANCH}}
       - git push -u origin preview/{{.BRANCH}}
-      - 'echo "✓ Preview branch created: preview/{{.BRANCH}}"'
-      - 'echo "🔍 Cloudflare Pages will create a preview deployment"'
-      - 'echo "Check status with: task cf:status"'
+      - |
+        COMMIT=$(git rev-parse --short HEAD)
+
+        echo ""
+        echo "========================================"
+        echo "Preview Branch Created"
+        echo "========================================"
+        echo "Branch: preview/{{.BRANCH}}"
+        echo ""
+        echo "Preview URLs (after deployment):"
+        echo "  Main: {{.URL_PREVIEW}}"
+        echo "  Commit: https://$COMMIT.ubuntu-website.pages.dev"
+        echo ""
+        echo "Dashboard: {{.CF_DASH_PAGES}}"
+        echo ""
+        echo "Quick Commands:"
+        echo "  task cf:status  - Check deployment status"
+        echo "  task cf:logs    - View deployment logs"
+        echo "========================================"
     requires:
       vars: [BRANCH]
 
@@ -344,6 +468,42 @@ tasks:
       - 'echo ""'
       - 'echo "Latest deployments:"'
       - task: cf:logs
+
+  # ============================================================================
+  # URL Helpers
+  # ============================================================================
+
+  url:prod:
+    desc: Open production website in browser
+    cmds:
+      - open {{.URL_PRODUCTION}}
+
+  url:preview:
+    desc: Open preview website in browser
+    cmds:
+      - open {{.URL_PREVIEW}}
+
+  url:commit:
+    desc: Open commit preview URL in browser
+    cmds:
+      - |
+        COMMIT=$(git rev-parse --short HEAD)
+        open https://$COMMIT.ubuntu-website.pages.dev
+
+  cf:open:
+    desc: Open Cloudflare Pages dashboard in browser
+    cmds:
+      - open {{.CF_DASH_PAGES}}
+
+  cf:open:settings:
+    desc: Open Cloudflare Pages settings in browser
+    cmds:
+      - open {{.CF_DASH_PAGES_SETTINGS}}
+
+  cf:open:domain:
+    desc: Open domain dashboard in browser
+    cmds:
+      - open {{.CF_DASH_DOMAIN}}
 
   # ============================================================================
   # Help
