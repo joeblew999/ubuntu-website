@@ -171,6 +171,29 @@ tasks:
     cmds:
       - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}}'
 
+  cf:logs:
+    desc: View deployment logs
+    cmds:
+      - echo "📋 Recent deployments:"
+      - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}} | head -10'
+
+  cf:tail:
+    desc: Tail latest deployment logs
+    cmds:
+      - echo "📡 Tailing deployment logs..."
+      - '{{.WRANGLER_CMD}} pages deployment tail --project-name={{.PROJECT_NAME}}'
+
+  cf:secret:set:
+    desc: Set a secret for Cloudflare Pages (e.g., HUGO_VERSION)
+    cmds:
+      - echo "Setting secret for Pages project..."
+      - '{{.WRANGLER_CMD}} pages secret put {{.CLI_ARGS}} --project-name={{.PROJECT_NAME}}'
+
+  cf:secret:list:
+    desc: List secrets for Cloudflare Pages
+    cmds:
+      - '{{.WRANGLER_CMD}} pages secret list --project-name={{.PROJECT_NAME}}'
+
   cf:delete:
     desc: "[DANGEROUS] Delete Cloudflare Pages project"
     cmds:
