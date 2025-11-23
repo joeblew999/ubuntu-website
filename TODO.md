@@ -1,5 +1,11 @@
 # todo
 
+
+Option 2: Fix Custom Domain Setup (Technical, unblocks production)
+Debug and fix the Cloudflare domain API integration (currently failing)
+
+---
+
 CLAUDE: If your seeing this, you can just move anything done to the DONE area. KEEP IT KISS - the code is self documenting, so just move it and change anything you need to make it accurate but kiss.
 
 ## DONE

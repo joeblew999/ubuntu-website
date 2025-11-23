@@ -1,51 +1,55 @@
 ---
 # Banner
 banner:
-  title: "The Ultimate Starter Template You Need To Start Your Hugo Project"
-  content: "Hugoplate is a free starter template built with Hugo and TailwindCSS, providing everything you need to jumpstart your Hugo project and save valuable time."
+  title: "Expert IT Consulting & Software Architecture"
+  content: "Ubuntu Software delivers enterprise-scale solutions in distributed systems, cloud infrastructure, and DevOps. 25+ years of proven expertise serving Fortune 500 companies and international organizations."
   image: "/images/banner.png"
   button:
     enable: true
-    label: "Get Started For Free"
-    link: "https://github.com/zeon-studio/hugoplate"
+    label: "Learn More"
+    link: "/about"
 
 # Features
 features:
-  - title: "What's Included in Hugoplate"
+  - title: "World-Class Technical Expertise"
     image: "/images/service-1.png"
-    content: "Hugoplate is a comprehensive starter template that includes everything you need to get started with your Hugo project. What's Included in Hugoplate"
+    content: "Senior IT consultant and software architect with extensive international experience delivering complex systems for leading organizations worldwide."
     bulletpoints:
-      - "10+ Pre-build pages"
-      - "95+ Google Pagespeed Score"
-      - "Build with Hugo and TailwindCSS for easy and customizable styling"
-      - "Fully responsive on all devices"
-      - "SEO-optimized for better search engine rankings"
-      - "**Open-source and free** for personal and commercial use"
+      - "25+ years professional experience"
+      - "Distributed systems and real-time architectures"
+      - "Cloud platforms: AWS, GCP, Azure"
+      - "Container orchestration: Kubernetes, Docker"
+      - "Enterprise-scale system delivery"
+      - "Technical leadership for teams up to 70 developers"
     button:
       enable: false
-      label: "Get Started Now"
-      link: "#"
+      label: ""
+      link: ""
 
-  - title: "Discover the Key Features Of Hugo"
+  - title: "Notable Client Experience"
     image: "/images/service-2.png"
-    content: "Hugo is an all-in-one web framework for building fast, content-focused websites. It offers a range of exciting features for developers and website creators. Some of the key features are:"
+    content: "Proven track record delivering mission-critical systems for government organizations, major corporations, and Fortune 500 companies across Europe and beyond."
     bulletpoints:
-      - "Zero JS, by default: No JavaScript runtime overhead to slow you down."
-      - "Customizable: Tailwind, MDX, and 100+ other integrations to choose from."
-      - "UI-agnostic: Supports React, Preact, Svelte, Vue, Solid, Lit and more."
+      - "German Federal Ministry of Health (BMG)"
+      - "European Union and European Climate Foundation"
+      - "Metro AG - 7,000 Kubernetes server deployment"
+      - "Audi AG - Autonomous transport systems"
+      - "BP, Nomura Bank, ABN AMRO Bank"
     button:
       enable: true
-      label: "Get Started Now"
-      link: "https://github.com/zeon-studio/hugoplate"
+      label: "View Full Portfolio"
+      link: "/about"
 
-  - title: "The Top Reasons to Choose Hugo for Your Hugo Project"
+  - title: "Modern Technology Stack"
     image: "/images/service-3.png"
-    content: "With Hugo, you can build modern and content-focused websites without sacrificing performance or ease of use."
+    content: "Specializing in cutting-edge technologies and modern development practices to deliver high-performance, scalable solutions."
     bulletpoints:
-      - "Instantly load static sites for better user experience and SEO."
-      - "Intuitive syntax and support for popular frameworks make learning and using Hugo a breeze."
-      - "Use any front-end library or framework, or build custom components, for any project size."
-      - "Built on cutting-edge technology to keep your projects up-to-date with the latest web standards."
+      - "Go, Rust, C#/.NET, JavaScript/TypeScript, Python"
+      - "Distributed systems and event-driven architecture"
+      - "Real-time systems and streaming technologies"
+      - "Infrastructure as Code and CI/CD automation"
+      - "Mobile and desktop application development (Flutter)"
+      - "SQL and NoSQL databases"
     button:
       enable: false
       label: ""
