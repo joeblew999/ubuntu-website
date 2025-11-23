@@ -4,7 +4,7 @@ dotenv: ['.env']
 
 vars:
   # Project
-  PROJECT_NAME: ubuntusoftware-net
+  PROJECT_NAME: ubuntu-website
   DOMAIN: www.ubuntusoftware.net
 
   # Commands
