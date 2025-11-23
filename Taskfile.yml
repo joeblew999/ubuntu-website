@@ -66,10 +66,26 @@ tasks:
     desc: Show all URLs and project information
     cmds:
       - |
+        # Get branch info
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+
         echo "========================================"
         echo "Ubuntu Website - Project Info"
         echo "========================================"
         echo ""
+
+        # Branch Status - PROMINENT DISPLAY
+        echo "========== GIT BRANCH =========="
+        if [ "$CURRENT_BRANCH" = "main" ]; then
+          echo "WARNING: You are on MAIN branch"
+          echo "Commits will deploy to PRODUCTION!"
+        else
+          echo "Current branch: $CURRENT_BRANCH"
+          echo "(Safe to commit - preview deployment)"
+        fi
+        echo "================================"
+        echo ""
+
         echo "Project: {{.PROJECT_NAME}}"
         echo "Domain: {{.DOMAIN}}"
         echo ""
@@ -161,9 +177,17 @@ tasks:
     desc: Start Hugo development server
     cmds:
       - |
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+
         echo "========================================"
         echo "Hugo Development Server"
         echo "========================================"
+        echo ""
+        if [ "$CURRENT_BRANCH" = "main" ]; then
+          echo "Branch: MAIN (production)"
+        else
+          echo "Branch: $CURRENT_BRANCH (preview)"
+        fi
         echo ""
         echo "Local URL: {{.URL_DEV}}"
         echo ""
@@ -389,6 +413,21 @@ tasks:
   git:status:
     desc: Show git status and recent commits
     cmds:
+      - |
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+
+        echo "========================================"
+        echo "GIT STATUS"
+        echo "========================================"
+        echo ""
+        echo "========== CURRENT BRANCH =========="
+        if [ "$CURRENT_BRANCH" = "main" ]; then
+          echo "WARNING: Branch: MAIN (production)"
+        else
+          echo "Branch: $CURRENT_BRANCH (preview)"
+        fi
+        echo "===================================="
+        echo ""
       - git status
       - 'echo ""'
       - 'echo "Recent commits:"'
@@ -397,27 +436,66 @@ tasks:
   git:commit:
     desc: Generate gitignore, commit and push changes (triggers Cloudflare deployment)
     cmds:
+      - |
+        # Check current branch
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+
+        echo ""
+        echo "========================================"
+        echo "GIT COMMIT & PUSH"
+        echo "========================================"
+        echo "Branch: $CURRENT_BRANCH"
+        echo ""
+
+        if [ "$CURRENT_BRANCH" = "main" ]; then
+          echo "WARNING WARNING WARNING WARNING WARNING"
+          echo ""
+          echo "You are committing to MAIN branch!"
+          echo "This will trigger PRODUCTION deployment"
+          echo "to: {{.URL_PRODUCTION}}"
+          echo ""
+          echo "WARNING WARNING WARNING WARNING WARNING"
+          echo ""
+          echo "Press Ctrl+C to cancel, or"
+          read -p "Type 'DEPLOY' to continue: " CONFIRM
+          if [ "$CONFIRM" != "DEPLOY" ]; then
+            echo "Cancelled."
+            exit 1
+          fi
+        else
+          echo "Safe: Preview deployment only"
+          echo ""
+        fi
+
       - task: generate:gitignore
       - git add -A
       - git commit -m "{{.MESSAGE}}" || true
       - git push
       - |
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
         REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"' 2>/dev/null || echo "")
         COMMIT=$(git rev-parse --short HEAD)
 
         echo ""
         echo "========================================"
-        echo "Deployment Triggered"
+        if [ "$CURRENT_BRANCH" = "main" ]; then
+          echo "PRODUCTION Deployment Triggered"
+        else
+          echo "Preview Deployment Triggered"
+        fi
         echo "========================================"
+        echo "Branch: $CURRENT_BRANCH"
 
         if [ -n "$REPO" ]; then
           echo "GitHub: https://github.com/$REPO"
         fi
 
         echo ""
-        echo "Production URL:"
-        echo "  {{.URL_PRODUCTION}}"
-        echo ""
+        if [ "$CURRENT_BRANCH" = "main" ]; then
+          echo "Production URL:"
+          echo "  {{.URL_PRODUCTION}}"
+          echo ""
+        fi
         echo "Preview URL:"
         echo "  {{.URL_PREVIEW}}"
         echo ""
