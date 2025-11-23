@@ -141,24 +141,30 @@ tasks:
       - go run {{.TRANSLATE_CMD}} --i18n
 
   # ============================================================================
-  # Cloudflare Pages
+  # Cloudflare Pages (DEPRECATED - using Git integration)
   # ============================================================================
+  # NOTE: Deployments now happen automatically via Cloudflare Pages Git integration
+  # These tasks are kept for reference but should not be used for regular deployments
 
   cf:login:
-    desc: Login to Cloudflare
+    desc: "[DEPRECATED] Login to Cloudflare"
     cmds:
+      - echo "⚠️  DEPRECATED: This task is no longer needed with Git integration"
       - '{{.WRANGLER_CMD}} login'
 
   cf:init:
-    desc: Initialize Cloudflare Pages project
+    desc: "[DEPRECATED] Initialize Cloudflare Pages project"
     cmds:
+      - echo "⚠️  DEPRECATED: Project is configured via Cloudflare dashboard"
       - '{{.WRANGLER_CMD}} pages project create {{.PROJECT_NAME}} --production-branch=main'
 
   cf:deploy:
-    desc: Deploy to Cloudflare Pages
+    desc: "[DEPRECATED] Deploy to Cloudflare Pages - Use git push instead"
     deps: [build]
     cmds:
-      - '{{.WRANGLER_CMD}} pages deploy {{.DIR_PUBLIC}} --project-name={{.PROJECT_NAME}}'
+      - echo "⚠️  DEPRECATED: Deployments happen automatically on git push"
+      - echo "Just run: git push"
+      - exit 1
 
   cf:status:
     desc: Check deployment status
@@ -166,17 +172,20 @@ tasks:
       - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}}'
 
   cf:delete:
-    desc: Delete Cloudflare Pages project
+    desc: "[DANGEROUS] Delete Cloudflare Pages project"
     cmds:
+      - echo "⚠️  WARNING: This will delete your Pages project!"
       - '{{.WRANGLER_CMD}} pages project delete {{.PROJECT_NAME}}'
 
   # ============================================================================
-  # CI/CD
+  # CI/CD (DEPRECATED - using Cloudflare Pages Git integration)
   # ============================================================================
+  # NOTE: These tasks were used by GitHub Actions, which is now disabled
 
   ci:setup:
-    desc: Setup CI environment
+    desc: "[DEPRECATED] Setup CI environment"
     cmds:
+      - echo "⚠️  DEPRECATED: CI/CD now handled by Cloudflare Pages"
       - go install -tags extended github.com/gohugoio/hugo@latest
       - bun install
       - go mod download
@@ -184,13 +193,14 @@ tasks:
       CGO_ENABLED: '{{.CGO_ENABLED}}'
 
   ci:build:
-    desc: Build in CI
+    desc: "[DEPRECATED] Build in CI"
     deps: [build]
 
   ci:deploy:
-    desc: Deploy from CI
+    desc: "[DEPRECATED] Deploy from CI"
     cmds:
-      - '{{.WRANGLER_CMD}} pages deploy {{.DIR_PUBLIC}} --project-name={{.PROJECT_NAME}}'
+      - echo "⚠️  DEPRECATED: Deployments now handled by Cloudflare Pages Git integration"
+      - exit 1
 
   # ============================================================================
   # Code Quality
