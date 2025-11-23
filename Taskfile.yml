@@ -149,21 +149,21 @@ tasks:
   cf:login:
     desc: "[DEPRECATED] Login to Cloudflare"
     cmds:
-      - echo "⚠️  DEPRECATED: This task is no longer needed with Git integration"
+      - 'echo "DEPRECATED: This task is no longer needed with Git integration"'
       - '{{.WRANGLER_CMD}} login'
 
   cf:init:
     desc: "[DEPRECATED] Initialize Cloudflare Pages project"
     cmds:
-      - echo "⚠️  DEPRECATED: Project is configured via Cloudflare dashboard"
+      - 'echo "DEPRECATED: Project is configured via Cloudflare dashboard"'
       - '{{.WRANGLER_CMD}} pages project create {{.PROJECT_NAME}} --production-branch=main'
 
   cf:deploy:
     desc: "[DEPRECATED] Deploy to Cloudflare Pages - Use git push instead"
     deps: [build]
     cmds:
-      - echo "⚠️  DEPRECATED: Deployments happen automatically on git push"
-      - echo "Just run: git push"
+      - 'echo "DEPRECATED: Deployments happen automatically on git push"'
+      - 'echo "Just run: git push"'
       - exit 1
 
   cf:status:
@@ -174,19 +174,19 @@ tasks:
   cf:logs:
     desc: View deployment logs
     cmds:
-      - echo "📋 Recent deployments:"
+      - 'echo "Recent deployments:"'
       - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}} | head -10'
 
   cf:tail:
     desc: Tail latest deployment logs
     cmds:
-      - echo "📡 Tailing deployment logs..."
+      - 'echo "Tailing deployment logs..."'
       - '{{.WRANGLER_CMD}} pages deployment tail --project-name={{.PROJECT_NAME}}'
 
   cf:secret:set:
     desc: Set a secret for Cloudflare Pages (e.g., HUGO_VERSION)
     cmds:
-      - echo "Setting secret for Pages project..."
+      - 'echo "Setting secret for Pages project..."'
       - '{{.WRANGLER_CMD}} pages secret put {{.CLI_ARGS}} --project-name={{.PROJECT_NAME}}'
 
   cf:secret:list:
@@ -197,7 +197,7 @@ tasks:
   cf:delete:
     desc: "[DANGEROUS] Delete Cloudflare Pages project"
     cmds:
-      - echo "⚠️  WARNING: This will delete your Pages project!"
+      - 'echo "WARNING: This will delete your Pages project!"'
       - '{{.WRANGLER_CMD}} pages project delete {{.PROJECT_NAME}}'
 
   # ============================================================================
@@ -208,7 +208,7 @@ tasks:
   ci:setup:
     desc: "[DEPRECATED] Setup CI environment"
     cmds:
-      - echo "⚠️  DEPRECATED: CI/CD now handled by Cloudflare Pages"
+      - 'echo "DEPRECATED: CI/CD now handled by Cloudflare Pages"'
       - go install -tags extended github.com/gohugoio/hugo@latest
       - bun install
       - go mod download
@@ -222,7 +222,7 @@ tasks:
   ci:deploy:
     desc: "[DEPRECATED] Deploy from CI"
     cmds:
-      - echo "⚠️  DEPRECATED: Deployments now handled by Cloudflare Pages Git integration"
+      - 'echo "DEPRECATED: Deployments now handled by Cloudflare Pages Git integration"'
       - exit 1
 
   # ============================================================================
