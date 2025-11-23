@@ -1,11 +1,13 @@
-name: Deploy to Cloudflare Pages
+# DEPRECATED: Using Cloudflare Pages Git integration instead
+# This workflow is kept for reference but no longer used
+# Deployments happen automatically via Cloudflare Pages when pushing to GitHub
+#
+# To permanently disable this workflow, all triggers have been removed.
+# Delete this file if no longer needed.
 
-on:
-  workflow_dispatch: # Manual trigger only
-  # push:
-  #   branches: [main]
-  # pull_request:
-  #   branches: [main]
+name: Deploy to Cloudflare Pages (DEPRECATED - DO NOT USE)
+
+on: []  # No triggers - workflow is completely disabled
 
 jobs:
   deploy:
