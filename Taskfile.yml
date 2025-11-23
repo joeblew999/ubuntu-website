@@ -13,6 +13,7 @@ vars:
   # Deployment URLs
   URL_PRODUCTION: https://www.ubuntusoftware.net
   URL_PREVIEW: https://ubuntu-website.pages.dev
+  URL_DEV: http://localhost:1313
 
   # Cloudflare Dashboard URLs
   CF_DASH_BASE: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}
@@ -155,6 +156,18 @@ tasks:
   dev:
     desc: Start Hugo development server
     cmds:
+      - |
+        echo "========================================"
+        echo "Hugo Development Server"
+        echo "========================================"
+        echo ""
+        echo "Local URL: {{.URL_DEV}}"
+        echo ""
+        echo "Quick Commands:"
+        echo "  task url:dev   - Open in browser"
+        echo "  Ctrl+C         - Stop server"
+        echo "========================================"
+        echo ""
       - hugo server {{.HUGO_DEV_FLAGS}}
 
   build:
@@ -472,6 +485,11 @@ tasks:
   # ============================================================================
   # URL Helpers
   # ============================================================================
+
+  url:dev:
+    desc: Open local development server in browser
+    cmds:
+      - open {{.URL_DEV}}
 
   url:prod:
     desc: Open production website in browser
