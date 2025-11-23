@@ -361,13 +361,46 @@ func (s *Service) GetCurrentConfig() (*EnvConfig, error) {
 	return LoadEnv()
 }
 
-// ValidateConfig validates all fields in the provided config
+// ValidateConfig validates all fields in the provided config using deep validation
+// This is the default validation method (includes API calls)
 func (s *Service) ValidateConfig(cfg *EnvConfig) map[string]ValidationResult {
 	results := make(map[string]ValidationResult)
 
 	for _, field := range envFieldsInOrder {
 		value := cfg.Get(field.Key)
 		result := ValidateField(field.Key, value, cfg, s.mockMode)
+		results[field.Key] = result
+	}
+
+	return results
+}
+
+// ValidateConfigFast validates all fields using fast validation (format checks only, no API calls)
+func (s *Service) ValidateConfigFast(cfg *EnvConfig) map[string]ValidationResult {
+	results := make(map[string]ValidationResult)
+
+	for _, field := range envFieldsInOrder {
+		value := cfg.Get(field.Key)
+		result := ValidateFieldFast(field.Key, value, cfg)
+		results[field.Key] = result
+	}
+
+	return results
+}
+
+// ValidateConfigDeep validates all fields using deep validation (includes API calls)
+// This is an explicit alias for ValidateConfig for clarity
+func (s *Service) ValidateConfigDeep(cfg *EnvConfig) map[string]ValidationResult {
+	return s.ValidateConfig(cfg)
+}
+
+// ValidateConfigWithMode validates all fields using the specified validation mode
+func (s *Service) ValidateConfigWithMode(cfg *EnvConfig, mode ValidationMode) map[string]ValidationResult {
+	results := make(map[string]ValidationResult)
+
+	for _, field := range envFieldsInOrder {
+		value := cfg.Get(field.Key)
+		result := ValidateFieldWithMode(field.Key, value, cfg, mode, s.mockMode)
 		results[field.Key] = result
 	}
 

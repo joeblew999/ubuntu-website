@@ -10,6 +10,29 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
+// Step4Info is the metadata for Step 4 - single source of truth
+var Step4Info = WizardStepInfo{
+	StepNumber:  4,
+	Path:        "/cloudflare/step4",
+	Title:       "Project Selection",
+	Description: "Select or create a Cloudflare Pages project",
+	Fields:      []string{env.KeyCloudflarePageProject},
+	Prerequisites: []PrerequisiteCheck{
+		{
+			FieldKey:    env.KeyCloudflareAPIToken,
+			DisplayName: "Cloudflare API Token",
+			StepPath:    "/cloudflare/step1",
+			StepLabel:   "Configure in Step 1",
+		},
+		{
+			FieldKey:    env.KeyCloudflareAccountID,
+			DisplayName: "Cloudflare Account ID",
+			StepPath:    "/cloudflare/step2",
+			StepLabel:   "Configure in Step 2",
+		},
+	},
+}
+
 // cloudflareStep4Page - Project details (Step 4 of 5)
 func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	svc := env.NewService(mockMode)
@@ -174,6 +197,9 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	})
 
 	c.View(func() h.H {
+		// Use step's own metadata for prerequisite checking
+		missingPrereqs := CheckPrerequisites(cfg, Step4Info.Prerequisites)
+
 		// Load projects using LazyLoader
 		projectsCache, projectsErr := projectsLoader.Get()
 		if projectsErr != nil {
@@ -221,10 +247,17 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 		return h.Main(
 			h.Class("container"),
-			h.H1(h.Text("Cloudflare Setup - Step 4 of 5")),
-			h.P(h.Text("Project Name (Optional)")),
+
+			// Use metadata for header
+			RenderWizardStepHeader(&Step4Info, len(CloudflareWizard.Steps)),
 
 			RenderNavigation("cloudflare"),
+
+			// Add breadcrumb navigation
+			RenderWizardBreadcrumbs(&CloudflareWizard, cfg, Step4Info.StepNumber),
+
+			// Show prerequisite error banner if missing
+			RenderPrerequisiteError(missingPrereqs),
 
 			h.H2(h.Text("Cloudflare Pages Project")),
 			h.P(h.Text("Select a Pages project to deploy your Hugo site to.")),
@@ -387,12 +420,8 @@ func cloudflareStep4Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				),
 			),
 
-			h.Div(
-				h.Style("margin-top: 2rem;"),
-				h.A(h.Href("/cloudflare/step3"), h.Text("← Back: Domain Selection")),
-				h.Text(" "),
-				h.Button(h.Text("Next: Custom Domain Setup →"), finishAction.OnClick()),
-			),
+			// Use wizard navigation component
+			RenderWizardNavigation(&CloudflareWizard, &Step4Info, finishAction),
 
 			RenderErrorMessage(saveMessage),
 			RenderSuccessMessage(saveMessage),

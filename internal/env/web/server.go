@@ -1,10 +1,10 @@
 package web
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"os/exec"
+	"os/signal"
+	"syscall"
 
 	"github.com/go-via/via"
 	"github.com/go-via/via-plugin-picocss/picocss"
@@ -23,20 +23,27 @@ func ServeSetupGUIMock() error {
 	return nil
 }
 
-// cleanupPort kills any processes using the specified port
-func cleanupPort(port string) {
-	// Try to kill any existing processes on the port
-	cmd := exec.Command("sh", "-c", fmt.Sprintf("lsof -ti:%s | xargs kill -9 2>/dev/null || true", port))
-	_ = cmd.Run() // Ignore errors - port might not be in use
-}
-
 // serveSetupGUIWithOptions is the internal implementation using Via
 func serveSetupGUIWithOptions(mockMode bool) {
-	// Setup enhanced logging to add page context to Via errors
-	SetupEnhancedLogging()
+	// Ensure Caddy is running for HTTPS support
+	if err := env.EnsureCaddyRunning(); err != nil {
+		log.Printf("Warning: Failed to start Caddy (HTTPS will not be available): %v", err)
+		log.Println("Continuing with HTTP-only mode...")
+	}
 
-	// Clean up port 3000 before starting
-	cleanupPort("3000")
+	// Register Via GUI service with Caddy (event-based pattern)
+	// Serve under /admin/* to avoid URL clashes with Hugo
+	regResult, err := env.RegisterService(env.ServiceConfig{
+		Name:          "via-gui",
+		Port:          3000,
+		PathPattern:   "/admin/*",    // Admin prefix to avoid Hugo clashes
+		Priority:      10,            // Higher priority than Hugo
+		HealthPath:    "/admin/",     // Health check endpoint
+		AssetPatterns: []string{"/_*"}, // Via framework assets (/_plugins, /_datastar.js)
+	})
+	if err != nil {
+		log.Printf("Warning: Failed to register Via GUI with Caddy: %v", err)
+	}
 
 	// Use test env file in mock mode
 	if mockMode {
@@ -53,10 +60,41 @@ func serveSetupGUIWithOptions(mockMode bool) {
 	if mockMode {
 		log.Println("Mock validation enabled - no real API calls")
 	}
+
 	log.Println("Opening in browser...")
-	log.Printf("\n  %s\n\n", "http://localhost:3000")
+	// Use URLs from Caddy registration result
+	if regResult != nil {
+		log.Printf("\n  Local: %s", regResult.FullLocalURL)
+		if regResult.FullLANURL != "" {
+			log.Printf("\n  LAN:   %s", regResult.FullLANURL)
+		}
+	} else {
+		// Fallback if registration failed
+		log.Printf("\n  Local: %s", "https://localhost/admin/")
+	}
+	log.Printf("\n\n")
 	log.Println("Press Ctrl+C to stop")
 	log.Println()
+
+	// Setup signal handler for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		log.Println("\n\nShutting down gracefully...")
+		log.Println("Unregistering Via GUI from Caddy...")
+		if err := env.UnregisterService("via-gui"); err != nil {
+			log.Printf("Warning: Failed to unregister Via GUI: %v\n", err)
+		}
+		log.Println("Stopping Caddy...")
+		if err := env.StopCaddy(); err != nil {
+			log.Printf("Warning: Failed to stop Caddy: %v\n", err)
+		}
+		log.Println("Stopping Hugo server...")
+		env.StopHugoServer()
+		log.Println("Goodbye!")
+		os.Exit(0)
+	}()
 
 	v := via.New()
 	v.Config(via.Options{
@@ -88,6 +126,10 @@ func serveSetupGUIWithOptions(mockMode bool) {
 	// Cloudflare setup wizard - 5 steps
 	v.Page("/cloudflare", func(c *via.Context) {
 		cloudflarePage(c, loadConfig(), mockMode)
+	})
+
+	v.Page("/cloudflare/step1", func(c *via.Context) {
+		cloudflareStep1Page(c, loadConfig(), mockMode)
 	})
 
 	v.Page("/cloudflare/step2", func(c *via.Context) {

@@ -14,11 +14,9 @@ Correct paths:
 When working on Via coding aspects:
 
 - **Source code**: `/Users/apple/workspace/go/src/github.com/joeblew999/wellknown/.src/via`
-- **Patterns guide**: [`internal/env/web/VIA_PATTERNS.md`](internal/env/web/VIA_PATTERNS.md)
-  - Lazy loading patterns
-  - LazyLoader[T] helper usage
-  - Best practices for Via pages
-  - Common pitfalls and solutions
+
+- use a closure variable pattern instead of trying to access the signal's value.
+- use PicoCSS
 
 ### Hugo Source code
 

@@ -25,12 +25,27 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 	// Deploy to Preview action (no branch flag)
 	buildDeployPreviewAction := c.Action(func() {
-		currentProject := cfg.Get(env.KeyCloudflarePageProject)
-		if currentProject == "" || env.IsPlaceholder(currentProject) {
-			deployOutput.SetValue("error:No project configured. Please complete Step 4 of the Cloudflare setup first.")
+		// Check prerequisites using centralized helper
+		missingPrereqs := CheckPrerequisites(cfg, []PrerequisiteCheck{
+			{FieldKey: env.KeyCloudflareAPIToken, DisplayName: "Cloudflare API Token", StepPath: "/cloudflare/step1", StepLabel: "Configure in Step 1"},
+			{FieldKey: env.KeyCloudflareAccountID, DisplayName: "Account ID", StepPath: "/cloudflare/step2", StepLabel: "Configure in Step 2"},
+			{FieldKey: env.KeyCloudflarePageProject, DisplayName: "Project Name", StepPath: "/cloudflare/step4", StepLabel: "Configure in Step 4"},
+		})
+		if len(missingPrereqs) > 0 {
+			// Build error message listing missing items
+			errorMsg := "Missing configuration: "
+			for i, prereq := range missingPrereqs {
+				if i > 0 {
+					errorMsg += ", "
+				}
+				errorMsg += prereq.DisplayName
+			}
+			deployOutput.SetValue("error:" + errorMsg)
 			c.Sync()
 			return
 		}
+
+		currentProject := cfg.Get(env.KeyCloudflarePageProject)
 
 		previewInProgress.SetValue(true)
 		deployOutput.SetValue("Starting build and preview deployment...\n")
@@ -54,12 +69,27 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 	// Deploy to Production action (with --branch=main)
 	buildDeployProductionAction := c.Action(func() {
-		currentProject := cfg.Get(env.KeyCloudflarePageProject)
-		if currentProject == "" || env.IsPlaceholder(currentProject) {
-			deployOutput.SetValue("error:No project configured. Please complete Step 4 of the Cloudflare setup first.")
+		// Check prerequisites using centralized helper
+		missingPrereqs := CheckPrerequisites(cfg, []PrerequisiteCheck{
+			{FieldKey: env.KeyCloudflareAPIToken, DisplayName: "Cloudflare API Token", StepPath: "/cloudflare/step1", StepLabel: "Configure in Step 1"},
+			{FieldKey: env.KeyCloudflareAccountID, DisplayName: "Account ID", StepPath: "/cloudflare/step2", StepLabel: "Configure in Step 2"},
+			{FieldKey: env.KeyCloudflarePageProject, DisplayName: "Project Name", StepPath: "/cloudflare/step4", StepLabel: "Configure in Step 4"},
+		})
+		if len(missingPrereqs) > 0 {
+			// Build error message listing missing items
+			errorMsg := "Missing configuration: "
+			for i, prereq := range missingPrereqs {
+				if i > 0 {
+					errorMsg += ", "
+				}
+				errorMsg += prereq.DisplayName
+			}
+			deployOutput.SetValue("error:" + errorMsg)
 			c.Sync()
 			return
 		}
+
+		currentProject := cfg.Get(env.KeyCloudflarePageProject)
 
 		productionInProgress.SetValue(true)
 		deployOutput.SetValue("Starting build and production deployment...\n")
@@ -108,11 +138,21 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	})
 
 	c.View(func() h.H {
+		// Check prerequisites for deployment
+		missingPrereqs := CheckPrerequisites(cfg, []PrerequisiteCheck{
+			{FieldKey: env.KeyCloudflareAPIToken, DisplayName: "Cloudflare API Token", StepPath: "/cloudflare/step1", StepLabel: "Configure in Step 1"},
+			{FieldKey: env.KeyCloudflareAccountID, DisplayName: "Account ID", StepPath: "/cloudflare/step2", StepLabel: "Configure in Step 2"},
+			{FieldKey: env.KeyCloudflarePageProject, DisplayName: "Project Name", StepPath: "/cloudflare/step4", StepLabel: "Configure in Step 4"},
+		})
+
 		return h.Main(
 			h.Class("container"),
 			h.H1(h.Text("Deploy to Cloudflare Pages")),
 
 			RenderNavigation("deploy"),
+
+			// Show prerequisite error banner if missing
+			RenderPrerequisiteError(missingPrereqs),
 
 			// Project info section
 			h.Article(
@@ -128,14 +168,6 @@ func deployPage(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 							h.Style("color: var(--pico-del-color);"),
 							h.Text("Not configured"),
 						),
-					),
-				),
-				h.If(projectName == "" || env.IsPlaceholder(projectName),
-					h.P(
-						h.Style("margin-top: 1rem;"),
-						h.Text("⚠️ Please "),
-						h.A(h.Href("/cloudflare/step4"), h.Text("complete Cloudflare setup")),
-						h.Text(" and select a project before deploying."),
 					),
 				),
 			),

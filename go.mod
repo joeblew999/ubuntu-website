@@ -11,6 +11,7 @@ require (
 require (
 	github.com/CAFxX/httpcompression v0.0.9 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
+	github.com/fatih/color v1.18.0 // indirect
 	github.com/gethugothemes/hugo-modules/accordion v0.0.0-20251117073232-ef5b4666824c // indirect
 	github.com/gethugothemes/hugo-modules/adsense v0.0.0-20251117073232-ef5b4666824c // indirect
 	github.com/gethugothemes/hugo-modules/components/announcement v0.0.0-20251117073232-ef5b4666824c // indirect
@@ -37,8 +38,11 @@ require (
 	github.com/hugomods/mermaid v0.1.4 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/starfederation/datastar-go v1.0.3 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/zeon-studio/hugoplate v0.0.0-20251118030057-19d793dd1b6b // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	maragu.dev/gomponents v1.2.0 // indirect
 )

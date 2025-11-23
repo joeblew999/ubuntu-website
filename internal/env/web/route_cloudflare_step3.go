@@ -9,6 +9,29 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
+// Step3Info is the metadata for Step 3 - single source of truth
+var Step3Info = WizardStepInfo{
+	StepNumber:  3,
+	Path:        "/cloudflare/step3",
+	Title:       "Domain Selection",
+	Description: "Choose which domain to deploy to",
+	Fields:      []string{env.KeyCloudflareDomain, env.KeyCloudflareZoneID},
+	Prerequisites: []PrerequisiteCheck{
+		{
+			FieldKey:    env.KeyCloudflareAPIToken,
+			DisplayName: "Cloudflare API Token",
+			StepPath:    "/cloudflare/step1",
+			StepLabel:   "Configure in Step 1",
+		},
+		{
+			FieldKey:    env.KeyCloudflareAccountID,
+			DisplayName: "Cloudflare Account ID",
+			StepPath:    "/cloudflare/step2",
+			StepLabel:   "Configure in Step 2",
+		},
+	},
+}
+
 // cloudflareStep3Page - Domain selection (Step 3 of 5)
 func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	svc := env.NewService(mockMode)
@@ -113,6 +136,9 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	})
 
 	c.View(func() h.H {
+		// Use step's own metadata for prerequisite checking
+		missingPrereqs := CheckPrerequisites(cfg, Step3Info.Prerequisites)
+
 		// Load zones using LazyLoader
 		zonesCache, zonesErr := zonesLoader.Get()
 		if zonesErr != nil {
@@ -135,10 +161,17 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 
 		return h.Main(
 			h.Class("container"),
-			h.H1(h.Text("Cloudflare Setup - Step 3 of 5")),
-			h.P(h.Text("Domain Selection")),
+
+			// Use metadata for header
+			RenderWizardStepHeader(&Step3Info, len(CloudflareWizard.Steps)),
 
 			RenderNavigation("cloudflare"),
+
+			// Add breadcrumb navigation
+			RenderWizardBreadcrumbs(&CloudflareWizard, cfg, Step3Info.StepNumber),
+
+			// Show prerequisite error banner if missing
+			RenderPrerequisiteError(missingPrereqs),
 
 			h.H2(h.Text("Select Your Domain")),
 			h.P(h.Text("Choose which domain you want to deploy your Hugo site to.")),
@@ -150,7 +183,7 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 					h.P(
 						h.Style("margin: 0;"),
 						h.Text("No domains found in this account. "),
-						h.A(h.Href(addSiteURL), h.Attr("target", "_blank"), h.Text("Add a domain ↗")),
+						RenderExternalLink(addSiteURL, "Add a domain"),
 						h.Text(" to Cloudflare first."),
 					),
 				),
@@ -178,17 +211,12 @@ func cloudflareStep3Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 				),
 			),
 
-			h.Div(
-				h.Style("margin-top: 2rem;"),
-				h.A(h.Href("/cloudflare/step2"), h.Text("← Back: Account ID")),
-				h.Text(" "),
-				h.If(len(domainOptions) > 1,
-					h.Button(h.Text("Next: Project Details →"), nextAction.OnClick()),
-				),
-				h.If(len(domainOptions) > 1,
-					h.Text(" or "),
-				),
-				h.A(h.Href("/cloudflare/step4"), h.Text("Skip")),
+			// Use wizard navigation component - only show next button if domains available
+			h.If(len(domainOptions) > 1,
+				RenderWizardNavigation(&CloudflareWizard, &Step3Info, nextAction),
+			),
+			h.If(len(domainOptions) <= 1,
+				RenderWizardNavigation(&CloudflareWizard, &Step3Info, nil),
 			),
 
 			RenderErrorMessage(saveMessage),

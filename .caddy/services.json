@@ -1,0 +1,14 @@
+{
+  "services": [
+    {
+      "name": "via-gui",
+      "port": 3000,
+      "path_pattern": "/admin/*",
+      "priority": 10,
+      "health_path": "/admin/",
+      "asset_patterns": [
+        "/_*"
+      ]
+    }
+  ]
+}

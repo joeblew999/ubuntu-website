@@ -1,0 +1,25 @@
+=== Command: hugo [--environment development --gc --minify] ===
+=== Started: 2025-11-19T10:41:04+07:00 ===
+
+Start building sites … 
+hugo v0.152.2+extended+withdeploy darwin/arm64 BuildDate=2025-10-24T15:31:49Z VendorInfo=brew
+
+
+           │ EN │ DE │ SV │ ZH │ JA │ TH 
+───────────┼────┼────┼────┼────┼────┼────
+ Pages     │ 52 │  9 │  9 │  9 │  9 │  9 
+ Paginator │  0 │  0 │  0 │  0 │  0 │  0 
+ pages     │    │    │    │    │    │    
+ Non-page  │  0 │  0 │  0 │  0 │  0 │  0 
+ files     │    │    │    │    │    │    
+ Static    │  2 │  2 │  2 │  2 │  2 │  2 
+ files     │    │    │    │    │    │    
+ Processed │ 76 │  0 │  0 │  0 │  0 │  0 
+ images    │    │    │    │    │    │    
+ Aliases   │  2 │  0 │  0 │  0 │  0 │  0 
+ Cleaned   │  0 │  0 │  0 │  0 │  0 │  0 
+
+Total in 433 ms
+
+=== Finished: 2025-11-19T10:41:05+07:00 ===
+=== Exit Status: SUCCESS ===

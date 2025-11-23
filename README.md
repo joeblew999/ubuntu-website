@@ -2,8 +2,32 @@
 
 Multi-language website built with Hugo Plate, featuring automated translation and deployment to Cloudflare Pages.
 
-**Website:** https://www.ubuntusoftware.net
-**Dashboard:** https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/ubuntusoftware.net
+## 🔗 Quick Links
+
+For all URLs, dashboards, and project information, run:
+
+```bash
+task          # or: task info
+```
+
+This will show:
+- Development server URL (local)
+- Production and preview URLs
+- Cloudflare dashboards
+- Quick commands
+
+You can also open any URL directly in your browser:
+
+```bash
+task url:dev      # Open local dev server
+task url:prod     # Open production site
+task url:preview  # Open preview site
+task cf:open      # Open Cloudflare dashboard
+```
+
+
+
+
 
 ## 🌍 Supported Languages
 
@@ -72,6 +96,69 @@ task translate:lang LANG=de  # Translate to German
 
 task cf:deploy     # Deploy to Cloudflare
 task cf:status     # Check status
+```
+
+## 🔒 HTTPS Development
+
+The project uses **Caddy + mkcert** for local HTTPS development:
+
+- **Hugo**: `https://localhost/` or `https://192.168.x.x/`
+- **Via GUI**: `https://localhost/admin/` or `https://192.168.x.x/admin/`
+
+### How It Works
+
+1. **Automatic Setup**: Caddy starts automatically when you run the dev server or Via GUI
+2. **Smart Certificates**: mkcert generates certificates for localhost + *.local + your current LAN IP
+3. **Idempotent**: Safe to run multiple times - certificates regenerate only when your LAN IP changes
+4. **Mobile Testing**: Works on iOS Safari without manual CA installation (just accept the certificate prompt)
+
+### Certificate Management
+
+Certificates are stored in `.caddy/certs/` (gitignored) and automatically regenerated when:
+- Certificates don't exist
+- Your LAN IP address changes (switching networks)
+
+### Mobile Device Setup (iOS/Android)
+
+**iOS Safari**: No installation needed! Safari will show a trust prompt the first time you visit the HTTPS site.
+
+**iOS/Android (for apps or other browsers)**:
+1. Install mkcert CA certificate on your mobile device
+2. Find the CA at: `~/Library/Application Support/mkcert/rootCA.pem`
+3. Transfer to your device via AirDrop, email, or file sharing
+4. Install the certificate and trust it in Settings
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│  Caddy (HTTPS on port 443)                  │
+│  - localhost, *.local, 192.168.x.x         │
+│  - mkcert certificates                      │
+└──────────┬──────────────────────┬───────────┘
+           │                      │
+           ▼                      ▼
+  ┌────────────────┐    ┌─────────────────┐
+  │ Hugo           │    │ Via GUI         │
+  │ (HTTP :1313)   │    │ (HTTP :3000)    │
+  │ /              │    │ /admin/*        │
+  └────────────────┘    └─────────────────┘
+```
+
+### CLI Commands
+
+```bash
+# Start the system
+go run cmd/env/main.go web-gui          # Starts Caddy + Via GUI
+go run cmd/env/main.go build            # Starts Caddy + Hugo
+
+# Manage Caddy manually (if needed)
+go run cmd/env/main.go caddy-start      # Start Caddy
+go run cmd/env/main.go caddy-stop       # Stop Caddy
+go run cmd/env/main.go caddy-status     # Check if running
+
+# Cleanup
+# Press Ctrl+C in the web-gui terminal - auto-cleanup of Caddy and Hugo
 ```
 
 ## 🌐 Translation Workflow

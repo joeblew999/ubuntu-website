@@ -2,10 +2,8 @@ package env
 
 import (
 	"fmt"
-	"net"
-	"os"
 	"os/exec"
-	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -16,28 +14,9 @@ var (
 	hugoServerPort = 1313 // Default Hugo server port
 )
 
-// GetLocalIP returns the non-loopback local IPv4 address for LAN access
-func GetLocalIP() string {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return ""
-	}
-
-	for _, address := range addrs {
-		// Check the address type and if it is not a loopback
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			// Get IPv4 address
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
-			}
-		}
-	}
-	return ""
-}
-
-// StartHugoServer starts a simple HTTPS server for local preview of the built site
-// Uses Hugo's --tlsAuto flag for automatic certificate generation via mkcert
+// StartHugoServer starts a simple HTTP server for local preview of the built site
 // Binds to 0.0.0.0 for LAN access (mobile testing)
+// Note: Uses HTTP instead of HTTPS to avoid certificate trust issues on mobile devices
 func StartHugoServer(mockMode bool) CommandOutput {
 	hugoServerMux.Lock()
 	defer hugoServerMux.Unlock()
@@ -47,14 +26,14 @@ func StartHugoServer(mockMode bool) CommandOutput {
 		stopHugoServerInternal()
 	}
 
-	// Detect LAN IP address for mobile testing
-	lanIP := GetLocalIP()
+	// Detect LAN IP address for mobile testing (empty string if not available)
+	lanIP := GetLocalIPOrFallback()
 
 	if mockMode {
-		localURL := fmt.Sprintf("https://localhost:%d", hugoServerPort)
+		localURL := fmt.Sprintf("http://localhost:%d", hugoServerPort)
 		lanURL := ""
 		if lanIP != "" {
-			lanURL = fmt.Sprintf("https://%s:%d", lanIP, hugoServerPort)
+			lanURL = fmt.Sprintf("http://%s:%d", lanIP, hugoServerPort)
 		}
 		output := fmt.Sprintf("Starting preview server (mock mode)...\n  Local: %s\n  LAN:   %s", localURL, lanURL)
 		return CommandOutput{
@@ -65,40 +44,17 @@ func StartHugoServer(mockMode bool) CommandOutput {
 		}
 	}
 
-	// Generate HTTPS certificates with mkcert (includes LAN IP explicitly)
-	// Store in temp directory and regenerate each time for simplicity
-	tmpDir := os.TempDir()
-	certFile := filepath.Join(tmpDir, "hugo-cert.pem")
-	keyFile := filepath.Join(tmpDir, "hugo-key.pem")
-
-	// Build mkcert arguments - explicitly include LAN IP for iOS Safari compatibility
-	mkcertArgs := []string{
-		"-cert-file", certFile,
-		"-key-file", keyFile,
-		"localhost", "127.0.0.1", "::1",
-	}
-	if lanIP != "" {
-		mkcertArgs = append(mkcertArgs, lanIP) // Add LAN IP (e.g., 192.168.1.49)
-	}
-
-	// Run mkcert to generate certificates
-	mkcertCmd := exec.Command("mkcert", mkcertArgs...)
-	if err := mkcertCmd.Run(); err != nil {
-		return CommandOutput{
-			Output: "",
-			Error:  fmt.Errorf("failed to generate certificates with mkcert: %w (ensure mkcert is installed)", err),
-		}
-	}
-
-	// Start Hugo server with generated certificates
+	// Start Hugo server with HTTP (no HTTPS certificates needed)
 	// Use development environment which enables relativeURLs for multi-hostname support
-	hugoServerCmd = exec.Command("hugo", "server",
-		"--environment", "development", // Loads config/development/config.toml with relativeURLs
+	// IMPORTANT: --environment must come BEFORE server subcommand for Hugo to load the config
+	// NOTE: Do NOT set --baseURL flag - let Hugo use config/development/config.toml baseURL="/"
+	//       This ensures the <base> tag uses relative URLs instead of hardcoded production URL
+	hugoServerCmd = exec.Command("hugo",
+		"--environment", "development", // Loads config/development/config.toml with baseURL="/" and relativeURLs=true
+		"server",
 		"--disableLiveReload",
 		"--port", fmt.Sprintf("%d", hugoServerPort),
-		"--tlsCertFile", certFile,  // Use mkcert-generated certificate
-		"--tlsKeyFile", keyFile,     // Use mkcert-generated key
-		"--bind", "0.0.0.0",         // Bind to all interfaces for LAN access
+		"--bind", "0.0.0.0", // Bind to all interfaces for LAN access
 	)
 
 	// Start the server in background
@@ -110,10 +66,10 @@ func StartHugoServer(mockMode bool) CommandOutput {
 	}
 
 	// Build URLs for display
-	localURL := fmt.Sprintf("https://localhost:%d", hugoServerPort)
+	localURL := fmt.Sprintf("http://localhost:%d", hugoServerPort)
 	lanURL := ""
 	if lanIP != "" {
-		lanURL = fmt.Sprintf("https://%s:%d", lanIP, hugoServerPort)
+		lanURL = fmt.Sprintf("http://%s:%d", lanIP, hugoServerPort)
 	}
 
 	output := fmt.Sprintf("Preview server started\n  Local: %s\n  LAN:   %s", localURL, lanURL)
@@ -157,19 +113,45 @@ func StopHugoServer() CommandOutput {
 	hugoServerMux.Lock()
 	defer hugoServerMux.Unlock()
 
+	// Unregister Hugo service from Caddy (shutdown event)
+	if err := UnregisterService("hugo"); err != nil {
+		fmt.Printf("Warning: Failed to unregister Hugo from Caddy: %v\n", err)
+	}
+
 	return stopHugoServerInternal()
 }
 
 // BuildHugoSite runs `hugo --gc --minify` and returns streaming output
-// Also starts a local HTTPS preview server with LAN access
+// Also starts Caddy for HTTPS and a local HTTP preview server with LAN access
 func BuildHugoSite(mockMode bool) CommandOutput {
-	if mockMode {
-		lanIP := GetLocalIP()
-		localURL := fmt.Sprintf("https://localhost:%d", hugoServerPort)
-		lanURL := ""
-		if lanIP != "" {
-			lanURL = fmt.Sprintf("https://%s:%d", lanIP, hugoServerPort)
+	// Ensure Caddy is running for HTTPS support
+	if err := EnsureCaddyRunning(); err != nil {
+		return CommandOutput{
+			Output: "",
+			Error:  fmt.Errorf("failed to ensure Caddy is running: %w", err),
 		}
+	}
+
+	// Register Hugo service with Caddy (event-based pattern)
+	regResult, err := RegisterService(ServiceConfig{
+		Name:        "hugo",
+		Port:        1313,
+		PathPattern: "",  // Root path (catch-all)
+		Priority:    0,   // Lower priority than Via GUI
+		HealthPath:  "/", // Health check endpoint (Hugo homepage)
+	})
+	if err != nil {
+		return CommandOutput{
+			Output: "",
+			Error:  fmt.Errorf("failed to register Hugo with Caddy: %w", err),
+		}
+	}
+
+	// Use the URLs provided by Caddy registration
+	localURL := regResult.FullLocalURL
+	lanURL := regResult.FullLANURL
+
+	if mockMode {
 		output := fmt.Sprintf("Building Hugo site (mock mode)...\nBuild complete! (mock)\n\nStarting preview server...\nPreview server running\n  Local: %s\n  LAN:   %s", localURL, lanURL)
 		return CommandOutput{
 			Output:   output,
@@ -179,13 +161,14 @@ func BuildHugoSite(mockMode bool) CommandOutput {
 		}
 	}
 
-	// Build the site
-	buildResult := runCommand("hugo", "--gc", "--minify")
+	// Build the site using development environment (same as server)
+	// This ensures built files use baseURL="/" and relativeURLs=true from config/development/config.toml
+	buildResult := runCommand("hugo", "--environment", "development", "--gc", "--minify")
 	if buildResult.Error != nil {
 		return buildResult
 	}
 
-	// Start preview server with HTTPS and LAN access
+	// Start preview server with HTTP and LAN access (Caddy provides HTTPS wrapper)
 	serverResult := StartHugoServer(mockMode)
 	if serverResult.Error != nil {
 		// Build succeeded but server failed - return build output with warning
@@ -197,11 +180,44 @@ func BuildHugoSite(mockMode bool) CommandOutput {
 		}
 	}
 
-	// Combine build and server outputs
+	// Combine build and server outputs with HTTPS URLs from registration
+	httpsOutput := fmt.Sprintf("Preview server started with HTTPS\n  Local: %s\n  LAN:   %s", localURL, lanURL)
 	return CommandOutput{
-		Output:   buildResult.Output + "\n\n" + serverResult.Output,
+		Output:   buildResult.Output + "\n\n" + httpsOutput,
 		Error:    nil,
-		LocalURL: serverResult.LocalURL,
-		LANURL:   serverResult.LANURL,
+		LocalURL: localURL,
+		LANURL:   lanURL,
 	}
+}
+
+// GetHugoVersion returns the Hugo version and binary location
+func GetHugoVersion() (version string, binaryPath string, err error) {
+	// Try to find hugo in PATH
+	binaryPath, err = exec.LookPath("hugo")
+	if err != nil {
+		return "", "", fmt.Errorf("hugo binary not found in PATH\n" +
+			"Install: https://gohugo.io/installation/")
+	}
+
+	// Get version
+	cmd := exec.Command("hugo", "version")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", binaryPath, fmt.Errorf("failed to get hugo version: %w", err)
+	}
+
+	version = strings.TrimSpace(string(output))
+	return version, binaryPath, nil
+}
+
+// PrintHugoVersion prints Hugo version and binary location
+func PrintHugoVersion() {
+	version, binaryPath, err := GetHugoVersion()
+	if err != nil {
+		fmt.Printf("Hugo: %v\n", err)
+		return
+	}
+	fmt.Printf("Hugo:\n")
+	fmt.Printf("  Binary: %s\n", binaryPath)
+	fmt.Printf("  Version: %s\n", version)
 }

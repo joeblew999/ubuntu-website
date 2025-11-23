@@ -19,9 +19,6 @@ go.sum
 .env
 .env.*
 
-# Logs
-logs/
-
 # Testing
 .playwright-mcp/
 
@@ -31,4 +28,3 @@ logs/
 # IDE & OS
 .vscode/
 .DS_Store
-env

@@ -6,15 +6,22 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/env"
 )
 
+// Step1Info is the metadata for Step 1 - single source of truth
+var Step1Info = WizardStepInfo{
+	StepNumber:    1,
+	Path:          "/cloudflare/step1",
+	Title:         "API Token",
+	Description:   "Configure your Cloudflare API token for deployments",
+	Fields:        []string{env.KeyCloudflareAPIToken, env.KeyCloudflareAPITokenName},
+	Prerequisites: nil, // No prerequisites for first step
+}
+
 // cloudflareStep1Page - API Token setup (Step 1 of 5)
 func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	svc := env.NewService(mockMode)
 
-	// Create fields for API token and token name
-	fields := CreateFormFields(c, cfg, []string{
-		env.KeyCloudflareAPIToken,
-		env.KeyCloudflareAPITokenName,
-	})
+	// Create fields using step metadata
+	fields := CreateFormFields(c, cfg, Step1Info.Fields)
 
 	saveMessage := c.Signal("")
 
@@ -50,16 +57,26 @@ func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 	})
 
 	c.View(func() h.H {
+		// Use step's own metadata for prerequisite checking
+		missingPrereqs := CheckPrerequisites(cfg, Step1Info.Prerequisites)
+
 		return h.Main(
 			h.Class("container"),
-			h.H1(h.Text("Cloudflare Setup - Step 1 of 5")),
-			h.P(h.Text("API Token")),
+
+			// Use metadata for header
+			RenderWizardStepHeader(&Step1Info, len(CloudflareWizard.Steps)),
 
 			RenderNavigation("cloudflare"),
 
+			// Add breadcrumb navigation
+			RenderWizardBreadcrumbs(&CloudflareWizard, cfg, Step1Info.StepNumber),
+
+			// Show prerequisite error banner if missing (Step 1 has no prerequisites, so will be empty)
+			RenderPrerequisiteError(missingPrereqs),
+
 			h.H2(h.Text("Create API Token")),
 			h.Ol(
-				h.Li(h.Text("Visit: "), h.A(h.Href(env.CloudflareAPITokensURL), h.Attr("target", "_blank"), h.Text("Cloudflare API Tokens ↗"))),
+				h.Li(RenderExternalLink(env.CloudflareAPITokensURL, "Cloudflare API Tokens")),
 				h.Li(h.Text("Click 'Create Token'")),
 				h.Li(h.Text("Under 'Custom Token', click 'Get started'")),
 				h.Li(h.Text("Give your token a descriptive name (e.g., 'Production Deploy Token')")),
@@ -75,12 +92,8 @@ func cloudflareStep1Page(c *via.Context, cfg *env.EnvConfig, mockMode bool) {
 			h.P(h.Text("Enter the name you gave this token in Cloudflare (helps you remember which token this is).")),
 			RenderFormField(fields[1]),
 
-			h.Div(
-				h.Style("margin-top: 2rem;"),
-				h.Button(h.Text("Next: Account ID →"), nextAction.OnClick()),
-				h.Text(" or "),
-				h.A(h.Href("/cloudflare/step2"), h.Text("Skip validation")),
-			),
+			// Use wizard navigation component
+			RenderWizardNavigation(&CloudflareWizard, &Step1Info, nextAction),
 
 			RenderErrorMessage(saveMessage),
 			RenderSuccessMessage(saveMessage),

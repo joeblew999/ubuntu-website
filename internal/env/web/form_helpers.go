@@ -139,55 +139,6 @@ func CreateSaveAction(c *via.Context, svc *env.Service, fields []FormFieldData, 
 	}
 }
 
-// RenderErrorMessage renders error messages with PicoCSS alert styling
-func RenderErrorMessage(saveMessage interface{ String() string }) h.H {
-	return h.If(strings.HasPrefix(saveMessage.String(), "error:"),
-		h.Article(
-			h.Style("background-color: var(--pico-del-background); border-left: 4px solid var(--pico-del-color); padding: 1rem; margin-top: 1rem;"),
-			h.P(
-				h.Style("margin: 0; color: var(--pico-del-color);"),
-				h.Text(strings.TrimPrefix(saveMessage.String(), "error:")),
-			),
-		),
-	)
-}
-
-// RenderSuccessMessage renders success messages with PicoCSS alert styling
-func RenderSuccessMessage(saveMessage interface{ String() string }) h.H {
-	return h.If(strings.HasPrefix(saveMessage.String(), "success:"),
-		h.Article(
-			h.Style("background-color: var(--pico-ins-background); border-left: 4px solid var(--pico-ins-color); padding: 1rem; margin-top: 1rem;"),
-			h.P(
-				h.Style("margin: 0; color: var(--pico-ins-color);"),
-				h.Text(strings.TrimPrefix(saveMessage.String(), "success:")),
-			),
-		),
-	)
-}
-
-// RenderNavigation renders the navigation menu
-func RenderNavigation(currentPage string) h.H {
-	return h.Nav(
-		h.Ul(
-			h.Li(h.If(currentPage == "all",
-				h.Strong(h.Text("All Settings")),
-			), h.If(currentPage != "all",
-				h.A(h.Href("/"), h.Text("All Settings")),
-			)),
-			h.Li(h.If(currentPage == "cloudflare",
-				h.Strong(h.Text("Cloudflare Only")),
-			), h.If(currentPage != "cloudflare",
-				h.A(h.Href("/cloudflare"), h.Text("Cloudflare Only")),
-			)),
-			h.Li(h.If(currentPage == "claude",
-				h.Strong(h.Text("Claude Only")),
-			), h.If(currentPage != "claude",
-				h.A(h.Href("/claude"), h.Text("Claude Only")),
-			)),
-		),
-	)
-}
-
 // SelectOption represents a dropdown option
 type SelectOption struct {
 	Value string
@@ -217,5 +168,56 @@ func RenderSelectField(label string, selectedValue interface{ String() string; B
 	return h.Div(
 		h.Label(h.Text(label)),
 		h.Select(selectChildren...),
+	)
+}
+
+// PrerequisiteCheck holds information about a missing prerequisite
+type PrerequisiteCheck struct {
+	FieldKey    string // Environment variable key (e.g., env.KeyCloudflareAPIToken)
+	DisplayName string // Human-readable name (e.g., "Cloudflare API Token")
+	StepPath    string // Path to configure step (e.g., "/cloudflare/step1")
+	StepLabel   string // Label for link (e.g., "Configure in Step 1")
+}
+
+// CheckPrerequisites validates that required fields are configured and not placeholders.
+// Returns a list of missing prerequisites with navigation information.
+func CheckPrerequisites(cfg *env.EnvConfig, requiredChecks []PrerequisiteCheck) []PrerequisiteCheck {
+	missing := []PrerequisiteCheck{}
+
+	for _, check := range requiredChecks {
+		value := cfg.Get(check.FieldKey)
+		if value == "" || env.IsPlaceholder(value) {
+			missing = append(missing, check)
+		}
+	}
+
+	return missing
+}
+
+// RenderPrerequisiteError renders a warning banner with clickable navigation links
+// to configure missing prerequisites. Returns nil if no missing items.
+func RenderPrerequisiteError(missing []PrerequisiteCheck) h.H {
+	if len(missing) == 0 {
+		return nil
+	}
+
+	// Build list items with clickable links
+	listItems := make([]h.H, 0, len(missing)+1)
+	listItems = append(listItems, h.Style("margin: 0.5rem 0 0 1.5rem;"))
+	for _, item := range missing {
+		listItems = append(listItems, h.Li(
+			h.Text(item.DisplayName + " - "),
+			h.A(
+				h.Href(item.StepPath),
+				h.Text(item.StepLabel),
+			),
+		))
+	}
+
+	return h.Article(
+		h.Style("background-color: var(--pico-card-background-color); border-left: 4px solid var(--pico-muted-color); padding: 1rem; margin-bottom: 1rem;"),
+		h.H4(h.Text("⚠️ Missing Prerequisites")),
+		h.P(h.Text("The following configuration is required before using this page:")),
+		h.Ul(listItems...),
 	)
 }

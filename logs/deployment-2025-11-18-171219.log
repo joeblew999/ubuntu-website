@@ -1,0 +1,22 @@
+=== Command: bunx [wrangler pages deploy public --project-name=bbb --branch=main] ===
+=== Started: 2025-11-18T17:12:19+07:00 ===
+
+
+ ⛅️ wrangler 4.22.0 (update available 4.47.0)
+─────────────────────────────────────────────
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mWarning: Your working directory is a git repo and has uncommitted changes[0m
+
+  To silence this warning, pass in --commit-dirty=true
+
+
+Uploading... (76/175)
+Uploading... (109/175)
+Uploading... (142/175)
+Uploading... (175/175)
+✨ Success! Uploaded 99 files (76 already uploaded) (2.75 sec)
+
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://489b89c1.bbb-4ha.pages.dev
+
+=== Finished: 2025-11-18T17:12:33+07:00 ===
+=== Exit Status: SUCCESS ===
