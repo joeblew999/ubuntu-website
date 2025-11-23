@@ -285,8 +285,16 @@ tasks:
         .DS_Store
         EOF
 
+  git:status:
+    desc: Show git status and recent commits
+    cmds:
+      - git status
+      - 'echo ""'
+      - 'echo "Recent commits:"'
+      - git log --oneline -5
+
   git:commit:
-    desc: Generate gitignore, commit and push changes
+    desc: Generate gitignore, commit and push changes (triggers Cloudflare deployment)
     cmds:
       - task: generate:gitignore
       - git add -A
@@ -297,8 +305,45 @@ tasks:
         if [ -n "$REPO" ]; then
           echo ""
           echo "✓ Pushed to: https://github.com/$REPO"
+          echo "🚀 Cloudflare Pages will automatically deploy this commit"
           echo ""
         fi
+
+  git:deploy:
+    desc: Quick commit and deploy to Cloudflare Pages
+    cmds:
+      - task: git:commit
+        vars:
+          MESSAGE: '{{.MESSAGE | default "Update site"}}'
+
+  git:preview:
+    desc: Create a preview branch for testing (triggers preview deployment)
+    cmds:
+      - git checkout -b preview/{{.BRANCH}}
+      - git push -u origin preview/{{.BRANCH}}
+      - 'echo "✓ Preview branch created: preview/{{.BRANCH}}"'
+      - 'echo "🔍 Cloudflare Pages will create a preview deployment"'
+      - 'echo "Check status with: task cf:status"'
+    requires:
+      vars: [BRANCH]
+
+  git:cleanup-preview:
+    desc: Delete a preview branch
+    cmds:
+      - git checkout main
+      - git branch -D preview/{{.BRANCH}}
+      - git push origin --delete preview/{{.BRANCH}}
+      - 'echo "✓ Deleted preview branch: preview/{{.BRANCH}}"'
+    requires:
+      vars: [BRANCH]
+
+  git:sync:
+    desc: Sync with remote and show deployment status
+    cmds:
+      - git pull
+      - 'echo ""'
+      - 'echo "Latest deployments:"'
+      - task: cf:logs
 
   # ============================================================================
   # Help
