@@ -2,6 +2,8 @@
 
 ## CRITICAL REMINDERS
 
+USE TASKFILE - it makes conventions for development...
+
 ### Path Convention
 **ALWAYS use `joeblew999` (with three 9s), NEVER `joeblew99` (with two 9s)**
 
