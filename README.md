@@ -2,6 +2,13 @@
 
 Multi-language website built with Hugo Plate, featuring automated translation and deployment to Cloudflare Pages.
 
+http://localhost:1313
+
+https://www.ubuntusoftware.net
+
+https://www.ubuntusoftware.net/sitemap.xml
+https://www.ubuntusoftware.net/sitemap.xml/en/sitemap.xml
+
 ## 🔗 Quick Links
 
 For all URLs, dashboards, and project information, run:

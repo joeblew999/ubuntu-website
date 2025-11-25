@@ -159,6 +159,49 @@ tasks:
       - bun install
       - go mod download
 
+  install:rsvg:
+    desc: Install librsvg for SVG to PNG conversion
+    cmds:
+      - |
+        if command -v rsvg-convert &> /dev/null; then
+          echo "rsvg-convert already installed"
+          rsvg-convert --version
+        else
+          echo "Installing librsvg via Homebrew..."
+          brew install librsvg
+          rsvg-convert --version
+        fi
+
+  # ============================================================================
+  # Asset Generation
+  # ============================================================================
+
+  generate:favicon:
+    desc: Generate favicon PNG from SVG source (512x512 for Hugo scaling)
+    deps: [install:rsvg]
+    cmds:
+      - |
+        echo "Generating favicon from SVG..."
+        rsvg-convert -w 512 -h 512 assets/images/favicon-source.svg -o assets/images/favicon.png
+        echo "Created assets/images/favicon.png (512x512)"
+
+  generate:logos:
+    desc: Generate logo PNGs from SVG sources
+    deps: [install:rsvg]
+    cmds:
+      - |
+        echo "Generating logos from SVG..."
+        rsvg-convert -w 512 -h 512 assets/images/logo.svg -o assets/images/logo.png
+        echo "Created assets/images/logo.png (512x512)"
+        rsvg-convert -w 512 -h 512 assets/images/logo-darkmode.svg -o assets/images/logo-darkmode.png
+        echo "Created assets/images/logo-darkmode.png (512x512)"
+
+  generate:assets:
+    desc: Generate all image assets from SVG sources
+    cmds:
+      - task: generate:favicon
+      - task: generate:logos
+
   # ============================================================================
   # Environment Management
   # ============================================================================
@@ -194,13 +237,32 @@ tasks:
         fi
         echo ""
         echo "Local URL: {{.URL_DEV}}"
+        LAN_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | head -1 | awk '{print $2}')
+        echo "LAN URL:   http://$LAN_IP:1313"
         echo ""
         echo "Quick Commands:"
         echo "  task url:dev   - Open in browser"
+        echo "  task dev:lan   - Start with LAN baseURL (for mobile)"
         echo "  Ctrl+C         - Stop server"
         echo "========================================"
         echo ""
-      - hugo server {{.HUGO_DEV_FLAGS}}
+      - hugo server {{.HUGO_DEV_FLAGS}} --bind 0.0.0.0
+
+  dev:lan:
+    desc: Start Hugo dev server with LAN IP (for mobile testing)
+    cmds:
+      - |
+        LAN_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | head -1 | awk '{print $2}')
+        echo "========================================"
+        echo "Hugo Development Server (LAN Mode)"
+        echo "========================================"
+        echo ""
+        echo "LAN URL: http://$LAN_IP:1313"
+        echo ""
+        echo "Use this URL on your mobile device"
+        echo "========================================"
+        echo ""
+        hugo server {{.HUGO_DEV_FLAGS}} --bind 0.0.0.0 --baseURL "http://$LAN_IP:1313"
 
   build:
     desc: Build production site
