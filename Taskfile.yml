@@ -196,11 +196,21 @@ tasks:
         rsvg-convert -w 512 -h 512 assets/images/logo-darkmode.svg -o assets/images/logo-darkmode.png
         echo "Created assets/images/logo-darkmode.png (512x512)"
 
+  generate:og-image:
+    desc: Generate Open Graph image from SVG source (1200x630 for social sharing)
+    deps: [install:rsvg]
+    cmds:
+      - |
+        echo "Generating OG image from SVG..."
+        rsvg-convert -w 1200 -h 630 assets/images/og-image-source.svg -o assets/images/og-image.png
+        echo "Created assets/images/og-image.png (1200x630)"
+
   generate:assets:
     desc: Generate all image assets from SVG sources
     cmds:
       - task: generate:favicon
       - task: generate:logos
+      - task: generate:og-image
 
   # ============================================================================
   # Environment Management
