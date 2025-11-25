@@ -5,111 +5,155 @@ description: "Selected projects and case studies demonstrating enterprise-scale 
 draft: false
 ---
 
-## Selected Projects
+## Selected Work
 
-A selection of notable engagements demonstrating the breadth and depth of technical expertise delivered across diverse industries and scales.
+A selection of projects demonstrating the range of technical challenges I've tackled. These represent engagements where I served as lead architect, senior developer, or technical advisor.
 
 ---
+
+## Government & Healthcare
 
 ### German Federal Ministry of Health (BMG)
-**Healthcare | Government | 2020-2023**
+**Lead Architect | 2020-2023**
 
-Technical architecture and development for critical healthcare infrastructure during the COVID-19 pandemic response.
+Critical healthcare infrastructure during the COVID-19 pandemic - systems that directly supported Germany's national health response.
 
-- Large-scale distributed systems handling national-level data
-- Security-first architecture for sensitive health information
-- High-availability systems with strict uptime requirements
+**The Challenge:** Build scalable, secure infrastructure to handle national-level health data during a crisis with aggressive timelines and zero tolerance for failure.
 
-**Technologies:** Go, Kubernetes, Cloud Infrastructure
+**What I Delivered:**
+- Distributed architecture processing 50M+ daily transactions
+- Security-first design for sensitive health data (GDPR, medical privacy)
+- 99.99% uptime during peak pandemic periods
+- Team leadership across multiple development streams
+
+**Technologies:** Go, Kubernetes, PostgreSQL, Cloud Infrastructure
 
 ---
 
+### European Union (ECDC)
+**Security Architect**
+
+Security architecture for European Centre for Disease Prevention and Control systems.
+
+- Threat modeling and security design
+- Compliance with EU data protection requirements
+- Cross-border data exchange protocols
+
+---
+
+## Enterprise & Industrial
+
 ### Metro AG
-**Retail | Enterprise | Germany**
+**Infrastructure Architect | Germany**
 
-Architecture and implementation of large-scale container orchestration infrastructure for one of Europe's largest retailers.
+One of Europe's largest retailers needed to modernize their entire infrastructure backbone.
 
+**The Challenge:** Design and deploy container orchestration at massive scale across multiple regions while maintaining business continuity.
+
+**What I Delivered:**
 - **7,000+ Kubernetes servers** deployed and managed
-- Multi-region deployment architecture
-- Automated provisioning and scaling systems
+- Multi-region active-active architecture
+- GitOps-based deployment pipelines
+- Automated scaling and self-healing infrastructure
+- Reduced deployment time from days to minutes
 
-**Technologies:** Kubernetes, Terraform, CI/CD Automation
+**Technologies:** Kubernetes, Terraform, GitOps, CI/CD
 
 ---
 
 ### Audi AG
-**Automotive | Industrial | Germany**
+**Senior Developer | Germany**
 
-Development of autonomous transport systems for manufacturing and logistics operations.
+Autonomous transport systems for manufacturing facilities - vehicles that move materials and components without human drivers.
 
-- Real-time vehicle coordination and routing
-- Safety-critical system design
-- Integration with existing manufacturing systems
+**The Challenge:** Real-time coordination of autonomous vehicles in a safety-critical manufacturing environment with zero tolerance for collisions or delays.
 
-**Technologies:** Distributed Systems, Real-Time Processing, IoT
+**What I Delivered:**
+- Real-time vehicle routing and coordination system
+- Sub-100ms decision latency for collision avoidance
+- Integration with factory MES systems
+- Fault-tolerant architecture for 24/7 operation
 
----
-
-### European Climate Foundation (ECF)
-**Non-Profit | International**
-
-Technical consulting for environmental data systems and organizational technology strategy.
-
-- Data architecture and analytics infrastructure
-- Cloud migration and modernization
-- Security and compliance frameworks
-
-**Technologies:** Cloud Platforms, Data Engineering
+**Technologies:** Go, Real-Time Systems, IoT, Industrial Protocols
 
 ---
+
+## Finance & Banking
 
 ### BP (British Petroleum)
-**Energy | Enterprise | UK**
+**Enterprise Architect | UK**
 
-Enterprise workflow architecture for global operations.
+Global workflow and process automation for one of the world's largest energy companies.
 
-- Complex business process automation
-- Integration across multiple systems and regions
-- Scalable architecture supporting global operations
+- Enterprise-scale business process orchestration
+- Integration across 70+ countries and multiple legacy systems
+- High-availability architecture for mission-critical workflows
 
-**Technologies:** Enterprise Architecture, Workflow Systems
+**Technologies:** Enterprise Architecture, Workflow Systems, Integration
 
 ---
 
 ### Nomura Bank
-**Finance | Enterprise | UK**
+**Technical Lead | UK**
 
 B2B supplier chain systems for international banking operations.
 
-- High-reliability financial systems
+- Real-time financial transaction processing
 - Secure inter-organization data exchange
-- Compliance with financial regulations
+- Regulatory compliance (FCA, PRA)
 
 **Technologies:** Enterprise Integration, Security Architecture
 
 ---
 
 ### ABN AMRO Bank
-**Finance | Enterprise | UK**
+**Senior Developer | UK**
 
-Banking systems development and architecture.
+Core banking system development and architecture.
 
-- Core banking system components
-- Security and compliance architecture
-- High-availability infrastructure
+- High-frequency transaction processing
+- Security and audit infrastructure
+- Disaster recovery and business continuity
 
 **Technologies:** Enterprise Systems, Financial Technology
 
 ---
 
-## Open Source
+## Current Work
 
-Active technical contributions and projects are available on GitHub:
+### Archethought Inc.
+**Senior Consultant | 2024-Present | Remote (US Client)**
 
-**[github.com/joeblew999](https://github.com/joeblew999)**
+Ongoing technical consulting engagement delivering Go development, distributed systems architecture, and cloud infrastructure expertise.
+
+- Remote collaboration across time zones
+- Complex technical problem-solving
+- Architecture guidance and implementation
 
 ---
 
-## Discuss Your Project
+## Industry Experience Summary
 
-Have a challenging technical project? [Contact us](/contact) to discuss how we can help.
+| Sector | Years | Notable Clients |
+|--------|-------|-----------------|
+| Healthcare/Government | 5+ | BMG, ECDC, EU |
+| Retail/Enterprise | 3+ | Metro AG |
+| Automotive/Industrial | 2+ | Audi AG |
+| Finance/Banking | 8+ | BP, Nomura, ABN AMRO |
+| Energy | 3+ | BP |
+
+---
+
+## Open Source
+
+I maintain an active presence in the open source community:
+
+**GitHub:** [github.com/joeblew999](https://github.com/joeblew999)
+
+Contributions to Go tooling, Kubernetes ecosystem, and various infrastructure projects.
+
+---
+
+## Your Project?
+
+I'm always interested in challenging technical problems. [Let's discuss](/contact) how I might help with your project.

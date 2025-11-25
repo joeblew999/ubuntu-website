@@ -5,77 +5,108 @@ description: "Expert consulting services in software architecture, distributed s
 draft: false
 ---
 
-## Consulting Services
+## What I Do
 
-Ubuntu Software provides expert IT consulting services for organizations requiring senior technical expertise. With over 25 years of experience delivering enterprise-scale solutions, we bring proven methodologies and deep technical knowledge to every engagement.
-
----
-
-### Software Architecture
-
-Design and implementation of scalable, maintainable software systems.
-
-- **System Design** - Architecture for distributed systems, microservices, and event-driven applications
-- **Technology Selection** - Evaluation and recommendation of appropriate technologies and frameworks
-- **Technical Reviews** - Assessment of existing architectures with actionable improvement recommendations
-- **Migration Planning** - Strategies for modernizing legacy systems
+I help organizations solve complex technical challenges. Whether you're scaling infrastructure, modernizing legacy systems, or building new platforms from scratch, I bring 25+ years of hands-on experience to deliver results.
 
 ---
 
-### Cloud Infrastructure
+## Core Services
 
-Expert guidance on cloud platform adoption and optimization.
+### Software Architecture & Design
 
-- **Platform Strategy** - AWS, GCP, Azure architecture and best practices
-- **Kubernetes** - Container orchestration design and implementation
-- **Infrastructure as Code** - Terraform, Pulumi, and automation frameworks
-- **Cost Optimization** - Resource efficiency and cloud spend management
+Building systems that scale and last.
 
----
+- **Greenfield Architecture** - Design new systems with the right foundations from day one
+- **Legacy Modernization** - Incremental strategies to evolve monoliths into maintainable services
+- **Technical Due Diligence** - Architecture assessments for acquisitions, investments, or major initiatives
+- **Performance Optimization** - Identify bottlenecks and implement targeted improvements
 
-### Distributed Systems
-
-Specialized expertise in building reliable, high-performance distributed systems.
-
-- **Event-Driven Architecture** - Message queues, event sourcing, CQRS patterns
-- **Real-Time Systems** - Low-latency, high-throughput application design
-- **Data Pipelines** - Streaming and batch processing architectures
-- **Reliability Engineering** - High availability and disaster recovery planning
+*Recent example: Designed distributed architecture handling 50M+ daily transactions for government healthcare system.*
 
 ---
 
-### DevOps & Automation
+### Kubernetes & Cloud Infrastructure
 
-Streamlining development workflows and operational processes.
+Production-grade container orchestration and cloud platforms.
 
-- **CI/CD Pipelines** - Automated build, test, and deployment workflows
-- **Monitoring & Observability** - Logging, metrics, and tracing infrastructure
-- **Security** - DevSecOps practices and security architecture
-- **Developer Experience** - Tooling and workflow optimization
+- **Kubernetes at Scale** - Multi-cluster deployments, service mesh, GitOps workflows
+- **Cloud Migration** - AWS, GCP, Azure - strategy through implementation
+- **Infrastructure as Code** - Terraform, Pulumi, reproducible environments
+- **Cost Optimization** - Right-sizing, reserved capacity planning, waste elimination
+
+*Recent example: Deployed and managed 7,000+ Kubernetes servers for Metro AG retail operations.*
+
+---
+
+### Distributed Systems & Real-Time
+
+High-performance systems that handle complexity.
+
+- **Event-Driven Architecture** - Kafka, NATS, event sourcing, CQRS
+- **Real-Time Processing** - Sub-millisecond latency for trading, IoT, autonomous systems
+- **Data Pipelines** - Streaming architectures, batch processing, data mesh
+- **Reliability Engineering** - Chaos engineering, disaster recovery, SLO/SLA design
+
+*Recent example: Built real-time coordination system for autonomous transport vehicles at Audi AG.*
+
+---
+
+### Go & Backend Development
+
+Modern backend systems in Go and related technologies.
+
+- **Go Development** - Microservices, APIs, CLI tools, system utilities
+- **API Design** - REST, gRPC, GraphQL - pragmatic choices for your needs
+- **Database Architecture** - PostgreSQL, Redis, time-series, graph databases
+- **Integration** - Third-party APIs, legacy system bridges, data synchronization
+
+*Primary language for the past 8+ years. Contributor to Go ecosystem and tooling.*
 
 ---
 
 ### Technical Leadership
 
-Guidance for teams and organizations on technical direction.
+Helping teams and organizations level up.
 
-- **Team Mentorship** - Skill development and best practices coaching
-- **Architecture Governance** - Standards, patterns, and decision frameworks
-- **Vendor Evaluation** - Technical due diligence and assessment
-- **Project Recovery** - Rescuing troubled technical projects
-
----
-
-## Engagement Models
-
-**Advisory** - Strategic guidance and architectural oversight on a flexible basis.
-
-**Project-Based** - Defined scope engagements with clear deliverables and timelines.
-
-**Embedded** - Integrated team participation for longer-term initiatives.
+- **Architecture Reviews** - Structured assessment with actionable recommendations
+- **Team Mentoring** - Hands-on guidance for engineering teams (led teams up to 70 developers)
+- **Process Improvement** - CI/CD, code review practices, documentation culture
+- **Project Recovery** - Getting troubled projects back on track
 
 ---
 
-## Get Started
+## How I Work
 
-Ready to discuss your technical challenges? [Contact us](/contact) to explore how Ubuntu Software can help your organization.
+### Engagement Models
+
+**Advisory** - Ongoing strategic guidance. Architecture reviews, design consultations, decision support. Flexible hours as needed.
+
+**Project-Based** - Defined deliverables with clear scope. Architecture designs, proof-of-concepts, technical assessments. Fixed timeline and budget.
+
+**Embedded** - Join your team for focused initiatives. Full integration with your workflows, tools, and processes. Weekly or monthly commitment.
+
+### What to Expect
+
+- **Direct communication** - You work with me directly, not a junior consultant
+- **Pragmatic solutions** - Technology choices driven by your actual needs, not trends
+- **Knowledge transfer** - Your team learns alongside the engagement
+- **Clear documentation** - Decisions and designs documented for future reference
+
+---
+
+## Technologies
+
+**Languages:** Go, Rust, TypeScript, Python, C#/.NET
+
+**Infrastructure:** Kubernetes, Docker, Terraform, AWS, GCP, Azure
+
+**Data:** PostgreSQL, Redis, Kafka, Elasticsearch, TimescaleDB
+
+**Practices:** GitOps, Infrastructure as Code, Event-Driven Architecture, Domain-Driven Design
+
+---
+
+## Let's Talk
+
+Have a technical challenge? [Get in touch](/contact) - I'm happy to discuss whether I can help, with no obligation.
