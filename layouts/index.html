@@ -15,7 +15,7 @@
               {{ if .enable }}
                 <a
                   class="btn btn-primary"
-                  href="{{ .link | absURL }}"
+                  href="{{ .link | relLangURL }}"
                   {{ if strings.HasPrefix .link `http` }}
                     target="_blank" rel="noopener"
                   {{ end }}>
@@ -65,7 +65,7 @@
             </ul>
             {{ with .button }}
               {{ if .enable }}
-                <a class="btn btn-primary mt-6" href="{{ .link | absURL }}">
+                <a class="btn btn-primary mt-6" href="{{ .link | relLangURL }}">
                   {{ .label }}
                   <i class="fa fa-arrow-right pl-2"></i>
                 </a>
