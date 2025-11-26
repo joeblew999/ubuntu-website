@@ -14,20 +14,20 @@
   <!-- Accent line -->
   <rect x="80" y="180" width="6" height="120" fill="#3b82f6"/>
 
-  <!-- Logo: [ U | S ] -->
-  <text x="80" y="120" font-family="SF Mono, Monaco, Consolas, monospace" font-size="28" fill="#3b82f6" font-weight="600">[ U | S ]</text>
-  <text x="200" y="120" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#ffffff" font-weight="500">Ubuntu Software</text>
+  <!-- Logo: [U|S] Ubuntu Software -->
+  <text x="80" y="120" font-family="monospace" font-size="28" fill="#3b82f6" font-weight="600" letter-spacing="0">[U|S]</text>
+  <text x="170" y="120" font-family="sans-serif" font-size="28" fill="#ffffff" font-weight="500">Ubuntu Software</text>
 
   <!-- Main heading -->
-  <text x="110" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="56" fill="#ffffff" font-weight="700">Expert IT Consulting</text>
-  <text x="110" y="310" font-family="system-ui, -apple-system, sans-serif" font-size="42" fill="#a1a1aa" font-weight="400">&amp; Software Architecture</text>
+  <text x="110" y="240" font-family="sans-serif" font-size="56" fill="#ffffff" font-weight="700">Expert IT Consulting</text>
+  <text x="110" y="310" font-family="sans-serif" font-size="42" fill="#a1a1aa" font-weight="400">&amp; Software Architecture</text>
 
   <!-- Tagline -->
-  <text x="110" y="400" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#71717a">Distributed Systems  ·  Kubernetes  ·  Cloud Infrastructure</text>
+  <text x="110" y="400" font-family="sans-serif" font-size="24" fill="#71717a">Distributed Systems · Kubernetes · Cloud Infrastructure</text>
 
   <!-- Bottom info -->
-  <text x="110" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#52525b">25+ years enterprise experience</text>
+  <text x="110" y="550" font-family="sans-serif" font-size="20" fill="#52525b">25+ years enterprise experience</text>
 
   <!-- URL -->
-  <text x="1080" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#3b82f6" text-anchor="end">ubuntusoftware.net</text>
+  <text x="1080" y="550" font-family="sans-serif" font-size="20" fill="#3b82f6" text-anchor="end">ubuntusoftware.net</text>
 </svg>
