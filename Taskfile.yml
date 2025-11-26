@@ -205,12 +205,25 @@ tasks:
         rsvg-convert -w 1200 -h 630 assets/images/og-image-source.svg -o assets/images/og-image.png
         echo "Created assets/images/og-image.png (1200x630)"
 
+  generate:email-logo:
+    desc: Generate email signature logo PNG (300x47 for Gmail/email clients)
+    deps: [install:rsvg]
+    cmds:
+      - |
+        echo "Generating email signature logo from SVG..."
+        rsvg-convert -w 300 assets/images/logo.svg -o static/images/email-logo.png
+        echo "Created static/images/email-logo.png (300px wide)"
+        echo ""
+        echo "Use this URL in your Gmail signature:"
+        echo "  https://www.ubuntusoftware.net/images/email-logo.png"
+
   generate:assets:
     desc: Generate all image assets from SVG sources
     cmds:
       - task: generate:favicon
       - task: generate:logos
       - task: generate:og-image
+      - task: generate:email-logo
 
   # ============================================================================
   # Environment Management
