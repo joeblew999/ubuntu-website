@@ -1,63 +1,59 @@
-############# English navigation ##############
+############# Japanese navigation ##############
 
 # main menu
 [[main]]
-name = "Home"
+name = "ホーム"
 url = "/"
 weight = 1
 
 [[main]]
-name = "About"
+name = "会社概要"
 url = "/about"
 weight = 2
 
 [[main]]
-name = "Elements"
-url = "/elements"
+name = "製品"
+url = "/product"
 weight = 3
 
 [[main]]
+name = "サービス"
+url = "/services"
 weight = 4
-name = "Pages"
 
 [[main]]
-parent = "Pages"
-name = "Blog"
+name = "ポートフォリオ"
+url = "/portfolio"
+weight = 5
+
+[[main]]
+name = "ブログ"
 url = "/blog"
+weight = 6
 
 [[main]]
-parent = "Pages"
-name = "Contact"
+name = "お問い合わせ"
 url = "/contact"
-
-[[main]]
-parent = "Pages"
-name = "Authors"
-url = "/authors"
-
-[[main]]
-parent = "Pages"
-name = "Categories"
-url = "/categories"
-
-[[main]]
-parent = "Pages"
-name = "404 Page"
-url = "/404"
+weight = 7
 
 
 # footer menu
 [[footer]]
-name = "About"
+name = "会社概要"
 url = "/about"
 weight = 1
 
 [[footer]]
-name = "Elements"
-url = "/elements"
+name = "サービス"
+url = "/services"
 weight = 2
 
 [[footer]]
-name = "Privacy Policy"
-url = "/privacy-policy"
+name = "お問い合わせ"
+url = "/contact"
 weight = 3
+
+[[footer]]
+name = "プライバシーポリシー"
+url = "/privacy-policy"
+weight = 4

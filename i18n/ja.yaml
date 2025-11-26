@@ -1,14 +1,18 @@
-home: Home
-read_more: Read More
-send: Send
-related_posts: Related Posts
-categories: Categories
-tags: Tags
-toc: Table of Contents
-share: Share
-search_input_placeholder: Search Post...
-search_no_results: No results for
-search_initial_message: Type something to search..
-search_navigate: to navigate
-search_select: to select
-search_close: to close
+home: ホーム
+read_more: 続きを読む
+send: 送信
+related_posts: 関連記事
+categories: カテゴリー
+tags: タグ
+toc: 目次
+share: 共有
+search_input_placeholder: 記事を検索...
+search_no_results: 検索結果なし
+search_initial_message: 検索ワードを入力..
+search_navigate: ナビゲート
+search_select: 選択
+search_close: 閉じる
+services: サービス
+portfolio: ポートフォリオ
+product: 製品
+contact: お問い合わせ

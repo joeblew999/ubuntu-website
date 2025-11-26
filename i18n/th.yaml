@@ -1,14 +1,18 @@
-home: Home
-read_more: Read More
-send: Send
-related_posts: Related Posts
-categories: Categories
-tags: Tags
-toc: Table of Contents
-share: Share
-search_input_placeholder: Search Post...
-search_no_results: No results for
-search_initial_message: Type something to search..
-search_navigate: to navigate
-search_select: to select
-search_close: to close
+home: หน้าแรก
+read_more: อ่านเพิ่มเติม
+send: ส่ง
+related_posts: บทความที่เกี่ยวข้อง
+categories: หมวดหมู่
+tags: แท็ก
+toc: สารบัญ
+share: แชร์
+search_input_placeholder: ค้นหาบทความ...
+search_no_results: ไม่พบผลลัพธ์สำหรับ
+search_initial_message: พิมพ์เพื่อค้นหา..
+search_navigate: นำทาง
+search_select: เลือก
+search_close: ปิด
+services: บริการ
+portfolio: ผลงาน
+product: ผลิตภัณฑ์
+contact: ติดต่อเรา

@@ -1,63 +1,59 @@
-############# English navigation ##############
+############# Swedish navigation ##############
 
 # main menu
 [[main]]
-name = "Home"
+name = "Hem"
 url = "/"
 weight = 1
 
 [[main]]
-name = "About"
+name = "Om oss"
 url = "/about"
 weight = 2
 
 [[main]]
-name = "Elements"
-url = "/elements"
+name = "Produkt"
+url = "/product"
 weight = 3
 
 [[main]]
+name = "Tjänster"
+url = "/services"
 weight = 4
-name = "Pages"
 
 [[main]]
-parent = "Pages"
-name = "Blog"
+name = "Portfolio"
+url = "/portfolio"
+weight = 5
+
+[[main]]
+name = "Blogg"
 url = "/blog"
+weight = 6
 
 [[main]]
-parent = "Pages"
-name = "Contact"
+name = "Kontakt"
 url = "/contact"
-
-[[main]]
-parent = "Pages"
-name = "Authors"
-url = "/authors"
-
-[[main]]
-parent = "Pages"
-name = "Categories"
-url = "/categories"
-
-[[main]]
-parent = "Pages"
-name = "404 Page"
-url = "/404"
+weight = 7
 
 
 # footer menu
 [[footer]]
-name = "About"
+name = "Om oss"
 url = "/about"
 weight = 1
 
 [[footer]]
-name = "Elements"
-url = "/elements"
+name = "Tjänster"
+url = "/services"
 weight = 2
 
 [[footer]]
-name = "Privacy Policy"
-url = "/privacy-policy"
+name = "Kontakt"
+url = "/contact"
 weight = 3
+
+[[footer]]
+name = "Integritetspolicy"
+url = "/privacy-policy"
+weight = 4

@@ -10,6 +10,19 @@ Source: `cmd/genlogo/main.go` → `task generate:assets`
 
 After regenerating, manually update: Bluesky, Gmail signature
 
+### Translation Workflow
+
+Tasks:
+- `task translate:status` - what English files changed since last translation
+- `task translate:missing` - which languages are missing content files
+- `task translate:done` - mark translations complete (updates checkpoint)
+
+Workflow:
+1. `task translate:status` → translate changed files to all 5 languages
+2. `task translate:done` → update checkpoint
+
+Languages: de (German), sv (Swedish), zh (Chinese), ja (Japanese), th (Thai)
+
 ### Path Convention
 **ALWAYS use `joeblew999` (with three 9s), NEVER `joeblew99` (with two 9s)**
 

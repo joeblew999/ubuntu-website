@@ -1,7 +1,19 @@
 # todo
 
 
+---
 
+The home page in English has a "Learn More" button / link, but on the other language pages when you click the same button / link, it goes to the English page for some reason. It should not. 
+
+Yet the links on the blog home page do go to the same language blog pages. 
+
+Work out whats wrong.
+
+---
+
+make sure Privacy page is decent. We need to make sure we are not breaking any laws in the EU, for example, and telling our users that we respect their rights to privacy and to not be tracked.   
+
+I think that there is some law about take downs and they if we do not do it we are in trouble. But we are an Australain Comapny, so maybe that means we are OK there ? 
 
 ---
 
@@ -10,7 +22,6 @@ Debug and fix the Cloudflare domain API integration (currently failing)
 
 ---
 
-CLAUDE: If your seeing this, you can just move anything done to the DONE area. KEEP IT KISS - the code is self documenting, so just move it and change anything you need to make it accurate but kiss.
 
 ## DONE
 
@@ -44,33 +55,6 @@ External Link Standardization - FIXED by creating reusable components
 DNS web step so that CUSTOM Domain works.
 
 http://localhost:3000/cloudflare/step5 got me Failed to attach domain: failed to add domain ubuntusoftware.net (status: 400): { "result": null, "success": false, "errors": [ { "code": 8000006, "message": "Request body is incorrect. The request body may have an invalid JSON type or missing required keys. Refer to https://developers.cloudflare.com/api." } ], "messages": [] }
-
-
---- 
-
-Versions
-
-I noticed that wrangler gives us versions for each deploy. We can use this in our deploy page in a smart way ?
-
-wrangler 4.22.0 (update available 4.47.0)
-─────────────────────────────────────────────
-┌──────────────────────────────────────┬─────────────┬────────┬─────────┬────────────────────────────────────┬────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ Id                                   │ Environment │ Branch │ Source  │ Deployment                         │ Status         │ Build                                                                                                            │
-├──────────────────────────────────────┼─────────────┼────────┼─────────┼────────────────────────────────────┼────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ dc2dc9db-d13f-424c-aa5d-314b9622e9e1 │ Production  │ main   │ 9ad76a7 │ https://dc2dc9db.bbb-4ha.pages.dev │ 3 minutes ago  │ https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/pages/view/bbb/dc2dc9db-d13f-424c-aa5d-314b9622e9e1 │
-├──────────────────────────────────────┼─────────────┼────────┼─────────┼────────────────────────────────────┼────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ d7069f3a-3daa-4ea4-9a15-a81c1c3245a2 │ Production  │ main   │ 9ad76a7 │ https://d7069f3a.bbb-4ha.pages.dev │ 4 minutes ago  │ https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/pages/view/bbb/d7069f3a-3daa-4ea4-9a15-a81c1c3245a2 │
-├──────────────────────────────────────┼─────────────┼────────┼─────────┼────────────────────────────────────┼────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ a644bb65-8198-470e-9002-4a38b0e51d34 │ Production  │ main   │ 9ad76a7 │ https://a644bb65.bbb-4ha.pages.dev │ 4 minutes ago  │ https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/pages/view/bbb/a644bb65-8198-470e-9002-4a38b0e51d34 │
-├──────────────────────────────────────┼─────────────┼────────┼─────────┼────────────────────────────────────┼────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 6413decb-a211-4896-8dc7-ab21ad34eea6 │ Production  │ main   │ 9ad76a7 │ https://6413decb.bbb-4ha.pages.dev │ 7 minutes ago  │ https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/pages/view/bbb/6413decb-a211-4896-8dc7-ab21ad34eea6 │
-├──────────────────────────────────────┼─────────────┼────────┼─────────┼────────────────────────────────────┼────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ d59e4628-b6f0-43dc-b446-6f89c5276133 │ Production  │ main   │ 9ad76a7 │ https://d59e4628.bbb-4ha.pages.dev │ 7 minutes ago  │ https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/pages/view/bbb/d59e4628-b6f0-43dc-b446-6f89c5276133 │
-├──────────────────────────────────────┼─────────────┼────────┼─────────┼────────────────────────────────────┼────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ a8fa6fee-c103-482b-b02a-229a452df8a0 │ Production  │ main   │ 9ad76a7 │ https://a8fa6fee.bbb-4ha.pages.dev │ 7 minutes ago  │ https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/pages/view/bbb/a8fa6fee-c103-482b-b02a-229a452df8a0 │
-├──────────────────────────────────────┼─────────────┼────────┼─────────┼────────────────────────────────────┼────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 979b5dfd-588c-4a3c-9745-a6697d2d3827 │ Production  │ main   │ 9ad76a7 │ https://979b5dfd.bbb-4ha.pages.dev │ 7 minutes ago  │ https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/pages/view/bbb/979b5dfd-588c-4a3c-9745-a6697d2d3827 │
-├──────────────────────────────────────┼─────────────┼────────┼─────────┼────────────────────────────────────┼────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
 
 
 ---

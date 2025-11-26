@@ -1,14 +1,18 @@
-home: Home
-read_more: Read More
-send: Send
-related_posts: Related Posts
-categories: Categories
-tags: Tags
-toc: Table of Contents
-share: Share
-search_input_placeholder: Search Post...
-search_no_results: No results for
-search_initial_message: Type something to search..
-search_navigate: to navigate
-search_select: to select
-search_close: to close
+home: Hem
+read_more: Läs mer
+send: Skicka
+related_posts: Relaterade inlägg
+categories: Kategorier
+tags: Taggar
+toc: Innehållsförteckning
+share: Dela
+search_input_placeholder: Sök inlägg...
+search_no_results: Inga resultat för
+search_initial_message: Skriv något för att söka..
+search_navigate: navigera
+search_select: välj
+search_close: stäng
+services: Tjänster
+portfolio: Portfolio
+product: Produkt
+contact: Kontakt

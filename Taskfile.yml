@@ -251,28 +251,98 @@ tasks:
       - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
 
   # ============================================================================
-  # Translation
+  # Translation (use Claude Code interactively)
   # ============================================================================
+  # Workflow:
+  #   1. task translate:status    - see what changed since last translation
+  #   2. Ask Claude Code: "Translate the changed files to all languages"
+  #   3. task translate:done      - mark translations complete
+  #
+  # Target languages: de (German), sv (Swedish), zh (Chinese), ja (Japanese), th (Thai)
 
-  translate:check:
-    desc: Check which files need translation
+  translate:status:
+    desc: Show what English files changed since last translation
+    cmds:
+      - |
+        echo "========================================"
+        echo "Translation Status"
+        echo "========================================"
+        echo ""
+        echo "=== Uncommitted changes ==="
+        git diff --name-only -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null | grep -E '\.(md|toml|yaml)$' || echo "(none)"
+        echo ""
+        echo "=== Committed since last translation ==="
+        git diff --name-only last-translation..HEAD -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null || echo "(No checkpoint tag yet - run 'task translate:done' to set baseline)"
+        echo ""
+        echo "========================================"
+        echo "To translate, ask Claude Code:"
+        echo "  'Translate the changed files to all languages'"
+        echo ""
+        echo "After translating: task translate:done"
+        echo "========================================"
+
+  translate:done:
+    desc: Mark current translations as complete (update checkpoint tag)
+    cmds:
+      - git tag -f last-translation HEAD
+      - echo "✓ Translation checkpoint updated to current commit"
+
+  translate:missing:
+    desc: Show which languages are missing content files compared to English
+    cmds:
+      - |
+        echo "========================================"
+        echo "Missing Content Files by Language"
+        echo "========================================"
+        echo ""
+
+        LANGS="german swedish chinese japanese thai"
+
+        for LANG in $LANGS; do
+          MISSING=0
+          MISSING_FILES=""
+
+          # Check each English content file
+          for EN_FILE in $(find content/english -name "*.md" -type f); do
+            # Convert path: content/english/foo.md -> content/german/foo.md
+            LANG_FILE=$(echo "$EN_FILE" | sed "s|content/english|content/$LANG|")
+
+            if [ ! -f "$LANG_FILE" ]; then
+              MISSING=$((MISSING + 1))
+              MISSING_FILES="$MISSING_FILES\n  - ${EN_FILE#content/english/}"
+            fi
+          done
+
+          if [ $MISSING -eq 0 ]; then
+            echo "✓ $LANG: Complete"
+          else
+            echo "✗ $LANG: Missing $MISSING files"
+            echo -e "$MISSING_FILES"
+            echo ""
+          fi
+        done
+
+        echo "========================================"
+
+  translate:api:check:
+    desc: "[API] Check files needing translation (requires CLAUDE_API_KEY)"
     cmds:
       - go run {{.TRANSLATE_CMD}} --check
 
-  translate:all:
-    desc: Translate all changed content
+  translate:api:all:
+    desc: "[API] Translate all changed content (requires CLAUDE_API_KEY)"
     cmds:
       - go run {{.TRANSLATE_CMD}} --all
 
-  translate:lang:
-    desc: Translate to specific language
+  translate:api:lang:
+    desc: "[API] Translate to specific language (requires CLAUDE_API_KEY)"
     cmds:
       - go run {{.TRANSLATE_CMD}} --lang={{.LANG}}
     requires:
       vars: [LANG]
 
-  translate:i18n:
-    desc: Translate i18n files
+  translate:api:i18n:
+    desc: "[API] Translate i18n files (requires CLAUDE_API_KEY)"
     cmds:
       - go run {{.TRANSLATE_CMD}} --i18n
 
