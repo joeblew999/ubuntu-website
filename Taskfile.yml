@@ -159,71 +159,19 @@ tasks:
       - bun install
       - go mod download
 
-  install:rsvg:
-    desc: Install librsvg for SVG to PNG conversion
-    cmds:
-      - |
-        if command -v rsvg-convert &> /dev/null; then
-          echo "rsvg-convert already installed"
-          rsvg-convert --version
-        else
-          echo "Installing librsvg via Homebrew..."
-          brew install librsvg
-          rsvg-convert --version
-        fi
-
   # ============================================================================
-  # Asset Generation
+  # Asset Generation (uses Go genlogo tool - no external dependencies)
   # ============================================================================
-
-  generate:favicon:
-    desc: Generate favicon PNG from SVG source (512x512 for Hugo scaling)
-    deps: [install:rsvg]
-    cmds:
-      - |
-        echo "Generating favicon from SVG..."
-        rsvg-convert -w 512 -h 512 assets/images/favicon-source.svg -o assets/images/favicon.png
-        echo "Created assets/images/favicon.png (512x512)"
-
-  generate:logos:
-    desc: Generate logo PNGs from SVG sources
-    deps: [install:rsvg]
-    cmds:
-      - |
-        echo "Generating logos from SVG..."
-        rsvg-convert -w 512 -h 512 assets/images/logo.svg -o assets/images/logo.png
-        echo "Created assets/images/logo.png (512x512)"
-        rsvg-convert -w 512 -h 512 assets/images/logo-darkmode.svg -o assets/images/logo-darkmode.png
-        echo "Created assets/images/logo-darkmode.png (512x512)"
-
-  generate:og-image:
-    desc: Generate Open Graph image from SVG source (1200x630 for social sharing)
-    deps: [install:rsvg]
-    cmds:
-      - |
-        echo "Generating OG image from SVG..."
-        rsvg-convert -w 1200 -h 630 assets/images/og-image-source.svg -o assets/images/og-image.png
-        echo "Created assets/images/og-image.png (1200x630)"
-
-  generate:email-logo:
-    desc: Generate email signature logo PNG (300x47 for Gmail/email clients)
-    deps: [install:rsvg]
-    cmds:
-      - |
-        echo "Generating email signature logo from SVG..."
-        rsvg-convert -w 300 assets/images/logo.svg -o static/images/email-logo.png
-        echo "Created static/images/email-logo.png (300px wide)"
-        echo ""
-        echo "Use this URL in your Gmail signature:"
-        echo "  https://www.ubuntusoftware.net/images/email-logo.png"
 
   generate:assets:
-    desc: Generate all image assets from SVG sources
+    desc: Generate all branding assets (favicon, logos, og-image, email-logo, avatar, banner)
     cmds:
-      - task: generate:favicon
-      - task: generate:logos
-      - task: generate:og-image
-      - task: generate:email-logo
+      - go run cmd/genlogo/main.go -asset all
+      - echo ""
+      - echo "✓ Assets generated. Next steps:"
+      - echo "  1. Deploy website (task cf:deploy) - updates Hugo site with new favicon, logos, og-image"
+      - echo "  2. Gmail signature - re-upload email-logo.png at https://mail.google.com/mail/u/0/#settings/general"
+      - echo "  3. Bluesky profile - re-upload avatar & banner at https://bsky.app/profile/ubuntusoftware.net"
 
   # ============================================================================
   # Environment Management

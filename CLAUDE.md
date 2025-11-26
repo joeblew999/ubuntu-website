@@ -4,6 +4,12 @@
 
 USE TASKFILE - it makes conventions for development...
 
+### Branding Assets
+
+Source: `cmd/genlogo/main.go` → `task generate:assets`
+
+After regenerating, manually update: Bluesky, Gmail signature
+
 ### Path Convention
 **ALWAYS use `joeblew999` (with three 9s), NEVER `joeblew99` (with two 9s)**
 

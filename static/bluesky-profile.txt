@@ -1,0 +1,23 @@
+BLUESKY PROFILE - @ubuntusoftware.net
+======================================
+
+Display Name:
+Gerard Webb
+
+Bio:
+Building AI-powered CAD for modular construction @ Ubuntu Software | Go, Kubernetes, Cloud Architecture | IEEE, IOP, EU Software Foundation
+
+Avatar:
+static/images/bluesky-avatar.png (400x400)
+
+Banner:
+static/images/bluesky-banner.png (1500x500)
+
+To Edit:
+1. Go to https://bsky.app/profile/ubuntusoftware.net
+2. Click "Edit Profile"
+3. Update bio, upload avatar and banner
+4. Save
+
+To Regenerate Images:
+task generate:social

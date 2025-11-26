@@ -9,6 +9,13 @@ https://www.ubuntusoftware.net
 https://www.ubuntusoftware.net/sitemap.xml
 https://www.ubuntusoftware.net/sitemap.xml/en/sitemap.xml
 
+## 📍 Touch Points (Edit Locations)
+
+- **Gmail Signature**: [Gmail Settings → Signature](https://mail.google.com/mail/u/0/#settings/general)
+- **Bluesky Profile**: [bsky.app/profile/ubuntusoftware.net](https://bsky.app/profile/ubuntusoftware.net) → Edit Profile
+- **Cloudflare DNS**: [Cloudflare Dashboard](https://dash.cloudflare.com/) → ubuntusoftware.net → DNS
+- **GitHub Profile**: [github.com/settings/profile](https://github.com/settings/profile)
+
 ## 🔗 Quick Links
 
 For all URLs, dashboards, and project information, run:
