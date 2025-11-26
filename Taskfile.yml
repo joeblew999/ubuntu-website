@@ -23,7 +23,6 @@ vars:
 
   # Commands
   ENV_CMD: cmd/env/main.go
-  TRANSLATE_CMD: cmd/translate/main.go
 
   # Directories
   DIR_PUBLIC: public
@@ -323,28 +322,6 @@ tasks:
         done
 
         echo "========================================"
-
-  translate:api:check:
-    desc: "[API] Check files needing translation (requires CLAUDE_API_KEY)"
-    cmds:
-      - go run {{.TRANSLATE_CMD}} --check
-
-  translate:api:all:
-    desc: "[API] Translate all changed content (requires CLAUDE_API_KEY)"
-    cmds:
-      - go run {{.TRANSLATE_CMD}} --all
-
-  translate:api:lang:
-    desc: "[API] Translate to specific language (requires CLAUDE_API_KEY)"
-    cmds:
-      - go run {{.TRANSLATE_CMD}} --lang={{.LANG}}
-    requires:
-      vars: [LANG]
-
-  translate:api:i18n:
-    desc: "[API] Translate i18n files (requires CLAUDE_API_KEY)"
-    cmds:
-      - go run {{.TRANSLATE_CMD}} --i18n
 
   # ============================================================================
   # Cloudflare Pages (DEPRECATED - using Git integration)
