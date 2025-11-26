@@ -17,16 +17,16 @@ Operating through **Ubuntu Software** (ABN: 95 595 575 880), an Australian-regis
 ## Notable Client Experience
 
 **Government & International Organizations:**
-- German Federal Ministry of Health (BMG)
-- European Union (ECDC) - Security architecture
-- European Climate Foundation (ECF)
+- [German Federal Ministry of Health (BMG)](https://www.bundesgesundheitsministerium.de/)
+- [European Union (ECDC)](https://www.ecdc.europa.eu/) - Security architecture
+- [European Climate Foundation (ECF)](https://europeanclimate.org/)
 
 **Major Corporations:**
-- Metro AG (Germany) - 7,000 Kubernetes server deployment
-- Audi AG (Germany) - Autonomous transport systems
-- BP (British Petroleum) - Enterprise workflow architecture
-- Nomura Bank (UK) - B2B supplier chain
-- ABN AMRO Bank (UK) - Banking systems
+- [Metro AG](https://www.metroag.de/) (Germany) - 7,000 Kubernetes server deployment
+- [Audi AG](https://www.audi.com/) (Germany) - Autonomous transport systems
+- [BP](https://www.bp.com/) (British Petroleum) - Enterprise workflow architecture
+- [Nomura](https://www.nomura.com/) (UK) - B2B supplier chain
+- [ABN AMRO](https://www.abnamro.com/) (UK) - Banking systems
 
 ## Technical Expertise
 

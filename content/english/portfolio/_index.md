@@ -13,7 +13,7 @@ A selection of projects demonstrating the range of technical challenges I've tac
 
 ## Government & Healthcare
 
-### German Federal Ministry of Health (BMG)
+### [German Federal Ministry of Health (BMG)](https://www.bundesgesundheitsministerium.de/)
 **Lead Architect | 2020-2023**
 
 Critical healthcare infrastructure during the COVID-19 pandemic - systems that directly supported Germany's national health response.
@@ -30,7 +30,7 @@ Critical healthcare infrastructure during the COVID-19 pandemic - systems that d
 
 ---
 
-### European Union (ECDC)
+### [European Union (ECDC)](https://www.ecdc.europa.eu/)
 **Security Architect**
 
 Security architecture for European Centre for Disease Prevention and Control systems.
@@ -43,7 +43,7 @@ Security architecture for European Centre for Disease Prevention and Control sys
 
 ## Enterprise & Industrial
 
-### Metro AG
+### [Metro AG](https://www.metroag.de/)
 **Infrastructure Architect | Germany**
 
 One of Europe's largest retailers needed to modernize their entire infrastructure backbone.
@@ -61,7 +61,7 @@ One of Europe's largest retailers needed to modernize their entire infrastructur
 
 ---
 
-### Audi AG
+### [Audi AG](https://www.audi.com/)
 **Senior Developer | Germany**
 
 Autonomous transport systems for manufacturing facilities - vehicles that move materials and components without human drivers.
@@ -80,7 +80,7 @@ Autonomous transport systems for manufacturing facilities - vehicles that move m
 
 ## Finance & Banking
 
-### BP (British Petroleum)
+### [BP](https://www.bp.com/)
 **Enterprise Architect | UK**
 
 Global workflow and process automation for one of the world's largest energy companies.
@@ -93,7 +93,7 @@ Global workflow and process automation for one of the world's largest energy com
 
 ---
 
-### Nomura Bank
+### [Nomura](https://www.nomura.com/)
 **Technical Lead | UK**
 
 B2B supplier chain systems for international banking operations.
@@ -106,7 +106,7 @@ B2B supplier chain systems for international banking operations.
 
 ---
 
-### ABN AMRO Bank
+### [ABN AMRO](https://www.abnamro.com/)
 **Senior Developer | UK**
 
 Core banking system development and architecture.
@@ -136,11 +136,11 @@ Ongoing technical consulting engagement delivering Go development, distributed s
 
 | Sector | Years | Notable Clients |
 |--------|-------|-----------------|
-| Healthcare/Government | 5+ | BMG, ECDC, EU |
-| Retail/Enterprise | 3+ | Metro AG |
-| Automotive/Industrial | 2+ | Audi AG |
-| Finance/Banking | 8+ | BP, Nomura, ABN AMRO |
-| Energy | 3+ | BP |
+| Healthcare/Government | 5+ | [BMG](https://www.bundesgesundheitsministerium.de/), [ECDC](https://www.ecdc.europa.eu/) |
+| Retail/Enterprise | 3+ | [Metro AG](https://www.metroag.de/) |
+| Automotive/Industrial | 2+ | [Audi AG](https://www.audi.com/) |
+| Finance/Banking | 8+ | [BP](https://www.bp.com/), [Nomura](https://www.nomura.com/), [ABN AMRO](https://www.abnamro.com/) |
+| Energy | 3+ | [BP](https://www.bp.com/) |
 
 ---
 
