@@ -1,0 +1,17 @@
+name: Post to Bluesky
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post new blog entries to Bluesky
+        uses: joschi/blueskyfeedbot@v1
+        with:
+          feed-url: 'https://ubuntusoftware.net/index.xml'
+          bluesky-handle: 'ubuntusoftware.net'
+          bluesky-password: ${{ secrets.BLUESKY_APP_PASSWORD }}
