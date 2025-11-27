@@ -1,0 +1,40 @@
+{{- $title := .Title | default site.Title -}}
+{{- $description := .Description | default .Summary | default site.Params.description | plainify | truncate 160 -}}
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ $title }} | {{ site.Title }}" />
+<meta property="og:description" content="{{ $description }}" />
+<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}" />
+<meta property="og:url" content="{{ .Permalink }}" />
+
+{{- with .Params.image -}}
+  {{- $imageURL := . -}}
+  {{- if not (hasPrefix . "http") -}}
+    {{- $imageURL = printf "%s%s" site.BaseURL (strings.TrimPrefix "/" .) -}}
+  {{- end -}}
+  <meta property="og:image" content="{{ $imageURL }}" />
+{{- else -}}
+  {{- with site.Params.metadata.image -}}
+    <meta property="og:image" content="{{ . | absURL }}" />
+  {{- end -}}
+{{- end -}}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ $title }} | {{ site.Title }}" />
+<meta name="twitter:description" content="{{ $description }}" />
+{{- with site.Params.twitter -}}
+<meta name="twitter:creator" content="@{{ . }}" />
+{{- end -}}
+
+{{- with .Params.image -}}
+  {{- $imageURL := . -}}
+  {{- if not (hasPrefix . "http") -}}
+    {{- $imageURL = printf "%s%s" site.BaseURL (strings.TrimPrefix "/" .) -}}
+  {{- end -}}
+  <meta name="twitter:image" content="{{ $imageURL }}" />
+{{- else -}}
+  {{- with site.Params.metadata.image -}}
+    <meta name="twitter:image" content="{{ . | absURL }}" />
+  {{- end -}}
+{{- end -}}

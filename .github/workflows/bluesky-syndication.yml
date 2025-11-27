@@ -29,6 +29,6 @@ jobs:
           password: ${{ secrets.BLUESKY_APP_PASSWORD }}
           cache-file: .bluesky-cache/posted.json
           template: |
-            {{item.title}}
+            📝 {{item.title}}
 
             {{item.link}}
