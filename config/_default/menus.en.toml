@@ -10,6 +10,19 @@ weight = 1
 name = "Platform"
 url = "/platform"
 weight = 2
+hasChildren = true
+
+[[main]]
+name = "Publish"
+url = "/platform/publish"
+parent = "Platform"
+weight = 1
+
+[[main]]
+name = "Spatial"
+url = "/platform/spatial"
+parent = "Platform"
+weight = 2
 
 [[main]]
 name = "Applications"
