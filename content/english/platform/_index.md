@@ -1,129 +1,90 @@
 ---
 title: "The Platform"
-meta_title: "AI-Native 3D Design Infrastructure | Ubuntu Software"
-description: "This isn't CAD with AI bolted on. It's a platform built from the ground up for a world where artificial intelligence and three-dimensional design converge."
+meta_title: "AI-Native Design Infrastructure | Ubuntu Software"
+description: "Two platforms. One vision. Spatial for 3D design and AI. Publish for documents and forms. Both built on open standards, real-time collaboration, and your infrastructure."
 image: "/images/platform.svg"
 draft: false
 ---
 
-## AI-Native 3D Design Infrastructure
+## Two Platforms. One Vision.
 
-This isn't CAD with AI bolted on. It's a platform built from the ground up for a world where artificial intelligence and three-dimensional design converge.
+Design infrastructure for organizations that work in both dimensions—documents and 3D models, forms and factories, PDFs and physical systems.
 
----
-
-## Core Architecture
-
-### 3D-Native AI Integration
-
-**AI that truly understands space, not just describes screenshots.**
-
-Built on Model Context Protocol (MCP), our platform gives AI systems direct access to geometry, spatial relationships, constraints, and physics. AI doesn't look at your design—it works inside it.
-
-- Spatial reasoning, not image recognition
-- Constraint-aware generation
-- Physics-informed optimization
-- Conversational design interaction
+Built on open standards. Real-time collaboration. Your infrastructure.
 
 ---
 
-### Open Standards, Forever
+## Publish: 2D Document Platform
 
-**Your geometry. Your data. No lock-in. Ever.**
+**Single-source publishing for documents, forms, and data capture.**
 
-- **STEP (ISO 10303)** — Industry-standard 3D geometry exchange. The format aerospace, automotive, and manufacturing trust.
-- **IFC (ISO 16739)** — Native Building Information Modeling. Full semantic richness for the built environment.
+Write once in Markdown. Generate web pages, PDFs, and forms—all perfectly aligned. Capture data from digital or paper submissions back to your database.
 
-No proprietary formats. No conversion loss. No vendor dependency. Your work outlasts any software.
+### For Organizations That Need:
 
----
+- **Unified publishing** — One source drives web, PDF, and forms
+- **Paper + digital** — Both channels, same data destination
+- **OCR capture** — Scanned paper forms to database automatically
+- **No lock-in** — Markdown source, standard outputs, your database
 
-### Real-Time Collaboration
+### Industries:
 
-**Distributed teams working as one.**
+Government. Healthcare. Financial services. Education. Insurance. Enterprise operations.
 
-Automerge CRDT at the core. Not save-and-merge. Not lock-and-wait. True simultaneous editing with automatic conflict resolution.
-
-- Factory floor in Vietnam
-- Engineering in Germany
-- Architects in Australia
-
-Same model. Same moment. No conflicts.
-
-Offline-first. Work without connectivity. Sync automatically when reconnected. Full version history with branching and merging.
+[Explore Publish →](/platform/publish/)
 
 ---
 
-### Digital Twin Architecture
+## Spatial: 3D AI Platform
 
-**Design connected to reality.**
+**AI-native infrastructure for three-dimensional design.**
 
-NATS JetStream event-driven messaging bridges the gap between design and the physical world.
+AI that truly understands geometry, not just describes screenshots. Real-time collaboration across global teams. Open standards that outlast any vendor.
 
-- Live sensor data flowing into your model
-- Simulation running against real-world inputs
-- IoT device management from the design environment
-- Predictive maintenance before failures happen
+### For Organizations That Need:
 
----
+- **AI + 3D** — Native integration, not bolted-on vision models
+- **Global collaboration** — Same model, same moment, no conflicts
+- **Open standards** — STEP and IFC. Your geometry belongs to you.
+- **Digital twins** — Design connected to sensors and reality
 
-## Run Anywhere
+### Industries:
 
-**Your infrastructure. Your rules.**
+Robotics. Manufacturing. Construction. Simulation. Facility management.
 
-| Deployment | Description |
-|------------|-------------|
-| **Web** | Modern browser, full functionality |
-| **Desktop** | Native experience via embedded webview |
-| **Mobile** | Tablets and phones, no compromise |
-| **Online** | Cloud collaboration and access from anywhere |
-| **Offline** | Air-gapped environments, complete control |
-| **Hybrid** | Sensitive work local, collaboration in the cloud |
-| **Self-Hosted** | Your servers, your data, your security model |
+[Explore Spatial →](/platform/spatial/)
 
 ---
 
-## Technical Foundation
+## Common Foundation
 
-Built with technologies chosen for longevity and openness:
+Both platforms share core infrastructure:
 
-| Layer | Technology |
-|-------|------------|
-| Geometry | STEP/IFC native formats |
-| Collaboration | Automerge CRDT |
-| Messaging | NATS JetStream |
-| AI Integration | Model Context Protocol |
-| Frontend | Web-native with webview embedding |
-| Architecture | Event-driven, extensible plugin system |
-
----
-
-## Why Now?
-
-**Five technologies matured at once:**
-
-- **CRDTs are production-ready** — Automerge solved real-time collaboration without conflicts
-- **AI can use tools** — LLMs with function calling can manipulate complex systems
-- **Open standards won** — STEP and IFC are accepted across industries
-- **WebAssembly delivers** — Desktop-class performance in the browser
-- **The market is ready** — Every industry asking how AI applies to physical design
-
-The window is open. We're building through it.
+| Capability | Technology |
+|------------|------------|
+| **Real-time collaboration** | Automerge CRDT — simultaneous editing, automatic conflict resolution |
+| **Event-driven messaging** | NATS JetStream — connect to sensors, systems, and workflows |
+| **AI integration** | Model Context Protocol — AI that works inside your data |
+| **Open standards** | No proprietary formats. Export everything. Own your work. |
+| **Deployment flexibility** | Cloud, self-hosted, hybrid, air-gapped. Your choice. |
 
 ---
 
-## See It In Action
+## Choose Your Path
 
-- [Robotics & Automation →](/applications/robotics)
-- [Simulation & Training →](/applications/simulation)
-- [Digital Twins →](/applications/digital-twins)
-- [Manufacturing →](/applications/manufacturing)
-- [Construction →](/applications/construction)
+**Need documents and forms?**
+Start with [Publish](/platform/publish/). Add Spatial later if you move into 3D.
+
+**Need 3D design and AI?**
+Start with [Spatial](/platform/spatial/). Publish integrates when you need documentation.
+
+**Need both?**
+They work together. Technical drawings generated from 3D models. BOMs flowing to forms. Documentation aligned with design.
 
 ---
 
-## Build With Us
+## Get Started
 
-Interested in the platform? Building something in this space? Let's talk.
+Whether you're processing paper forms or designing robotic work cells, we have infrastructure for you.
 
-[Contact →](/contact)
+[Contact Us →](/contact)
