@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="520" viewBox="0 0 560 520">
+  <!-- Simulation & Training: Virtual environments, AI learning -->
+
+  <!-- Main simulation viewport -->
+  <g transform="translate(40, 30)">
+    <rect width="320" height="220" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Viewport corners -->
+    <circle cx="15" cy="15" r="4" fill="#ccc"/>
+    <circle cx="305" cy="15" r="4" fill="#ccc"/>
+    <circle cx="15" cy="205" r="4" fill="#ccc"/>
+    <circle cx="305" cy="205" r="4" fill="#ccc"/>
+    <!-- 3D perspective grid -->
+    <g transform="translate(160, 150)">
+      <!-- Ground plane -->
+      <line x1="-120" y1="40" x2="120" y2="40" stroke="#e0e0e0" stroke-width="1.5"/>
+      <line x1="-100" y1="20" x2="100" y2="20" stroke="#e0e0e0" stroke-width="1.5"/>
+      <line x1="-80" y1="0" x2="80" y2="0" stroke="#e0e0e0" stroke-width="1.5"/>
+      <line x1="-60" y1="-20" x2="60" y2="-20" stroke="#e0e0e0" stroke-width="1.5"/>
+      <!-- Vertical lines -->
+      <line x1="-80" y1="40" x2="-40" y2="-20" stroke="#e0e0e0" stroke-width="1"/>
+      <line x1="-40" y1="40" x2="-20" y2="-20" stroke="#e0e0e0" stroke-width="1"/>
+      <line x1="0" y1="40" x2="0" y2="-20" stroke="#e0e0e0" stroke-width="1"/>
+      <line x1="40" y1="40" x2="20" y2="-20" stroke="#e0e0e0" stroke-width="1"/>
+      <line x1="80" y1="40" x2="40" y2="-20" stroke="#e0e0e0" stroke-width="1"/>
+      <!-- Simulated object -->
+      <circle cx="0" cy="10" r="25" fill="#ddd" stroke="#999" stroke-width="2"/>
+      <circle cx="0" cy="10" r="10" fill="#999"/>
+      <!-- Motion trail -->
+      <path d="M -60 30 Q -30 0 0 10" fill="none" stroke="#ccc" stroke-width="2" stroke-dasharray="5,3"/>
+    </g>
+  </g>
+
+  <!-- Parameters panel -->
+  <g transform="translate(380, 30)">
+    <rect width="140" height="140" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Parameter sliders -->
+    <g transform="translate(20, 25)">
+      <text x="0" y="0" font-family="sans-serif" font-size="8" fill="#999">Speed</text>
+      <rect x="0" y="8" width="100" height="8" rx="4" fill="#e8e8e8"/>
+      <circle cx="70" cy="12" r="6" fill="#999"/>
+      <text x="0" y="35" font-family="sans-serif" font-size="8" fill="#999">Friction</text>
+      <rect x="0" y="43" width="100" height="8" rx="4" fill="#e8e8e8"/>
+      <circle cx="40" cy="47" r="6" fill="#999"/>
+      <text x="0" y="70" font-family="sans-serif" font-size="8" fill="#999">Mass</text>
+      <rect x="0" y="78" width="100" height="8" rx="4" fill="#e8e8e8"/>
+      <circle cx="85" cy="82" r="6" fill="#666"/>
+    </g>
+  </g>
+
+  <!-- Training iterations panel -->
+  <g transform="translate(380, 190)">
+    <rect width="140" height="100" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Progress chart -->
+    <g transform="translate(20, 20)">
+      <line x1="0" y1="60" x2="100" y2="60" stroke="#e0e0e0" stroke-width="1"/>
+      <line x1="0" y1="0" x2="0" y2="60" stroke="#e0e0e0" stroke-width="1"/>
+      <!-- Learning curve -->
+      <path d="M 0 55 Q 25 50 50 35 Q 75 15 100 10" fill="none" stroke="#999" stroke-width="2"/>
+      <!-- Data points -->
+      <circle cx="0" cy="55" r="3" fill="#ccc"/>
+      <circle cx="25" cy="45" r="3" fill="#ccc"/>
+      <circle cx="50" cy="35" r="3" fill="#999"/>
+      <circle cx="75" cy="20" r="3" fill="#999"/>
+      <circle cx="100" cy="10" r="3" fill="#666"/>
+    </g>
+  </g>
+
+  <!-- AI Agent panel -->
+  <g transform="translate(40, 270)">
+    <rect width="200" height="150" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Neural network visualization -->
+    <g transform="translate(100, 75)">
+      <!-- Input layer -->
+      <circle cx="-60" cy="-30" r="8" fill="#e8e8e8" stroke="#ccc" stroke-width="1"/>
+      <circle cx="-60" cy="0" r="8" fill="#e8e8e8" stroke="#ccc" stroke-width="1"/>
+      <circle cx="-60" cy="30" r="8" fill="#e8e8e8" stroke="#ccc" stroke-width="1"/>
+      <!-- Hidden layer -->
+      <circle cx="0" cy="-20" r="8" fill="#ddd" stroke="#bbb" stroke-width="1"/>
+      <circle cx="0" cy="20" r="8" fill="#ddd" stroke="#bbb" stroke-width="1"/>
+      <!-- Output layer -->
+      <circle cx="60" cy="0" r="10" fill="#ccc" stroke="#999" stroke-width="1.5"/>
+      <!-- Connections -->
+      <line x1="-52" y1="-30" x2="-8" y2="-20" stroke="#ddd" stroke-width="1"/>
+      <line x1="-52" y1="0" x2="-8" y2="-20" stroke="#ddd" stroke-width="1"/>
+      <line x1="-52" y1="30" x2="-8" y2="20" stroke="#ddd" stroke-width="1"/>
+      <line x1="-52" y1="0" x2="-8" y2="20" stroke="#ddd" stroke-width="1"/>
+      <line x1="8" y1="-20" x2="50" y2="0" stroke="#ccc" stroke-width="1"/>
+      <line x1="8" y1="20" x2="50" y2="0" stroke="#ccc" stroke-width="1"/>
+    </g>
+  </g>
+
+  <!-- Environment variants panel -->
+  <g transform="translate(260, 310)">
+    <rect width="260" height="110" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Multiple environment thumbnails -->
+    <g transform="translate(30, 25)">
+      <rect x="0" y="0" width="55" height="55" rx="4" fill="#e8e8e8" stroke="#ccc" stroke-width="1"/>
+      <line x1="10" y1="45" x2="45" y2="45" stroke="#ddd" stroke-width="1"/>
+      <circle cx="27" cy="30" r="10" fill="#ddd"/>
+    </g>
+    <g transform="translate(100, 25)">
+      <rect x="0" y="0" width="55" height="55" rx="4" fill="#ddd" stroke="#bbb" stroke-width="1"/>
+      <line x1="10" y1="45" x2="45" y2="45" stroke="#ccc" stroke-width="1"/>
+      <rect x="15" y="20" width="25" height="20" rx="2" fill="#ccc"/>
+    </g>
+    <g transform="translate(170, 25)">
+      <rect x="0" y="0" width="55" height="55" rx="4" fill="#ccc" stroke="#999" stroke-width="1"/>
+      <line x1="10" y1="45" x2="45" y2="45" stroke="#999" stroke-width="1"/>
+      <polygon points="27,15 40,40 14,40" fill="#999"/>
+    </g>
+  </g>
+
+  <!-- Decorative -->
+  <circle cx="500" cy="470" r="18" fill="none" stroke="#eee" stroke-width="2"/>
+</svg>

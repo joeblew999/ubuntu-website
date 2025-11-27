@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="physicalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6e7681;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#6e7681;stop-opacity:0.4"/>
+    </linearGradient>
+    <linearGradient id="digitalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#58a6ff;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#58a6ff;stop-opacity:0.4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="#f8f9fa"/>
+
+  <!-- Dividing line / Mirror -->
+  <line x1="400" y1="50" x2="400" y2="350" stroke="#121212" stroke-width="3"/>
+  <g transform="translate(400, 200)">
+    <rect x="-4" y="-20" width="8" height="40" fill="#121212"/>
+  </g>
+
+  <!-- Physical side label -->
+  <text x="200" y="45" font-family="sans-serif" font-size="14" fill="#6e7681" text-anchor="middle">Physical</text>
+
+  <!-- Digital side label -->
+  <text x="600" y="45" font-family="sans-serif" font-size="14" fill="#58a6ff" text-anchor="middle">Digital Twin</text>
+
+  <!-- Physical Building (left side) -->
+  <g transform="translate(200, 220)">
+    <!-- Building base -->
+    <rect x="-80" y="20" width="160" height="100" fill="url(#physicalGrad)" stroke="#6e7681" stroke-width="2"/>
+    <!-- Building top section -->
+    <rect x="-70" y="-40" width="140" height="60" fill="url(#physicalGrad)" stroke="#6e7681" stroke-width="2"/>
+    <!-- Roof -->
+    <polygon points="-80,-40 0,-80 80,-40" fill="url(#physicalGrad)" stroke="#6e7681" stroke-width="2"/>
+
+    <!-- Windows -->
+    <g fill="#f8f9fa" stroke="#6e7681" stroke-width="1">
+      <rect x="-55" y="-25" width="25" height="30"/>
+      <rect x="-15" y="-25" width="25" height="30"/>
+      <rect x="30" y="-25" width="25" height="30"/>
+      <rect x="-55" y="40" width="25" height="35"/>
+      <rect x="-15" y="40" width="25" height="35"/>
+      <rect x="30" y="40" width="25" height="35"/>
+    </g>
+
+    <!-- Door -->
+    <rect x="-15" y="85" width="30" height="35" fill="#6e7681"/>
+
+    <!-- Sensor indicators on physical -->
+    <circle cx="-60" cy="0" r="5" fill="#58a6ff" opacity="0.8"/>
+    <circle cx="60" cy="0" r="5" fill="#58a6ff" opacity="0.8"/>
+    <circle cx="0" cy="90" r="5" fill="#58a6ff" opacity="0.8"/>
+  </g>
+
+  <!-- Digital Building (right side - mirrored with glow) -->
+  <g transform="translate(600, 220)">
+    <!-- Glow effect -->
+    <rect x="-85" y="15" width="170" height="110" fill="#58a6ff" opacity="0.1" rx="5"/>
+
+    <!-- Building base -->
+    <rect x="-80" y="20" width="160" height="100" fill="url(#digitalGrad)" stroke="#58a6ff" stroke-width="2"/>
+    <!-- Building top section -->
+    <rect x="-70" y="-40" width="140" height="60" fill="url(#digitalGrad)" stroke="#58a6ff" stroke-width="2"/>
+    <!-- Roof -->
+    <polygon points="-80,-40 0,-80 80,-40" fill="url(#digitalGrad)" stroke="#58a6ff" stroke-width="2"/>
+
+    <!-- Windows with data -->
+    <g fill="#121212" stroke="#58a6ff" stroke-width="1">
+      <rect x="-55" y="-25" width="25" height="30"/>
+      <rect x="-15" y="-25" width="25" height="30"/>
+      <rect x="30" y="-25" width="25" height="30"/>
+      <rect x="-55" y="40" width="25" height="35"/>
+      <rect x="-15" y="40" width="25" height="35"/>
+      <rect x="30" y="40" width="25" height="35"/>
+    </g>
+
+    <!-- Data indicators in windows -->
+    <g fill="#58a6ff" font-family="monospace" font-size="8">
+      <text x="-48" y="-5">22°</text>
+      <text x="-8" y="-5">21°</text>
+      <text x="37" y="-5">23°</text>
+      <text x="-48" y="65">45%</text>
+      <text x="-8" y="65">52%</text>
+      <text x="37" y="65">48%</text>
+    </g>
+
+    <!-- Door -->
+    <rect x="-15" y="85" width="30" height="35" fill="#58a6ff" opacity="0.6"/>
+
+    <!-- Digital data points -->
+    <circle cx="-60" cy="0" r="5" fill="#58a6ff"/>
+    <circle cx="60" cy="0" r="5" fill="#58a6ff"/>
+    <circle cx="0" cy="90" r="5" fill="#58a6ff"/>
+
+    <!-- Wireframe overlay effect -->
+    <g stroke="#58a6ff" stroke-width="0.5" opacity="0.3" fill="none">
+      <line x1="-80" y1="20" x2="-80" y2="120"/>
+      <line x1="80" y1="20" x2="80" y2="120"/>
+      <line x1="-70" y1="-40" x2="-70" y2="20"/>
+      <line x1="70" y1="-40" x2="70" y2="20"/>
+      <line x1="0" y1="-80" x2="0" y2="120"/>
+    </g>
+  </g>
+
+  <!-- Sync arrows between physical and digital -->
+  <g stroke="#58a6ff" stroke-width="2">
+    <!-- Top arrow -->
+    <path d="M 280 140 C 330 140 370 140 380 140" fill="none"/>
+    <polygon points="380,140 370,135 370,145" fill="#58a6ff"/>
+
+    <!-- Middle bidirectional -->
+    <line x1="300" y1="220" x2="380" y2="220"/>
+    <polygon points="380,220 370,215 370,225" fill="#58a6ff"/>
+    <line x1="500" y1="220" x2="420" y2="220"/>
+    <polygon points="420,220 430,215 430,225" fill="#58a6ff"/>
+
+    <!-- Bottom arrow -->
+    <path d="M 280 300 C 330 300 370 300 380 300" fill="none"/>
+    <polygon points="380,300 370,295 370,305" fill="#58a6ff"/>
+  </g>
+
+  <!-- Data stream indicators -->
+  <g fill="#58a6ff">
+    <circle cx="320" cy="140" r="3"/>
+    <circle cx="340" cy="140" r="2"/>
+    <circle cx="360" cy="140" r="3"/>
+
+    <circle cx="340" cy="220" r="3"/>
+    <circle cx="360" cy="215" r="2"/>
+    <circle cx="440" cy="225" r="2"/>
+    <circle cx="460" cy="220" r="3"/>
+
+    <circle cx="320" cy="300" r="3"/>
+    <circle cx="340" cy="300" r="2"/>
+    <circle cx="360" cy="300" r="3"/>
+  </g>
+
+  <!-- Labels -->
+  <g font-family="sans-serif" font-size="9" fill="#6e7681">
+    <text x="340" y="130">Sensors</text>
+    <text x="340" y="210">Real-time Sync</text>
+    <text x="340" y="290">Analytics</text>
+  </g>
+</svg>

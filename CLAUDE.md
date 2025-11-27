@@ -10,6 +10,19 @@ Source: `cmd/genlogo/main.go` → `task generate:assets`
 
 After regenerating, manually update: Bluesky, Gmail signature
 
+### Blog Images
+
+Location: `assets/images/blog/`
+Format: SVG, 800x400 viewBox
+Colors: `#58a6ff` (blue), `#121212` (dark), `#f8f9fa` (background)
+
+### Page Images (banner, services, etc.)
+
+Location: `assets/images/`
+Format: SVG with explicit width/height attributes
+Dimensions: banner 800x500, services 560x520, call-to-action 400x400
+Style: Hugo Plate grayscale line-art (white, `#f5f5f5`, `#ccc`, `#999`, `#666`)
+
 ### Translation Workflow
 
 Tasks:
@@ -18,10 +31,12 @@ Tasks:
 - `task translate:done` - mark translations complete (updates checkpoint)
 
 Workflow:
-1. `task translate:status` → translate changed files to all 5 languages
+1. `task translate:status` → translate changed files to all languages
 2. `task translate:done` → update checkpoint
 
-Languages: de (German), sv (Swedish), zh (Chinese), ja (Japanese), th (Thai)
+Languages: de (German), zh (Chinese), ja (Japanese)
+
+Note: When adding/removing languages, also update Taskfile.yml
 
 ### Path Convention
 **ALWAYS use `joeblew999` (with three 9s), NEVER `joeblew99` (with two 9s)**
@@ -47,11 +62,11 @@ When working on Hugo coding aspects use the source at:
 
 ### Hugo Plate Source code
 
-When working on Hugo Plate, which is a Hugo theme we use coding aspects use the source at:
+When working on Hugo Plate, which is a Hugo theme:
 
-/Users/apple/workspace/go/src/github.com/joeblew999/wellknown/.src/hugoplate
+- **Source code**: `/Users/apple/workspace/go/src/github.com/joeblew999/wellknown/.src/hugoplate`
 
-Only use Hugo template things properly. I do not want to steer away from the standard Hugo Plate way of doing things !! 
+- Only use Hugo template things properly. I do not want to steer away from the standard Hugo Plate way of doing things !! 
 
 ## Information about the company 
 

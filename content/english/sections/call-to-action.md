@@ -1,8 +1,8 @@
 ---
 enable: true
-title: "Ready to Transform Your IT Infrastructure?"
-image: "/images/call-to-action.png"
-description: "Partner with Ubuntu Software for expert consulting in distributed systems, cloud architecture, and enterprise-scale solutions. Over 25 years of proven expertise."
+title: "Ready to Build Where AI Designs Reality?"
+image: "/images/call-to-action.svg"
+description: "Join us in building the platform where artificial intelligence and three-dimensional design converge. Whether you're in robotics, simulation, digital twins, or construction—let's talk."
 button:
   enable: true
   label: "Get in Touch"

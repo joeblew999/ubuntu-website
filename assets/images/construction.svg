@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="520" viewBox="0 0 560 520">
+  <!-- Construction: Modular building, prefab, BIM -->
+
+  <!-- Main building panel -->
+  <g transform="translate(40, 30)">
+    <rect width="320" height="240" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Building frame under construction -->
+    <g transform="translate(160, 200)">
+      <!-- Foundation -->
+      <rect x="-120" y="0" width="240" height="15" rx="3" fill="#ccc" stroke="#999" stroke-width="1"/>
+      <!-- Floor 1 -->
+      <rect x="-110" y="-60" width="220" height="60" fill="none" stroke="#bbb" stroke-width="2"/>
+      <line x1="-50" y1="-60" x2="-50" y2="0" stroke="#ddd" stroke-width="1"/>
+      <line x1="10" y1="-60" x2="10" y2="0" stroke="#ddd" stroke-width="1"/>
+      <line x1="70" y1="-60" x2="70" y2="0" stroke="#ddd" stroke-width="1"/>
+      <!-- Floor 2 -->
+      <rect x="-110" y="-120" width="220" height="60" fill="none" stroke="#bbb" stroke-width="2"/>
+      <line x1="-50" y1="-120" x2="-50" y2="-60" stroke="#ddd" stroke-width="1"/>
+      <line x1="10" y1="-120" x2="10" y2="-60" stroke="#ddd" stroke-width="1"/>
+      <line x1="70" y1="-120" x2="70" y2="-60" stroke="#ddd" stroke-width="1"/>
+      <!-- Roof beam -->
+      <line x1="-110" y1="-120" x2="110" y2="-120" stroke="#999" stroke-width="3"/>
+      <!-- Crane -->
+      <g transform="translate(-90, -140)">
+        <line x1="0" y1="0" x2="0" y2="-60" stroke="#999" stroke-width="3"/>
+        <line x1="0" y1="-60" x2="120" y2="-60" stroke="#999" stroke-width="2"/>
+        <line x1="100" y1="-60" x2="100" y2="-30" stroke="#ccc" stroke-width="1" stroke-dasharray="3,2"/>
+        <!-- Load -->
+        <rect x="85" y="-30" width="30" height="20" rx="2" fill="#ddd" stroke="#bbb" stroke-width="1"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Modular components panel -->
+  <g transform="translate(380, 30)">
+    <rect width="140" height="160" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Prefab modules -->
+    <g transform="translate(70, 85)">
+      <!-- Module stack -->
+      <rect x="-45" y="20" width="40" height="30" rx="3" fill="#ddd" stroke="#bbb" stroke-width="1.5"/>
+      <rect x="5" y="20" width="40" height="30" rx="3" fill="#ccc" stroke="#999" stroke-width="1.5"/>
+      <rect x="-25" y="-15" width="40" height="30" rx="3" fill="#e0e0e0" stroke="#bbb" stroke-width="1.5"/>
+      <rect x="15" y="-15" width="30" height="30" rx="3" fill="#ddd" stroke="#999" stroke-width="1.5"/>
+      <rect x="-5" y="-45" width="35" height="25" rx="3" fill="#e8e8e8" stroke="#ccc" stroke-width="1.5"/>
+    </g>
+    <text x="70" y="145" font-family="sans-serif" font-size="9" fill="#777" text-anchor="middle">Prefab Modules</text>
+  </g>
+
+  <!-- BIM model panel -->
+  <g transform="translate(40, 290)">
+    <rect width="200" height="140" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- 3D wireframe building -->
+    <g transform="translate(100, 80)">
+      <!-- 3D box wireframe -->
+      <polygon points="-60,20 0,50 60,20 0,-10" fill="none" stroke="#ccc" stroke-width="1.5"/>
+      <line x1="-60" y1="20" x2="-60" y2="-30" stroke="#ccc" stroke-width="1.5"/>
+      <line x1="60" y1="20" x2="60" y2="-30" stroke="#bbb" stroke-width="1.5"/>
+      <line x1="0" y1="50" x2="0" y2="0" stroke="#bbb" stroke-width="1.5"/>
+      <polygon points="-60,-30 0,0 60,-30 0,-60" fill="none" stroke="#999" stroke-width="1.5"/>
+      <line x1="0" y1="-10" x2="0" y2="-60" stroke="#999" stroke-width="1.5"/>
+      <!-- Layer indicators -->
+      <circle cx="-30" cy="5" r="4" fill="#666"/>
+      <circle cx="30" cy="5" r="4" fill="#666"/>
+      <circle cx="0" cy="-35" r="4" fill="#666"/>
+    </g>
+    <text x="100" y="130" font-family="sans-serif" font-size="9" fill="#777" text-anchor="middle">BIM Model</text>
+  </g>
+
+  <!-- Collaboration panel -->
+  <g transform="translate(260, 210)">
+    <rect width="260" height="120" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Team members -->
+    <g transform="translate(50, 60)">
+      <circle cx="0" cy="0" r="20" fill="#e8e8e8" stroke="#ccc" stroke-width="1.5"/>
+      <circle cx="0" cy="0" r="8" fill="#999"/>
+      <text x="0" y="35" font-family="sans-serif" font-size="8" fill="#999" text-anchor="middle">Architect</text>
+    </g>
+    <g transform="translate(130, 60)">
+      <circle cx="0" cy="0" r="20" fill="#ddd" stroke="#bbb" stroke-width="1.5"/>
+      <circle cx="0" cy="0" r="8" fill="#999"/>
+      <text x="0" y="35" font-family="sans-serif" font-size="8" fill="#999" text-anchor="middle">Engineer</text>
+    </g>
+    <g transform="translate(210, 60)">
+      <circle cx="0" cy="0" r="20" fill="#e8e8e8" stroke="#ccc" stroke-width="1.5"/>
+      <circle cx="0" cy="0" r="8" fill="#666"/>
+      <text x="0" y="35" font-family="sans-serif" font-size="8" fill="#999" text-anchor="middle">Builder</text>
+    </g>
+    <!-- Connection lines -->
+    <line x1="70" y1="60" x2="110" y2="60" stroke="#ddd" stroke-width="1.5"/>
+    <line x1="150" y1="60" x2="190" y2="60" stroke="#ddd" stroke-width="1.5"/>
+  </g>
+
+  <!-- Schedule/timeline panel -->
+  <g transform="translate(260, 350)">
+    <rect width="260" height="80" rx="8" fill="#fff" stroke="#ddd" stroke-width="2"/>
+    <!-- Gantt-style bars -->
+    <g transform="translate(20, 20)">
+      <rect x="0" y="0" width="60" height="12" rx="2" fill="#ccc" stroke="#999" stroke-width="1"/>
+      <rect x="50" y="17" width="80" height="12" rx="2" fill="#ddd" stroke="#bbb" stroke-width="1"/>
+      <rect x="120" y="34" width="100" height="12" rx="2" fill="#e8e8e8" stroke="#ccc" stroke-width="1"/>
+    </g>
+    <text x="130" y="70" font-family="sans-serif" font-size="8" fill="#999" text-anchor="middle">Project Timeline</text>
+  </g>
+
+  <!-- Decorative -->
+  <circle cx="500" cy="460" r="18" fill="none" stroke="#eee" stroke-width="2"/>
+</svg>
