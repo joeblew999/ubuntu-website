@@ -257,6 +257,21 @@ Event-driven. Distributed. Resilient. Open.
 
 ---
 
+## Complete the Loop with Publish
+
+Digital twins generate insights—but insights need to reach people.
+
+- **Operations reports** — Energy performance, maintenance schedules, compliance status
+- **Inspection forms** — Checklists generated from the model, captured back digitally or on paper
+- **Tenant communications** — Space utilization, service schedules, building updates
+- **Regulatory filings** — Compliance documentation with data from sensors
+
+All from single source. All connected to your living facility model.
+
+[Explore Publish →](/platform/publish/)
+
+---
+
 ## Get Started
 
 Your facility generates data constantly. Your design holds spatial intelligence. Connect them.

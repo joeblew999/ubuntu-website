@@ -285,6 +285,21 @@ Built for modular. Built for collaboration. Built for production.
 
 ---
 
+## Complete the Loop with Publish
+
+Construction generates mountains of documentation.
+
+- **Submittal packages** — Specs, drawings, compliance documents from the BIM model
+- **RFIs and change orders** — Forms captured digitally or on paper, tracked back to the model
+- **Inspection checklists** — Quality control forms for factory and site, data flowing to your systems
+- **O&M manuals** — Operations and maintenance documentation generated at handover
+
+All from single source. All aligned with the building model.
+
+[Explore Publish →](/platform/publish/)
+
+---
+
 ## Get Started
 
 Construction is changing. Factory-built. Globally designed. AI-assisted.

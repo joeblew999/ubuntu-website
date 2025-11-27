@@ -235,6 +235,21 @@ The math is obvious. The infrastructure is what's been missing.
 
 ---
 
+## Complete the Loop with Publish
+
+Simulation generates more than trained models—it generates documentation.
+
+- **Test reports** — Scenario results, edge case coverage, validation data
+- **Training datasets** — Annotated data with full provenance
+- **Compliance documentation** — Safety validation evidence for regulators
+- **Configuration specs** — Environment parameters, sensor setups, test conditions
+
+All from single source. All versioned alongside your simulation environments.
+
+[Explore Publish →](/platform/publish/)
+
+---
+
 ## Get Started
 
 Every AI that will act in the physical world needs to learn in simulation first.

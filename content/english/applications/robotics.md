@@ -173,6 +173,21 @@ Your facility. Your automation. Your data.
 
 ---
 
+## Complete the Loop with Publish
+
+Robotics isn't just 3D models—it's documentation, too.
+
+- **Work instructions** — Assembly guides generated from the model
+- **Safety documentation** — Procedures, checklists, compliance forms
+- **Maintenance manuals** — Equipment specs, part numbers, service intervals
+- **Training materials** — Operator guides with visuals from the simulation
+
+All from single source. All aligned with your 3D work cell design.
+
+[Explore Publish →](/platform/publish/)
+
+---
+
 ## Get Started
 
 The robotics explosion needs infrastructure. We're building it.

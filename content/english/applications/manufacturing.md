@@ -259,6 +259,21 @@ Manufacturing-grade infrastructure.
 
 ---
 
+## Complete the Loop with Publish
+
+Manufacturing runs on paperwork as much as machines.
+
+- **Work instructions** — Step-by-step assembly guides generated from CAD
+- **Quality checklists** — Inspection forms captured digitally or on paper, back to your QMS
+- **BOMs and cut lists** — Parts documentation aligned with the 3D model
+- **Compliance records** — Certifications, test results, traceability documentation
+
+All from single source. All connected to your manufacturing data.
+
+[Explore Publish →](/platform/publish/)
+
+---
+
 ## Get Started
 
 Manufacturing is where design meets reality. Where geometry becomes product. Where precision matters.
