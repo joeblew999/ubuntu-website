@@ -1,15 +1,11 @@
 # todo
 
 
----
 
-Work out how i can get my blogs up to https://bsky.app/profile/ubuntusoftware.net. Ask CLaude !!! rhere must be a way 
-
-https://github.com/bluesky-social/indigo ?
 
 ---
 
-Make sure the claude.md has a note about makign sure the OG is right too via the frontmatter . assume site map naturally follows ? 
+~~Make sure the claude.md has a note about makign sure the OG is right too via the frontmatter . assume site map naturally follows ?~~ DONE - See CLAUDE.md Bluesky section 
 
 
 
@@ -61,7 +57,7 @@ Adjust static folder with the stuff i need to do to update Bluessky and GMail ea
 
 ---
 
-Contact page is stupid as we dont have a forms processor and i dont want to ad one. Better to have an email. maybe there is a decent obfuscation thing buuld in to Hugo and hugop plate to help ? 
+~~Contact page is stupid as we dont have a forms processor and i dont want to ad one. Better to have an email. maybe there is a decent obfuscation thing buuld in to Hugo and hugop plate to help ?~~ DONE - Using Web3Forms (free, unlimited, spam-protected) 
 
 
 ---
