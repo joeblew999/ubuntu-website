@@ -1,4 +1,5 @@
 name: Post to Bluesky
+# Syndicates blog posts to https://bsky.app/profile/ubuntusoftware.net
 
 on:
   schedule:
