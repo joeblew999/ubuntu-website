@@ -1,30 +1,52 @@
 ---
-title: "Datenschutz"
-meta_title: ""
-description: "Datenschutzerklärung"
+title: "Datenschutzrichtlinie"
+meta_title: "Datenschutzrichtlinie"
+description: "Datenschutzrichtlinie für Ubuntu Software - wie wir mit Ihren Daten umgehen"
 draft: false
 ---
 
-#### Verantwortung der Mitwirkenden
+**Gültig ab:** November 2024
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis. Sem turpis sed viverra massa gravida pharetra. Non dui dolor potenti eu dignissim fusce. Ultrices amet, in curabitur a arcu a lectus morbi id. Iaculis erat sagittis in tortor cursus. Molestie urna eu tortor, erat scelerisque eget. Nunc hendrerit sed interdum lacus. Lorem quis viverra sed
+**Ubuntu Software** (ABN: 95 595 575 880) verpflichtet sich zum Schutz Ihrer Privatsphäre. Diese Richtlinie erklärt, wie wir mit Informationen umgehen, wenn Sie unsere Website besuchen.
 
-pretium, aliquam sit. Praesent elementum magna amet, tincidunt eros, nibh in leo. Malesuada purus, lacus, at aliquam suspendisse tempus. Quis tempus amet, velit nascetur sollicitudin. At sollicitudin eget amet in. Eu velit nascetur sollicitudin erhdfvssfvrgss eget viverra nec elementum. Lacus, facilisis tristique lectus in.
+## Informationen, die wir erfassen
 
-#### Erhebung personenbezogener Daten
+Dies ist eine statische Website. Wir:
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis. Sem turpis sed viverra massa gravida pharetra. Non dui dolor potenti eu dignissim fusce. Ultrices amet, in curabitur a arcu a lectus morbi id. Iaculis erat sagittis in tortor cursus. Molestie urna eu tortor, erat scelerisque eget. Nunc hendrerit sed interdum lacus. Lorem quis viverra sed
+- Erfassen keine persönlichen Informationen
+- Verwenden keine Tracking-Cookies
+- Benötigen keine Benutzerkonten oder Anmeldungen
+- Speichern keine Benutzerdaten auf unseren Servern
 
-#### Schutz personenbezogener Daten
+## Hosting und Drittanbieter-Dienste
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis. Sem turpis sed viverra massa gravida pharetra. Non dui dolor potenti eu dignissim fusce. Ultrices amet, in curabitur a arcu a lectus morbi id. Iaculis erat sagittis in tortor cursus.
+Unsere Website wird auf **Cloudflare Pages** gehostet. Cloudflare kann Standard-Webserver-Protokolle (IP-Adressen, Browsertyp, besuchte Seiten) für Sicherheits- und Leistungszwecke erfassen. Bitte beachten Sie die [Datenschutzrichtlinie von Cloudflare](https://www.cloudflare.com/privacy/) für Details zu deren Datenpraktiken.
 
-Molestie urna eu tortor, erat scelerisque eget. Nunc hendrerit sed interdum lacus. Lorem quis viverra sed
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat
+## Cookies
 
-#### Änderungen der Datenschutzerklärung
+Wir verwenden keine Cookies für Tracking oder Werbung. Alle vorhandenen Cookies sind ausschließlich funktional (wie z.B. die von Cloudflare für Sicherheitszwecke benötigten).
 
-1. Alle Themefisher-Artikel sind so konzipiert, dass sie mit den neuesten Versionen kompatibel sind
-2. Kommentare, die den Ruf einer Person oder Organisation bedrohen oder schädigen
-3. Persönliche Informationen einschließlich, aber nicht beschränkt auf, E-Mail-Adressen, Telefonnummern
-4. Bei Updates der Technologie erhalten Kunden automatische Benachrichtigungen
+## Ihre Rechte (DSGVO)
+
+Wenn Sie sich in der Europäischen Union befinden, haben Sie Rechte gemäß der Datenschutz-Grundverordnung (DSGVO), einschließlich:
+
+- **Auskunftsrecht** - Anfrage von Informationen über alle über Sie gespeicherten Daten
+- **Recht auf Löschung** - Anfrage zur Löschung persönlicher Daten
+- **Recht auf Berichtigung** - Anfrage zur Korrektur ungenauer Daten
+- **Widerspruchsrecht** - Widerspruch gegen die Verarbeitung Ihrer Daten
+
+Da wir keine persönlichen Daten erfassen oder speichern, sind diese Rechte automatisch erfüllt.
+
+## Kontaktinformationen
+
+Für datenschutzbezogene Anfragen kontaktieren Sie uns bitte über:
+
+- **GitHub:** [github.com/joeblew999](https://github.com/joeblew999)
+
+## Änderungen dieser Richtlinie
+
+Wir können diese Datenschutzrichtlinie von Zeit zu Zeit aktualisieren. Alle Änderungen werden auf dieser Seite mit einem aktualisierten Gültigkeitsdatum veröffentlicht.
+
+## Australisches Datenschutzgesetz
+
+Als australisches Unternehmen halten wir die Australian Privacy Principles (APPs) gemäß dem Privacy Act 1988 ein. Unser minimaler Datenerfassungsansatz übertrifft die Anforderungen dieser Grundsätze.

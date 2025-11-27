@@ -1,25 +1,52 @@
 ---
 title: "プライバシーポリシー"
-meta_title: ""
-description: "Ubuntu Softwareプライバシーポリシー"
+meta_title: "プライバシーポリシー"
+description: "Ubuntu Softwareプライバシーポリシー - お客様のデータの取り扱いについて"
 draft: false
 ---
 
-#### 寄稿者の責任
+**発効日：** 2024年11月
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis.
+**Ubuntu Software**（ABN: 95 595 575 880）は、お客様のプライバシー保護に努めています。このポリシーでは、当ウェブサイトをご利用いただく際の情報の取り扱いについて説明します。
 
-#### 個人情報の収集
+## 収集する情報
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis.
+これは静的ウェブサイトです。当社は：
 
-#### 個人情報の保護
+- 個人情報を収集しません
+- トラッキングCookieを使用しません
+- ユーザーアカウントやログインを必要としません
+- サーバーにユーザーデータを保存しません
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis.
+## ホスティングとサードパーティサービス
 
-#### プライバシーポリシーの変更
+当ウェブサイトは **Cloudflare Pages** でホストされています。Cloudflareは、セキュリティとパフォーマンスの目的で、標準的なWebサーバーログ（IPアドレス、ブラウザの種類、訪問したページ）を収集する場合があります。データの取り扱いの詳細については、[Cloudflareのプライバシーポリシー](https://www.cloudflare.com/privacy/)をご参照ください。
 
-1. すべてのThemefisherアイテムは最新に設計されています。すべてをチェックします
-2. 個人または組織の評判を脅かしたり傷つけたりするコメント
-3. メールアドレス、電話番号を含むがこれに限定されない個人情報
-4. 技術の更新がある場合、お客様は自動通知を受け取ります。
+## Cookie
+
+トラッキングや広告のためのCookieは使用しません。存在するCookieは、厳密に機能的なもの（Cloudflareがセキュリティのために必要とするものなど）のみです。
+
+## お客様の権利（GDPR）
+
+欧州連合にお住まいの場合、一般データ保護規則（GDPR）に基づき、以下の権利があります：
+
+- **アクセス権** - お客様に関するデータの情報を請求する
+- **消去権** - 個人データの削除を請求する
+- **訂正権** - 不正確なデータの修正を請求する
+- **異議申立権** - データの処理に異議を唱える
+
+当社は個人データを収集または保存しないため、これらの権利は自動的に満たされます。
+
+## お問い合わせ
+
+プライバシーに関するお問い合わせは、以下よりご連絡ください：
+
+- **GitHub：** [github.com/joeblew999](https://github.com/joeblew999)
+
+## このポリシーの変更
+
+このプライバシーポリシーは随時更新される場合があります。変更がある場合は、このページに更新された発効日とともに掲載されます。
+
+## オーストラリア個人情報保護法
+
+オーストラリアの企業として、1988年プライバシー法に基づくオーストラリアプライバシー原則（APPs）を遵守しています。当社の最小限のデータ収集アプローチは、これらの原則の要件を上回っています。

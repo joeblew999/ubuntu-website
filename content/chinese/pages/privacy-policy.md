@@ -1,25 +1,52 @@
 ---
 title: "隐私政策"
-meta_title: ""
-description: "Ubuntu Software隐私政策"
+meta_title: "隐私政策"
+description: "Ubuntu Software隐私政策 - 我们如何处理您的数据"
 draft: false
 ---
 
-#### 贡献者责任
+**生效日期：** 2024年11月
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis.
+**Ubuntu Software**（ABN: 95 595 575 880）致力于保护您的隐私。本政策说明了当您访问我们网站时，我们如何处理信息。
 
-#### 个人信息收集
+## 我们收集的信息
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis.
+这是一个静态网站。我们：
 
-#### 个人信息保护
+- 不收集个人信息
+- 不使用跟踪Cookie
+- 不需要用户账户或登录
+- 不在我们的服务器上存储任何用户数据
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis.
+## 托管和第三方服务
 
-#### 隐私政策变更
+我们的网站托管在 **Cloudflare Pages** 上。Cloudflare可能会出于安全和性能目的收集标准Web服务器日志（IP地址、浏览器类型、访问的页面）。请参阅[Cloudflare隐私政策](https://www.cloudflare.com/privacy/)了解其数据处理详情。
 
-1. 所有Themefisher项目都设计为最新的，我们检查所有
-2. 威胁或损害任何个人或组织声誉的评论
-3. 个人信息包括但不限于电子邮件地址、电话号码
-4. 技术的任何更新客户都将获得自动通知。
+## Cookie
+
+我们不使用Cookie进行跟踪或广告。任何存在的Cookie都是严格功能性的（例如Cloudflare出于安全目的所需的Cookie）。
+
+## 您的权利（GDPR）
+
+如果您位于欧盟，您根据《通用数据保护条例》（GDPR）享有以下权利：
+
+- **访问权** - 请求关于您的任何数据的信息
+- **删除权** - 请求删除个人数据
+- **更正权** - 请求更正不准确的数据
+- **反对权** - 反对处理您的数据
+
+由于我们不收集或存储个人数据，这些权利自动得到满足。
+
+## 联系信息
+
+如有隐私相关问题，请通过以下方式联系我们：
+
+- **GitHub：** [github.com/joeblew999](https://github.com/joeblew999)
+
+## 本政策的变更
+
+我们可能会不时更新本隐私政策。任何变更都将在此页面发布，并更新生效日期。
+
+## 澳大利亚隐私法
+
+作为澳大利亚企业，我们遵守1988年《隐私法》下的澳大利亚隐私原则（APPs）。我们的最小化数据收集方法超出了这些原则的要求。

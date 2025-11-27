@@ -1,33 +1,52 @@
 ---
-title: "Privacy"
-# meta title
-meta_title: ""
-# meta description
-description: "This is meta description"
-# save as draft
+title: "Privacy Policy"
+meta_title: "Privacy Policy"
+description: "Privacy policy for Ubuntu Software - how we handle your data"
 draft: false
 ---
 
-#### Responsibility of Contributors
+**Effective Date:** November 2024
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis. Sem turpis sed viverra massa gravida pharetra. Non dui dolor potenti eu dignissim fusce. Ultrices amet, in curabitur a arcu a lectus morbi id. Iaculis erat sagittis in tortor cursus. Molestie urna eu tortor, erat scelerisque eget. Nunc hendrerit sed interdum lacus. Lorem quis viverra sed
+**Ubuntu Software** (ABN: 95 595 575 880) is committed to protecting your privacy. This policy explains how we handle information when you visit our website.
 
-pretium, aliquam sit. Praesent elementum magna amet, tincidunt eros, nibh in leo. Malesuada purus, lacus, at aliquam suspendisse tempus. Quis tempus amet, velit nascetur sollicitudin. At sollicitudin eget amet in. Eu velit nascetur sollicitudin erhdfvssfvrgss eget viverra nec elementum. Lacus, facilisis tristique lectus in.
+## Information We Collect
 
-#### Gathering of Personal Information
+This is a static website. We do not:
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis. Sem turpis sed viverra massa gravida pharetra. Non dui dolor potenti eu dignissim fusce. Ultrices amet, in curabitur a arcu a lectus morbi id. Iaculis erat sagittis in tortor cursus. Molestie urna eu tortor, erat scelerisque eget. Nunc hendrerit sed interdum lacus. Lorem quis viverra sed
+- Collect personal information
+- Use tracking cookies
+- Require user accounts or logins
+- Store any user data on our servers
 
-#### Protection of Personal- Information
+## Hosting and Third-Party Services
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat quisque aliquam sagittis. Sem turpis sed viverra massa gravida pharetra. Non dui dolor potenti eu dignissim fusce. Ultrices amet, in curabitur a arcu a lectus morbi id. Iaculis erat sagittis in tortor cursus.
+Our website is hosted on **Cloudflare Pages**. Cloudflare may collect standard web server logs (IP addresses, browser type, pages visited) for security and performance purposes. Please refer to [Cloudflare's Privacy Policy](https://www.cloudflare.com/privacy/) for details on their data practices.
 
-Molestie urna eu tortor, erat scelerisque eget. Nunc hendrerit sed interdum lacus. Lorem quis viverra sed
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Purus, donec nunc eros, ullamcorper id feugiat
+## Cookies
 
-#### Privacy Policy Changes
+We do not use cookies for tracking or advertising. Any cookies present are strictly functional (such as those required by Cloudflare for security).
 
-1. Sll the Themefisher items are designed to be with the latest , We check all
-2. comments that threaten or harm the reputation of any person or organization
-3. personal information including, but limited to, email addresses, telephone numbers
-4. Any Update come in The technology Customer will get automatic Notification.
+## Your Rights (GDPR)
+
+If you are located in the European Union, you have rights under the General Data Protection Regulation (GDPR), including:
+
+- **Right to Access** - Request information about any data held about you
+- **Right to Erasure** - Request deletion of any personal data
+- **Right to Rectification** - Request correction of inaccurate data
+- **Right to Object** - Object to processing of your data
+
+Since we do not collect or store personal data, these rights are automatically satisfied.
+
+## Contact Information
+
+For privacy-related inquiries, please contact us via:
+
+- **GitHub:** [github.com/joeblew999](https://github.com/joeblew999)
+
+## Changes to This Policy
+
+We may update this privacy policy from time to time. Any changes will be posted on this page with an updated effective date.
+
+## Australian Privacy Act
+
+As an Australian business, we comply with the Australian Privacy Principles (APPs) under the Privacy Act 1988. Our minimal data collection approach exceeds the requirements of these principles.
