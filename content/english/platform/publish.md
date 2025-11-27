@@ -51,6 +51,8 @@ From that single source, generate:
 | PDF document | Print, email, archive |
 | Web form | Digital submissions |
 | PDF form | Fillable digital or printable |
+| Custom maps | Location-based content with your data |
+| Kiosk displays | Real-time signage and menus |
 
 **All outputs are 100% aligned.** Same content. Same field positions. Same structure.
 
@@ -188,6 +190,47 @@ Clean. Simple. Yours.
 | Connectors | Read/write to your database |
 
 **No proprietary formats. Export everything. Own your content.**
+
+---
+
+## Beyond Documents
+
+Publish isn't just forms and PDFs. The same single-source approach works for location data, video, and physical displays.
+
+### Custom Maps
+
+Build maps from your data. Integrate with the platforms your users already have.
+
+- **Your geographic data** — Locations, routes, boundaries from your database
+- **Custom styling** — Your brand, your markers, your overlays
+- **Platform integration** — Works with Google Maps, Apple Maps, or standalone
+- **Offline capable** — Field workers see maps without connectivity
+
+Restaurant locations. Service areas. Asset tracking. Delivery routes. All from your single source, all real-time from your data.
+
+### Video Publishing
+
+*Coming soon*
+
+Same philosophy applied to video content:
+
+- **Your video server** — Host on your infrastructure
+- **Mirror to platforms** — Auto-publish to YouTube, Vimeo for discovery
+- **Your links everywhere** — Wellknown URIs route through your gateway
+- **Analytics you own** — See every view, track every user
+
+### Kiosk Systems
+
+*Coming soon*
+
+Raspberry Pi-powered displays running your content:
+
+- **Restaurant menus** — Real-time updates from your database
+- **Government offices** — Queue displays, wayfinding, forms
+- **Retail signage** — Pricing, promotions, inventory status
+- **All aligned** — Same source drives web, print, and physical displays
+
+Change the data once. Menu boards, website, and printed materials all update.
 
 ---
 

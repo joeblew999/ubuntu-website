@@ -62,11 +62,14 @@ Both platforms share core infrastructure:
 
 | Capability | Technology |
 |------------|------------|
+| **Offline-first** | Work without internet, sync when connected |
 | **Real-time collaboration** | Automerge CRDT — simultaneous editing, automatic conflict resolution |
-| **Event-driven messaging** | NATS JetStream — connect to sensors, systems, and workflows |
-| **AI integration** | Model Context Protocol — AI that works inside your data |
+| **Universal deployment** | Web, desktop, and mobile from one codebase |
+| **Cloud options** | Our cloud, your cloud, or fully on-premises |
+| **Self-sovereign** | Your data, your servers, your rules |
 | **Open standards** | No proprietary formats. Export everything. Own your work. |
-| **Deployment flexibility** | Cloud, self-hosted, hybrid, air-gapped. Your choice. |
+
+[Explore the Foundation →](/platform/foundation/)
 
 ---
 

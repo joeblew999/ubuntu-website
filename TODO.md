@@ -1,14 +1,21 @@
 # todo
 
-ensure frontmatter is right si that OG and sitemap is right ? 
+
+---
+
+Work out how i can get my blogs up to https://bsky.app/profile/ubuntusoftware.net. Ask CLaude !!! rhere must be a way 
+
+https://github.com/bluesky-social/indigo ?
+
+---
+
+Make sure the claude.md has a note about makign sure the OG is right too via the frontmatter . assume site map naturally follows ? 
+
 
 
 ---
 
-We need to talk about our Single sourcing contnet and 2D system that allowing writing in Makrdown and outputting to web, pgf and PDF forms, and how forms are then aligned so that a PDF or web forms is 100% alignes and how the OCR system then does the full 360 ? You can explain this much better than me but its means that Orgs have a publishing system from a single source and can also collect data back into their backend system without any changes. they just need any database and our system can use the data in it to make Interaxting with the outside worls seemless. 
-
-
----
+We need real names for testimonials ? 
 
 We need the testimonals and the previsu proejcts to link well and i need to make the previous projects things good. The Climate Foundation system was a secure publisging system, data collection system and messaging and video conferencing system, so that all global projects had a unified and secure and self soverign way to collaborate and publish and for sciwnce divisiosn to collect sensor information.
 

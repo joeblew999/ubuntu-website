@@ -25,6 +25,12 @@ parent = "Platform"
 weight = 2
 
 [[main]]
+name = "Foundation"
+url = "/platform/foundation"
+parent = "Platform"
+weight = 3
+
+[[main]]
 name = "Applications"
 weight = 3
 hasChildren = true
