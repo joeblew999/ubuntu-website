@@ -2,7 +2,7 @@
 # This is used when building with: hugo -e production
 # Uses relative URLs but relies on site.Params.canonical_url for SEO
 
-baseURL = "/"
+baseURL = "https://www.ubuntusoftware.net/"
 
 [params]
 # Canonical URL for SEO - used by Hugo modules for meta tags
