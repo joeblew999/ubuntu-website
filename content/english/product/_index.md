@@ -1,167 +1,127 @@
 ---
-title: "Product"
-meta_title: "AI-Powered CAD Platform for AEC & Modular Construction | Ubuntu Software"
-description: "Next-generation 2D/3D CAD software with AI assistance, real-time collaboration, and 100% open standards (STEP/IFC). Built for prefabricated modular housing and AEC."
+title: "Products"
+meta_title: "AI + 3D Spatial Intelligence Platform | Ubuntu Software"
+description: "Giving AI the ability to understand, reason about, and interact with the 3D physical world. From construction to manufacturing to digital twins."
 draft: false
 ---
 
-## Introducing Our AI-Powered CAD Platform
+## AI Thinks in 2D. We Give It Spatial Intelligence.
 
-We're building the next generation of computer-aided design software for the Architecture, Engineering, and Construction (AEC) industry. A modern 2D/3D CAD system that combines the precision of traditional CAD tools with the intelligence of AI—purpose-built for prefabricated modular construction.
+Today's AI is remarkably capable—it can read, write, see images, and hold conversations. But it thinks in flat dimensions: text is 1D, images are 2D, video is 2D over time.
 
----
+**The real world is 3D.**
 
-## The Problem
+For AI to truly interact with physical reality—to design buildings, guide robots, manage facilities, or plan manufacturing—it needs spatial intelligence. The ability to understand geometry, reason about physical constraints, and work with three-dimensional space.
 
-The AEC industry is undergoing a transformation toward prefabricated modular housing. Factory-built modules offer faster construction, better quality control, and reduced waste. But traditional CAD software wasn't designed for this workflow:
-
-- **File-based collaboration** breaks down when multiple teams work on interconnected modules
-- **Proprietary formats** create vendor lock-in and interoperability nightmares
-- **No real-time sync** means teams waste hours merging conflicting changes
-- **Legacy architectures** can't integrate modern AI assistance
-
-Modular construction demands a new approach—CAD software built from the ground up for distributed teams, open standards, and intelligent automation.
+That's what we're building: a platform that bridges AI's cognitive abilities with 3D spatial understanding, enabling machines to work with the physical world.
 
 ---
 
-## Our Solution
+## Applications
 
-### 100% Open Standards
+{{< tabs >}}
 
-No proprietary lock-in. Your designs belong to you.
+{{< tab "Construction" >}}
 
-- **STEP Format** - Industry-standard 3D geometry exchange (ISO 10303)
-- **IFC Support** - Native Building Information Modeling interoperability (ISO 16739)
-- **Open File Formats** - Export to any compatible system without conversion loss
-- **Future-Proof** - Your data remains accessible regardless of software changes
+### Modular & Prefabricated Construction
 
----
+The construction industry is shifting toward factory-built modular housing. Prefabrication offers faster builds, better quality control, and reduced waste—but traditional CAD tools weren't designed for this workflow.
 
-### Real-Time Collaboration
+**The Challenge:**
+- Distributed teams across factory floors, engineering offices, and construction sites
+- Need for real-time collaboration, not file-based save-merge-commit cycles
+- Proprietary formats creating vendor lock-in
+- Legacy systems that can't integrate AI assistance
 
-Remote teams working together as if in the same room.
+**Our Approach:**
+- **Real-Time Collaboration** — Teams in Thailand, Germany, and Australia work on the same model simultaneously using Automerge CRDT technology
+- **100% Open Standards** — STEP and IFC formats ensure your designs remain yours, accessible regardless of software changes
+- **AI-Assisted Design** — Natural language commands, design optimization suggestions, and automatic error detection
+- **Module-Centric Workflow** — First-class support for prefab components, assembly sequencing, and transport planning
 
-- **True Real-Time Sync** - See changes from teammates instantly, not after save-merge-commit cycles
-- **Automerge-Powered** - Conflict-free collaboration using CRDT technology
-- **Distributed Teams** - Factory floor in Thailand, engineering in Germany, architects in Australia—all working on the same model simultaneously
-- **Offline-First** - Work without internet, sync automatically when reconnected
-- **Complete Version History** - Full revision control with branching and merging
+{{< /tab >}}
 
----
+{{< tab "Digital Twins" >}}
 
-### Built for Modular Construction
+### Digital Twins & Facility Management
 
-Designed specifically for prefabricated housing factories.
+Bridge the gap between design and the real world. Our approach is informed by experience with AI-powered facility management systems, including work with [Bilfinger](https://www.bilfinger.com/), one of Germany's leading engineering and services companies.
 
-- **Module-Centric Design** - First-class support for prefab module workflows
-- **Factory Integration** - Connect designs directly to manufacturing systems
-- **Assembly Sequencing** - Plan and visualize module installation order
-- **Tolerance Management** - Handle the precision requirements of factory production
-- **Transport Planning** - Consider logistics constraints in the design phase
+**Capabilities:**
+- **Live Sensor Integration** — Connect your 3D models to real-time IoT data from buildings and infrastructure
+- **Predictive Maintenance** — AI-driven analysis to identify equipment issues before they become failures
+- **What-If Simulation** — Test scenarios in your digital twin before implementing changes in reality
+- **Facility Management** — Manage building systems, track assets, and optimize operations through a spatial interface
 
----
+**Architecture:**
+Built on NATS JetStream for event-driven, real-time data flow between physical sensors and digital models. The same spatial intelligence that helps design a building can monitor and manage it throughout its lifecycle.
 
-### AI-Powered Assistance
+{{< /tab >}}
 
-Your intelligent design partner powered by modern AI.
+{{< tab "Manufacturing" >}}
 
-- **MCP Integration** - Built on the Model Context Protocol for seamless AI tool integration
-- **Natural Language Commands** - Describe what you want to create or modify in plain language
-- **Design Optimization** - AI suggestions for manufacturability, cost, and performance
-- **Error Detection** - Automatic identification of design issues before they become problems
-- **Conversational Interface** - Chat with your CAD system about your designs
+### Manufacturing & Automation
 
----
+When AI understands 3D space, it can participate in physical production—from design through fabrication to quality control.
 
-### Digital Twin & IoT
+**Applications:**
+- **Robotics Integration** — Provide spatial context for automated systems, enabling smarter path planning and assembly operations
+- **Production Planning** — AI assistance for layout optimization, process sequencing, and resource allocation
+- **Quality Control** — Compare as-built geometry against design intent, automatically detecting deviations
+- **Assembly Documentation** — Generate work instructions that understand three-dimensional relationships
 
-Bridge the gap between design and the real world. Our approach to facility management is informed by real-world experience—including work on AI-powered facility management systems with [Bilfinger](https://www.bilfinger.com/), one of Germany's leading engineering and services companies.
+**Beyond Construction:**
+While our initial focus is on modular construction, the platform's spatial intelligence applies to any manufacturing domain—automotive, aerospace, consumer products, industrial equipment. Anywhere AI needs to reason about physical geometry.
 
-- **Digital Twin Simulation** - Run simulations using NATS JetStream messaging
-- **Facility Management** - Manage IoT devices and sensors in completed buildings
-- **Real-Time Monitoring** - Connect your designs to live sensor data
-- **Predictive Maintenance** - AI-driven insights to prevent equipment failures
-- **What-If Analysis** - Test scenarios in simulation before implementing in reality
+{{< /tab >}}
 
----
+{{< tab "Technology" >}}
 
-### 2D & 3D Solid Modeling
+### Platform Architecture
 
-Full-featured CAD functionality for professional design work.
+Modern technology stack built for spatial AI applications.
 
-- **Solid Modeling** - Full solids modeling with open standard geometry kernel
-- **Precision Drawing Tools** - Create accurate technical drawings with professional tools
-- **Parametric & Direct Modeling** - Build complex 3D models with flexible approaches
-- **Assembly Design** - Manage multi-component assemblies with constraints
-- **Technical Documentation** - Generate drawings, BOMs, and specifications automatically
+**Open Standards:**
+- **STEP Format** — ISO 10303 standard for 3D geometry exchange
+- **IFC Support** — ISO 16739 Building Information Modeling interoperability
+- No proprietary lock-in. Your data remains accessible.
 
----
+**Real-Time Collaboration:**
+- **Automerge** — CRDT-based synchronization for conflict-free collaboration
+- **Offline-First** — Full functionality without internet, automatic sync when reconnected
+- **Version Control** — Complete revision history with branching and merging
 
-### Modern Architecture
+**AI Integration:**
+- **MCP Protocol** — Model Context Protocol for seamless AI tool integration
+- **Natural Language** — Describe design intent in plain language
+- **Conversational Interface** — Chat with your spatial models
 
-Web-native design that runs everywhere.
+**Event-Driven Architecture:**
+- **NATS JetStream** — Real-time messaging for digital twin capabilities
+- **Sensor Connectivity** — Bridge between physical IoT and digital models
 
-- **Web GUI** - Modern web-based interface built for responsiveness
-- **Desktop App** - Native desktop experience via embedded webview
-- **Mobile Support** - Full functionality on tablets and mobile devices
-- **Cross-Platform** - Windows, macOS, Linux, iOS, and Android
+**Cross-Platform:**
+- Web-native GUI with desktop and mobile support
+- Windows, macOS, Linux, iOS, Android
+- Self-hosted or cloud deployment options
 
----
+{{< /tab >}}
 
-### Flexible Deployment
-
-Work the way you want, where you want.
-
-- **Offline Mode** - Full functionality without internet for secure environments
-- **Cloud Option** - Collaborate and access your designs from anywhere
-- **Hybrid Approach** - Keep sensitive work local while leveraging cloud for collaboration
-- **Self-Hosted** - Deploy on your own infrastructure for complete control
-
----
-
-## Why Now?
-
-The convergence of several technologies makes this the right time:
-
-1. **CRDTs mature** - Automerge and similar libraries enable true real-time collaboration
-2. **AI becomes practical** - Large language models can now assist with complex design tasks
-3. **Open standards gain adoption** - IFC and STEP are increasingly accepted across the industry
-4. **Modular construction grows** - The market demands tools built for this workflow
-5. **Web technology advances** - WebAssembly and modern browsers enable desktop-class performance
+{{< /tabs >}}
 
 ---
 
 ## Current Status
 
-We're actively developing the platform with a focus on:
+We're actively developing the platform, focusing on modular construction as our initial vertical while building the underlying spatial intelligence capabilities that apply across industries.
 
-1. **Core CAD Engine** - Building a robust foundation for 2D/3D solid modeling with STEP/IFC
-2. **Real-Time Collaboration** - Automerge-based sync for distributed teams
-3. **AI Integration** - MCP-based AI assistance throughout the workflow
-4. **Digital Twin** - NATS JetStream-powered simulation and IoT connectivity
-5. **Cross-Platform** - Web, desktop, and mobile interfaces via webview
+**Looking for:**
+- Modular housing manufacturers seeking better design tools
+- Facility managers interested in AI-powered digital twins
+- Manufacturing companies exploring spatial AI applications
 
 ---
 
 ## Interested?
 
-We're building in the open and looking for early feedback from:
-
-- **Modular housing manufacturers** looking for better design tools
-- **AEC professionals** frustrated with legacy CAD limitations
-- **Distributed teams** needing true real-time collaboration
-
-[Get in touch](/contact) to learn more about our progress and provide input on the direction we're taking.
-
----
-
-## Technical Foundation
-
-Built with modern architecture and technologies:
-
-- **STEP/IFC Native** - 100% open standard geometry and BIM formats
-- **Automerge** - CRDT-based synchronization for conflict-free real-time collaboration
-- **NATS JetStream** - Event-driven architecture for digital twin capabilities
-- **MCP Integration** - AI assistance using Model Context Protocol
-- **Web-Native** - Modern web technologies with webview embedding
-- **Extensible** - Plugin architecture for custom workflows and integrations
+[Get in touch](/contact) to learn more about our progress and discuss how spatial AI might apply to your domain.

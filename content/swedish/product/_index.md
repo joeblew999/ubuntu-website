@@ -1,167 +1,127 @@
 ---
-title: "Produkt"
-meta_title: "AI-driven CAD-plattform för AEC & Modulbyggnation | Ubuntu Software"
-description: "Nästa generations 2D/3D CAD-mjukvara med AI-assistans, realtidssamarbete och 100% öppna standarder (STEP/IFC). Byggd för prefabricerat modulbyggande och AEC."
+title: "Produkter"
+meta_title: "AI + 3D Spatial Intelligens Plattform | Ubuntu Software"
+description: "Vi ger AI förmågan att förstå, resonera om och interagera med den fysiska 3D-världen. Från konstruktion till tillverkning till digitala tvillingar."
 draft: false
 ---
 
-## Introduktion av vår AI-drivna CAD-plattform
+## AI tänker i 2D. Vi ger den spatial intelligens.
 
-Vi bygger nästa generation av datorstödd designmjukvara för arkitektur-, ingenjörs- och byggindustrin (AEC). Ett modernt 2D/3D CAD-system som kombinerar precisionen hos traditionella CAD-verktyg med intelligensen hos AI—specialbyggt för prefabricerat modulbyggande.
+Dagens AI är remarkabelt kapabel—den kan läsa, skriva, se bilder och föra konversationer. Men den tänker i platta dimensioner: text är 1D, bilder är 2D, video är 2D över tid.
 
----
+**Den verkliga världen är 3D.**
 
-## Problemet
+För att AI verkligen ska kunna interagera med den fysiska verkligheten—att designa byggnader, styra robotar, hantera anläggningar eller planera tillverkning—behöver den spatial intelligens. Förmågan att förstå geometri, resonera om fysiska begränsningar och arbeta med tredimensionellt utrymme.
 
-AEC-branschen genomgår en transformation mot prefabricerade modulbostäder. Fabriksbyggda moduler erbjuder snabbare byggande, bättre kvalitetskontroll och minskat avfall. Men traditionell CAD-mjukvara designades inte för detta arbetsflöde:
-
-- **Filbaserat samarbete** kollapsar när flera team arbetar med sammankopplade moduler
-- **Proprietära format** skapar leverantörsinlåsning och interoperabilitetsmardrömmar
-- **Ingen realtidssynkronisering** innebär att team slösar timmar på att slå samman motstridiga ändringar
-- **Äldre arkitekturer** kan inte integrera modern AI-assistans
-
-Modulbyggnation kräver ett nytt tillvägagångssätt—CAD-mjukvara byggd från grunden för distribuerade team, öppna standarder och intelligent automatisering.
+Det är vad vi bygger: en plattform som överbryggar AIs kognitiva förmågor med 3D-spatial förståelse, vilket gör det möjligt för maskiner att arbeta med den fysiska världen.
 
 ---
 
-## Vår lösning
+## Tillämpningar
 
-### 100% öppna standarder
+{{< tabs >}}
 
-Ingen proprietär inlåsning. Dina designer tillhör dig.
+{{< tab "Konstruktion" >}}
 
-- **STEP-format** - Branschstandard för 3D-geometriutbyte (ISO 10303)
-- **IFC-stöd** - Native Building Information Modeling-interoperabilitet (ISO 16739)
-- **Öppna filformat** - Exportera till alla kompatibla system utan konverteringsförlust
-- **Framtidssäkert** - Din data förblir tillgänglig oavsett mjukvaruförändringar
+### Modulärt & Prefabricerat Byggande
 
----
+Byggindustrin skiftar mot fabriksbyggda modulhus. Prefabricering erbjuder snabbare byggen, bättre kvalitetskontroll och minskat avfall—men traditionella CAD-verktyg designades inte för detta arbetsflöde.
 
-### Realtidssamarbete
+**Utmaningen:**
+- Distribuerade team över fabriksgolv, ingenjörskontor och byggarbetsplatser
+- Behov av realtidssamarbete, inte filbaserade spara-slå samman-commit-cykler
+- Proprietära format som skapar leverantörslåsning
+- Äldre system som inte kan integrera AI-assistans
 
-Fjärrteam som arbetar tillsammans som om de vore i samma rum.
+**Vår Approach:**
+- **Realtidssamarbete** — Team i Thailand, Tyskland och Australien arbetar på samma modell samtidigt med Automerge CRDT-teknologi
+- **100% Öppna Standarder** — STEP och IFC-format säkerställer att dina designer förblir dina, tillgängliga oavsett programvaruändringar
+- **AI-assisterad Design** — Naturliga språkkommandon, designoptimeringsförslag och automatisk feldetektering
+- **Modul-centrerat Arbetsflöde** — Förstklassigt stöd för prefab-komponenter, monteringssekvensering och transportplanering
 
-- **Äkta realtidssynkronisering** - Se ändringar från teammedlemmar direkt, inte efter spara-slå ihop-commit-cykler
-- **Automerge-drivet** - Konfliktfritt samarbete med CRDT-teknologi
-- **Distribuerade team** - Fabriksgolv i Thailand, engineering i Tyskland, arkitekter i Australien—alla arbetar på samma modell samtidigt
-- **Offline-först** - Arbeta utan internet, synkronisera automatiskt vid återanslutning
-- **Komplett versionshistorik** - Full revisionskontroll med branching och merging
+{{< /tab >}}
 
----
+{{< tab "Digitala Tvillingar" >}}
 
-### Byggt för modulbyggnation
+### Digitala Tvillingar & Fastighetsförvaltning
 
-Designat specifikt för prefabricerade bostadsfabriker.
+Överbrygga klyftan mellan design och den verkliga världen. Vår approach är informerad av erfarenhet med AI-drivna fastighetsförvaltningssystem, inklusive arbete med [Bilfinger](https://www.bilfinger.com/), ett av Tysklands ledande ingenjörs- och tjänsteföretag.
 
-- **Modulcentrerad design** - Förstklassigt stöd för prefab-modularbetsflöden
-- **Fabriksintegration** - Anslut designer direkt till tillverkningssystem
-- **Monteringssekvensering** - Planera och visualisera modulinstallationsordning
-- **Toleranshantering** - Hantera precisionskraven för fabriksproduktion
-- **Transportplanering** - Beakta logistikbegränsningar i designfasen
+**Kapabiliteter:**
+- **Live Sensor-integration** — Anslut dina 3D-modeller till realtids IoT-data från byggnader och infrastruktur
+- **Prediktivt Underhåll** — AI-driven analys för att identifiera utrustningsproblem innan de blir fel
+- **Vad-Om Simulering** — Testa scenarier i din digitala tvilling innan du implementerar ändringar i verkligheten
+- **Fastighetsförvaltning** — Hantera byggnadssystem, spåra tillgångar och optimera drift genom ett spatialt gränssnitt
 
----
+**Arkitektur:**
+Byggt på NATS JetStream för händelsestyrt, realtidsdataflöde mellan fysiska sensorer och digitala modeller. Samma spatiala intelligens som hjälper till att designa en byggnad kan övervaka och hantera den genom hela dess livscykel.
 
-### AI-driven assistans
+{{< /tab >}}
 
-Din intelligenta designpartner driven av modern AI.
+{{< tab "Tillverkning" >}}
 
-- **MCP-integration** - Byggd på Model Context Protocol för sömlös AI-verktygsintegration
-- **Naturliga språkkommandon** - Beskriv vad du vill skapa eller modifiera på vanlig svenska
-- **Designoptimering** - AI-förslag för tillverkningsbarhet, kostnad och prestanda
-- **Feldetektering** - Automatisk identifiering av designproblem innan de blir problem
-- **Konversationsgränssnitt** - Chatta med ditt CAD-system om dina designer
+### Tillverkning & Automation
 
----
+När AI förstår 3D-utrymme kan den delta i fysisk produktion—från design genom tillverkning till kvalitetskontroll.
 
-### Digital tvilling & IoT
+**Tillämpningar:**
+- **Robotik-integration** — Tillhandahåll spatial kontext för automatiserade system, möjliggör smartare banplanering och monteringsoperationer
+- **Produktionsplanering** — AI-assistans för layoutoptimering, processsekvensering och resursallokering
+- **Kvalitetskontroll** — Jämför som-byggd geometri mot designavsikt, automatisk upptäckt av avvikelser
+- **Monteringsdokumentation** — Generera arbetsinstruktioner som förstår tredimensionella relationer
 
-Överbrygga klyftan mellan design och den verkliga världen. Vårt tillvägagångssätt för facility management informeras av verklig erfarenhet—inklusive arbete med AI-drivna facility management-system med [Bilfinger](https://www.bilfinger.com/), ett av Tysklands ledande ingenjörs- och serviceföretag.
+**Bortom Konstruktion:**
+Medan vårt initiala fokus är på modulärt byggande, gäller plattformens spatiala intelligens för alla tillverkningsdomäner—fordon, flyg, konsumentprodukter, industriell utrustning. Överallt där AI behöver resonera om fysisk geometri.
 
-- **Digital tvilling-simulering** - Kör simuleringar med NATS JetStream-meddelanden
-- **Facility management** - Hantera IoT-enheter och sensorer i färdiga byggnader
-- **Realtidsövervakning** - Anslut dina designer till live sensordata
-- **Prediktivt underhåll** - AI-drivna insikter för att förebygga utrustningsfel
-- **What-if-analys** - Testa scenarier i simulering innan implementering i verkligheten
+{{< /tab >}}
 
----
+{{< tab "Teknologi" >}}
 
-### 2D & 3D solidmodellering
+### Plattformsarkitektur
 
-Fullfjädrad CAD-funktionalitet för professionellt designarbete.
+Modern teknikstack byggd för spatiala AI-tillämpningar.
 
-- **Solidmodellering** - Full solidmodellering med geometrikärna för öppen standard
-- **Precisionritverktyg** - Skapa exakta tekniska ritningar med professionella verktyg
-- **Parametrisk & direkt modellering** - Bygg komplexa 3D-modeller med flexibla tillvägagångssätt
-- **Sammansättningsdesign** - Hantera flerkomponentsammansättningar med begränsningar
-- **Teknisk dokumentation** - Generera ritningar, BOM:ar och specifikationer automatiskt
+**Öppna Standarder:**
+- **STEP-format** — ISO 10303 standard för 3D-geometriutbyte
+- **IFC-stöd** — ISO 16739 Building Information Modeling interoperabilitet
+- Ingen proprietär låsning. Din data förblir tillgänglig.
 
----
+**Realtidssamarbete:**
+- **Automerge** — CRDT-baserad synkronisering för konfliktfritt samarbete
+- **Offline-First** — Full funktionalitet utan internet, automatisk synk vid återanslutning
+- **Versionskontroll** — Komplett revisionshistorik med förgrening och sammanslagning
 
-### Modern arkitektur
+**AI-integration:**
+- **MCP-protokoll** — Model Context Protocol för sömlös AI-verktygsintegration
+- **Naturligt Språk** — Beskriv designavsikt i vanligt språk
+- **Konversationsgränssnitt** — Chatta med dina spatiala modeller
 
-Webbinfödd design som körs överallt.
+**Händelsestyrd Arkitektur:**
+- **NATS JetStream** — Realtidsmeddelanden för digital tvilling-kapabiliteter
+- **Sensor-anslutning** — Brygga mellan fysisk IoT och digitala modeller
 
-- **Webb-GUI** - Modernt webbaserat gränssnitt byggt för responsivitet
-- **Skrivbordsapp** - Native skrivbordsupplevelse via inbäddad webview
-- **Mobilstöd** - Full funktionalitet på surfplattor och mobila enheter
-- **Plattformsoberoende** - Windows, macOS, Linux, iOS och Android
+**Plattformsoberoende:**
+- Webb-nativ GUI med desktop- och mobilstöd
+- Windows, macOS, Linux, iOS, Android
+- Självhostad eller molninstallation
 
----
+{{< /tab >}}
 
-### Flexibel deployment
-
-Arbeta som du vill, var du vill.
-
-- **Offlineläge** - Full funktionalitet utan internet för säkra miljöer
-- **Molnalternativ** - Samarbeta och få tillgång till dina designer var som helst
-- **Hybridmetod** - Behåll känsligt arbete lokalt medan du utnyttjar molnet för samarbete
-- **Självhostad** - Deploya på din egen infrastruktur för fullständig kontroll
-
----
-
-## Varför nu?
-
-Konvergensen av flera teknologier gör detta till rätt tidpunkt:
-
-1. **CRDT:er mognar** - Automerge och liknande bibliotek möjliggör äkta realtidssamarbete
-2. **AI blir praktiskt** - Stora språkmodeller kan nu assistera med komplexa designuppgifter
-3. **Öppna standarder vinner mark** - IFC och STEP accepteras alltmer i hela branschen
-4. **Modulbyggnation växer** - Marknaden kräver verktyg byggda för detta arbetsflöde
-5. **Webbteknologi avancerar** - WebAssembly och moderna webbläsare möjliggör skrivbordsklassprestanda
+{{< /tabs >}}
 
 ---
 
-## Nuvarande status
+## Nuvarande Status
 
-Vi utvecklar aktivt plattformen med fokus på:
+Vi utvecklar aktivt plattformen och fokuserar på modulärt byggande som vår initiala vertikal medan vi bygger de underliggande spatiala intelligenskapabiliteterna som gäller över industrier.
 
-1. **Kärn-CAD-motor** - Bygger en robust grund för 2D/3D solidmodellering med STEP/IFC
-2. **Realtidssamarbete** - Automerge-baserad synkronisering för distribuerade team
-3. **AI-integration** - MCP-baserad AI-assistans genom hela arbetsflödet
-4. **Digital tvilling** - NATS JetStream-driven simulering och IoT-anslutning
-5. **Plattformsoberoende** - Webb-, skrivbords- och mobilgränssnitt via webview
+**Söker:**
+- Modulhustillverkare som söker bättre designverktyg
+- Fastighetsförvaltare intresserade av AI-drivna digitala tvillingar
+- Tillverkningsföretag som utforskar spatiala AI-tillämpningar
 
 ---
 
 ## Intresserad?
 
-Vi bygger öppet och söker tidig feedback från:
-
-- **Modulbostadstillverkare** som letar efter bättre designverktyg
-- **AEC-proffs** frustrerade över äldre CAD-begränsningar
-- **Distribuerade team** som behöver äkta realtidssamarbete
-
-[Kontakta oss](/contact) för att lära dig mer om vår utveckling och ge input på riktningen vi tar.
-
----
-
-## Teknisk grund
-
-Byggd med modern arkitektur och teknologier:
-
-- **STEP/IFC Native** - 100% öppen standard geometri- och BIM-format
-- **Automerge** - CRDT-baserad synkronisering för konfliktfritt realtidssamarbete
-- **NATS JetStream** - Händelsedriven arkitektur för digital tvilling-kapacitet
-- **MCP-integration** - AI-assistans med Model Context Protocol
-- **Webbinfödd** - Moderna webbteknologier med webview-inbäddning
-- **Utbyggbar** - Pluginarkitektur för anpassade arbetsflöden och integrationer
+[Kontakta oss](/sv/contact) för att lära dig mer om vårt framsteg och diskutera hur spatial AI kan tillämpas på din domän.

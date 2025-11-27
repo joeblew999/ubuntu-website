@@ -1,167 +1,127 @@
 ---
-title: "Produkt"
-meta_title: "KI-gestützte CAD-Plattform für AEC & Modulbau | Ubuntu Software"
-description: "CAD-Software der nächsten Generation mit 2D/3D-Modellierung, KI-Assistenz, Echtzeit-Zusammenarbeit und 100% offenen Standards (STEP/IFC). Entwickelt für vorgefertigten Modulbau und AEC."
+title: "Produkte"
+meta_title: "KI + 3D Räumliche Intelligenz Plattform | Ubuntu Software"
+description: "Wir geben KI die Fähigkeit, die physische 3D-Welt zu verstehen, darüber nachzudenken und mit ihr zu interagieren. Von Bauwesen über Fertigung bis zu digitalen Zwillingen."
 draft: false
 ---
 
-## Einführung unserer KI-gestützten CAD-Plattform
+## KI denkt in 2D. Wir geben ihr räumliche Intelligenz.
 
-Wir entwickeln die nächste Generation von Computer-Aided Design Software für die Architektur-, Ingenieur- und Baubranche (AEC). Ein modernes 2D/3D-CAD-System, das die Präzision traditioneller CAD-Tools mit der Intelligenz von KI kombiniert - speziell entwickelt für vorgefertigten Modulbau.
+Die heutige KI ist bemerkenswert leistungsfähig—sie kann lesen, schreiben, Bilder sehen und Gespräche führen. Aber sie denkt in flachen Dimensionen: Text ist 1D, Bilder sind 2D, Video ist 2D über Zeit.
 
----
+**Die reale Welt ist 3D.**
 
-## Das Problem
+Damit KI wirklich mit der physischen Realität interagieren kann—um Gebäude zu entwerfen, Roboter zu steuern, Anlagen zu verwalten oder Fertigung zu planen—braucht sie räumliche Intelligenz. Die Fähigkeit, Geometrie zu verstehen, über physische Einschränkungen nachzudenken und mit dreidimensionalem Raum zu arbeiten.
 
-Die AEC-Branche befindet sich im Wandel hin zu vorgefertigtem Modulbau. Fabrikgefertigte Module bieten schnellere Bauzeit, bessere Qualitätskontrolle und weniger Abfall. Aber traditionelle CAD-Software wurde nicht für diesen Workflow entwickelt:
-
-- **Dateibasierte Zusammenarbeit** bricht zusammen, wenn mehrere Teams an verbundenen Modulen arbeiten
-- **Proprietäre Formate** schaffen Vendor Lock-in und Interoperabilitäts-Alpträume
-- **Keine Echtzeit-Synchronisation** bedeutet, dass Teams Stunden mit dem Zusammenführen widersprüchlicher Änderungen verschwenden
-- **Legacy-Architekturen** können moderne KI-Assistenz nicht integrieren
-
-Modulbau erfordert einen neuen Ansatz - CAD-Software, die von Grund auf für verteilte Teams, offene Standards und intelligente Automatisierung entwickelt wurde.
+Das ist es, was wir bauen: eine Plattform, die KIs kognitive Fähigkeiten mit 3D-räumlichem Verständnis verbindet und Maschinen befähigt, mit der physischen Welt zu arbeiten.
 
 ---
 
-## Unsere Lösung
+## Anwendungen
 
-### 100% Offene Standards
+{{< tabs >}}
 
-Kein proprietärer Lock-in. Ihre Designs gehören Ihnen.
+{{< tab "Bauwesen" >}}
 
-- **STEP-Format** - Industriestandard für 3D-Geometrieaustausch (ISO 10303)
-- **IFC-Unterstützung** - Native Building Information Modeling Interoperabilität (ISO 16739)
-- **Offene Dateiformate** - Export zu jedem kompatiblen System ohne Konvertierungsverlust
-- **Zukunftssicher** - Ihre Daten bleiben zugänglich, unabhängig von Softwareänderungen
+### Modulares & Vorgefertigtes Bauen
 
----
+Die Bauindustrie verlagert sich hin zu fabrikgefertigten Modulhäusern. Vorfertigung bietet schnellere Bauzeiten, bessere Qualitätskontrolle und weniger Abfall—aber traditionelle CAD-Tools wurden nicht für diesen Workflow entwickelt.
 
-### Echtzeit-Zusammenarbeit
+**Die Herausforderung:**
+- Verteilte Teams über Fabrikhallen, Ingenieurbüros und Baustellen
+- Bedarf an Echtzeit-Zusammenarbeit, nicht dateibasierte Speichern-Zusammenführen-Commit-Zyklen
+- Proprietäre Formate, die Herstellerbindung schaffen
+- Altsysteme, die keine KI-Unterstützung integrieren können
 
-Remote-Teams arbeiten zusammen, als wären sie im selben Raum.
+**Unser Ansatz:**
+- **Echtzeit-Zusammenarbeit** — Teams in Thailand, Deutschland und Australien arbeiten gleichzeitig am selben Modell mit Automerge CRDT-Technologie
+- **100% Offene Standards** — STEP- und IFC-Formate stellen sicher, dass Ihre Entwürfe Ihnen gehören, unabhängig von Softwareänderungen zugänglich
+- **KI-unterstütztes Design** — Befehle in natürlicher Sprache, Designoptimierungsvorschläge und automatische Fehlererkennung
+- **Modul-zentrierter Workflow** — Erstklassige Unterstützung für Fertigbaukomponenten, Montagesequenzierung und Transportplanung
 
-- **Echte Echtzeit-Synchronisation** - Änderungen von Teammitgliedern sofort sehen, nicht nach Speichern-Merge-Commit-Zyklen
-- **Automerge-basiert** - Konfliktfreie Zusammenarbeit mit CRDT-Technologie
-- **Verteilte Teams** - Fabrik in Thailand, Engineering in Deutschland, Architekten in Australien - alle arbeiten gleichzeitig am selben Modell
-- **Offline-First** - Arbeiten ohne Internet, automatische Synchronisation bei Wiederverbindung
-- **Vollständige Versionshistorie** - Vollständige Revisionskontrolle mit Branching und Merging
+{{< /tab >}}
 
----
+{{< tab "Digitale Zwillinge" >}}
 
-### Entwickelt für Modulbau
+### Digitale Zwillinge & Gebäudemanagement
 
-Speziell für vorgefertigte Wohnungsfabriken konzipiert.
+Überbrücken Sie die Lücke zwischen Design und der realen Welt. Unser Ansatz basiert auf Erfahrungen mit KI-gestützten Gebäudemanagementsystemen, einschließlich der Zusammenarbeit mit [Bilfinger](https://www.bilfinger.com/), einem der führenden deutschen Ingenieur- und Dienstleistungsunternehmen.
 
-- **Modul-zentriertes Design** - Erstklassige Unterstützung für Prefab-Modul-Workflows
-- **Fabrikintegration** - Designs direkt mit Fertigungssystemen verbinden
-- **Montagesequenzierung** - Modulinstallationsreihenfolge planen und visualisieren
-- **Toleranzmanagement** - Präzisionsanforderungen der Fabrikproduktion handhaben
-- **Transportplanung** - Logistikbeschränkungen in der Designphase berücksichtigen
+**Fähigkeiten:**
+- **Live-Sensor-Integration** — Verbinden Sie Ihre 3D-Modelle mit Echtzeit-IoT-Daten von Gebäuden und Infrastruktur
+- **Vorausschauende Wartung** — KI-gestützte Analyse zur Identifizierung von Geräteproblemen, bevor sie zu Ausfällen werden
+- **Was-Wäre-Wenn-Simulation** — Testen Sie Szenarien in Ihrem digitalen Zwilling, bevor Sie Änderungen in der Realität umsetzen
+- **Gebäudemanagement** — Verwalten Sie Gebäudesysteme, verfolgen Sie Anlagen und optimieren Sie Abläufe über eine räumliche Schnittstelle
 
----
+**Architektur:**
+Aufgebaut auf NATS JetStream für ereignisgesteuerten Echtzeit-Datenfluss zwischen physischen Sensoren und digitalen Modellen. Dieselbe räumliche Intelligenz, die beim Entwurf eines Gebäudes hilft, kann es während seines gesamten Lebenszyklus überwachen und verwalten.
 
-### KI-gestützte Assistenz
+{{< /tab >}}
 
-Ihr intelligenter Design-Partner, angetrieben von moderner KI.
+{{< tab "Fertigung" >}}
 
-- **MCP-Integration** - Aufgebaut auf dem Model Context Protocol für nahtlose KI-Tool-Integration
-- **Natürlichsprachliche Befehle** - Beschreiben Sie in einfacher Sprache, was Sie erstellen oder ändern möchten
-- **Design-Optimierung** - KI-Vorschläge für Herstellbarkeit, Kosten und Leistung
-- **Fehlererkennung** - Automatische Identifikation von Designproblemen, bevor sie zu Problemen werden
-- **Konversationsschnittstelle** - Mit Ihrem CAD-System über Ihre Designs chatten
+### Fertigung & Automatisierung
 
----
+Wenn KI den 3D-Raum versteht, kann sie an der physischen Produktion teilnehmen—vom Design über die Fertigung bis zur Qualitätskontrolle.
 
-### Digital Twin & IoT
+**Anwendungen:**
+- **Robotik-Integration** — Räumlichen Kontext für automatisierte Systeme bereitstellen, ermöglicht intelligentere Bahnplanung und Montageoperationen
+- **Produktionsplanung** — KI-Unterstützung für Layoutoptimierung, Prozesssequenzierung und Ressourcenzuweisung
+- **Qualitätskontrolle** — Ist-Geometrie mit Designabsicht vergleichen, automatische Erkennung von Abweichungen
+- **Montagedokumentation** — Arbeitsanweisungen generieren, die dreidimensionale Beziehungen verstehen
 
-Die Brücke zwischen Design und der realen Welt schlagen. Unser Ansatz zum Facility Management wird durch praktische Erfahrung geprägt - einschließlich Arbeit an KI-gestützten Facility-Management-Systemen mit [Bilfinger](https://www.bilfinger.com/), einem der führenden deutschen Ingenieur- und Dienstleistungsunternehmen.
+**Über das Bauwesen hinaus:**
+Während unser anfänglicher Fokus auf modularem Bauen liegt, gilt die räumliche Intelligenz der Plattform für jeden Fertigungsbereich—Automobil, Luft- und Raumfahrt, Konsumgüter, Industrieausrüstung. Überall, wo KI über physische Geometrie nachdenken muss.
 
-- **Digital Twin Simulation** - Simulationen mit NATS JetStream Messaging ausführen
-- **Facility Management** - IoT-Geräte und Sensoren in fertigen Gebäuden verwalten
-- **Echtzeit-Monitoring** - Ihre Designs mit Live-Sensordaten verbinden
-- **Predictive Maintenance** - KI-gestützte Einblicke zur Vermeidung von Geräteausfällen
-- **What-If-Analyse** - Szenarien in der Simulation testen, bevor sie in der Realität umgesetzt werden
+{{< /tab >}}
 
----
+{{< tab "Technologie" >}}
 
-### 2D & 3D Solid Modeling
+### Plattform-Architektur
 
-Vollwertige CAD-Funktionalität für professionelle Designarbeit.
+Moderner Technologie-Stack für räumliche KI-Anwendungen.
 
-- **Solid Modeling** - Vollständiges Solids-Modelling mit offenem Standard-Geometriekernel
-- **Präzisions-Zeichenwerkzeuge** - Genaue technische Zeichnungen mit professionellen Werkzeugen erstellen
-- **Parametrische & Direkte Modellierung** - Komplexe 3D-Modelle mit flexiblen Ansätzen erstellen
-- **Assembly Design** - Multi-Komponenten-Baugruppen mit Constraints verwalten
-- **Technische Dokumentation** - Zeichnungen, Stücklisten und Spezifikationen automatisch generieren
+**Offene Standards:**
+- **STEP-Format** — ISO 10303 Standard für 3D-Geometrieaustausch
+- **IFC-Unterstützung** — ISO 16739 Building Information Modeling Interoperabilität
+- Keine proprietäre Bindung. Ihre Daten bleiben zugänglich.
 
----
+**Echtzeit-Zusammenarbeit:**
+- **Automerge** — CRDT-basierte Synchronisation für konfliktfreie Zusammenarbeit
+- **Offline-First** — Volle Funktionalität ohne Internet, automatische Synchronisation bei Wiederverbindung
+- **Versionskontrolle** — Vollständige Revisionshistorie mit Verzweigung und Zusammenführung
 
-### Moderne Architektur
+**KI-Integration:**
+- **MCP-Protokoll** — Model Context Protocol für nahtlose KI-Tool-Integration
+- **Natürliche Sprache** — Designabsicht in einfacher Sprache beschreiben
+- **Konversationsschnittstelle** — Mit Ihren räumlichen Modellen chatten
 
-Web-natives Design, das überall läuft.
+**Ereignisgesteuerte Architektur:**
+- **NATS JetStream** — Echtzeit-Messaging für digitale Zwillings-Fähigkeiten
+- **Sensor-Konnektivität** — Brücke zwischen physischem IoT und digitalen Modellen
 
-- **Web GUI** - Moderne webbasierte Oberfläche, entwickelt für Responsivität
-- **Desktop App** - Native Desktop-Erfahrung via eingebettetem Webview
-- **Mobile Unterstützung** - Volle Funktionalität auf Tablets und Mobilgeräten
-- **Cross-Platform** - Windows, macOS, Linux, iOS und Android
+**Plattformübergreifend:**
+- Web-native GUI mit Desktop- und Mobile-Unterstützung
+- Windows, macOS, Linux, iOS, Android
+- Self-Hosted oder Cloud-Deployment-Optionen
 
----
+{{< /tab >}}
 
-### Flexible Bereitstellung
-
-Arbeiten Sie, wie Sie wollen, wo Sie wollen.
-
-- **Offline-Modus** - Volle Funktionalität ohne Internet für sichere Umgebungen
-- **Cloud-Option** - Zusammenarbeiten und von überall auf Ihre Designs zugreifen
-- **Hybrider Ansatz** - Sensible Arbeit lokal halten, während Cloud für Zusammenarbeit genutzt wird
-- **Self-Hosted** - Auf eigener Infrastruktur für vollständige Kontrolle bereitstellen
-
----
-
-## Warum jetzt?
-
-Die Konvergenz mehrerer Technologien macht dies zum richtigen Zeitpunkt:
-
-1. **CRDTs sind ausgereift** - Automerge und ähnliche Bibliotheken ermöglichen echte Echtzeit-Zusammenarbeit
-2. **KI wird praktisch** - Große Sprachmodelle können nun bei komplexen Designaufgaben assistieren
-3. **Offene Standards gewinnen an Akzeptanz** - IFC und STEP werden branchenweit zunehmend akzeptiert
-4. **Modulbau wächst** - Der Markt verlangt nach Tools, die für diesen Workflow entwickelt wurden
-5. **Web-Technologie schreitet voran** - WebAssembly und moderne Browser ermöglichen Desktop-Klasse-Performance
+{{< /tabs >}}
 
 ---
 
 ## Aktueller Status
 
-Wir entwickeln die Plattform aktiv mit Fokus auf:
+Wir entwickeln aktiv die Plattform und konzentrieren uns auf modulares Bauen als unseren ersten Bereich, während wir die zugrundeliegenden räumlichen Intelligenzfähigkeiten aufbauen, die branchenübergreifend anwendbar sind.
 
-1. **Core CAD Engine** - Aufbau eines robusten Fundaments für 2D/3D Solid Modeling mit STEP/IFC
-2. **Echtzeit-Zusammenarbeit** - Automerge-basierte Synchronisation für verteilte Teams
-3. **KI-Integration** - MCP-basierte KI-Assistenz im gesamten Workflow
-4. **Digital Twin** - NATS JetStream-basierte Simulation und IoT-Konnektivität
-5. **Cross-Platform** - Web-, Desktop- und Mobile-Schnittstellen via Webview
+**Wir suchen:**
+- Modulhaushersteller, die bessere Designwerkzeuge suchen
+- Gebäudemanager, die an KI-gestützten digitalen Zwillingen interessiert sind
+- Fertigungsunternehmen, die räumliche KI-Anwendungen erkunden
 
 ---
 
 ## Interessiert?
 
-Wir entwickeln offen und suchen frühes Feedback von:
-
-- **Modulhausherstellern**, die bessere Design-Tools suchen
-- **AEC-Fachleuten**, die von Legacy-CAD-Einschränkungen frustriert sind
-- **Verteilten Teams**, die echte Echtzeit-Zusammenarbeit benötigen
-
-[Kontaktieren Sie uns](/contact), um mehr über unseren Fortschritt zu erfahren und Input zur Richtung zu geben, die wir einschlagen.
-
----
-
-## Technisches Fundament
-
-Aufgebaut mit moderner Architektur und Technologien:
-
-- **STEP/IFC Native** - 100% offene Standard-Geometrie- und BIM-Formate
-- **Automerge** - CRDT-basierte Synchronisation für konfliktfreie Echtzeit-Zusammenarbeit
-- **NATS JetStream** - Ereignisgesteuerte Architektur für Digital Twin Fähigkeiten
-- **MCP-Integration** - KI-Assistenz mit Model Context Protocol
-- **Web-Native** - Moderne Web-Technologien mit Webview-Embedding
-- **Erweiterbar** - Plugin-Architektur für benutzerdefinierte Workflows und Integrationen
+[Kontaktieren Sie uns](/de/contact), um mehr über unseren Fortschritt zu erfahren und zu besprechen, wie räumliche KI auf Ihren Bereich anwendbar sein könnte.
