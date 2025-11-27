@@ -9,9 +9,21 @@ jobs:
   post:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: .bluesky-cache
+          key: bluesky-cache-${{ github.run_id }}
+          restore-keys: |
+            bluesky-cache-
+
       - name: Post new blog entries to Bluesky
         uses: joschi/blueskyfeedbot@v1
         with:
-          feed-url: 'https://ubuntusoftware.net/index.xml'
-          bluesky-handle: 'ubuntusoftware.net'
-          bluesky-password: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          rss-feed: 'https://ubuntusoftware.net/index.xml'
+          username: 'ubuntusoftware.net'
+          password: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          cache-file: .bluesky-cache/posted.json
