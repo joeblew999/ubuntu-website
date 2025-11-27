@@ -24,7 +24,7 @@ jobs:
       - name: Post new blog entries to Bluesky
         uses: joschi/blueskyfeedbot@v1
         with:
-          rss-feed: 'https://www.ubuntusoftware.net/index.xml'
+          rss-feed: 'https://www.ubuntusoftware.net/blog/index.xml'
           username: 'ubuntusoftware.net'
           password: ${{ secrets.BLUESKY_APP_PASSWORD }}
           cache-file: .bluesky-cache/posted.json
