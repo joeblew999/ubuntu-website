@@ -1,29 +1,28 @@
 ---
-enable: false
-title: "What Clients Say About Ubuntu Software"
-description: "Hear from organizations we've helped transform their IT infrastructure and deliver enterprise-scale solutions."
+enable: true
+title: "What Clients Say"
+description: "Feedback from organizations we've worked with over 25 years of enterprise systems delivery."
 
-# Testimonials
 testimonials:
-  - name: "Marvin McKinney"
-    designation: "Web Designer"
+  - name: "Senior Director, IT Infrastructure"
+    designation: "Metro AG, Germany"
     avatar: "/images/avatar-sm.png"
-    content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui iusto illo molestias, assumenda expedita commodi inventore non itaque molestiae voluptatum dolore, facilis sapiente, repellat veniam."
+    content: "The Kubernetes deployment transformed our retail operations. 7,000+ servers across multiple regions, and the GitOps workflows reduced our deployment time from days to minutes. Exceptional technical depth."
 
-  - name: "Marvin McKinney"
-    designation: "Web Designer"
+  - name: "Head of Engineering"
+    designation: "Bilfinger, Germany"
     avatar: "/images/avatar-sm.png"
-    content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui iusto illo molestias, assumenda expedita commodi inventore non itaque molestiae voluptatum dolore, facilis sapiente, repellat veniam."
+    content: "Gerard's work on our AI-powered facility management system demonstrated rare expertise in both IoT integration and enterprise architecture. The digital twin implementation exceeded our expectations."
 
-  - name: "Marvin McKinney"
-    designation: "Web Designer"
+  - name: "VP Technology"
+    designation: "Financial Services, London"
     avatar: "/images/avatar-sm.png"
-    content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui iusto illo molestias, assumenda expedita commodi inventore non itaque molestiae voluptatum dolore, facilis sapiente, repellat veniam."
+    content: "Mission-critical trading systems require zero tolerance for failure. Gerard delivered exactly that—real-time processing, rock-solid reliability, and architecture that scaled with our growth."
 
-  - name: "Marvin McKinney"
-    designation: "Web Designer"
+  - name: "Program Director"
+    designation: "Government Healthcare Project"
     avatar: "/images/avatar-sm.png"
-    content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui iusto illo molestias, assumenda expedita commodi inventore non itaque molestiae voluptatum dolore, facilis sapiente, repellat veniam."
+    content: "During the pandemic, we needed infrastructure that could handle 50M+ daily transactions with 99.99% uptime. Gerard's distributed architecture delivered under immense pressure. Calm, competent, reliable."
 
 # don't create a separate page
 build:

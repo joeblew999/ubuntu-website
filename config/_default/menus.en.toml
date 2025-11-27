@@ -7,30 +7,60 @@ url = "/"
 weight = 1
 
 [[main]]
-name = "About"
-url = "/about"
+name = "Platform"
+url = "/platform"
 weight = 2
 
 [[main]]
-name = "Products"
-url = "/product"
+name = "Applications"
+weight = 3
+hasChildren = true
+
+[[main]]
+name = "Robotics"
+url = "/applications/robotics"
+parent = "Applications"
+weight = 1
+
+[[main]]
+name = "Simulation"
+url = "/applications/simulation"
+parent = "Applications"
+weight = 2
+
+[[main]]
+name = "Digital Twins"
+url = "/applications/digital-twins"
+parent = "Applications"
 weight = 3
 
 [[main]]
-name = "Services"
+name = "Manufacturing"
+url = "/applications/manufacturing"
+parent = "Applications"
+weight = 4
+
+[[main]]
+name = "Construction"
+url = "/applications/construction"
+parent = "Applications"
+weight = 5
+
+[[main]]
+name = "Company"
 weight = 4
 hasChildren = true
 
 [[main]]
-name = "Consulting"
-url = "/services"
-parent = "Services"
+name = "Our Story"
+url = "/company/story"
+parent = "Company"
 weight = 1
 
 [[main]]
-name = "Portfolio"
-url = "/portfolio"
-parent = "Services"
+name = "Experience"
+url = "/company/experience"
+parent = "Company"
 weight = 2
 
 [[main]]
@@ -46,13 +76,13 @@ weight = 6
 
 # footer menu
 [[footer]]
-name = "About"
-url = "/about"
+name = "Platform"
+url = "/platform"
 weight = 1
 
 [[footer]]
-name = "Services"
-url = "/services"
+name = "Applications"
+url = "/applications"
 weight = 2
 
 [[footer]]

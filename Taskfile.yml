@@ -257,7 +257,7 @@ tasks:
   #   2. Ask Claude Code: "Translate the changed files to all languages"
   #   3. task translate:done      - mark translations complete
   #
-  # Target languages: de (German), sv (Swedish), zh (Chinese), ja (Japanese), th (Thai)
+  # Target languages: de (German), zh (Chinese), ja (Japanese)
 
   translate:status:
     desc: Show what English files changed since last translation
@@ -267,7 +267,10 @@ tasks:
         echo "Translation Status"
         echo "========================================"
         echo ""
-        echo "=== Uncommitted changes ==="
+        echo "=== New (untracked) files ==="
+        git ls-files --others --exclude-standard -- content/english/ | grep -E '\.md$' || echo "(none)"
+        echo ""
+        echo "=== Uncommitted changes (modified) ==="
         git diff --name-only -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null | grep -E '\.(md|toml|yaml)$' || echo "(none)"
         echo ""
         echo "=== Committed since last translation ==="
@@ -295,7 +298,7 @@ tasks:
         echo "========================================"
         echo ""
 
-        LANGS="german swedish chinese japanese thai"
+        LANGS="german chinese japanese"
 
         for LANG in $LANGS; do
           MISSING=0
@@ -322,6 +325,70 @@ tasks:
         done
 
         echo "========================================"
+
+  translate:orphans:
+    desc: Show files in target languages that no longer exist in English (should be deleted)
+    cmds:
+      - |
+        echo "========================================"
+        echo "Orphaned Files (exist in target but not in English)"
+        echo "========================================"
+        echo ""
+
+        LANGS="german chinese japanese"
+        TOTAL_ORPHANS=0
+
+        for LANG in $LANGS; do
+          ORPHAN_COUNT=0
+          ORPHAN_FILES=""
+
+          # Check each file in target language
+          for LANG_FILE in $(find content/$LANG -name "*.md" -type f 2>/dev/null); do
+            # Convert path: content/german/foo.md -> content/english/foo.md
+            EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
+
+            if [ ! -f "$EN_FILE" ]; then
+              ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+              TOTAL_ORPHANS=$((TOTAL_ORPHANS + 1))
+              ORPHAN_FILES="$ORPHAN_FILES\n  - ${LANG_FILE}"
+            fi
+          done
+
+          if [ $ORPHAN_COUNT -eq 0 ]; then
+            echo "✓ $LANG: No orphans"
+          else
+            echo "✗ $LANG: $ORPHAN_COUNT orphaned files (DELETE THESE)"
+            echo -e "$ORPHAN_FILES"
+            echo ""
+          fi
+        done
+
+        echo "========================================"
+        if [ $TOTAL_ORPHANS -gt 0 ]; then
+          echo "Run 'task translate:clean' to delete all orphaned files"
+        fi
+        echo "========================================"
+
+  translate:clean:
+    desc: Delete orphaned files in target languages that no longer exist in English
+    cmds:
+      - |
+        echo "Cleaning orphaned translation files..."
+        LANGS="german chinese japanese"
+        DELETED=0
+
+        for LANG in $LANGS; do
+          for LANG_FILE in $(find content/$LANG -name "*.md" -type f 2>/dev/null); do
+            EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
+            if [ ! -f "$EN_FILE" ]; then
+              echo "Deleting: $LANG_FILE"
+              rm "$LANG_FILE"
+              DELETED=$((DELETED + 1))
+            fi
+          done
+        done
+
+        echo "✓ Deleted $DELETED orphaned files"
 
   # ============================================================================
   # Cloudflare Pages (DEPRECATED - using Git integration)

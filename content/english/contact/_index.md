@@ -1,49 +1,87 @@
 ---
 title: "Contact"
 meta_title: "Contact | Ubuntu Software"
-description: "Get in touch to discuss your IT consulting needs. Expert guidance in software architecture, distributed systems, and cloud infrastructure."
+description: "Building something in robotics, simulation, digital twins, manufacturing, or construction? Let's talk."
 draft: false
 ---
 
-## Get In Touch
+## Let's Build Together
 
-Interested in discussing a project or exploring how Ubuntu Software can help your organization? We'd love to hear from you.
-
----
-
-### Consulting Inquiries
-
-For consulting engagements, technical discussions, or collaboration opportunities:
-
-**Email:** [contact@ubuntusoftware.net](mailto:contact@ubuntusoftware.net)
-
-**GitHub:** [github.com/joeblew999](https://github.com/joeblew999)
-
-**LinkedIn:** [Gerard Webb](https://www.linkedin.com/in/gerardwebb/)
+We're building the platform where AI designs reality. If you're working in the same space, we want to hear from you.
 
 ---
 
-### What to Include
+## Who We Want to Hear From
 
-When reaching out about a potential project, it's helpful to include:
+**Robotics teams** — Building humanoids, warehouse automation, surgical systems, or any robot that needs to understand space.
 
-- Brief description of your technical challenge or goals
-- Timeline and scope considerations
-- Any specific technologies or constraints involved
+**Simulation engineers** — Creating training environments for AI, synthetic data pipelines, or digital worlds for embodied intelligence.
+
+**Facility managers** — Running buildings, factories, or infrastructure where digital twins could transform operations.
+
+**Manufacturers** — From job shops to OEMs, anyone bridging the gap between design and production.
+
+**Construction innovators** — Modular builders, prefab manufacturers, and anyone pushing construction toward factory precision.
+
+**Potential partners** — Robot OEMs, simulation platforms, sensor companies, or anyone whose technology fits the ecosystem.
+
+**Investors** — If you see the same convergence we do.
 
 ---
 
-### Response Time
+## Get in Touch
 
-We typically respond to inquiries within 1-2 business days. For urgent matters, please indicate the time-sensitivity in your message.
+**Email:** [hello@ubuntusoftware.net](mailto:hello@ubuntusoftware.net)
 
 ---
 
-### Location
+## What to Include
 
-Ubuntu Software operates remotely, serving international clients across all time zones. We're experienced in distributed collaboration and can adapt to your team's working hours and communication preferences.
+Help us understand how we might work together:
 
-**Business Registration:**
-Ubuntu Software
-ABN: 95 595 575 880
-Australia
+- **Who you are** — Your role and organization
+- **What you're building** — The problem you're solving
+- **Where AI + 3D matters** — How spatial intelligence fits your work
+- **What you're looking for** — Early access, partnership, conversation
+
+---
+
+## Response Time
+
+We're a small, focused team. We read everything and respond to relevant inquiries within a few business days.
+
+If you're building something that fits our vision, you'll hear from us.
+
+---
+
+## Location
+
+Ubuntu Software is an Australian-registered company operating globally.
+
+We work with distributed teams across time zones—it's what we build for, after all.
+
+---
+
+## Follow the Journey
+
+We're building in the open. Updates on progress, thinking, and direction:
+
+**Website:** [ubuntusoftware.net](https://www.ubuntusoftware.net)
+
+---
+
+## Not Sure Yet?
+
+That's fine. If you're curious about where AI and 3D design converge, start here:
+
+[Explore the Platform →](/platform/)
+
+[See Applications →](/applications/)
+
+[Read Our Story →](/company/story/)
+
+---
+
+We're at the beginning of something big. The right collaborators will shape what it becomes.
+
+Looking forward to hearing from you.

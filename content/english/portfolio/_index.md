@@ -2,7 +2,7 @@
 title: "Portfolio"
 meta_title: "Portfolio & Case Studies | Ubuntu Software"
 description: "Selected projects and case studies demonstrating enterprise-scale solutions across government, finance, healthcare, and industrial sectors."
-draft: false
+draft: true
 ---
 
 ## Selected Work

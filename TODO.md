@@ -1,19 +1,57 @@
 # todo
 
+ensure frontmatter is right si that OG and sitemap is right ? 
+
+
+
+--- 
+
+In the Ourstory we need to say how we spopnet years builting Systsms and Apps for many years and that the company name existed before Ubuntu Linux happened, but we built for Linux and Open BSD for many many years. 
 
 ---
 
-The home page in English has a "Learn More" button / link, but on the other language pages when you click the same button / link, it goes to the English page for some reason. It should not. 
+Now we need to add Images. But first work out best way. SVG since its easy for  CLaude to make off the text ? And then no scaling issues.
 
-Yet the links on the blog home page do go to the same language blog pages. 
+Need to consider colour. We use gray at the moment because its neutral.
 
-Work out whats wrong.
+Need to consider hugo plate and not working against it, and to ensure things keep working well when we update, in relation to images. 
+
+Hugo plate elements page has some Nice Image tools that we can leverage perhaps too.
 
 ---
 
-make sure Privacy page is decent. We need to make sure we are not breaking any laws in the EU, for example, and telling our users that we respect their rights to privacy and to not be tracked.   
+Some layouts are not used ? Can hugo tell us ? or do we even care ? or do we need a task file to help us. DO we really care ? its only EN we care about as its the single source of truth when checking what conrtent uses what layouts ? 
 
-I think that there is some law about take downs and they if we do not do it we are in trouble. But we are an Australain Comapny, so maybe that means we are OK there ? 
+
+--
+
+testomonials is  done ? get one from Dick of archethought.
+reference his github too somwwhre in the site ? 
+
+---
+
+blogs need to be adjusted ? We can make some about the problems in the industry related to our product. Keep the ones about programming ?? 
+
+
+---
+
+Adjust static folder with the stuff i need to do to update Bluessky and GMail each time my logo and Strap line changes.
+
+
+
+---
+
+Contact page is stupid as we dont have a forms processor and i dont want to ad one. Better to have an email. maybe there is a decent obfuscation thing buuld in to Hugo and hugop plate to help ? 
+
+
+---
+
+Pictures 
+
+- we have default Grey ones right now that hugo plate defaults I dont want to make a big mess, but maybe we can easily add images ? 
+
+
+
 
 ---
 

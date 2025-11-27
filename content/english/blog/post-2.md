@@ -7,7 +7,7 @@ image: "/images/image-placeholder.png"
 categories: ["Consulting", "Remote Work"]
 author: "Gerard Webb"
 tags: ["consulting", "remote-work", "best-practices"]
-draft: false
+draft: true
 ---
 
 Over 25 years of IT consulting across Australia, Europe, and Asia, I've learned that successful remote consulting requires more than just technical expertise. It demands a specific mindset, communication approach, and toolkit.

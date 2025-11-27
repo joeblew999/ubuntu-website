@@ -3,7 +3,7 @@ title: "Building Distributed Systems with Go and Kubernetes"
 meta_title: ""
 description: "Lessons learned from deploying enterprise-scale distributed systems using Go and Kubernetes at scale"
 date: 2024-11-20T05:00:00Z
-image: "/images/image-placeholder.png"
+image: "/images/blog/distributed-systems.svg"
 categories: ["Distributed Systems", "Cloud"]
 author: "Gerard Webb"
 tags: ["go", "kubernetes", "distributed-systems"]

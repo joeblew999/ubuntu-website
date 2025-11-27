@@ -3,7 +3,7 @@ title: "Why Rust is the Future for Systems Programming"
 meta_title: ""
 description: "Exploring Rust's memory safety guarantees and performance characteristics for systems-level development"
 date: 2024-11-15T05:00:00Z
-image: "/images/image-placeholder.png"
+image: "/images/blog/systems-programming.svg"
 categories: ["Programming", "Systems"]
 author: "Gerard Webb"
 tags: ["rust", "systems-programming", "performance"]

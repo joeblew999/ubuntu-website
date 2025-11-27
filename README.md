@@ -47,10 +47,8 @@ task cf:open      # Open Cloudflare dashboard
 
 - 🇬🇧 English (en) - Source language
 - 🇩🇪 German (de)
-- 🇸🇪 Swedish (sv)
 - 🇨🇳 Chinese Simplified (zh)
 - 🇯🇵 Japanese (ja)
-- 🇹🇭 Thai (th)
 
 ## 🚀 Quick Start
 
@@ -201,10 +199,8 @@ The translation tool:
 ├── content/
 │   ├── english/           # Source (EN)
 │   ├── german/            # DE translations
-│   ├── swedish/           # SV translations
 │   ├── chinese/           # ZH translations
-│   ├── japanese/          # JA translations
-│   └── thai/              # TH translations
+│   └── japanese/          # JA translations
 ├── config/_default/
 │   ├── languages.toml     # Language config
 │   └── menus.*.toml       # Per-language menus

@@ -3,7 +3,7 @@ title: "Cloud Architecture Patterns: Lessons from Enterprise Deployments"
 meta_title: ""
 description: "Proven architectural patterns for cloud-native applications based on real-world enterprise experience"
 date: 2024-11-10T05:00:00Z
-image: "/images/image-placeholder.png"
+image: "/images/blog/cloud-architecture.svg"
 categories: ["Architecture", "Cloud"]
 author: "Gerard Webb"
 tags: ["cloud", "architecture", "aws", "gcp", "azure"]
