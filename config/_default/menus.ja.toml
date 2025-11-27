@@ -12,29 +12,37 @@ url = "/about"
 weight = 2
 
 [[main]]
-name = "製品"
-url = "/product"
+name = "サービス"
 weight = 3
+hasChildren = true
 
 [[main]]
-name = "サービス"
+name = "製品"
+url = "/product"
+parent = "サービス"
+weight = 1
+
+[[main]]
+name = "コンサルティング"
 url = "/services"
-weight = 4
+parent = "サービス"
+weight = 2
 
 [[main]]
 name = "ポートフォリオ"
 url = "/portfolio"
-weight = 5
+parent = "サービス"
+weight = 3
 
 [[main]]
 name = "ブログ"
 url = "/blog"
-weight = 6
+weight = 4
 
 [[main]]
 name = "お問い合わせ"
 url = "/contact"
-weight = 7
+weight = 5
 
 
 # footer menu
