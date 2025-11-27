@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="520" viewBox="0 0 560 520">
+  <!-- Financial Services: Applications, disclosures, compliance -->
+
+  <!-- Background -->
+  <rect width="560" height="520" fill="white"/>
+
+  <!-- Bank building icon at top -->
+  <g transform="translate(230, 25)">
+    <!-- Triangle roof -->
+    <polygon points="50,0 0,35 100,35" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+    <!-- Columns -->
+    <rect x="10" y="35" width="12" height="45" fill="white" stroke="#999" stroke-width="1"/>
+    <rect x="32" y="35" width="12" height="45" fill="white" stroke="#999" stroke-width="1"/>
+    <rect x="55" y="35" width="12" height="45" fill="white" stroke="#999" stroke-width="1"/>
+    <rect x="78" y="35" width="12" height="45" fill="white" stroke="#999" stroke-width="1"/>
+    <!-- Base -->
+    <rect x="0" y="75" width="100" height="10" fill="#ccc" stroke="#999" stroke-width="1"/>
+  </g>
+
+  <!-- Left: Loan Application -->
+  <g transform="translate(30, 130)">
+    <rect x="0" y="0" width="150" height="180" rx="4" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+    <rect x="0" y="0" width="150" height="22" rx="4" fill="#ccc"/>
+    <text x="75" y="15" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Loan Application</text>
+
+    <!-- Form fields -->
+    <text x="15" y="40" font-family="sans-serif" font-size="7" fill="#666">Applicant Information</text>
+    <rect x="15" y="48" width="120" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="1"/>
+    <rect x="15" y="68" width="120" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="1"/>
+
+    <text x="15" y="100" font-family="sans-serif" font-size="7" fill="#666">Loan Details</text>
+    <rect x="15" y="108" width="55" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="1"/>
+    <text x="20" y="118" font-family="sans-serif" font-size="6" fill="#999">Amount</text>
+    <rect x="80" y="108" width="55" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="1"/>
+    <text x="85" y="118" font-family="sans-serif" font-size="6" fill="#999">Term</text>
+
+    <!-- Progress indicator -->
+    <rect x="15" y="140" width="120" height="8" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="1"/>
+    <rect x="15" y="140" width="80" height="8" rx="2" fill="#ccc"/>
+    <text x="75" y="162" font-family="sans-serif" font-size="7" fill="#666" text-anchor="middle">Step 2 of 4</text>
+
+    <text x="75" y="200" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Multi-Step Application</text>
+  </g>
+
+  <!-- Center: Disclosure Document -->
+  <g transform="translate(205, 130)">
+    <rect x="0" y="0" width="150" height="180" rx="2" fill="white" stroke="#999" stroke-width="2"/>
+
+    <!-- Document header -->
+    <rect x="15" y="15" width="120" height="20" fill="#f5f5f5"/>
+    <text x="75" y="28" font-family="sans-serif" font-size="8" fill="#666" text-anchor="middle">DISCLOSURE STATEMENT</text>
+
+    <!-- Legal text blocks -->
+    <rect x="15" y="45" width="120" height="4" fill="#ccc"/>
+    <rect x="15" y="53" width="110" height="4" fill="#ccc"/>
+    <rect x="15" y="61" width="115" height="4" fill="#ccc"/>
+    <rect x="15" y="69" width="100" height="4" fill="#ccc"/>
+
+    <rect x="15" y="85" width="120" height="4" fill="#ccc"/>
+    <rect x="15" y="93" width="105" height="4" fill="#ccc"/>
+    <rect x="15" y="101" width="118" height="4" fill="#ccc"/>
+
+    <!-- Version stamp -->
+    <rect x="15" y="120" width="60" height="15" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="1"/>
+    <text x="45" y="131" font-family="sans-serif" font-size="7" fill="#666" text-anchor="middle">v2024.03</text>
+
+    <!-- Signature line -->
+    <text x="15" y="155" font-family="sans-serif" font-size="7" fill="#666">Acknowledgment:</text>
+    <line x1="75" y1="155" x2="135" y2="155" stroke="#999" stroke-width="1"/>
+
+    <text x="75" y="200" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Versioned Disclosures</text>
+  </g>
+
+  <!-- Right: Compliance Dashboard -->
+  <g transform="translate(380, 130)">
+    <rect x="0" y="0" width="150" height="180" rx="4" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+    <rect x="0" y="0" width="150" height="22" rx="4" fill="#ccc"/>
+    <text x="75" y="15" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Audit Trail</text>
+
+    <!-- Log entries -->
+    <g transform="translate(10, 32)">
+      <rect x="0" y="0" width="130" height="28" fill="white" stroke="#ccc" stroke-width="1"/>
+      <circle cx="15" cy="14" r="6" fill="#ccc"/>
+      <path d="M 12 14 L 14 16 L 18 11" stroke="#666" stroke-width="1.5" fill="none"/>
+      <text x="28" y="11" font-family="sans-serif" font-size="7" fill="#666">Form submitted</text>
+      <text x="28" y="21" font-family="sans-serif" font-size="6" fill="#999">2024-03-15 14:32</text>
+
+      <rect x="0" y="32" width="130" height="28" fill="white" stroke="#ccc" stroke-width="1"/>
+      <circle cx="15" cy="46" r="6" fill="#ccc"/>
+      <path d="M 12 46 L 14 48 L 18 43" stroke="#666" stroke-width="1.5" fill="none"/>
+      <text x="28" y="43" font-family="sans-serif" font-size="7" fill="#666">Disclosure sent</text>
+      <text x="28" y="53" font-family="sans-serif" font-size="6" fill="#999">2024-03-15 14:33</text>
+
+      <rect x="0" y="64" width="130" height="28" fill="white" stroke="#ccc" stroke-width="1"/>
+      <circle cx="15" cy="78" r="6" fill="#ccc"/>
+      <path d="M 12 78 L 14 80 L 18 75" stroke="#666" stroke-width="1.5" fill="none"/>
+      <text x="28" y="75" font-family="sans-serif" font-size="7" fill="#666">Acknowledged</text>
+      <text x="28" y="85" font-family="sans-serif" font-size="6" fill="#999">2024-03-15 14:45</text>
+
+      <rect x="0" y="96" width="130" height="28" fill="white" stroke="#ccc" stroke-width="1"/>
+      <circle cx="15" cy="110" r="6" fill="#ccc"/>
+      <path d="M 12 110 L 14 112 L 18 107" stroke="#666" stroke-width="1.5" fill="none"/>
+      <text x="28" y="107" font-family="sans-serif" font-size="7" fill="#666">Approved</text>
+      <text x="28" y="117" font-family="sans-serif" font-size="6" fill="#999">2024-03-16 09:12</text>
+    </g>
+
+    <text x="75" y="200" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Complete History</text>
+  </g>
+
+  <!-- Bottom: Core System Integration -->
+  <g transform="translate(130, 360)">
+    <rect x="0" y="0" width="300" height="100" rx="4" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+    <text x="150" y="20" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Core System Integration</text>
+
+    <!-- System icons -->
+    <g transform="translate(30, 35)">
+      <rect x="0" y="0" width="60" height="45" rx="3" fill="white" stroke="#ccc" stroke-width="1"/>
+      <text x="30" y="25" font-family="sans-serif" font-size="8" fill="#666" text-anchor="middle">Core</text>
+      <text x="30" y="36" font-family="sans-serif" font-size="8" fill="#666" text-anchor="middle">Banking</text>
+    </g>
+
+    <g transform="translate(120, 35)">
+      <rect x="0" y="0" width="60" height="45" rx="3" fill="white" stroke="#ccc" stroke-width="1"/>
+      <text x="30" y="25" font-family="sans-serif" font-size="8" fill="#666" text-anchor="middle">CRM</text>
+    </g>
+
+    <g transform="translate(210, 35)">
+      <rect x="0" y="0" width="60" height="45" rx="3" fill="white" stroke="#ccc" stroke-width="1"/>
+      <text x="30" y="25" font-family="sans-serif" font-size="8" fill="#666" text-anchor="middle">Document</text>
+      <text x="30" y="36" font-family="sans-serif" font-size="8" fill="#666" text-anchor="middle">Mgmt</text>
+    </g>
+
+    <!-- Connection lines -->
+    <line x1="90" y1="57" x2="120" y2="57" stroke="#999" stroke-width="1.5"/>
+    <line x1="180" y1="57" x2="210" y2="57" stroke="#999" stroke-width="1.5"/>
+  </g>
+
+  <!-- Lock icon for security -->
+  <g transform="translate(490, 50)">
+    <rect x="5" y="15" width="30" height="25" rx="3" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+    <path d="M 10 15 L 10 10 Q 10 0, 20 0 Q 30 0, 30 10 L 30 15" fill="none" stroke="#999" stroke-width="2"/>
+    <circle cx="20" cy="27" r="4" fill="#999"/>
+  </g>
+
+  <!-- Bottom label -->
+  <text x="280" y="500" font-family="sans-serif" font-size="11" fill="#666" text-anchor="middle">Compliance Without Complexity • Every Channel • Complete Audit Trail</text>
+</svg>

@@ -12,6 +12,10 @@ We need to talk about our Single sourcing contnet and 2D system that allowing wr
 
 We need the testimonals and the previsu proejcts to link well and i need to make the previous projects things good. The Climate Foundation system was a secure publisging system, data collection system and messaging and video conferencing system, so that all global projects had a unified and secure and self soverign way to collaborate and publish and for sciwnce divisiosn to collect sensor information.
 
+a blog article about it too is good.
+
+a testimonial about it too from the director.
+
 
 --- 
 

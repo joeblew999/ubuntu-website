@@ -60,6 +60,36 @@ parent = "Applications"
 weight = 5
 
 [[main]]
+name = "Government"
+url = "/applications/government"
+parent = "Applications"
+weight = 6
+
+[[main]]
+name = "Healthcare"
+url = "/applications/healthcare"
+parent = "Applications"
+weight = 7
+
+[[main]]
+name = "Financial"
+url = "/applications/financial"
+parent = "Applications"
+weight = 8
+
+[[main]]
+name = "Education"
+url = "/applications/education"
+parent = "Applications"
+weight = 9
+
+[[main]]
+name = "Insurance"
+url = "/applications/insurance"
+parent = "Applications"
+weight = 10
+
+[[main]]
 name = "Company"
 weight = 4
 hasChildren = true

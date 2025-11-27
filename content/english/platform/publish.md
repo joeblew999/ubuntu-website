@@ -126,83 +126,19 @@ The circle is complete.
 
 ---
 
-## Use Cases
+## Industries We Serve
 
-### Government & Public Sector
+Publish works wherever forms and documents matter.
 
-Citizens need options. Some file online. Some mail paper forms. Both need to work.
+| Industry | Key Benefits |
+|----------|--------------|
+| [**Government**](/applications/government) | Serve every citizen. Paper + digital. Accessible. Compliant. |
+| [**Healthcare**](/applications/healthcare) | Less administration. Fewer errors. Better care. |
+| [**Financial Services**](/applications/financial) | Compliance without complexity. Complete audit trails. |
+| [**Education**](/applications/education) | Modern administration. Traditional options. |
+| [**Insurance**](/applications/insurance) | Every channel. One system. Field to office unified. |
 
-- Accessible web and PDF from same source
-- Paper submissions processed automatically
-- Compliance with accessibility standards
-- Archival formats supported
-
-**Serve every citizen. Process every submission.**
-
----
-
-### Healthcare
-
-Patient intake. Consent forms. Medical history. Insurance paperwork.
-
-- Waiting room paper forms, patient portal digital forms—same source
-- OCR eliminates transcription errors
-- Audit trail for compliance
-- Integration with existing EMR/EHR systems
-
-**Less administration. Fewer errors. Better care.**
-
----
-
-### Financial Services
-
-Applications. Claims. Disclosures. Account forms.
-
-- Regulatory-compliant PDF output
-- Digital and paper channels unified
-- Data capture without manual re-entry
-- Version control for audit requirements
-
-**Compliance without complexity.**
-
----
-
-### Education
-
-Enrollment. Registration. Permission slips. Transcripts.
-
-- Parents choose paper or digital
-- Administrative staff freed from data entry
-- Records stay synchronized
-- Bulk document generation from student data
-
-**Modern administration. Traditional options.**
-
----
-
-### Insurance
-
-Policy applications. Claims forms. Assessments. Renewals.
-
-- Field agents work on paper
-- Customers submit online
-- Both captured identically
-- Back-office integration seamless
-
-**Every channel. One system.**
-
----
-
-### Enterprise
-
-Internal forms. HR paperwork. Procedures. Checklists.
-
-- Intranet and print from same source
-- Field operations work offline on paper
-- Data returns to enterprise systems
-- Documentation always current
-
-**Operations that actually work.**
+Each industry has unique requirements. [Explore the application pages](/applications/) for detailed use cases.
 
 ---
 

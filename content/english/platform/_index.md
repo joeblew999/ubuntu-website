@@ -1,5 +1,5 @@
 ---
-title: "The Platform"
+title: "Platform"
 meta_title: "AI-Native Design Infrastructure | Ubuntu Software"
 description: "Two platforms. One vision. Spatial for 3D design and AI. Publish for documents and forms. Both built on open standards, real-time collaboration, and your infrastructure."
 image: "/images/platform.svg"
