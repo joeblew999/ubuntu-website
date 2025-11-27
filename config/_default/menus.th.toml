@@ -12,37 +12,36 @@ url = "/about"
 weight = 2
 
 [[main]]
-name = "บริการ"
-weight = 3
-hasChildren = true
-
-[[main]]
 name = "ผลิตภัณฑ์"
 url = "/product"
-parent = "บริการ"
-weight = 1
+weight = 3
+
+[[main]]
+name = "บริการ"
+weight = 4
+hasChildren = true
 
 [[main]]
 name = "ที่ปรึกษา"
 url = "/services"
 parent = "บริการ"
-weight = 2
+weight = 1
 
 [[main]]
 name = "ผลงาน"
 url = "/portfolio"
 parent = "บริการ"
-weight = 3
+weight = 2
 
 [[main]]
 name = "บล็อก"
 url = "/blog"
-weight = 4
+weight = 5
 
 [[main]]
 name = "ติดต่อเรา"
 url = "/contact"
-weight = 5
+weight = 6
 
 
 # footer menu

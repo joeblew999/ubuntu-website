@@ -12,37 +12,36 @@ url = "/about"
 weight = 2
 
 [[main]]
-name = "Services"
+name = "Products"
+url = "/product"
 weight = 3
-hasChildren = true
 
 [[main]]
-name = "Product"
-url = "/product"
-parent = "Services"
-weight = 1
+name = "Services"
+weight = 4
+hasChildren = true
 
 [[main]]
 name = "Consulting"
 url = "/services"
 parent = "Services"
-weight = 2
+weight = 1
 
 [[main]]
 name = "Portfolio"
 url = "/portfolio"
 parent = "Services"
-weight = 3
+weight = 2
 
 [[main]]
 name = "Blog"
 url = "/blog"
-weight = 4
+weight = 5
 
 [[main]]
 name = "Contact"
 url = "/contact"
-weight = 5
+weight = 6
 
 
 # footer menu
