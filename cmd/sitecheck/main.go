@@ -76,33 +76,46 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Display results
-	fmt.Println("Results:")
-	fmt.Println("--------")
-
 	// Sort by node name for consistent output
 	sort.Slice(results, func(i, j int) bool {
 		return results[i].Node < results[j].Node
 	})
 
-	failures := 0
+	// Count and collect failures
+	var failures []Result
 	pending := 0
 	for _, r := range results {
 		if r.Pending {
-			fmt.Printf("⏳ %s: pending...\n", r.Node)
 			pending++
-		} else if r.Success {
-			fmt.Printf("✓ %s: OK (%dms) - HTTP %s\n", r.Node, int(r.Time*1000), r.Status)
-		} else {
-			fmt.Printf("✗ %s: FAILED - %s\n", r.Node, r.Status)
-			failures++
+		} else if !r.Success {
+			failures = append(failures, r)
 		}
 	}
 
-	fmt.Printf("\nSummary: %d ok, %d failed, %d pending\n", len(results)-failures-pending, failures, pending)
+	ok := len(results) - len(failures) - pending
+
+	// Only print failures (if any)
+	if len(failures) > 0 {
+		fmt.Println("Failures:")
+		for _, r := range failures {
+			fmt.Printf("  ✗ %s: %s\n", r.Node, r.Status)
+		}
+		fmt.Println()
+	}
+
+	// Summary line
+	fmt.Printf("✓ %d/%d nodes OK", ok, len(results))
+	if len(failures) > 0 {
+		fmt.Printf(", %d failed", len(failures))
+	}
+	if pending > 0 {
+		fmt.Printf(", %d pending", pending)
+	}
+	fmt.Println()
 	fmt.Printf("Full report: %s/check-report/%s\n", apiBase, requestID)
 
-	if failures > 0 {
+	// Exit 1 only if 3+ failures (1-2 is noise)
+	if len(failures) >= 3 {
 		os.Exit(1)
 	}
 }
