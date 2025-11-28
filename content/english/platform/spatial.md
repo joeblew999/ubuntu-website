@@ -122,9 +122,25 @@ The window is open. We're building through it.
 
 ---
 
+## Built on Foundation
+
+Spatial inherits all [Foundation](/platform/foundation/) capabilities automatically:
+
+| Capability | What It Means |
+|------------|---------------|
+| **Offline-first** | Design without internet, sync when connected |
+| **Universal deployment** | Web, desktop, mobile—one codebase |
+| **Self-sovereign** | Your servers, your data, your rules |
+| **Real-time sync** | Multiple designers, automatic conflict resolution |
+| **Wellknown Gateway** | Publish TO Big Tech, never locked IN |
+
+[Learn more about Foundation →](/platform/foundation/)
+
+---
+
 ## Part of Something Bigger
 
-Spatial is the 3D foundation of the Ubuntu Software platform.
+Spatial is the 3D layer of the Ubuntu Software platform.
 
 For organizations that also need document publishing, forms, and data capture, our Publish platform provides the 2D layer—with seamless integration to your 3D models.
 

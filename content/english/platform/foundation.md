@@ -194,12 +194,22 @@ For teams evaluating our architecture:
 
 | Layer | Technology |
 |-------|------------|
-| **Sync Engine** | Automerge CRDT |
+| **Storage** | SQLite everywhere—local devices and servers |
+| **Sync Engine** | CRDT-based replication via NATS JetStream |
 | **Messaging** | NATS JetStream |
-| **Storage** | SQLite (local), PostgreSQL (server) |
 | **UI Framework** | Cross-platform native rendering |
-| **API** | REST + WebSocket + gRPC |
+| **API** | HTTP REST + SSE (Server-Sent Events) |
+| **AI Integration** | Model Context Protocol (MCP) |
 | **Auth** | OIDC-compatible, bring your own IdP |
+
+### Distributed SQLite
+
+Every node—your laptop, your phone, your servers—runs SQLite. Changes replicate via NATS JetStream using CRDT semantics.
+
+- **Any server can fail** — Others keep serving
+- **Any server can go offline** — Sync when reconnected
+- **No single point of failure** — True distributed architecture
+- **Same database everywhere** — Local device to global cluster
 
 **Standard technologies. No proprietary lock-in.**
 

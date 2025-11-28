@@ -1,193 +1,199 @@
 ---
 title: "Publish"
 meta_title: "Single-Source Publishing | Ubuntu Software"
-description: "Single-source publishing. Markdown to web, PDF, and forms. OCR capture back to your database. Full circle."
+description: "One DSL for everything. Text, graphics, forms, emails. Self-recursive composition. Auto-translated outputs. Perfect branding by architecture."
 image: "/images/publish.svg"
 draft: false
 ---
 
-## Write Once. Output Everywhere. Capture Back.
+## One Language. Every Output. Every Language.
 
-Markdown in. Web pages, PDFs, and forms out—all perfectly aligned. Capture data from digital or paper submissions. Back to your database. Full circle.
+Define everything in one DSL. Compose components that include components. Output to any format. Auto-translate to any language. Capture data back from forms.
 
-No more maintaining multiple versions. No more re-keying paper forms. No more content drift.
+Perfect branding. Not by discipline. By architecture.
 
 ---
 
 ## The Problem
 
-Every organization publishes information in multiple formats.
+Organizations publish content across multiple channels: websites, PDFs, emails, forms, signage.
 
-The website says one thing. The PDF says another. The form has different fields. Paper submissions get typed in manually. Updates mean changing everything in three places.
+Each channel maintained separately. Content drifts. Branding fractures. Translations lag. Form submissions get re-keyed manually.
 
-**Content drifts. Errors multiply. Staff waste hours on manual data entry.**
+**One change means updating five systems. Or it doesn't get updated at all.**
 
 ---
 
-## The Solution
+## One DSL
 
-### Single Source of Truth
+Everything is defined in the same language.
 
-Everything starts as Markdown and a simple DSL.
+**Text content:**
 ```
-# Application Form
+# Welcome to Our Service
 
+We help organizations {industry} achieve {outcome}.
+```
+
+**Graphics:**
+```
+@logo: svg {
+  viewBox: "0 0 200 50"
+  rect: { x: 0, y: 0, width: 50, height: 50, fill: "#2563eb" }
+  text: { x: 60, y: 35, content: "Ubuntu", font: "bold 24px" }
+}
+```
+
+**Form fields:**
+```
 Name: [_______________]{field: name, required: true}
 Email: [_______________]{field: email, type: email}
 Date: [__/__/____]{field: date, type: date}
 ```
 
-Human-readable. Version-controlled. The one source that drives everything.
+**Emails:**
+```
+@welcome-email: email {
+  to: {customer.email}
+  subject: "Welcome, {customer.name}"
+  body: include welcome-content
+}
+```
+
+**One language. Text, graphics, forms, emails, documents.**
 
 ---
 
-### Aligned Outputs
+## Compose
 
-From that single source, generate:
+Components include components.
 
-| Output | Use |
-|--------|-----|
-| Web page | Online viewing |
-| PDF document | Print, email, archive |
-| Web form | Digital submissions |
-| PDF form | Fillable digital or printable |
-| Custom maps | Location-based content with your data |
-| Kiosk displays | Real-time signage and menus |
+```
+@header: compose {
+  include: logo
+  include: navigation
+  include: search-bar
+}
 
-**All outputs are 100% aligned.** Same content. Same field positions. Same structure.
+@page-template: compose {
+  include: header
+  include: content
+  include: footer
+}
 
-Change the source. Everything updates.
+@welcome-letter: compose {
+  include: page-template
+  content: "Dear {customer.name}, welcome to..."
+}
+
+@application-form: compose {
+  include: page-template
+  content: include form-fields
+}
+```
+
+**The cascade:**
+- Change the logo → header updates
+- Header updates → every page updates
+- Every page updates → every PDF, email, form updates
+
+**This is why branding stays perfect.** Not because someone remembers to update everything. Because the architecture makes it impossible not to.
+
+Link to any existing content. Reuse across the system. One source of truth.
 
 ---
 
-### Full-Circle Capture
+## Output
 
-Here's the breakthrough:
+From one source, generate everything:
 
-**Web form** → Data flows to your database
+| Output | What Happens |
+|--------|--------------|
+| Web pages | Rendered to HTML, SEO-ready |
+| PDFs | Print-ready, archival |
+| Emails | Sent directly to recipients |
+| Web forms | Interactive, data captures back |
+| PDF forms | Fillable or printable, OCR captures back |
+| SVG graphics | Vector assets, any size |
+| Maps | Your location data visualized |
+| Kiosks | Physical displays, real-time |
 
-**PDF form (filled digitally)** → Data extracts to your database
+**Every output auto-translates.**
 
-**PDF form (printed, handwritten, scanned)** → OCR captures to your database
+Write in English. German colleagues see German. Spanish partners see Spanish. Japanese customers see Japanese.
 
-Because we generated the form, OCR knows exactly where every field is. No training. No guessing. Precise extraction.
+Not translated after the fact. Translated as part of rendering. Every output. Every language. Automatically.
+
+---
+
+## Translate
+
+Translation isn't a feature. It's how the system works.
+
+| Capability | What It Means |
+|------------|---------------|
+| Real-time in editor | Collaborate across languages simultaneously |
+| Auto-translate outputs | Every format renders in every language |
+| Offline AI | Works without internet |
+| Contextual | Knows education vs. legal vs. medical terminology |
+| Bi-directional | They edit in their language, you see yours |
+
+**Write once. Publish in every language.**
+
+---
+
+## Capture
+
+Forms capture data back. Because we generated the form, we know exactly where every field is.
+
+| Channel | What Happens |
+|---------|--------------|
+| Web form submitted | Data flows to your database |
+| PDF form filled digitally | Data extracts to your database |
+| PDF form printed, filled by hand, scanned | OCR captures to your database |
+
+No training the OCR. No field mapping. We generated the form—we know where everything is.
 
 **Paper or digital. Same data. Same destination.**
 
 ---
 
-### Any Database
+## Connect
 
-We don't replace your backend. We connect to it.
+Your database. Your schema.
 
-- Your existing database
-- Your schema
-- Read data to populate documents
-- Write captured data back
+- Read data to populate documents: "Dear {customer.name}..."
+- Write captured data back: form submissions → your tables
+- Any SQL database: PostgreSQL, MySQL, SQLite
+- Your infrastructure: self-hosted or cloud
 
-**Your infrastructure. Our publishing and capture layer.**
-
----
-
-## How It Works
-
-### Step 1: Write
-
-Create your content in Markdown with our DSL for fields and structure.
-
-Plain text files. Version control friendly. Human readable.
-
-### Step 2: Publish
-
-Generate all outputs from the source:
-
-- Static web pages
-- PDF documents
-- Interactive web forms
-- Fillable PDF forms
-
-Deploy to your website. Print PDFs. Distribute however you need.
-
-### Step 3: Capture
-
-Receive submissions through any channel:
-
-- Web form submissions
-- Digitally filled PDFs
-- Scanned paper forms
-
-All data validates, transforms, and flows to your database.
-
-### Step 4: Close the Loop
-
-Data in your database can populate new documents. Generate personalized outputs. Drive workflows.
-
-**Source → Output → Capture → Database → Source**
-
-The circle is complete.
+**We don't replace your backend. We connect to it.**
 
 ---
 
-## Industries We Serve
+## Industries
 
-Publish works wherever forms and documents matter.
-
-| Industry | Key Benefits |
-|----------|--------------|
+| Industry | Why Publish |
+|----------|-------------|
 | [**Government**](/applications/government) | Serve every citizen. Paper + digital. Accessible. Compliant. |
 | [**Healthcare**](/applications/healthcare) | Less administration. Fewer errors. Better care. |
-| [**Financial Services**](/applications/financial) | Compliance without complexity. Complete audit trails. |
+| [**Financial**](/applications/financial) | Compliance without complexity. Complete audit trails. |
 | [**Education**](/applications/education) | Modern administration. Traditional options. |
 | [**Insurance**](/applications/insurance) | Every channel. One system. Field to office unified. |
-
-Each industry has unique requirements. [Explore the application pages](/applications/) for detailed use cases.
-
----
-
-## What You Get
-
-### For Content Teams
-
-- Write in Markdown—no design tools required
-- One source to maintain, not three
-- Updates propagate automatically
-- Version control built in
-
-### For Operations
-
-- Paper and digital submissions unified
-- No more manual data entry
-- Error rates plummet
-- Processing time drops
-
-### For IT
-
-- Connects to existing databases
-- Standard formats (PDF, HTML)
-- No proprietary lock-in
-- Self-hosted or cloud
-
-### For Compliance
-
-- Single source of truth
-- Complete audit trail
-- Version history preserved
-- Archival formats supported
 
 ---
 
 ## Architecture
 
-Clean. Simple. Yours.
-
 | Layer | What It Does |
 |-------|--------------|
-| Source files | Markdown + DSL, version controlled |
-| Parser | Extracts content, structure, field definitions |
-| Renderers | Generates web, PDF, form outputs |
-| Field map | Knows exact position of every field |
+| DSL parser | Understands text, graphics, forms, composition |
+| Include resolver | Recursive component composition |
+| Renderers | Web, PDF, email, SVG, form outputs |
+| Translation engine | Real-time AI, offline capable |
+| Field mapper | Knows exact position of every form field |
 | OCR engine | Precise extraction using field map |
-| Connectors | Read/write to your database |
+| Database connectors | Read and write to your schema |
 
 **No proprietary formats. Export everything. Own your content.**
 
@@ -195,79 +201,39 @@ Clean. Simple. Yours.
 
 ## Beyond Documents
 
-Publish isn't just forms and PDFs. The same single-source approach works for location data, video, and physical displays.
+The same single-source approach works for:
 
-### Custom Maps
+**Maps** — Your geographic data, your styling, integrate with Google/Apple Maps for reach.
 
-Build maps from your data. Integrate with the platforms your users already have.
+**Video** *(coming soon)* — Your video server, mirror to YouTube/Vimeo for discovery.
 
-- **Your geographic data** — Locations, routes, boundaries from your database
-- **Custom styling** — Your brand, your markers, your overlays
-- **Platform integration** — Works with Google Maps, Apple Maps, or standalone
-- **Offline capable** — Field workers see maps without connectivity
+**Calendar** *(coming soon)* — Your CalDAV server, sync to Google/Apple Calendar for convenience.
 
-Restaurant locations. Service areas. Asset tracking. Delivery routes. All from your single source, all real-time from your data.
+**Kiosks** *(coming soon)* — Raspberry Pi displays, restaurant menus, government offices, retail signage.
 
-### Video Publishing
-
-*Coming soon*
-
-Same philosophy applied to video content:
-
-- **Your video server** — Host on your infrastructure
-- **Mirror to platforms** — Auto-publish to YouTube, Vimeo for discovery
-- **Your links everywhere** — Wellknown URIs route through your gateway
-- **Analytics you own** — See every view, track every user
-
-### Kiosk Systems
-
-*Coming soon*
-
-Raspberry Pi-powered displays running your content:
-
-- **Restaurant menus** — Real-time updates from your database
-- **Government offices** — Queue displays, wayfinding, forms
-- **Retail signage** — Pricing, promotions, inventory status
-- **All aligned** — Same source drives web, print, and physical displays
-
-Change the data once. Menu boards, website, and printed materials all update.
+All links route through [your gateway](/platform/foundation/#wellknown-gateway). Publish TO Big Tech platforms. Never be locked IN.
 
 ---
 
-## Integration
+## Built on Foundation
 
-Works with what you have:
+Publish inherits all [Foundation](/platform/foundation/) capabilities automatically:
 
-- **Databases:** PostgreSQL, MySQL, SQLite, or any SQL database
-- **Storage:** Local filesystem, S3, or any object storage
-- **Auth:** Your existing identity provider
-- **Deployment:** Your servers, your cloud, your choice
+| Capability | What It Means |
+|------------|---------------|
+| **Offline-first** | Work without internet, sync when connected |
+| **Universal deployment** | Web, desktop, mobile—one codebase |
+| **Self-sovereign** | Your servers, your data, your rules |
+| **Real-time sync** | Multiple editors, automatic conflict resolution |
+| **Wellknown Gateway** | Publish TO Big Tech, never locked IN |
 
-**We adapt to your infrastructure. Not the other way around.**
-
----
-
-## The ROI
-
-**Before:**
-- Staff hours re-keying paper submissions
-- Errors from manual data entry
-- Time updating multiple document versions
-- Content drift between web and PDF
-
-**After:**
-- Paper submissions processed automatically
-- Near-zero data entry errors
-- Single source updates everything
-- Perfect alignment across all outputs
-
-**The math is simple. The savings are real.**
+[Learn more about Foundation →](/platform/foundation/)
 
 ---
 
 ## Get Started
 
-If you're maintaining forms in multiple places, manually processing paper submissions, or watching content drift across formats—there's a better way.
+If you're maintaining content in multiple places, watching branding drift, waiting for translations, or re-keying form submissions—there's a better way.
 
 [Contact Us →](/contact/)
 
@@ -275,7 +241,7 @@ If you're maintaining forms in multiple places, manually processing paper submis
 
 ## Part of Something Bigger
 
-Publish is the 2D foundation of the Ubuntu Software platform.
+Publish is the 2D layer of the Ubuntu Software platform.
 
 For organizations working in 3D—robotics, manufacturing, construction, digital twins—Publish provides the documentation layer. Technical drawings, BOMs, work instructions, compliance forms—all from single source, all aligned with the 3D model.
 

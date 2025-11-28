@@ -6,6 +6,7 @@
       <div class="row justify-center">
         <div class="lg:col-10">
           <div class="content">
+            {{ partial "toc.html" (dict "Class" "platform" "Collapsed" false "TableOfContents" .TableOfContents ) }}
             {{ .Content }}
           </div>
         </div>
