@@ -4,6 +4,7 @@
 
 **Production Domain:** `www.ubuntusoftware.net`
 
+Apex domain (`ubuntusoftware.net`) redirects to www via Cloudflare redirect rule.
 
 USE TASKFILE - it makes conventions for development...
 
