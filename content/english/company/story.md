@@ -106,11 +106,11 @@ Now: **AI connected to the physical world.**
 
 ## The Team
 
-Ubuntu Software is an Australian company.
-
-We're small by design. Focused. Building the core platform before scaling the organization.
+Ubuntu Software is an Australian company. We're small by design. Focused. Building the core platform before scaling the organization.
 
 We're looking for collaborators—early customers who want to shape the direction, partners who see the same convergence, engineers who want to build something that matters.
+
+[Meet the Team →](/company/team/)
 
 ---
 

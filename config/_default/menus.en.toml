@@ -113,6 +113,12 @@ parent = "Company"
 weight = 2
 
 [[main]]
+name = "Team"
+url = "/company/team"
+parent = "Company"
+weight = 3
+
+[[main]]
 name = "Blog"
 url = "/blog"
 weight = 5
