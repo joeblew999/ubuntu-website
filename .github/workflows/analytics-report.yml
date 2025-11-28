@@ -50,6 +50,7 @@ jobs:
           path: .analytics-state.json
           retention-days: 90
           overwrite: true
+          include-hidden-files: true
 
       # Create issue if changes detected (exit code 1)
       - name: Create Issue
