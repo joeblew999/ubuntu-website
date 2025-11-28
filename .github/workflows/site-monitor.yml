@@ -1,19 +1,19 @@
-# Weekly Analytics Report
+# Site Monitor
 #
-# Runs every Sunday at 9am UTC to check Cloudflare Web Analytics.
-# Creates a GitHub Issue if visits or pageviews change >20% from previous week.
+# Runs every 6 hours to check site reachability from global locations.
+# Creates a GitHub Issue if failures detected or significant changes occur.
 #
-# Required secret: CLOUDFLARE_API_TOKEN (with Account Analytics:Read permission)
+# Uses check-host.net API (no secrets required)
 
-name: Weekly Analytics Report
+name: Site Monitor
 
 on:
   schedule:
-    - cron: '0 9 * * 0'  # Sunday 9am UTC
-  workflow_dispatch:      # Manual trigger
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:        # Manual trigger
 
 jobs:
-  analytics:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,35 +31,33 @@ jobs:
       - name: Download previous state
         uses: dawidd6/action-download-artifact@v6
         with:
-          name: analytics-state
+          name: sitecheck-state
           path: .
           if_no_artifact_found: ignore
           workflow_conclusion: success
           search_artifacts: true
 
-      # Run analytics check via Taskfile
-      - name: Check Analytics
-        id: analytics
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: task ci:analytics > report.md
+      # Run site check via Taskfile
+      - name: Run Site Check
+        id: check
+        run: task ci:sitecheck > report.md
         continue-on-error: true
 
       # Save state for next run
       - name: Upload state
         uses: actions/upload-artifact@v4
         with:
-          name: analytics-state
-          path: .analytics-state.json
+          name: sitecheck-state
+          path: .sitecheck-state.json
           retention-days: 90
           overwrite: true
           include-hidden-files: true
 
-      # Create issue if changes detected (exit code 1)
+      # Create issue if issues detected (exit code 1)
       - name: Create Issue
-        if: steps.analytics.outcome == 'failure'
+        if: steps.check.outcome == 'failure'
         uses: peter-evans/create-issue-from-file@v5
         with:
-          title: 'Analytics Alert: Significant traffic change detected'
+          title: 'Site Alert: Reachability issue detected'
           content-filepath: report.md
-          labels: analytics, automated
+          labels: site-monitor, automated

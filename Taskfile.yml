@@ -495,29 +495,30 @@ tasks:
       - '{{.WRANGLER_CMD}} pages project delete {{.PROJECT_NAME}}'
 
   # ============================================================================
-  # CI/CD (DEPRECATED - using Cloudflare Pages Git integration)
+  # CI Interface (called by GitHub Actions workflows)
   # ============================================================================
-  # NOTE: These tasks were used by GitHub Actions, which is now disabled
+  # These tasks are the contract between GitHub Actions and local tooling.
+  # Workflows call these tasks - all logic stays in Taskfile.
+  # Pattern: `task ci:*` for anything called from CI
 
-  ci:setup:
-    desc: "[DEPRECATED] Setup CI environment"
+  ci:analytics:
+    desc: Run analytics check for CI (outputs markdown, exit 1 if changes)
     cmds:
-      - 'echo "DEPRECATED: CI/CD now handled by Cloudflare Pages"'
-      - go install -tags extended github.com/gohugoio/hugo@latest
-      - bun install
-      - go mod download
-    env:
-      CGO_ENABLED: '{{.CGO_ENABLED}}'
+      - go run ./cmd/analytics/ -github-issue
 
-  ci:build:
-    desc: "[DEPRECATED] Build in CI"
-    deps: [build]
-
-  ci:deploy:
-    desc: "[DEPRECATED] Deploy from CI"
+  ci:sitecheck:
+    desc: Run site check for CI (outputs markdown, exit 1 if changes)
     cmds:
-      - 'echo "DEPRECATED: Deployments now handled by Cloudflare Pages Git integration"'
-      - exit 1
+      - go run ./cmd/sitecheck/ -github-issue
+
+  ci:workflow-status:
+    desc: Check recent workflow run status
+    cmds:
+      - |
+        echo "## Recent Workflow Runs"
+        echo ""
+        gh run list --limit 5 --json name,status,conclusion,createdAt \
+          --jq '.[] | "\(.name): \(.status) (\(.conclusion)) - \(.createdAt)"'
 
   # ============================================================================
   # Code Quality
