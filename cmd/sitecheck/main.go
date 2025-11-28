@@ -25,7 +25,7 @@ import (
 
 const (
 	defaultURL   = "https://www.ubuntusoftware.net"
-	defaultNodes = 40 // Use all available nodes
+	defaultNodes = 56 // Use all available nodes
 	defaultWait  = 8  // Seconds to wait for global responses
 	apiBase      = "https://check-host.net"
 )
