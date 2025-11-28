@@ -62,8 +62,8 @@ content = "<span class='text-center block'>♥️ Loving Hugoplate? <a class='un
 # seo meta data for OpenGraph / Twitter Card
 # seo module: https://github.com/gethugothemes/hugo-modules/tree/master/seo-tools/basic-seo
 [metadata]
-keywords = ["IT Consulting", "Software Architecture", "Distributed Systems", "Kubernetes", "Go", "Cloud Infrastructure"]
-description = "Ubuntu Software - Expert IT consulting in software architecture, distributed systems, and cloud infrastructure. 25+ years of enterprise experience."
+keywords = ["3D Design", "Document Publishing", "AI", "Spatial", "Publish", "Open Standards", "Offline-First"]
+description = "Spatial (3D design) + Publish (documents) | AI-powered, offline-first, open standards"
 author = "Gerard Webb"
 twitter = ""
 image = "images/og-image.png"
