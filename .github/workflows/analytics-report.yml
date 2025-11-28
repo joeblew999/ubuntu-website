@@ -1,0 +1,61 @@
+# Weekly Analytics Report
+#
+# Runs every Sunday at 9am UTC to check Cloudflare Web Analytics.
+# Creates a GitHub Issue if visits or pageviews change >20% from previous week.
+#
+# Required secret: CLOUDFLARE_API_TOKEN (with Account Analytics:Read permission)
+
+name: Weekly Analytics Report
+
+on:
+  schedule:
+    - cron: '0 9 * * 0'  # Sunday 9am UTC
+  workflow_dispatch:      # Manual trigger
+
+jobs:
+  analytics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      # Download previous state from artifact (if exists)
+      - name: Download previous state
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: analytics-state
+          path: .
+          if_no_artifact_found: ignore
+          workflow_conclusion: success
+          search_artifacts: true
+
+      # Run analytics check
+      - name: Check Analytics
+        id: analytics
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          go run ./cmd/analytics/ -github-issue > report.md
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      # Save state for next run
+      - name: Upload state
+        uses: actions/upload-artifact@v4
+        with:
+          name: analytics-state
+          path: .analytics-state.json
+          retention-days: 90
+          overwrite: true
+
+      # Create issue if changes detected (exit code 1)
+      - name: Create Issue
+        if: steps.analytics.outcome == 'failure'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: 'Analytics Alert: Significant traffic change detected'
+          content-filepath: report.md
+          labels: analytics, automated

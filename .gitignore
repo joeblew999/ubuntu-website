@@ -25,6 +25,9 @@ go.sum
 # Via framework
 .via/
 
+# Analytics state
+.analytics-state.json
+
 # IDE & OS
 .vscode/
 .DS_Store

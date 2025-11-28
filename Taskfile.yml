@@ -797,13 +797,75 @@ tasks:
         fi
 
   # ============================================================================
+  # SEO & Analytics
+  # ============================================================================
+
+  seo:open:search-console:
+    desc: Open Google Search Console
+    cmds:
+      - open "https://search.google.com/search-console"
+
+  seo:open:cf-analytics:
+    desc: Open Cloudflare Web Analytics
+    cmds:
+      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in=4c28a6bfb5514996914a603c999d5c79"
+
+  seo:setup:
+    desc: Open all SEO setup pages (Search Console + Cloudflare Analytics)
+    cmds:
+      - echo "Opening Google Search Console..."
+      - open "https://search.google.com/search-console"
+      - echo "Opening Cloudflare Web Analytics..."
+      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in=4c28a6bfb5514996914a603c999d5c79"
+      - echo ""
+      - echo "Setup steps:"
+      - echo "1. Google Search Console - Add property, Domain, ubuntusoftware.net"
+      - echo "2. Copy verification TXT record to Cloudflare DNS"
+      - echo "3. Cloudflare Analytics - Enable Web Analytics (one click)"
+
+  seo:report:
+    desc: Check analytics and report changes (>20% threshold)
+    cmds:
+      - go run ./cmd/analytics/
+
+  seo:report:verbose:
+    desc: Check analytics with verbose output
+    cmds:
+      - go run ./cmd/analytics/ -v
+
+  seo:report:webhook:
+    desc: Post analytics changes to webhook (set ANALYTICS_WEBHOOK_URL)
+    cmds:
+      - go run ./cmd/analytics/ -webhook "$ANALYTICS_WEBHOOK_URL"
+
+  # ============================================================================
   # Site Monitoring
   # ============================================================================
 
   site:check:
-    desc: Check site reachability from all global locations
+    desc: Check site HTTP reachability from all global locations
     cmds:
       - go run ./cmd/sitecheck/
+
+  site:check:dns:
+    desc: Check DNS resolution from all global locations
+    cmds:
+      - go run ./cmd/sitecheck/ -type dns
+
+  site:check:tcp:
+    desc: Check TCP port 443 from all global locations
+    cmds:
+      - go run ./cmd/sitecheck/ -type tcp
+
+  site:check:redirect:
+    desc: Check apex domain redirects to www
+    cmds:
+      - go run ./cmd/sitecheck/ -type redirect
+
+  site:check:all:
+    desc: Run all site checks (DNS, TCP, Redirect, HTTP)
+    cmds:
+      - go run ./cmd/sitecheck/ -type all
 
   # ============================================================================
   # Help
