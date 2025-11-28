@@ -801,14 +801,9 @@ tasks:
   # ============================================================================
 
   site:check:
-    desc: Check site reachability from multiple global locations
+    desc: Check site reachability from all global locations
     cmds:
       - go run ./cmd/sitecheck/
-
-  site:check:detailed:
-    desc: Check site with detailed output (more nodes, longer wait)
-    cmds:
-      - go run ./cmd/sitecheck/ -nodes 20 -wait 10
 
   # ============================================================================
   # Help

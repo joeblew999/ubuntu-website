@@ -7,7 +7,6 @@
 //
 //	go run cmd/sitecheck/main.go                           # Check production URL
 //	go run cmd/sitecheck/main.go -url https://example.com  # Check custom URL
-//	go run cmd/sitecheck/main.go -nodes 20                 # More locations
 //	task site:check                                        # Via Taskfile
 package main
 
@@ -26,7 +25,8 @@ import (
 
 const (
 	defaultURL   = "https://www.ubuntusoftware.net"
-	defaultNodes = 10
+	defaultNodes = 40 // Use all available nodes
+	defaultWait  = 8  // Seconds to wait for global responses
 	apiBase      = "https://check-host.net"
 )
 
@@ -51,7 +51,7 @@ type Result struct {
 func main() {
 	urlFlag := flag.String("url", defaultURL, "URL to check")
 	nodesFlag := flag.Int("nodes", defaultNodes, "Maximum number of global nodes to check from")
-	waitFlag := flag.Int("wait", 5, "Seconds to wait for results")
+	waitFlag := flag.Int("wait", defaultWait, "Seconds to wait for results")
 	flag.Parse()
 
 	fmt.Printf("Checking %s from %d global locations...\n\n", *urlFlag, *nodesFlag)
