@@ -1,7 +1,7 @@
 ---
 enable: true
-title: "What Clients Say"
-description: "Feedback from organizations we've worked with over 25 years of enterprise systems delivery."
+title: "25 Years of Client Success"
+description: "Feedback from organizations Gerard Webb has worked with building enterprise systems."
 
 testimonials:
   - name: "Senior Director, IT Infrastructure"

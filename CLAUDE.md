@@ -85,10 +85,28 @@ When working on Hugo Plate, which is a Hugo theme:
 
 - **Source code**: `/Users/apple/workspace/go/src/github.com/joeblew999/wellknown/.src/hugoplate`
 
-- Only use Hugo template things properly. I do not want to steer away from the standard Hugo Plate way of doing things !! 
+- Only use Hugo template things properly. I do not want to steer away from the standard Hugo Plate way of doing things !!
+
+### Theme Upgrade Policy
+
+**DO NOT modify theme CSS, Tailwind config, or `data/theme.json`** - keep upgrades easy.
+
+Allowed changes:
+- Content files (`content/`)
+- Custom layouts (`layouts/`)
+- Config (`config/`)
+- Images (`assets/images/`, `static/images/`)
+
+Avoid:
+- CSS/SCSS changes
+- Tailwind plugin modifications
+- Theme color overrides
+- Any changes that would conflict with upstream Hugo Plate updates 
 
 ## Information about the company 
 
-This Proejct is a web site for my company. I have various info here about me and the company.
+This Project is a web site for my company. I have various info here about me and the company.
 
-/Users/apple/Library/Mobile Documents/com~apple~CloudDocs/Thailand /dtv-employment-proof
+- **Source code**: `/Users/apple/Library/Mobile Documents/com~apple~CloudDocs/Thailand /`
+
+

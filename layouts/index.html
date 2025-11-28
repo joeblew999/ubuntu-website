@@ -78,6 +78,31 @@
   {{ end }}
   <!-- /Features -->
 
+  <!-- Founder -->
+  {{ with .Params.founder }}
+    {{ if .enable }}
+      <section class="section bg-gradient">
+        <div class="container">
+          <div class="row items-center justify-center">
+            <div class="md:col-3 mb-6 md:mb-0 text-center">
+              {{ partial "image" (dict "Src" .image "Alt" .title "Class" "mx-auto rounded-full" "Size" "150x150") }}
+            </div>
+            <div class="md:col-6">
+              <h2 class="mb-2">{{ .title }}</h2>
+              <p class="text-primary mb-4">{{ .role }}</p>
+              <p class="mb-6">{{ .content | markdownify }}</p>
+              <a class="btn btn-outline-primary" href="{{ .link | relLangURL }}">
+                Meet the Founder
+                <i class="fa fa-arrow-right pl-2"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    {{ end }}
+  {{ end }}
+  <!-- /Founder -->
+
   <!-- Testimonials -->
   {{ with site.GetPage "sections/testimonial" }}
     {{ if .Params.enable }}

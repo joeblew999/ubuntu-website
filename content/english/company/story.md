@@ -7,7 +7,7 @@ draft: false
 
 ## 25 Years Building Real-Time Systems. Now Building the Future.
 
-Ubuntu Software didn't start with a pitch deck. It started with two decades of building systems where failure wasn't an option.
+Ubuntu Software didn't start with a pitch deck. It started with Gerard Webb's two decades of building systems where failure wasn't an option.
 
 ---
 
@@ -104,13 +104,13 @@ Now: **AI connected to the physical world.**
 
 ---
 
-## The Team
+## The Founder
 
-Ubuntu Software is an Australian company. We're small by design. Focused. Building the core platform before scaling the organization.
+**Gerard Webb** — 25 years building real-time, distributed systems for global enterprises—investment banks, energy companies, automotive manufacturers, retail giants. Now applying that experience to the convergence of AI and 3D design. Australian company, working with teams across the US, UK, EU, and Asia.
+
+Ubuntu Software is small by design. Focused. Building the core platform before scaling the organization.
 
 We're looking for collaborators—early customers who want to shape the direction, partners who see the same convergence, engineers who want to build something that matters.
-
-[Meet the Team →](/company/team/)
 
 ---
 
@@ -138,21 +138,4 @@ If you're working in robotics, simulation, digital twins, manufacturing, or cons
 
 ---
 
-## The Clients Who Shaped Us
-
-The experience that built this foundation came from work with:
-
-- **Nomura** — Investment banking systems
-- **ABN AMRO** — Financial trading platforms
-- **Audi** — Automotive manufacturing
-- **BP** — Energy sector systems
-- **Metro AG** — Retail at scale
-- **Bilfinger** — Engineering and facility management
-- **BMG** — Media and entertainment
-- **European Union** — Government-scale systems
-
-25 years. Global enterprises. Mission-critical systems.
-
-Now applied to the next frontier.
-
-[See Our Experience →](/company/experience/)
+[See Our Full Experience →](/company/experience/)
