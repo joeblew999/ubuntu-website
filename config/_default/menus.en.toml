@@ -136,26 +136,31 @@ url = "/platform"
 weight = 1
 
 [[footer]]
+name = "Early Access"
+url = "/early-access"
+weight = 2
+
+[[footer]]
 name = "Our Story"
 url = "/company/story"
-weight = 2
+weight = 3
 
 [[footer]]
 name = "Experience"
 url = "/company/experience"
-weight = 3
+weight = 4
 
 [[footer]]
 name = "Blog"
 url = "/blog"
-weight = 4
+weight = 5
 
 [[footer]]
 name = "Contact"
 url = "/contact"
-weight = 5
+weight = 6
 
 [[footer]]
 name = "Privacy Policy"
 url = "/privacy-policy"
-weight = 6
+weight = 7

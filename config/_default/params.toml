@@ -37,9 +37,9 @@ preloader = "" # use jpg, png, svg or gif format.
 
 # Navigation button
 [navigation_button]
-enable = false  # Disabled - was Hugoplate branding
-label = "get a quote"
-link = "contact"
+enable = false  # Disabled - pushes nav layout
+label = "Early Access"
+link = "early-access"
 
 # search
 # search module: https://github.com/gethugothemes/hugo-modules/tree/master/search
