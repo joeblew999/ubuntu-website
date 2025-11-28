@@ -81,6 +81,18 @@ When working on Via coding aspects:
 - use a closure variable pattern instead of trying to access the signal's value.
 - use PicoCSS
 
+### Hugo Version
+
+**Current:** 0.152.2 (extended)
+**Hugo Plate requires:** v0.144+ extended
+
+Three places must stay aligned:
+1. **Local**: `hugo version` (install via `brew install hugo`)
+2. **Cloudflare**: `HUGO_VERSION` secret (check build logs via dashboard)
+3. **This doc**: Update version above when changing
+
+Hugo Plate version in `go.mod`: `github.com/zeon-studio/hugoplate` (update via `hugo mod get -u`)
+
 ### Hugo Source code
 
 When working on Hugo coding aspects use the source at:
