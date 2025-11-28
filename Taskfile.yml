@@ -797,6 +797,123 @@ tasks:
         fi
 
   # ============================================================================
+  # Site Monitoring
+  # ============================================================================
+
+  site:check:
+    desc: Check site reachability from multiple global locations
+    vars:
+      CHECK_URL: '{{.URL_PRODUCTION}}'
+    cmds:
+      - |
+        echo "Checking {{.CHECK_URL}} from global locations..."
+        echo ""
+
+        # Request check from multiple nodes
+        RESULT=$(curl -s -H "Accept: application/json" \
+          "https://check-host.net/check-http?host={{.CHECK_URL}}&max_nodes=10")
+
+        # Extract request ID
+        REQUEST_ID=$(echo "$RESULT" | jq -r '.request_id')
+
+        if [ -z "$REQUEST_ID" ] || [ "$REQUEST_ID" = "null" ]; then
+          echo "✗ Failed to initiate check"
+          echo "$RESULT"
+          exit 1
+        fi
+
+        echo "Request ID: $REQUEST_ID"
+        echo "Waiting for results from global nodes..."
+        sleep 5
+
+        # Get results
+        RESULTS=$(curl -s -H "Accept: application/json" \
+          "https://check-host.net/check-result/$REQUEST_ID")
+
+        echo ""
+        echo "Results:"
+        echo "--------"
+
+        # Parse and display results
+        echo "$RESULTS" | jq -r '
+          to_entries[] |
+          if .value == null then
+            "⏳ \(.key): pending..."
+          elif .value[0][0] == 1 then
+            "✓ \(.key): OK (\((.value[0][1] * 1000) | floor)ms)"
+          else
+            "✗ \(.key): FAILED - \(.value[0][2] // "unknown error")"
+          end
+        ' 2>/dev/null || echo "$RESULTS"
+
+        echo ""
+        echo "Full results: https://check-host.net/check-report/$REQUEST_ID"
+
+  site:check:detailed:
+    desc: Check site with detailed output (more nodes, longer wait)
+    vars:
+      CHECK_URL: '{{.URL_PRODUCTION}}'
+    cmds:
+      - |
+        echo "Detailed check of {{.CHECK_URL}} from 20 global locations..."
+        echo ""
+
+        RESULT=$(curl -s -H "Accept: application/json" \
+          "https://check-host.net/check-http?host={{.CHECK_URL}}&max_nodes=20")
+
+        REQUEST_ID=$(echo "$RESULT" | jq -r '.request_id')
+
+        if [ -z "$REQUEST_ID" ] || [ "$REQUEST_ID" = "null" ]; then
+          echo "✗ Failed to initiate check"
+          exit 1
+        fi
+
+        echo "Request ID: $REQUEST_ID"
+        echo "Nodes being checked:"
+        echo "$RESULT" | jq -r '.nodes | keys[]' 2>/dev/null
+        echo ""
+        echo "Waiting 10 seconds for all nodes to respond..."
+        sleep 10
+
+        RESULTS=$(curl -s -H "Accept: application/json" \
+          "https://check-host.net/check-result/$REQUEST_ID")
+
+        echo ""
+        echo "Results:"
+        echo "--------"
+
+        # Count successes and failures
+        SUCCESS=0
+        FAIL=0
+        PENDING=0
+
+        while IFS= read -r line; do
+          echo "$line"
+          case "$line" in
+            ✓*) SUCCESS=$((SUCCESS + 1)) ;;
+            ✗*) FAIL=$((FAIL + 1)) ;;
+            ⏳*) PENDING=$((PENDING + 1)) ;;
+          esac
+        done < <(echo "$RESULTS" | jq -r '
+          to_entries[] |
+          if .value == null then
+            "⏳ \(.key): pending..."
+          elif .value[0][0] == 1 then
+            "✓ \(.key): OK (\((.value[0][1] * 1000) | floor)ms) - HTTP \(.value[0][3])"
+          else
+            "✗ \(.key): FAILED - \(.value[0][2] // "unknown error")"
+          end
+        ' 2>/dev/null)
+
+        echo ""
+        echo "Summary: $SUCCESS ok, $FAIL failed, $PENDING pending"
+        echo "Full report: https://check-host.net/check-report/$REQUEST_ID"
+
+        if [ $FAIL -gt 0 ]; then
+          exit 1
+        fi
+
+  # ============================================================================
   # Help
   # ============================================================================
 
