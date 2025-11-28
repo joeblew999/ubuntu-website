@@ -9,6 +9,7 @@ vars:
 
   # Cloudflare Account
   CF_ACCOUNT_ID: 7384af54e33b8a54ff240371ea368440
+  CF_ZONE_ID: 867fb5996096b895b47114b6564ee0fb
 
   # Deployment URLs
   URL_PRODUCTION: https://www.ubuntusoftware.net
@@ -772,6 +773,28 @@ tasks:
     desc: Open domain dashboard in browser
     cmds:
       - open {{.CF_DASH_DOMAIN}}
+
+  cf:purge:
+    desc: Purge Cloudflare CDN cache
+    cmds:
+      - |
+        if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+          echo "ERROR: CLOUDFLARE_API_TOKEN must be set in .env"
+          exit 1
+        fi
+        echo "Purging Cloudflare cache for {{.DOMAIN}}..."
+        RESPONSE=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/{{.CF_ZONE_ID}}/purge_cache" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          --data '{"purge_everything":true}')
+
+        if echo "$RESPONSE" | grep -q '"success": true'; then
+          echo "✓ Cache purged successfully"
+        else
+          echo "✗ Cache purge failed:"
+          echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
+          exit 1
+        fi
 
   # ============================================================================
   # Help

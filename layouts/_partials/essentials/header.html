@@ -12,7 +12,7 @@
     <input id="nav-toggle" type="checkbox" class="hidden" />
     <label
       for="nav-toggle"
-      class="order-3 cursor-pointer flex items-center lg:hidden text-text-dark dark:text-white lg:order-1">
+      class="order-3 cursor-pointer flex items-center xl:hidden text-text-dark dark:text-white xl:order-1">
       <svg id="show-button" class="h-6 fill-current block" viewBox="0 0 20 20">
         <title>Menu Open</title>
         <path d="M0 3h20v2H0V3z m0 6h20v2H0V9z m0 6h20v2H0V0z"></path>
@@ -29,7 +29,7 @@
     <!-- main navbar -->
     <ul
       id="nav-menu"
-      class="navbar-nav order-3 hidden lg:flex w-full pb-6 lg:order-1 lg:w-auto lg:space-x-2 lg:pb-0 xl:space-x-8">
+      class="navbar-nav order-3 hidden xl:flex w-full pb-6 xl:order-1 xl:w-auto xl:space-x-2 xl:pb-0 2xl:space-x-8">
       {{ $currentPage := . }}
       {{ range site.Menus.main }}
         {{ $menuURL := .URL | absLangURL }}
@@ -40,7 +40,7 @@
             <input
               type="checkbox"
               id="submenu-{{ .Name | urlize }}"
-              class="peer hidden lg:hidden" />
+              class="peer hidden xl:hidden" />
             <label
               for="submenu-{{ .Name | urlize }}"
               class="nav-link {{ range .Children }}
@@ -55,7 +55,7 @@
               </svg>
             </label>
             <ul
-              class="nav-dropdown-list hidden peer-checked:block lg:invisible lg:absolute lg:block lg:opacity-0 lg:group-hover:visible lg:group-hover:opacity-100">
+              class="nav-dropdown-list hidden peer-checked:block xl:invisible xl:absolute xl:block xl:opacity-0 xl:group-hover:visible xl:group-hover:opacity-100">
               {{ range .Children }}
                 {{ $childURL := .URL | absLangURL }}
                 {{ $active := eq $childURL $pageURL }}
@@ -101,7 +101,7 @@
         {{ end }}
       {{ end }}
       {{ if site.Params.navigation_button.enable }}
-        <li class="mt-4 inline-block lg:hidden">
+        <li class="mt-4 inline-block xl:hidden">
           <a
             class="btn btn-outline-primary btn-sm"
             href="{{ site.Params.navigation_button.link | relLangURL }}">
@@ -111,7 +111,7 @@
       {{ end }}
     </ul>
 
-    <div class="order-1 ml-auto flex items-center md:order-2 lg:ml-0">
+    <div class="order-1 ml-auto flex items-center md:order-2 xl:ml-0">
       {{ with site.Params.search }}
         {{ if .enable }}
           <button
@@ -120,7 +120,7 @@
             dark:border-darkmode-border mr-5 inline-block border-r pr-5
             text-xl dark:text-white cursor-pointer dark:hover:text-darkmode-primary
             {{ if not (or site.Params.navigation_button.enable site.Params.theme_switcher) }}
-              lg:border-r-0 lg:pr-0
+              xl:border-r-0 xl:pr-0
             {{ end }}"
             data-target="search-modal">
             <i class="fa-solid fa-search"></i>
@@ -136,7 +136,7 @@
       {{ if site.Params.navigation_button.enable }}
         <a
           href="{{ site.Params.navigation_button.link | relLangURL }}"
-          class="btn btn-outline-primary btn-sm hidden lg:inline-block">
+          class="btn btn-outline-primary btn-sm hidden xl:inline-block">
           {{ site.Params.navigation_button.label }}
         </a>
       {{ end }}
