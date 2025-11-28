@@ -1,13 +1,13 @@
 ---
 title: "Early Access"
 meta_title: "Join Early Access | Ubuntu Software"
-description: "Be among the first to build with AI-native 3D design. Shape the platform, get priority support, and founding customer benefits."
+description: "Be among the first to build with our document publishing and spatial design platforms. Shape the roadmap, get priority support, and founding customer benefits."
 draft: false
 ---
 
-## Shape the Future of AI + 3D Design
+## Build With Us
 
-We're selecting a small group of early customers to work closely with as we build the platform where AI designs reality.
+We're selecting a small group of early customers to work closely with as we develop the next generation of document and design systems.
 
 ---
 
@@ -25,7 +25,15 @@ We're selecting a small group of early customers to work closely with as we buil
 
 ## Who We're Looking For
 
-Organizations working in:
+**For Publish** — Single-source document publishing (production-ready):
+
+- **Government** — Citizen forms, accessible documents, multilingual services
+- **Healthcare** — Patient intake, consent forms, clinical documentation
+- **Financial Services** — Applications, disclosures, regulatory compliance
+- **Education** — Enrollment, registration, school communications
+- **Insurance** — Applications, claims processing, policy documents
+
+**For Spatial** — AI-native 3D design (coming soon):
 
 - **Robotics** — Simulation, digital twins, fleet management
 - **Manufacturing** — Factory layout, process optimization, equipment integration
@@ -33,7 +41,7 @@ Organizations working in:
 - **Simulation** — Training environments, scenario modeling, physics-based design
 - **Digital Twins** — Asset management, operational visibility, predictive maintenance
 
-If your work involves 3D design and you see how AI could transform it—we want to talk.
+If you're dealing with document chaos or 3D design complexity—we want to talk.
 
 ---
 
@@ -62,9 +70,24 @@ If your work involves 3D design and you see how AI could transform it—we want 
   </div>
 
   <div class="mb-6">
+    <label for="platform" class="form-label">Which platform interests you? <span class="text-red-500">*</span></label>
+    <select id="platform" name="platform" class="form-input" required>
+      <option value="">Select a platform...</option>
+      <option value="Publish">Publish (documents & forms)</option>
+      <option value="Spatial">Spatial (3D design)</option>
+      <option value="Both">Both</option>
+    </select>
+  </div>
+
+  <div class="mb-6">
     <label for="industry" class="form-label">Industry <span class="text-red-500">*</span></label>
     <select id="industry" name="industry" class="form-input" required>
       <option value="">Select your industry...</option>
+      <option value="Government">Government</option>
+      <option value="Healthcare">Healthcare</option>
+      <option value="Financial">Financial Services</option>
+      <option value="Education">Education</option>
+      <option value="Insurance">Insurance</option>
       <option value="Robotics">Robotics</option>
       <option value="Manufacturing">Manufacturing</option>
       <option value="Construction">Construction</option>
@@ -77,7 +100,7 @@ If your work involves 3D design and you see how AI could transform it—we want 
 
   <div class="mb-6">
     <label for="usecase" class="form-label">What would you build? <span class="text-red-500">*</span></label>
-    <textarea id="usecase" name="usecase" class="form-input" rows="4" placeholder="Describe your use case and what challenges you're facing with current tools..." required></textarea>
+    <textarea id="usecase" name="usecase" class="form-input" rows="4" placeholder="Tell us about your document/form workflows or 3D design challenges..." required></textarea>
   </div>
 
   <button type="submit" class="btn btn-primary">Apply for Early Access</button>
