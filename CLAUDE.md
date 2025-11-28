@@ -4,11 +4,17 @@
 
 **Production Domain:** `www.ubuntusoftware.net`
 
+
 USE TASKFILE - it makes conventions for development...
 
 ### Branding Assets
 
-Source: `cmd/genlogo/main.go` → `task generate:assets`
+**IMPORTANT:** Logo SVGs are generated from Go code, NOT edited directly!
+
+- Source of truth: `cmd/genlogo/main.go`
+- Regenerate: `task generate:assets`
+- Generated files: `assets/images/logo.svg`, `logo-darkmode.svg`, `favicon.png`, `og-image.png`
+- DO NOT edit SVG files directly - changes will be overwritten
 
 After regenerating, manually update: Bluesky, Gmail signature
 

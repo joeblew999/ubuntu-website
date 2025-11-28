@@ -22,7 +22,7 @@ a testimonial about it too from the director.
 
 --- 
 
-In the Ourstory we need to say how we spopnet years builting Systsms and Apps for many years and that the company name existed before Ubuntu Linux happened, but we built for Linux and Open BSD for many many years. 
+In the Ourstory we need to say how we spe years builting Systsms and Apps for many years and that the company name existed before Ubuntu Linux happened, but we built for Linux and Open BSD for many many years. 
 
 ---
 

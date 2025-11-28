@@ -230,7 +230,7 @@ func generateFavicon(outputDir string) {
 //   - Dark mode (darkMode=true): Light text for dark backgrounds
 // The logo mark [U|S] is always Ubuntu blue; only company name color changes.
 func generateLogoSVG(outputDir string, darkMode bool) {
-	width, height := 320, 50
+	width, height := 265, 50 // Tight viewBox - no dead space for proper centering
 
 	// Text color depends on mode
 	nameColor := textColorDark
@@ -238,10 +238,11 @@ func generateLogoSVG(outputDir string, darkMode bool) {
 		nameColor = textColor
 	}
 
-	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">
+	// No width/height attributes - viewBox only for responsive scaling on mobile
+	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">
   <text x="0" y="35" font-family="Menlo, Monaco, 'Courier New', monospace" font-size="24" font-weight="bold" fill="%s">%s</text>
   <text x="85" y="35" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="%s">%s</text>
-</svg>`, width, height, width, height, textColor, brandSymbol, nameColor, brandName)
+</svg>`, width, height, textColor, brandSymbol, nameColor, brandName)
 
 	var outPath string
 	if darkMode {
