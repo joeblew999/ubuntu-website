@@ -91,7 +91,9 @@ Three places must stay aligned:
 2. **Cloudflare**: `HUGO_VERSION` secret (check build logs via dashboard)
 3. **This doc**: Update version above when changing
 
-Hugo Plate doesn't tag releases (see [issue #188](https://github.com/zeon-studio/hugoplate/issues/188)), so we track by commit hash in `go.mod`. Update via `hugo mod get -u`.
+Hugo Plate doesn't tag releases (see [issue #188](https://github.com/zeon-studio/hugoplate/issues/188)), so we track by commit hash in `go.mod`.
+
+**Updating modules:** `hugo mod get -u` updates all modules together. The gethugothemes modules share a monorepo, so they stay in sync automatically.
 
 ### Hugo Source code
 
