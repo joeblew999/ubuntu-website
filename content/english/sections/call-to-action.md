@@ -1,8 +1,8 @@
 ---
 enable: true
-title: "Ready to Build Where AI Designs Reality?"
+title: "Ready to Build With Us?"
 image: "/images/call-to-action.svg"
-description: "Join us in building the platform where artificial intelligence and three-dimensional design converge. Whether you're in robotics, simulation, digital twins, or construction—let's talk."
+description: "Join us in building the next generation of document and design systems. Whether you need single-source publishing or AI-native 3D design—let's talk."
 button:
   enable: true
   label: "Join Early Access"
