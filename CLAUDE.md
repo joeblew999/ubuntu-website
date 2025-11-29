@@ -126,7 +126,15 @@ Avoid:
 - Theme color overrides
 - Any changes that would conflict with upstream Hugo Plate updates 
 
-## Information about the company 
+## Founder Social Presence
+
+**NO LinkedIn** - Gerard is not on LinkedIn. Don't add LinkedIn links.
+
+Social links to use:
+- GitHub: https://github.com/joeblew999
+- Bluesky: https://bsky.app/profile/ubuntusoftware.net
+
+## Information about the company
 
 This Project is a web site for my company. I have various info here about me and the company.
 

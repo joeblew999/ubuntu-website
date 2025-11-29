@@ -7,9 +7,6 @@ social:
   - name: GitHub
     icon: fa-brands fa-github
     link: https://github.com/joeblew999
-  - name: LinkedIn
-    icon: fa-brands fa-linkedin
-    link: https://www.linkedin.com/in/gerardwebb
   - name: Bluesky
     icon: fa-brands fa-bluesky
     link: https://bsky.app/profile/ubuntusoftware.net
