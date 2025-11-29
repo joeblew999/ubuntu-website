@@ -76,7 +76,8 @@ NATS JetStream is our only external dependency. Synadia (the company behind NATS
 |--------|---------------|---------------------|
 | **Synadia (NATS)** | SOC 2 Type I | Vanta |
 
-[View Synadia SOC 2 Report (PDF) →](/doc/synadia-soc2-type1-report.pdf)
+- [View Synadia SOC 2 Report (PDF) →](/doc/synadia-soc2-type1-report.pdf)
+- [Synadia SOC 2 Type II Announcement →](https://www.synadia.com/blog/synadia-soc2-type2-compliant)
 
 **One vendor. One audit.** That's the advantage of minimal dependencies.
 
