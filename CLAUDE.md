@@ -112,6 +112,24 @@ When working on Hugo Plate, which is a Hugo theme:
 
 ### URL Hygiene
 
+**⚠️ CRITICAL: When renaming or moving ANY content file, ALWAYS add an alias for the old URL!**
+
+This applies to:
+- Renaming folders (e.g., `early-access/` → `get-started/`)
+- Renaming files (e.g., `team/gerard-webb.md` → `founder/gerard-webb.md`)
+- Moving pages between sections
+
+```yaml
+---
+title: "Get Started"
+aliases:
+  - "/early-access/"
+---
+```
+
+Hugo generates redirect HTML at old URLs with canonical tags (SEO-friendly).
+Keep aliases for 6+ months to preserve bookmarks and search rankings.
+
 **Internal Links: Use `relref` for build-time validation**
 
 ```markdown
@@ -121,22 +139,6 @@ When working on Hugo Plate, which is a Hugo theme:
 # Do this (Hugo fails build if page doesn't exist):
 [Platform]({{< relref "/platform" >}})
 ```
-
-**Page Renames: Add `aliases` for old URLs**
-
-When renaming or moving a page, add the old URL(s) to frontmatter:
-
-```yaml
----
-title: "Get Started"
-aliases:
-  - "/early-access/"
-  - "/join/"
----
-```
-
-Hugo generates redirect HTML at old URLs with canonical tags (SEO-friendly).
-Keep aliases for 6+ months to preserve bookmarks and search rankings.
 
 **Config**: `refLinksErrorLevel = "error"` in hugo.toml ensures broken relrefs fail the build.
 
