@@ -5,7 +5,7 @@ description: "Industry veterans who share our vision for AI-native design infras
 draft: false
 ---
 
-Industry leaders who advise on strategy, technology, and market direction.
+We're fortunate to work alongside remarkable innovators who challenge our thinking and share their deep domain knowledge. United by a commitment to open standards and human-centered design, their work across diverse industries—from civic technology to construction—inspires and informs what we build.
 
 ---
 
