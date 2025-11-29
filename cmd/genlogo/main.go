@@ -289,8 +289,10 @@ func generateEmailLogo(outputDir string) {
 
 // generateOGImage creates a 1200x630 Open Graph image for social sharing.
 // This appears as the preview image when the website URL is shared on
-// Twitter, LinkedIn, Facebook, Slack, etc. Shows centered logo mark
-// with company name below. WHITE background with blue [U|S] and black company name.
+// Twitter, LinkedIn, Facebook, Slack, etc.
+// Uses HORIZONTAL layout with "[U|S] Ubuntu Software" on single line to avoid
+// cropping issues when messaging apps display previews in narrower aspect ratios.
+// WHITE background with blue [U|S] and black company name.
 func generateOGImage(outputDir string) {
 	width, height := 1200, 630
 	dc := gg.NewContext(width, height)
@@ -300,27 +302,42 @@ func generateOGImage(outputDir string) {
 	dc.DrawRectangle(0, 0, float64(width), float64(height))
 	dc.Fill()
 
-	// Load font for [U|S]
-	if err := dc.LoadFontFace(fontMono, 200); err != nil {
+	// Load font for logo mark - smaller to fit horizontal layout
+	if err := dc.LoadFontFace(fontMono, 80); err != nil {
 		log.Printf("Warning: Could not load font: %v", err)
 	}
 
-	// Draw logo mark centered in BLUE
-	dc.SetHexColor(textColor) // blue #58a6ff
-	w, h := dc.MeasureString(brandSymbol)
-	x := (float64(width) - w) / 2
-	y := float64(height)/2 - 20
-	dc.DrawString(brandSymbol, x, y)
+	// Measure logo mark
+	dc.SetHexColor(textColor)
+	symbolW, h := dc.MeasureString(brandSymbol)
 
 	// Load font for company name
-	if err := dc.LoadFontFace(fontSans, 48); err != nil {
+	if err := dc.LoadFontFace(fontSans, 50); err != nil {
 		log.Printf("Warning: Could not load Helvetica: %v", err)
 	}
 
-	// Draw company name below in BLACK
+	// Measure company name
+	nameW, _ := dc.MeasureString(brandName)
+
+	// Calculate total width and center everything horizontally
+	gap := 25.0 // gap between symbol and name
+	totalW := symbolW + gap + nameW
+	startX := (float64(width) - totalW) / 2
+	y := (float64(height) + h) / 2
+
+	// Draw logo mark in BLUE
+	if err := dc.LoadFontFace(fontMono, 80); err != nil {
+		log.Printf("Warning: Could not load font: %v", err)
+	}
+	dc.SetHexColor(textColor) // blue #58a6ff
+	dc.DrawString(brandSymbol, startX, y)
+
+	// Draw company name in BLACK
+	if err := dc.LoadFontFace(fontSans, 50); err != nil {
+		log.Printf("Warning: Could not load Helvetica: %v", err)
+	}
 	dc.SetHexColor(textColorDark) // black #121212
-	w2, _ := dc.MeasureString(brandName)
-	dc.DrawString(brandName, (float64(width)-w2)/2, y+h+40)
+	dc.DrawString(brandName, startX+symbolW+gap, y)
 
 	savePNG(dc, filepath.Join(outputDir, pathOGImage), "1200x630")
 }
