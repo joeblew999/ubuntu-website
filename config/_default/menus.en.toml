@@ -211,6 +211,11 @@ url = "/contact"
 weight = 6
 
 [[footer]]
+name = "Security"
+url = "/security"
+weight = 7
+
+[[footer]]
 name = "Privacy Policy"
 url = "/privacy-policy"
-weight = 7
+weight = 8

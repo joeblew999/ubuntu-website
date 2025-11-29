@@ -91,6 +91,14 @@ Our architecture does the hard work. Your audits get easier.
 
 ---
 
+## Report a Vulnerability
+
+Found a security issue? We take security seriously and appreciate responsible disclosure.
+
+[Vulnerability Disclosure Policy →](/security/)
+
+---
+
 ## Questions?
 
 Need to discuss specific compliance requirements?
