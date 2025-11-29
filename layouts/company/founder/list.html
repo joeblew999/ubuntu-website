@@ -3,25 +3,20 @@
 
   <section class="section">
     <div class="container">
-      <div class="row justify-center">
-        {{ range .RegularPages }}
-          <div class="md:col-6 lg:col-4 mb-14">
-            <div class="bg-light dark:bg-darkmode-light rounded p-8 text-center">
+      {{ range .RegularPages }}
+        <div class="row justify-center mb-14">
+          <div class="md:col-10 lg:col-8">
+            <div class="text-center mb-8">
               {{ $image := .Params.image }}
               {{ if $image }}
-                {{ partial "image" (dict "Src" $image "Context" .Page "Alt" .Title "Class" "mx-auto mb-6 rounded-full" "Size" "120x120") }}
+                {{ partial "image" (dict "Src" $image "Context" .Page "Alt" .Title "Class" "mx-auto mb-6 rounded-full" "Size" "150x150") }}
               {{ end }}
-              <h4 class="mb-2">
-                <a href="{{ .Permalink }}">{{ .Title }}</a>
-              </h4>
+              <h2 class="mb-2">{{ .Title }}</h2>
               {{ with .Params.role }}
-                <p class="text-primary mb-4">{{ . }}</p>
+                <p class="text-primary text-lg mb-4">{{ . }}</p>
               {{ end }}
-              <p class="mb-4">
-                {{ .Summary | plainify }}
-              </p>
               {{ with .Params.social }}
-                <ul class="social-icons">
+                <ul class="social-icons justify-center mb-8">
                   {{ range . }}
                     <li>
                       <a href="{{ .link | safeURL }}" target="_blank" rel="noopener nofollow">
@@ -33,9 +28,12 @@
                 </ul>
               {{ end }}
             </div>
+            <div class="content">
+              {{ .Content }}
+            </div>
           </div>
-        {{ end }}
-      </div>
+        </div>
+      {{ end }}
     </div>
   </section>
 {{ end }}

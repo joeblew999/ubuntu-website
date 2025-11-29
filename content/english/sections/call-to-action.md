@@ -2,11 +2,11 @@
 enable: true
 title: "Ready to Build With Us?"
 image: "/images/call-to-action.svg"
-description: "Join us in building the next generation of document and design systems. Whether you need single-source publishing or AI-native 3D design—let's talk."
+description: "Start building with our document publishing and 3D design platforms. Runs on Linux, Windows, Mac, iOS, and Android. Deploy anywhere."
 button:
   enable: true
-  label: "Join Early Access"
-  link: "/early-access"
+  label: "Get Started"
+  link: "/get-started"
 
 # don't create a separate page
 build:

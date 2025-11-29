@@ -1,8 +1,8 @@
-{{- $title := .Title | default site.Title -}}
+{{- $title := .Params.meta_title | default .Title | default site.Title -}}
 {{- $description := .Description | default .Summary | default site.Params.description | plainify | truncate 160 -}}
 
 <!-- Open Graph -->
-<meta property="og:title" content="{{ $title }} | {{ site.Title }}" />
+<meta property="og:title" content="{{ $title }}" />
 <meta property="og:description" content="{{ $description }}" />
 <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}" />
 <meta property="og:url" content="{{ .Permalink }}" />
@@ -13,7 +13,7 @@
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="{{ $title }} | {{ site.Title }}" />
+<meta name="twitter:title" content="{{ $title }}" />
 <meta name="twitter:description" content="{{ $description }}" />
 {{- with site.Params.twitter -}}
 <meta name="twitter:creator" content="@{{ . }}" />

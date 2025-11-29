@@ -14,6 +14,6 @@ We've received your message and will get back to you shortly.
 In the meantime, feel free to explore:
 
 - [Our Platform](/platform/)
-- [Our Story](/company/story/)
-- [Early Access](/early-access/) — if you're interested in working with us
+- [Our Founder](/company/founder/)
+- [Get Started](/get-started/) — if you're ready to build with us
 

@@ -69,17 +69,32 @@ NATS JetStream event-driven messaging bridges the gap between design and the phy
 
 ## Run Anywhere
 
-**Your infrastructure. Your rules.**
+**Your platform. Your infrastructure. Your rules.**
+
+### Native on Every Platform
+
+| Platform | Experience |
+|----------|------------|
+| **Linux** | Native desktop, embedded systems, edge devices |
+| **Windows** | Native Windows application |
+| **macOS** | Native Mac application |
+| **iOS** | Native mobile app |
+| **Android** | Native mobile app |
+| **Web** | Modern browser, full functionality |
+
+One codebase. Native performance on every platform. Not a web page pretending to be an app.
+
+### Deployment Options
 
 | Deployment | Description |
 |------------|-------------|
-| **Web** | Modern browser, full functionality |
-| **Desktop** | Native experience via embedded webview |
+| **Desktop** | Native experience, not Electron |
 | **Mobile** | Tablets and phones, no compromise |
 | **Online** | Cloud collaboration and access from anywhere |
 | **Offline** | Air-gapped environments, complete control |
 | **Hybrid** | Sensitive work local, collaboration in the cloud |
 | **Self-Hosted** | Your servers, your data, your security model |
+| **Edge** | Embedded Linux, IoT devices, factory floor |
 
 ---
 

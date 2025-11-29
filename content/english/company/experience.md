@@ -73,6 +73,16 @@ When the stakeholder is 450 million people.
 
 ---
 
+### Research & Development
+
+**CSIRO** — Australia's national science agency. Master's degree research in 3D CAD and building sustainability. Built software for volumetric extraction from 2D and 3D CAD models, matched with materials databases and embodied energy coefficients to calculate the total energy embedded in buildings.
+
+The system evolved into an audit tool—bringing computational rigor to sustainability assessment before "green building" was mainstream.
+
+Where the intersection of 3D geometry, materials science, and real-world impact first became clear.
+
+---
+
 ## What We Built
 
 Across these clients, common patterns emerged in what we delivered:
@@ -170,6 +180,13 @@ The systems we've built required mastery across:
 - Disaster recovery
 - Global deployment
 
+**Platforms**
+- Linux (server, desktop, embedded)
+- OpenBSD for security-critical systems
+- Cross-platform GUI development
+- Mobile (iOS, Android)
+- Docker and Kubernetes deployment
+
 ---
 
 ## Why This Matters Now
@@ -213,8 +230,6 @@ If you're evaluating whether we can deliver at the scale you need, the answer is
 
 ## More About Us
 
-[Our Story](/company/story/) — How this experience led to our current vision.
-
-[Founder](/company/founder/) — Meet the person behind Ubuntu Software.
+[Founder](/company/founder/) — Meet the person behind Ubuntu Software and the journey that led here.
 
 [Advisors](/company/advisors/) — Industry leaders who collaborate with us.

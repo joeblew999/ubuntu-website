@@ -37,9 +37,9 @@ preloader = "" # use jpg, png, svg or gif format.
 
 # Navigation button
 [navigation_button]
-enable = false  # Disabled - pushes nav layout
-label = "Early Access"
-link = "early-access"
+enable = true
+label = "Get Started"
+link = "get-started"
 
 # search
 # search module: https://github.com/gethugothemes/hugo-modules/tree/master/search
@@ -62,8 +62,8 @@ content = "<span class='text-center block'>♥️ Loving Hugoplate? <a class='un
 # seo meta data for OpenGraph / Twitter Card
 # seo module: https://github.com/gethugothemes/hugo-modules/tree/master/seo-tools/basic-seo
 [metadata]
-keywords = ["3D Design", "Document Publishing", "AI", "Spatial", "Publish", "Open Standards", "Offline-First"]
-description = "Spatial (3D design) + Publish (documents) | AI-powered, offline-first, open standards"
+keywords = ["Ubuntu Software", "Linux Development", "Cross-Platform", "3D Design", "Document Publishing", "AI", "Embedded Linux", "OpenBSD", "Spatial", "Publish", "Open Standards", "Offline-First"]
+description = "Ubuntu Software: 25 years building Linux applications. AI-powered 3D design (Spatial) + document publishing (Publish). Cross-platform for Linux, Windows, Mac, iOS, Android."
 author = "Gerard Webb"
 twitter = ""
 image = "images/og-image.png"

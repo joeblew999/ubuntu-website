@@ -1,31 +1,21 @@
 ---
-title: "Early Access"
-meta_title: "Join Early Access | Ubuntu Software"
-description: "Be among the first to build with our document publishing and spatial design platforms. Shape the roadmap, get priority support, and founding customer benefits."
+title: "Get Started"
+meta_title: "Get Started | Ubuntu Software"
+description: "Start building with Ubuntu Software platforms. Document publishing and 3D design tools that run on Linux, Windows, Mac, iOS, and Android. Deploy anywhere."
 draft: false
 ---
 
-## Build With Us
+## Start Building
 
-We're selecting a small group of early customers to work closely with as we develop the next generation of document and design systems.
-
----
-
-## What Early Access Includes
-
-**Direct Input** — Your use cases shape our roadmap. Regular calls with the founder to ensure we're building what you need.
-
-**Priority Support** — Direct access to engineering. Issues get fixed fast.
-
-**Founding Customer Pricing** — Lock in early adopter rates that stay with you as we grow.
-
-**First Access** — New features land in your hands before anyone else.
+Two platforms. One foundation. Both available now.
 
 ---
 
-## Who We're Looking For
+## Publish
 
-**For Publish** — Single-source document publishing (production-ready):
+**Single-source document publishing.** Write once, output everywhere—web, PDF, forms. Capture data from digital or paper submissions back to your database.
+
+**Industries using Publish:**
 
 - **Government** — Citizen forms, accessible documents, multilingual services
 - **Healthcare** — Patient intake, consent forms, clinical documentation
@@ -33,7 +23,13 @@ We're selecting a small group of early customers to work closely with as we deve
 - **Education** — Enrollment, registration, school communications
 - **Insurance** — Applications, claims processing, policy documents
 
-**For Spatial** — AI-native 3D design (coming soon):
+---
+
+## Spatial
+
+**AI-native 3D design infrastructure.** Design, simulate, and deploy—with AI that understands space, not just screenshots.
+
+**Industries using Spatial:**
 
 - **Robotics** — Simulation, digital twins, fleet management
 - **Manufacturing** — Factory layout, process optimization, equipment integration
@@ -41,17 +37,32 @@ We're selecting a small group of early customers to work closely with as we deve
 - **Simulation** — Training environments, scenario modeling, physics-based design
 - **Digital Twins** — Asset management, operational visibility, predictive maintenance
 
-If you're dealing with document chaos or 3D design complexity—we want to talk.
+---
+
+## Runs Everywhere
+
+Both platforms run natively on:
+
+| Platform | Deployment |
+|----------|------------|
+| **Linux** | Desktop, server, embedded |
+| **Windows** | Native application |
+| **macOS** | Native application |
+| **iOS** | Mobile app |
+| **Android** | Mobile app |
+| **Web** | Browser-based |
+
+Deploy on your infrastructure—cloud, on-premises, or air-gapped. [Learn more about our Linux & cross-platform expertise →](/technology/linux/)
 
 ---
 
-## Apply for Early Access
+## Request Access
 
 <form action="https://api.web3forms.com/submit" method="POST" class="max-w-xl">
   <input type="hidden" name="access_key" value="57debfc3-8bc1-46d5-a656-a2b0967dfe12">
-  <input type="hidden" name="subject" value="Early Access Application - Ubuntu Software">
-  <input type="hidden" name="from_name" value="Ubuntu Software Early Access">
-  <input type="hidden" name="redirect" value="https://www.ubuntusoftware.net/early-access/thank-you/">
+  <input type="hidden" name="subject" value="Get Started Request - Ubuntu Software">
+  <input type="hidden" name="from_name" value="Ubuntu Software">
+  <input type="hidden" name="redirect" value="https://www.ubuntusoftware.net/get-started/thank-you/">
   <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
 
   <div class="mb-6">
@@ -103,11 +114,11 @@ If you're dealing with document chaos or 3D design complexity—we want to talk.
     <textarea id="usecase" name="usecase" class="form-input" rows="4" placeholder="Tell us about your document/form workflows or 3D design challenges..." required></textarea>
   </div>
 
-  <button type="submit" class="btn btn-primary">Apply for Early Access</button>
+  <button type="submit" class="btn btn-primary">Get Started</button>
 </form>
 
 ---
 
 ## Questions?
 
-Not sure if you're a fit? [Contact us](/contact/) — we're happy to discuss.
+Want to learn more first? [Contact us](/contact/) — we're happy to discuss.

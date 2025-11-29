@@ -60,6 +60,27 @@ Our robotics stack is built on Viam RDK—an open-source robotics development ki
 
 [Robotics Stack →](/technology/robotics/)
 
+### Linux & Cross-Platform
+
+Decades of Linux expertise. Cross-platform applications for Windows, Mac, Linux, iOS, and Android. Own GUI framework after years with Qt, Flutter, and Electron.
+
+[Linux & Cross-Platform →](/technology/linux/)
+
+---
+
+## Deployment Platforms
+
+We deploy everywhere:
+
+| Platform | Use Case |
+|----------|----------|
+| **Linux** | Server, desktop, embedded |
+| **OpenBSD** | Security-critical systems |
+| **Windows** | Enterprise desktop |
+| **macOS** | Design and development |
+| **iOS/Android** | Mobile applications |
+| **Docker/Kubernetes** | Container orchestration |
+
 ---
 
 ## Open Source Foundation
@@ -80,6 +101,7 @@ We build on and contribute to open source:
 ## Learn More
 
 - [Robotics Stack →](/technology/robotics/)
+- [Linux & Cross-Platform →](/technology/linux/)
 - [Spatial Platform →](/platform/spatial/)
 - [Foundation →](/platform/foundation/)
 - [Contact Us →](/contact/)

@@ -1,4 +1,8 @@
 ---
+title: "Ubuntu Software"
+meta_title: "Ubuntu Software | Linux Development & Cross-Platform Applications"
+description: "25 years building Linux applications. AI-powered 3D design (Spatial) + document publishing (Publish). Native software for Linux, Windows, Mac, iOS, Android."
+
 # Banner
 banner:
   title: "AI Infrastructure for Design and Documents"
@@ -8,6 +12,10 @@ banner:
     enable: true
     label: "Explore the Platform"
     link: "/platform"
+  button2:
+    enable: true
+    label: "Get Started"
+    link: "/get-started"
 
 # Features
 features:
@@ -43,8 +51,8 @@ features:
     bulletpoints:
       - "Spatial: Robotics, Simulation, Digital Twins, Manufacturing, Construction"
       - "Publish: Government, Healthcare, Financial, Education, Insurance"
+      - "Cross-Platform — Native on Linux, Windows, Mac, iOS, Android"
       - "Shared Foundation — Same AI, same sync, same offline capability"
-      - "Works Together — 3D models with aligned documentation"
     button:
       enable: true
       label: "See Applications"

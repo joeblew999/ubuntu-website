@@ -12,7 +12,11 @@ From design to deployment. Spatial provides the 3D design and simulation layer. 
 
 ---
 
-## Viam RDK Runtime
+## Embedded Linux Runtime
+
+Robotics runs on Linux. Our decades of Linux and embedded systems experience means we build for the real world—factory floors, outdoor environments, and resource-constrained edge devices.
+
+### Viam RDK Runtime
 
 **Why we chose Viam RDK:**
 
@@ -21,10 +25,22 @@ From design to deployment. Spatial provides the 3D design and simulation layer. 
 - **Modular** — Components can be swapped and extended
 - **Cloud-optional** — Works offline-first, like our products
 - **Hardware-agnostic** — Not locked to specific robot manufacturers
+- **Runs on embedded Linux** — Raspberry Pi, NVIDIA Jetson, industrial controllers
 
 Viam RDK is an open-source robotics development kit with language-agnostic SDKs (Go, Python, TypeScript) and a modular component architecture.
 
 [Viam RDK Documentation →](https://docs.viam.com/)
+
+### Embedded Platforms
+
+| Platform | Use Case |
+|----------|----------|
+| **Raspberry Pi** | Prototyping, edge compute, kiosks |
+| **NVIDIA Jetson** | GPU-accelerated vision and ML |
+| **Industrial Linux** | Factory automation, harsh environments |
+| **Custom ARM boards** | Application-specific deployments |
+
+Same Go codebase. Same Viam RDK. Deploys from development workstation to embedded edge device.
 
 ---
 

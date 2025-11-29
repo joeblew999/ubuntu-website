@@ -215,8 +215,41 @@ Every node—your laptop, your phone, your servers—runs SQLite. Changes replic
 
 ---
 
+## Scale Without Limits
+
+### No Single Point of Failure (SPOF)
+
+Every component is redundant. No single server, service, or data center can take down the system. Fail any node—the system keeps running.
+
+### No Single Point of Performance (SPOP)
+
+Computation scales horizontally. Add capacity by adding nodes, not by buying bigger servers. Workloads distribute automatically across available resources.
+
+### Hundreds of Data Centers
+
+Architecture designed for global distribution:
+
+| Capability | What It Means |
+|------------|---------------|
+| **Deploy anywhere** | Cloud, on-prem, edge, air-gapped |
+| **Deploy close to users** | Low latency, local compliance |
+| **Replicate for redundancy** | Survive regional outages |
+| **Partition tolerance** | Operate independently when networks split |
+
+### Deployment Options
+
+| Method | Use Case |
+|--------|----------|
+| **Binaries** | Single-file deployment, minimal dependencies |
+| **Docker** | Containerized, reproducible environments |
+| **Kubernetes** | Orchestrated, auto-scaling clusters |
+
+**From a single laptop to hundreds of data centers. Same architecture. Same codebase.**
+
+---
+
 ## Get Started
 
 The foundation is built in. When you use Publish or Spatial, you get offline-first, universal deployment, and self-sovereign options automatically.
 
-[Explore Publish →](/platform/publish/) | [Explore Spatial →](/platform/spatial/) | [Contact Us →](/contact/)
+[Explore Publish →](/platform/publish/) | [Explore Spatial →](/platform/spatial/) | [Linux & Cross-Platform →](/technology/linux/) | [Contact Us →](/contact/)

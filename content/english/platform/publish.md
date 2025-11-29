@@ -199,6 +199,21 @@ Your database. Your schema.
 
 ---
 
+## Native on Every Platform
+
+| Platform | Experience |
+|----------|------------|
+| **Linux** | Native desktop, embedded kiosks, edge devices |
+| **Windows** | Native Windows application |
+| **macOS** | Native Mac application |
+| **iOS** | Native mobile app for field workers |
+| **Android** | Native mobile app for field workers |
+| **Web** | Modern browser, full functionality |
+
+One codebase. Native performance on every platform. Authors use desktops. Field workers use tablets. Customers use phones. Same system. Same data.
+
+---
+
 ## Beyond Documents
 
 The same single-source approach works for:

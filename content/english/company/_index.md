@@ -14,14 +14,11 @@ We're building the platform where AI learns to design reality—bridging artific
 
 ## Learn More
 
-### [Our Story](/company/story)
-The journey from enterprise systems to spatial AI.
-
 ### [Experience](/company/experience)
 25 years of mission-critical systems for leading organizations worldwide.
 
 ### [Founder](/company/founder)
-Meet the person building Ubuntu Software.
+Meet the person building Ubuntu Software—from Flame on SGI to spatial AI.
 
 ### [Advisors](/company/advisors)
 Industry leaders who share our vision and collaborate with us.
