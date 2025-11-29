@@ -211,8 +211,10 @@ If you're evaluating whether we can deliver at the scale you need, the answer is
 
 ---
 
-## Our Story
+## More About Us
 
-Want to understand how this experience led to our current vision?
+[Our Story](/company/story/) — How this experience led to our current vision.
 
-[Read Our Story →](/company/story/)
+[Founder](/company/founder/) — Meet the person behind Ubuntu Software.
+
+[Advisors](/company/advisors/) — Industry leaders who collaborate with us.

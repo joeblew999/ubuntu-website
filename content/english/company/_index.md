@@ -20,6 +20,12 @@ The journey from enterprise systems to spatial AI.
 ### [Experience](/company/experience)
 25 years of mission-critical systems for leading organizations worldwide.
 
+### [Founder](/company/founder)
+Meet the person building Ubuntu Software.
+
+### [Advisors](/company/advisors)
+Industry leaders who share our vision and collaborate with us.
+
 ---
 
 ## Get in Touch

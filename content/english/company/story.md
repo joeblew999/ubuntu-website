@@ -164,3 +164,13 @@ If you've felt this pain - spatial tools that don't collaborate, documents that 
 We're looking for people who see the same problems. Early customers who want to shape the direction. Partners who've hit the same walls. Engineers who want to build something that actually solves this.
 
 [Get in Touch →](/contact/)
+
+---
+
+## More About Us
+
+[Experience](/company/experience/) — 25 years of mission-critical systems for global enterprises.
+
+[Founder](/company/founder/) — Meet the person behind Ubuntu Software.
+
+[Advisors](/company/advisors/) — Industry leaders who collaborate with us.
