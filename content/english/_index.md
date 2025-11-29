@@ -65,5 +65,5 @@ founder:
   role: "Founder"
   image: "/images/team/gerard-passport.jpg"
   content: "25 years building real-time, distributed systems for global enterprises. Now applying that experience to the convergence of AI and 3D design."
-  link: "/company/team/gerard-webb"
+  link: "/company/founder/gerard-webb"
 ---
