@@ -1,7 +1,7 @@
 ---
 title: "Platform"
 meta_title: "AI-Native Design Infrastructure | Ubuntu Software"
-description: "Two platforms. One vision. Spatial for 3D design and AI. Publish for documents and forms. Both built on open standards, real-time collaboration, and your infrastructure."
+description: "Two platforms. One vision. Spatial for 3D design and AI. Publish for content management and multi-channel publishing. Both built on open standards, real-time collaboration, and your infrastructure."
 image: "/images/platform.svg"
 draft: false
 ---
@@ -14,9 +14,9 @@ Built on open standards. Real-time collaboration. Your infrastructure.
 
 ---
 
-## Publish: 2D Document Platform
+## Publish: Content Management Platform
 
-**Single-source publishing for documents, forms, and data capture.**
+**Single-source content management for multi-channel publishing.**
 
 Write once in Markdown. Generate web pages, PDFs, and forms—all perfectly aligned. Capture data from digital or paper submissions back to your database.
 
@@ -75,7 +75,7 @@ Both platforms share core infrastructure:
 
 ## Choose Your Path
 
-**Need documents and forms?**
+**Need content management?**
 Start with [Publish](/platform/publish/). Add Spatial later if you move into 3D.
 
 **Need 3D design and AI?**

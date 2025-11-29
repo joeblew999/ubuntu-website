@@ -12,7 +12,7 @@ Whether you're designing robot work cells or processing insurance claims, we hav
 
 **Spatial** — AI-native 3D design for industries that work in physical space.
 
-**Publish** — Single-source document publishing for industries that run on forms.
+**Publish** — Single-source content management for multi-channel publishing and data capture.
 
 Both platforms share our core foundation: AI assistance, offline-first architecture, Automerge sync, and open standards.
 
@@ -41,7 +41,7 @@ Modular, prefabricated, intelligent building design. Global teams, real-time col
 
 ## Publish Applications
 
-**For industries running on documents and forms.**
+**For industries managing content across channels.**
 
 ### [Government & Public Sector](/applications/government)
 Serve every citizen. Paper and digital unified. Accessible formats, archival compliance, legacy system integration.

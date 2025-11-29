@@ -1,14 +1,14 @@
 ---
 title: "Publish"
-meta_title: "Single-Source Publishing | Ubuntu Software"
-description: "One DSL for everything. Text, graphics, forms, emails. Self-recursive composition. Auto-translated outputs. Perfect branding by architecture."
+meta_title: "Content Management Platform | Ubuntu Software"
+description: "Single-source CMS for multi-channel publishing. One DSL for text, graphics, forms, emails. Auto-translated outputs. Perfect branding by architecture."
 image: "/images/publish.svg"
 draft: false
 ---
 
 ## One Language. Every Output. Every Language.
 
-Define everything in one DSL. Compose components that include components. Output to any format. Auto-translate to any language. Capture data back from forms.
+A single-source content management system. Define everything in one DSL. Compose components that include components. Output to any channel. Auto-translate to any language. Capture data back.
 
 Perfect branding. Not by discipline. By architecture.
 
@@ -233,7 +233,7 @@ Publish inherits all [Foundation](/platform/foundation/) capabilities automatica
 
 ## Get Started
 
-If you're maintaining content in multiple places, watching branding drift, waiting for translations, or re-keying form submissions—there's a better way.
+If you're maintaining content in multiple places, watching branding drift, waiting for translations, or manually processing submissions—there's a better way.
 
 [Contact Us →](/contact/)
 
