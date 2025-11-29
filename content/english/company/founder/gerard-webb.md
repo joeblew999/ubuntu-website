@@ -3,6 +3,8 @@ title: "Gerard Webb"
 role: "Founder"
 image: "/images/team/gerard-passport.jpg"
 description: "Founder of Ubuntu Software"
+aliases:
+  - "/company/team/gerard-webb/"
 social:
   - name: GitHub
     icon: fa-brands fa-github
