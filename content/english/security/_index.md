@@ -52,7 +52,7 @@ To protect our users and systems, please refrain from:
 
 ## How to Report
 
-Use our [Contact Form](/contact/) with "Security Report" as the subject.
+Use our [Contact Form](/contact/?subject=security) to submit your report.
 
 Please include:
 
@@ -64,7 +64,7 @@ Please include:
 
 You may report anonymously. We don't require personal information.
 
-[Report a Vulnerability →](/contact/)
+[Report a Vulnerability →](/contact/?subject=security)
 
 ---
 
@@ -93,7 +93,7 @@ We currently don't offer monetary rewards, but we're grateful for your contribut
 
 For questions about this policy or clarification on scope:
 
-[Contact Us →](/contact/)
+[Contact Us →](/contact/?subject=security)
 
 ---
 

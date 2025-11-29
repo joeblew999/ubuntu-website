@@ -9,7 +9,7 @@
           <form action="{{ site.Params.contact_form_action }}" method="POST">
             <!-- Web3Forms access key -->
             <input type="hidden" name="access_key" value="57debfc3-8bc1-46d5-a656-a2b0967dfe12">
-            <input type="hidden" name="subject" value="New contact from Ubuntu Software website">
+            <input type="hidden" name="subject" id="form-subject" value="New contact from Ubuntu Software website">
             <input type="hidden" name="from_name" value="Ubuntu Software Contact Form">
             <input type="hidden" name="redirect" value="https://www.ubuntusoftware.net/contact/thank-you/">
             <!-- Honeypot spam protection -->
@@ -54,6 +54,16 @@
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
+          <script>
+            // Auto-fill subject from URL parameter (e.g., ?subject=security)
+            (function() {
+              const params = new URLSearchParams(window.location.search);
+              const subject = params.get('subject');
+              if (subject === 'security') {
+                document.getElementById('form-subject').value = 'Security Vulnerability Report';
+              }
+            })();
+          </script>
         </div>
       </div>
     </div>
