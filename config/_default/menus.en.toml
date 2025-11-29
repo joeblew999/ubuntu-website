@@ -32,72 +32,101 @@ weight = 3
 
 [[main]]
 name = "Applications"
+url = "/applications"
 weight = 3
 hasChildren = true
 
 [[main]]
-name = "Robotics"
-url = "/applications/robotics"
+name = "Overview"
+identifier = "applications-overview"
+url = "/applications"
 parent = "Applications"
 weight = 1
+
+[[main]]
+name = "Robotics"
+identifier = "applications-robotics"
+url = "/applications/robotics"
+parent = "Applications"
+weight = 2
 
 [[main]]
 name = "Simulation"
 url = "/applications/simulation"
 parent = "Applications"
-weight = 2
+weight = 3
 
 [[main]]
 name = "Digital Twins"
 url = "/applications/digital-twins"
 parent = "Applications"
-weight = 3
+weight = 4
 
 [[main]]
 name = "Manufacturing"
 url = "/applications/manufacturing"
 parent = "Applications"
-weight = 4
+weight = 5
 
 [[main]]
 name = "Construction"
 url = "/applications/construction"
 parent = "Applications"
-weight = 5
+weight = 6
 
 [[main]]
 name = "Government"
 url = "/applications/government"
 parent = "Applications"
-weight = 6
+weight = 7
 
 [[main]]
 name = "Healthcare"
 url = "/applications/healthcare"
 parent = "Applications"
-weight = 7
+weight = 8
 
 [[main]]
 name = "Financial"
 url = "/applications/financial"
 parent = "Applications"
-weight = 8
+weight = 9
 
 [[main]]
 name = "Education"
 url = "/applications/education"
 parent = "Applications"
-weight = 9
+weight = 10
 
 [[main]]
 name = "Insurance"
 url = "/applications/insurance"
 parent = "Applications"
-weight = 10
+weight = 11
+
+[[main]]
+name = "Technology"
+url = "/technology"
+weight = 4
+hasChildren = true
+
+[[main]]
+name = "Overview"
+identifier = "technology-overview"
+url = "/technology"
+parent = "Technology"
+weight = 1
+
+[[main]]
+name = "Robotics"
+identifier = "technology-robotics"
+url = "/technology/robotics"
+parent = "Technology"
+weight = 2
 
 [[main]]
 name = "Company"
-weight = 4
+weight = 5
 hasChildren = true
 
 [[main]]
@@ -121,12 +150,12 @@ weight = 3
 [[main]]
 name = "Blog"
 url = "/blog"
-weight = 5
+weight = 6
 
 [[main]]
 name = "Contact"
 url = "/contact"
-weight = 6
+weight = 7
 
 
 # footer menu
