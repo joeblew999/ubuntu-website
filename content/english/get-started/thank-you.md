@@ -3,6 +3,8 @@ title: "Request Received"
 meta_title: "Thank You | Ubuntu Software"
 description: "Your request has been received."
 draft: false
+aliases:
+  - "/early-access/thank-you/"
 ---
 
 ## Thank You
