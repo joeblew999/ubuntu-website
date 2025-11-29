@@ -110,6 +110,36 @@ When working on Hugo Plate, which is a Hugo theme:
 
 - Only use Hugo template things properly. I do not want to steer away from the standard Hugo Plate way of doing things !!
 
+### URL Hygiene
+
+**Internal Links: Use `relref` for build-time validation**
+
+```markdown
+# Don't do this (no validation, can break silently):
+[Platform](/platform/)
+
+# Do this (Hugo fails build if page doesn't exist):
+[Platform]({{< relref "/platform" >}})
+```
+
+**Page Renames: Add `aliases` for old URLs**
+
+When renaming or moving a page, add the old URL(s) to frontmatter:
+
+```yaml
+---
+title: "Get Started"
+aliases:
+  - "/early-access/"
+  - "/join/"
+---
+```
+
+Hugo generates redirect HTML at old URLs with canonical tags (SEO-friendly).
+Keep aliases for 6+ months to preserve bookmarks and search rankings.
+
+**Config**: `refLinksErrorLevel = "error"` in hugo.toml ensures broken relrefs fail the build.
+
 ### Theme Upgrade Policy
 
 **DO NOT modify theme CSS, Tailwind config, or `data/theme.json`** - keep upgrades easy.

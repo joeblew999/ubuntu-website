@@ -83,6 +83,10 @@ dir = ":resourceDir/_gen"
 maxAge = "720h"
 
 
+########################## Ref Links #############################
+# Fail build if relref/ref shortcodes reference non-existent pages
+refLinksErrorLevel = "error"
+
 ############################ Markup ##############################
 [markup]
 [markup.goldmark.renderer]

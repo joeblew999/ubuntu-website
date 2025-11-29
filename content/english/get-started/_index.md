@@ -3,6 +3,8 @@ title: "Get Started"
 meta_title: "Get Started | Ubuntu Software"
 description: "Start building with Ubuntu Software platforms. Document publishing and 3D design tools that run on Linux, Windows, Mac, iOS, and Android. Deploy anywhere."
 draft: false
+aliases:
+  - "/early-access/"
 ---
 
 ## Start Building
