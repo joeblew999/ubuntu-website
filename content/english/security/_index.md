@@ -52,7 +52,7 @@ To protect our users and systems, please refrain from:
 
 ## How to Report
 
-**Email:** [gerard.webb@ubuntusoftware.net](mailto:gerard.webb@ubuntusoftware.net)
+Use our [Contact Form](/contact/) with "Security Report" as the subject.
 
 Please include:
 
@@ -63,6 +63,8 @@ Please include:
 5. **Proof of Concept** — Screenshots, code, or logs (if available)
 
 You may report anonymously. We don't require personal information.
+
+[Report a Vulnerability →](/contact/)
 
 ---
 
@@ -91,7 +93,7 @@ We currently don't offer monetary rewards, but we're grateful for your contribut
 
 For questions about this policy or clarification on scope:
 
-**Email:** [gerard.webb@ubuntusoftware.net](mailto:gerard.webb@ubuntusoftware.net)
+[Contact Us →](/contact/)
 
 ---
 

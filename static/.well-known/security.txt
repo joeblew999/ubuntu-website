@@ -1,4 +1,4 @@
-Contact: mailto:gerard.webb@ubuntusoftware.net
+Contact: https://www.ubuntusoftware.net/security/
 Expires: 2026-12-31T23:59:59Z
 Policy: https://www.ubuntusoftware.net/security/
 Acknowledgments: https://www.ubuntusoftware.net/security/acknowledgments/
