@@ -66,6 +66,12 @@ Decades of Linux expertise. Cross-platform applications for Windows, Mac, Linux,
 
 [Linux & Cross-Platform →](/technology/linux/)
 
+### Security & Compliance
+
+Self-sovereign architecture that simplifies SOC 2, FedRAMP, HIPAA, and ISO 27001 compliance. Air-gapped deployment, no call-home, complete data control.
+
+[Security & Compliance →](/technology/security/)
+
 ---
 
 ## Deployment Platforms
@@ -102,6 +108,7 @@ We build on and contribute to open source:
 
 - [Robotics Stack →](/technology/robotics/)
 - [Linux & Cross-Platform →](/technology/linux/)
+- [Security & Compliance →](/technology/security/)
 - [Spatial Platform →](/platform/spatial/)
 - [Foundation →](/platform/foundation/)
 - [Contact Us →](/contact/)

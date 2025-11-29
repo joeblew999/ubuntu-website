@@ -132,6 +132,13 @@ parent = "Technology"
 weight = 3
 
 [[main]]
+name = "Security"
+identifier = "technology-security"
+url = "/technology/security"
+parent = "Technology"
+weight = 4
+
+[[main]]
 name = "Company"
 weight = 5
 hasChildren = true
