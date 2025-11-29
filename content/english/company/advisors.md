@@ -12,7 +12,7 @@ Industry leaders who advise on strategy, technology, and market direction.
 ## Dixon Dick
 **CEO, Archethought Inc.**
 
-Collaborator on IoT architecture and NATS JetStream infrastructure. Dixon's work on Archethought's "Internet of Relationships" platform for civic and enterprise challenges shares our commitment to event-driven, distributed systems built on open standards.
+Dixon leads Archethought's pioneering "Internet of Relationships™" platform—tackling complex civic and human challenges like homelessness prevention by putting people and relationships first. His innovative approach to solving real-world problems through relationship-based technology, combined with our collaboration on NATS JetStream and IoT architecture, reflects shared values: open standards, distributed systems, and technology that serves human needs.
 
 [archethought.com](https://www.archethought.com)
 
