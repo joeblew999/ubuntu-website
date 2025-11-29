@@ -142,8 +142,8 @@ parent = "Company"
 weight = 2
 
 [[main]]
-name = "Team"
-url = "/company/team"
+name = "Founder"
+url = "/company/founder"
 parent = "Company"
 weight = 3
 
