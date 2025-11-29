@@ -55,12 +55,16 @@
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
           <script>
-            // Auto-fill subject from URL parameter (e.g., ?subject=security)
+            // Auto-fill subject from URL parameter - mappings defined in data/contact_subjects.yaml
             (function() {
+              const subjectMap = {
+                {{ range $key, $value := site.Data.contact_subjects }}"{{ $key }}": "{{ $value }}",
+                {{ end }}
+              };
               const params = new URLSearchParams(window.location.search);
               const subject = params.get('subject');
-              if (subject === 'security') {
-                document.getElementById('form-subject').value = 'Security Vulnerability Report';
+              if (subject && subjectMap[subject]) {
+                document.getElementById('form-subject').value = subjectMap[subject];
               }
             })();
           </script>

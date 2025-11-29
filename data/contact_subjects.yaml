@@ -1,0 +1,6 @@
+# Contact form subject mappings
+# Usage: Link to /contact/?subject=<key> to auto-fill the subject line
+# Add new entries as needed - Hugo will automatically include them at build time
+
+security: "Security Vulnerability Report"
+partnership: "Partnership Inquiry"

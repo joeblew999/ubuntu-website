@@ -44,6 +44,15 @@ Uses Web3Forms (free, unlimited). Submissions go to `gerard.webb@ubuntusoftware.
 - Access key in `layouts/contact/list.html`
 - Config: `config/_default/params.toml` → `contact_form_action`
 
+**Custom Subject Lines:** Edit `data/contact_subjects.yaml` to add email subject mappings.
+
+```yaml
+security: "Security Vulnerability Report"
+partnership: "Partnership Inquiry"
+```
+
+Link with `?subject=<key>` (e.g., `/contact/?subject=security`) to auto-fill.
+
 ### Page Images (banner, services, etc.)
 
 Location: `assets/images/`
