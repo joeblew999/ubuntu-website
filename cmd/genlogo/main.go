@@ -45,7 +45,7 @@ const (
 	pathFavicon     = "assets/images/favicon.png"       // 512x512 - browser tab icon, large for high-DPI
 	pathLogoSVG     = "assets/images/logo.svg"          // SVG - Hugo header (light mode backgrounds)
 	pathLogoDarkSVG = "assets/images/logo-darkmode.svg" // SVG - Hugo header (dark mode backgrounds)
-	pathOGImage     = "assets/images/og-image.png"      // 1200x630 - social sharing (Twitter, LinkedIn, etc.)
+	pathOGImage     = "static/images/og-image.png"      // 1200x630 - social sharing (Twitter, LinkedIn, etc.)
 
 	// Static files (served directly, not processed by Hugo)
 	pathEmailLogo     = "static/images/email-logo.png"    // 300x47 - Gmail signature (must be externally accessible)
