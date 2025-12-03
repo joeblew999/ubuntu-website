@@ -6,6 +6,14 @@
 # Validation: Run `task ci:validate` to check bindings
 #
 # This file is designed to be reusable across repos via Taskfile includes.
+#
+# TOOLCHAIN → ACTION MAPPING:
+# Used by check:workflow-deps to verify workflows have required setup steps.
+#   golang → setup-go
+#   rust   → rust-toolchain OR setup-rust-toolchain
+#   node   → setup-node
+#   python → setup-python
+#   hugo   → setup-hugo (peaceiris/actions-hugo)
 
 version: '3'
 
@@ -25,23 +33,19 @@ tasks:
         echo "OS: $(uname -s 2>/dev/null || echo Windows)"
         echo ""
 
-      # Ensure runtime toolchains are installed
-      - echo "### Runtime Toolchain Check"
-      - task: :toolchain:golang:check:deps
-      # - task: :toolchain:rust:check:deps  # Uncomment when rust modules are added
+      # Auto-discover and check toolchains based on module REQUIRES
+      - echo "### Toolchain Check (auto-discovered)"
+      - task: check:toolchains
 
-      # Ensure module dependencies are installed
+      # Auto-discover and check module dependencies
       - echo ""
-      - echo "### Module Dependency Check"
-      - task: :git:check:deps
-      - task: :lanip:check:deps
+      - echo "### Module Dependency Check (auto-discovered)"
+      - task: check:module-deps
 
-      # Validate all included modules (check:validate pattern)
+      # Auto-discover and validate modules
       - echo ""
-      - echo "### Module Validation"
-      - task: :toolchain:golang:check:validate
-      - task: :git:check:validate
-      - task: :lanip:check:validate
+      - echo "### Module Validation (auto-discovered)"
+      - task: check:module-validate
 
       # Validate workflow↔task bindings
       - echo ""
@@ -73,13 +77,9 @@ tasks:
         echo "Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
         echo ""
 
-      - echo "### Module Health Checks"
-      - task: :git:check:health
-      - task: :lanip:check:health
-
-      # Add more health checks as modules are added:
-      # - task: :hugo:check:health
-      # - task: :cf:check:health
+      # Auto-discover and run health checks
+      - echo "### Module Health Checks (auto-discovered)"
+      - task: check:module-health
 
       - echo ""
       - echo "### GitHub Secrets Check"
@@ -103,10 +103,135 @@ tasks:
       - task: :git:check:health:fail
 
   # ===========================================================================
+  # Auto-Discovery Tasks
+  # ===========================================================================
+  # These tasks scan taskfiles/* to find modules and their requirements
+
+  check:toolchains:
+    desc: Auto-discover and check required toolchains from module REQUIRES
+    cmds:
+      - |
+        echo "Discovering required toolchains..."
+        echo "----------------------------------------"
+
+        # Collect unique toolchains from all module REQUIRES
+        TOOLCHAINS=""
+        for TF in taskfiles/Taskfile.*.yml taskfiles/toolchain/Taskfile.*.yml; do
+          [ -f "$TF" ] || continue
+          REQUIRES=$(grep "^# REQUIRES:" "$TF" 2>/dev/null | sed 's/# REQUIRES: //')
+          for REQ in $REQUIRES; do
+            # Skip non-toolchain requirements
+            case "$REQ" in
+              git) continue ;;  # git is always available
+            esac
+            TOOLCHAINS="$TOOLCHAINS $REQ"
+          done
+        done
+
+        # Deduplicate
+        TOOLCHAINS=$(echo "$TOOLCHAINS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
+        if [ -z "$TOOLCHAINS" ]; then
+          echo "No toolchains required"
+          exit 0
+        fi
+
+        echo "Required toolchains: $TOOLCHAINS"
+        echo ""
+
+        # Check each toolchain
+        for TC in $TOOLCHAINS; do
+          echo "Checking $TC..."
+          task "toolchain:${TC}:check:deps" || exit 1
+        done
+
+  check:module-deps:
+    desc: Auto-discover and run check:deps for all modules
+    cmds:
+      - |
+        echo "Discovering modules..."
+        echo "----------------------------------------"
+
+        for TF in taskfiles/Taskfile.*.yml; do
+          [ -f "$TF" ] || continue
+          MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
+
+          # Skip special modules
+          case "$MODULE" in
+            ci|toolchain) continue ;;
+          esac
+
+          # Check if module has check:deps task
+          if task --list 2>/dev/null | grep -q "^\* ${MODULE}:check:deps:"; then
+            echo "Checking $MODULE..."
+            task "${MODULE}:check:deps" || exit 1
+          fi
+        done
+
+  check:module-validate:
+    desc: Auto-discover and run check:validate for all modules
+    cmds:
+      - |
+        echo "Validating modules..."
+        echo "----------------------------------------"
+
+        # First validate toolchains
+        for TF in taskfiles/toolchain/Taskfile.*.yml; do
+          [ -f "$TF" ] || continue
+          TC=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
+          if task --list 2>/dev/null | grep -q "^\* toolchain:${TC}:check:validate:"; then
+            echo "Validating toolchain:$TC..."
+            task "toolchain:${TC}:check:validate" || exit 1
+          fi
+        done
+
+        # Then validate feature modules
+        for TF in taskfiles/Taskfile.*.yml; do
+          [ -f "$TF" ] || continue
+          MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
+
+          # Skip special modules
+          case "$MODULE" in
+            ci|toolchain) continue ;;
+          esac
+
+          # Check if module has check:validate task
+          if task --list 2>/dev/null | grep -q "^\* ${MODULE}:check:validate:"; then
+            echo "Validating $MODULE..."
+            task "${MODULE}:check:validate" || exit 1
+          fi
+        done
+
+  check:module-health:
+    desc: Auto-discover and run check:health for all modules
+    cmds:
+      - |
+        echo "Running health checks..."
+        echo "----------------------------------------"
+
+        for TF in taskfiles/Taskfile.*.yml; do
+          [ -f "$TF" ] || continue
+          MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
+
+          # Skip special modules
+          case "$MODULE" in
+            ci|toolchain) continue ;;
+          esac
+
+          # Check if module has check:health task
+          if task --list 2>/dev/null | grep -q "^\* ${MODULE}:check:health:"; then
+            echo "Health check: $MODULE..."
+            task "${MODULE}:check:health" || exit 1
+          fi
+        done
+
+  # ===========================================================================
   # Checks (check:* - diagnostics for this module)
   # ===========================================================================
-  # validate      - verify workflow↔task bindings
-  # workflow-status - show recent workflow runs
+  # validate         - verify workflow↔task bindings
+  # workflow-status  - show recent workflow runs
+  # workflow-secrets - verify GitHub secrets are configured
+  # workflow-deps    - verify workflows have required setup steps
 
   check:validate:
     desc: Verify bidirectional binding between workflows and ci tasks
@@ -237,7 +362,7 @@ tasks:
         fi
 
   check:workflow-deps:
-    desc: Verify workflows have required dependencies based on taskfile REQUIRES
+    desc: Verify workflows have required setup steps based on REQUIRES
     cmds:
       - |
         echo "========================================"
@@ -245,30 +370,51 @@ tasks:
         echo "========================================"
         ERRORS=0
 
-        # Step 1: Collect requirements from all taskfiles
+        # Toolchain → GitHub Action mapping
+        # This maps REQUIRES values to the action patterns we look for in workflows
+        toolchain_action() {
+          case "$1" in
+            golang) echo "setup-go" ;;
+            rust)   echo "rust-toolchain\|setup-rust-toolchain" ;;
+            node)   echo "setup-node" ;;
+            python) echo "setup-python" ;;
+            hugo)   echo "setup-hugo\|actions-hugo" ;;
+            *)      echo "" ;;
+          esac
+        }
+
+        # Step 1: Collect all toolchain requirements
         echo ""
         echo "Module requirements (from REQUIRES comments):"
         echo "----------------------------------------"
-        MODULES_NEED_GO=""
-        MODULES_NEED_HUGO=""
 
-        for TF in taskfiles/Taskfile.*.yml; do
+        ALL_TOOLCHAINS=""
+        for TF in taskfiles/Taskfile.*.yml taskfiles/toolchain/Taskfile.*.yml; do
           [ -f "$TF" ] || continue
           MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
           REQUIRES=$(grep "^# REQUIRES:" "$TF" 2>/dev/null | sed 's/# REQUIRES: //')
 
           if [ -n "$REQUIRES" ]; then
             echo "  $MODULE: $REQUIRES"
-            if echo "$REQUIRES" | grep -q "go"; then
-              MODULES_NEED_GO="$MODULES_NEED_GO $MODULE"
-            fi
-            if echo "$REQUIRES" | grep -q "hugo"; then
-              MODULES_NEED_HUGO="$MODULES_NEED_HUGO hugo"
-            fi
+            ALL_TOOLCHAINS="$ALL_TOOLCHAINS $REQUIRES"
           fi
         done
 
-        # Step 2: Check workflows that call Go-dependent tasks
+        # Deduplicate toolchains
+        UNIQUE_TOOLCHAINS=$(echo "$ALL_TOOLCHAINS" | tr ' ' '\n' | grep -v '^git$' | sort -u | tr '\n' ' ')
+
+        if [ -z "$UNIQUE_TOOLCHAINS" ]; then
+          echo "  No toolchain requirements found"
+          echo ""
+          echo "========================================"
+          echo "PASSED: No dependencies to check"
+          exit 0
+        fi
+
+        echo ""
+        echo "Unique toolchains needed: $UNIQUE_TOOLCHAINS"
+
+        # Step 2: Check workflows that run ci: tasks
         echo ""
         echo "Checking workflows..."
         echo "----------------------------------------"
@@ -276,21 +422,30 @@ tasks:
         for WF in .github/workflows/*.yml; do
           [ -f "$WF" ] || continue
           WF_NAME=$(basename "$WF")
-          NEEDS_GO=false
 
-          # Check if workflow calls ci:taskfile or ci:health (which call Go modules)
-          if grep -q "ci:taskfile\|ci:health\|ci:analytics\|ci:sitecheck" "$WF" 2>/dev/null; then
-            NEEDS_GO=true
+          # Does this workflow call ci: tasks?
+          if ! grep -q "task ci:" "$WF" 2>/dev/null; then
+            continue
           fi
 
-          if [ "$NEEDS_GO" = "true" ]; then
-            if grep -q "setup-go" "$WF"; then
-              echo "OK: $WF_NAME has Go"
+          echo ""
+          echo "Workflow: $WF_NAME (calls ci: tasks)"
+
+          # Check each required toolchain
+          for TC in $UNIQUE_TOOLCHAINS; do
+            ACTION=$(toolchain_action "$TC")
+            if [ -z "$ACTION" ]; then
+              continue
+            fi
+
+            if grep -qE "$ACTION" "$WF" 2>/dev/null; then
+              echo "  OK: has $TC ($ACTION)"
             else
-              echo "ERROR: $WF_NAME missing Go setup"
+              echo "  ERROR: missing $TC setup"
+              echo "    → Add: uses: actions/$ACTION@v5"
               ERRORS=$((ERRORS + 1))
             fi
-          fi
+          done
         done
 
         echo ""
