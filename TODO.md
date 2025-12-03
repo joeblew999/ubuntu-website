@@ -2,9 +2,13 @@
 
 ---
 
-BLUESKY_APP_PASSWORD 
+can we have a ci task that checks that CI runs across a matrix ? I dont want to run everything across all OS. I just want to make sure the task files work on al OS within CI. this is to make sure out task file works for end users on different OS. some will be on Windows .
 
-I was lazy and did not put it into .env !!!
+---
+
+READY to split task files and then put them into .github repo ? 
+
+so then all repos can pull versions tasks files at runtime as task can do thsi.
 
 ---
 

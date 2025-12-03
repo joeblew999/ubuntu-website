@@ -6,6 +6,33 @@
 version: '3'
 
 tasks:
+  # ===========================================================================
+  # Checks (check:* - diagnostics for this module)
+  # ===========================================================================
+  # validate - smoke test, runs in CI on change
+  # health   - external system check, runs on cron
+
+  check:validate:
+    desc: Smoke test git module works
+    cmds:
+      - |
+        echo "Validating git module..."
+        git --version
+        git rev-parse --is-inside-work-tree > /dev/null
+        echo "git:check:validate passed"
+
+  check:health:
+    desc: Check git remote is reachable
+    cmds:
+      - |
+        echo "Checking git remote health..."
+        git ls-remote --exit-code origin HEAD > /dev/null
+        echo "git:check:health passed"
+
+  # ===========================================================================
+  # Tasks
+  # ===========================================================================
+
   status:
     desc: Show git status and recent commits
     cmds:

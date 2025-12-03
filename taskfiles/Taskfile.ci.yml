@@ -16,12 +16,15 @@ tasks:
         echo ""
         echo "OS: $(uname -s 2>/dev/null || echo Windows)"
         echo ""
+
+      # Validate all included modules (check:validate pattern)
+      - echo "### Module Validation"
+      - task: :git:check:validate
+
+      - |
+        echo ""
         echo "### Include Test"
         echo "This task is loaded from: taskfiles/Taskfile.ci.yml"
-        echo ""
-        echo "### Task List"
-        task --list | head -20
-        echo "..."
         echo ""
         echo "### Variable Expansion Test"
         echo "PROJECT_NAME: {{.PROJECT_NAME}}"
