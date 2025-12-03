@@ -9,9 +9,21 @@ version: '3'
 #   git:deploy      → git:commit
 #   git:commit      → generate:gitignore
 #   git:sync        → cf:logs
+#   cf:deploy       → hugo:build
+#
+#   Aliases (backward compat):
+#   build           → hugo:build
+#   dev             → hugo:dev
+#   dev:lan         → hugo:dev:lan
+#   preview         → hugo:preview
+#   clean           → hugo:clean
 #
 # Everything else is a leaf task (runs commands directly)
 # =============================================================================
+
+# Includes (modular task files)
+includes:
+  ci: ./taskfiles/Taskfile.ci.yml
 
 dotenv: ['.env']
 
@@ -124,9 +136,9 @@ tasks:
         echo ""
         echo "Quick Commands:"
         echo "  task setup             - Install Hugo, Bun, dependencies"
-        echo "  task dev               - Start development server"
+        echo "  task hugo:dev          - Start development server (or: task dev)"
         echo "  task url:dev           - Open local dev in browser"
-        echo "  task build             - Build production site"
+        echo "  task hugo:build        - Build production site (or: task build)"
         echo "  task git:deploy        - Commit and deploy to production"
         echo "  task cf:status         - Check deployment status"
         echo "  task url:prod          - Open production site"
@@ -253,10 +265,10 @@ tasks:
       - go run {{.ENV_CMD}} kill-all
 
   # ============================================================================
-  # Development
+  # Hugo (external binary)
   # ============================================================================
 
-  dev:
+  hugo:dev:
     desc: Start Hugo development server
     cmds:
       - |
@@ -277,14 +289,14 @@ tasks:
         echo "LAN URL:   http://$LAN_IP:1313"
         echo ""
         echo "Quick Commands:"
-        echo "  task url:dev   - Open in browser"
-        echo "  task dev:lan   - Start with LAN baseURL (for mobile)"
-        echo "  Ctrl+C         - Stop server"
+        echo "  task url:dev       - Open in browser"
+        echo "  task hugo:dev:lan  - Start with LAN baseURL (for mobile)"
+        echo "  Ctrl+C             - Stop server"
         echo "========================================"
         echo ""
       - hugo server {{.HUGO_DEV_FLAGS}} --bind 0.0.0.0
 
-  dev:lan:
+  hugo:dev:lan:
     desc: Start Hugo dev server with LAN IP (for mobile testing)
     cmds:
       - |
@@ -300,20 +312,46 @@ tasks:
         echo ""
         hugo server {{.HUGO_DEV_FLAGS}} --bind 0.0.0.0 --baseURL "http://$LAN_IP:1313"
 
-  build:
+  hugo:build:
     desc: Build production site
     cmds:
       - hugo {{.HUGO_BUILD_FLAGS}}
 
-  preview:
+  hugo:preview:
     desc: Preview production build
     cmds:
       - hugo server {{.HUGO_PREVIEW_FLAGS}}
 
-  clean:
+  hugo:clean:
     desc: Clean build artifacts
     cmds:
       - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
+
+  # Aliases (backward compatibility)
+  dev:
+    desc: "[alias] Start Hugo development server"
+    cmds:
+      - task: hugo:dev
+
+  dev:lan:
+    desc: "[alias] Start Hugo dev server with LAN IP"
+    cmds:
+      - task: hugo:dev:lan
+
+  build:
+    desc: "[alias] Build production site"
+    cmds:
+      - task: hugo:build
+
+  preview:
+    desc: "[alias] Preview production build"
+    cmds:
+      - task: hugo:preview
+
+  clean:
+    desc: "[alias] Clean build artifacts"
+    cmds:
+      - task: hugo:clean
 
   # ============================================================================
   # Translation (use Claude Code interactively)
@@ -476,7 +514,7 @@ tasks:
 
   cf:deploy:
     desc: "[DEPRECATED] Deploy to Cloudflare Pages - Use git push instead"
-    deps: [build]
+    deps: [hugo:build]
     cmds:
       - 'echo "DEPRECATED: Deployments happen automatically on git push"'
       - 'echo "Just run: git push"'
@@ -631,6 +669,8 @@ tasks:
     cmds:
       - go run ./cmd/sitecheck/ -github-issue
 
+  # ci:taskfile is in taskfiles/Taskfile.ci.yml (included as ci:*)
+
   ci:workflow-status:
     desc: Check recent workflow run status
     cmds:
@@ -641,30 +681,48 @@ tasks:
           --jq '.[] | "\(.name): \(.status) (\(.conclusion)) - \(.createdAt)"'
 
   ci:validate:
-    desc: Verify GitHub workflows call valid Taskfile tasks
+    desc: Verify bidirectional binding between workflows and ci tasks
     cmds:
       - |
-        echo "Checking workflow task references..."
+        echo "========================================"
+        echo "CI Binding Validation"
+        echo "========================================"
         ERRORS=0
 
-        # Extract task names from workflows
-        for TASK_CALL in $(grep -h "task " .github/workflows/*.yml 2>/dev/null | grep -v "^#" | grep -oE "task [a-z:_-]+" | sed 's/task //' | sort -u); do
-          # Check if task exists
+        echo ""
+        echo "1. Workflow → Task (workflows call valid tasks)"
+        echo "----------------------------------------"
+        for TASK_CALL in $(grep -h "task ci:" .github/workflows/*.yml 2>/dev/null | grep -oE "ci:[a-z_-]+" | sort -u); do
           if ! task --list 2>/dev/null | grep -q "^\* $TASK_CALL:"; then
-            echo "ERROR: Task '$TASK_CALL' referenced in workflow but not found in Taskfile"
+            echo "ERROR: Workflow calls '$TASK_CALL' but task doesn't exist"
             ERRORS=$((ERRORS + 1))
           else
             echo "OK: $TASK_CALL"
           fi
         done
 
-        if [ $ERRORS -gt 0 ]; then
-          echo ""
-          echo "Found $ERRORS invalid task reference(s)"
-          exit 1
-        fi
         echo ""
-        echo "All workflow task references are valid"
+        echo "2. Task → Workflow (ci tasks have workflows)"
+        echo "----------------------------------------"
+        for TASK in $(task --list 2>/dev/null | grep "^\* ci:" | grep -v "ci:validate\|ci:workflow-status" | sed 's/\* \(ci:[a-z_-]*\):.*/\1/'); do
+          # ci:sitecheck → sitecheck.yml
+          WORKFLOW_NAME=$(echo "$TASK" | sed 's/ci://')
+          if [ ! -f ".github/workflows/${WORKFLOW_NAME}.yml" ]; then
+            echo "ERROR: Task '$TASK' has no workflow .github/workflows/${WORKFLOW_NAME}.yml"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "OK: $TASK → ${WORKFLOW_NAME}.yml"
+          fi
+        done
+
+        echo ""
+        echo "========================================"
+        if [ $ERRORS -gt 0 ]; then
+          echo "FAILED: $ERRORS error(s)"
+          exit 1
+        else
+          echo "PASSED: All bindings valid"
+        fi
 
   # ============================================================================
   # Code Quality

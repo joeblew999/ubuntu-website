@@ -1,0 +1,30 @@
+# CI Tasks
+#
+# Tasks that are called by GitHub Actions workflows.
+# Each ci:<name> task should have a matching .github/workflows/<name>.yml
+#
+# Validation: Run `task ci:validate` to check bindings
+
+version: '3'
+
+tasks:
+  taskfile:
+    desc: Validate Taskfile works (used by CI matrix)
+    cmds:
+      - |
+        echo "## Taskfile Validation"
+        echo ""
+        echo "OS: $(uname -s 2>/dev/null || echo Windows)"
+        echo ""
+        echo "### Include Test"
+        echo "This task is loaded from: taskfiles/Taskfile.ci.yml"
+        echo ""
+        echo "### Task List"
+        task --list | head -20
+        echo "..."
+        echo ""
+        echo "### Variable Expansion Test"
+        echo "PROJECT_NAME: {{.PROJECT_NAME}}"
+        echo "DOMAIN: {{.DOMAIN}}"
+        echo ""
+        echo "Taskfile validated successfully"
