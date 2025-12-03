@@ -2,6 +2,8 @@
 #
 # Cross-platform LAN IP detection using Go.
 # Works on macOS, Linux, Windows.
+#
+# REQUIRES: go (for go run ./cmd/lanip)
 
 version: '3'
 

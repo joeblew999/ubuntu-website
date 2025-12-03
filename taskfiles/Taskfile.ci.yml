@@ -145,7 +145,7 @@ tasks:
           --jq '.[] | "\(.name): \(.status) (\(.conclusion)) - \(.createdAt)"'
 
   check:workflow-deps:
-    desc: Verify workflows have required dependencies (Go, etc.)
+    desc: Verify workflows have required dependencies based on taskfile REQUIRES
     cmds:
       - |
         echo "========================================"
@@ -153,18 +153,49 @@ tasks:
         echo "========================================"
         ERRORS=0
 
-        # Workflows that call tasks using Go
-        GO_WORKFLOWS="taskfile.yml health.yml"
-
+        # Step 1: Collect requirements from all taskfiles
         echo ""
-        echo "Checking Go dependency in workflows..."
+        echo "Module requirements (from REQUIRES comments):"
         echo "----------------------------------------"
-        for WF in $GO_WORKFLOWS; do
-          if [ -f ".github/workflows/$WF" ]; then
-            if grep -q "setup-go" ".github/workflows/$WF"; then
-              echo "OK: $WF has Go setup"
+        MODULES_NEED_GO=""
+        MODULES_NEED_HUGO=""
+
+        for TF in taskfiles/Taskfile.*.yml; do
+          [ -f "$TF" ] || continue
+          MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
+          REQUIRES=$(grep "^# REQUIRES:" "$TF" 2>/dev/null | sed 's/# REQUIRES: //')
+
+          if [ -n "$REQUIRES" ]; then
+            echo "  $MODULE: $REQUIRES"
+            if echo "$REQUIRES" | grep -q "go"; then
+              MODULES_NEED_GO="$MODULES_NEED_GO $MODULE"
+            fi
+            if echo "$REQUIRES" | grep -q "hugo"; then
+              MODULES_NEED_HUGO="$MODULES_NEED_HUGO hugo"
+            fi
+          fi
+        done
+
+        # Step 2: Check workflows that call Go-dependent tasks
+        echo ""
+        echo "Checking workflows..."
+        echo "----------------------------------------"
+
+        for WF in .github/workflows/*.yml; do
+          [ -f "$WF" ] || continue
+          WF_NAME=$(basename "$WF")
+          NEEDS_GO=false
+
+          # Check if workflow calls ci:taskfile or ci:health (which call Go modules)
+          if grep -q "ci:taskfile\|ci:health\|ci:analytics\|ci:sitecheck" "$WF" 2>/dev/null; then
+            NEEDS_GO=true
+          fi
+
+          if [ "$NEEDS_GO" = "true" ]; then
+            if grep -q "setup-go" "$WF"; then
+              echo "OK: $WF_NAME has Go"
             else
-              echo "ERROR: $WF missing 'actions/setup-go' (needed for lanip)"
+              echo "ERROR: $WF_NAME missing Go setup"
               ERRORS=$((ERRORS + 1))
             fi
           fi
@@ -173,8 +204,8 @@ tasks:
         echo ""
         echo "========================================"
         if [ $ERRORS -gt 0 ]; then
-          echo "FAILED: $ERRORS workflow(s) missing dependencies"
+          echo "FAILED: $ERRORS error(s)"
           exit 1
         else
-          echo "PASSED: All workflows have required dependencies"
+          echo "PASSED: All dependencies satisfied"
         fi

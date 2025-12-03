@@ -2,6 +2,8 @@
 #
 # Cross-platform git workflow tasks.
 # Pure git commands - works on macOS, Linux, Windows.
+#
+# REQUIRES: git
 
 version: '3'
 
