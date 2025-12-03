@@ -1,5 +1,8 @@
 name: Post to Bluesky
 # Syndicates blog posts to https://bsky.app/profile/ubuntusoftware.net
+#
+# Required secrets:
+#   - BLUESKY_APP_PASSWORD (app password for ubuntusoftware.net account)
 
 on:
   schedule:

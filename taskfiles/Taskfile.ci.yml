@@ -74,6 +74,10 @@ tasks:
       # - task: :hugo:check:health
       # - task: :cf:check:health
 
+      - echo ""
+      - echo "### GitHub Secrets Check"
+      - task: check:workflow-secrets
+
       - |
         echo ""
         echo "All health checks passed"
@@ -149,6 +153,81 @@ tasks:
         echo ""
         gh run list --limit 5 --json name,status,conclusion,createdAt \
           --jq '.[] | "\(.name): \(.status) (\(.conclusion)) - \(.createdAt)"'
+
+  check:workflow-secrets:
+    desc: Verify required GitHub secrets are configured for workflows
+    cmds:
+      - |
+        echo "========================================"
+        echo "Workflow Secrets Check"
+        echo "========================================"
+        ERRORS=0
+
+        # Get list of configured secrets
+        echo ""
+        echo "Checking GitHub secrets..."
+        echo "----------------------------------------"
+
+        # Collect required secrets from workflow comments
+        # Pattern: "# Required secrets:" followed by "#   - SECRET_NAME"
+        REQUIRED_SECRETS=""
+        for WF in .github/workflows/*.yml; do
+          [ -f "$WF" ] || continue
+          WF_NAME=$(basename "$WF")
+
+          # Extract secrets from "Required secrets:" block
+          SECRETS=$(awk '/^# Required secrets:/{found=1; next} found && /^#   - /{gsub(/^#   - /, ""); gsub(/ .*/, ""); print} found && !/^#/{found=0}' "$WF")
+
+          for SECRET in $SECRETS; do
+            echo "  $WF_NAME requires: $SECRET"
+            REQUIRED_SECRETS="$REQUIRED_SECRETS $SECRET"
+          done
+        done
+
+        if [ -z "$REQUIRED_SECRETS" ]; then
+          echo "  No secrets required by workflows"
+          echo ""
+          echo "========================================"
+          echo "PASSED: No secrets to check"
+          exit 0
+        fi
+
+        # Check if secrets exist in GitHub
+        echo ""
+        echo "Verifying secrets are configured..."
+        echo "----------------------------------------"
+
+        # Get configured secrets (requires gh CLI and repo access)
+        if ! command -v gh >/dev/null 2>&1; then
+          echo "SKIP: gh CLI not available"
+          exit 0
+        fi
+
+        CONFIGURED=$(gh secret list --json name --jq '.[].name' 2>/dev/null || echo "")
+        if [ -z "$CONFIGURED" ]; then
+          echo "SKIP: Cannot list secrets (may need gh auth or repo permissions)"
+          exit 0
+        fi
+
+        for SECRET in $(echo "$REQUIRED_SECRETS" | tr ' ' '\n' | sort -u); do
+          [ -z "$SECRET" ] && continue
+          if echo "$CONFIGURED" | grep -q "^${SECRET}$"; then
+            echo "OK: $SECRET is configured"
+          else
+            echo "ERROR: $SECRET is NOT configured"
+            echo "  → Add via: gh secret set $SECRET"
+            ERRORS=$((ERRORS + 1))
+          fi
+        done
+
+        echo ""
+        echo "========================================"
+        if [ $ERRORS -gt 0 ]; then
+          echo "FAILED: $ERRORS secret(s) missing"
+          exit 1
+        else
+          echo "PASSED: All secrets configured"
+        fi
 
   check:workflow-deps:
     desc: Verify workflows have required dependencies based on taskfile REQUIRES
