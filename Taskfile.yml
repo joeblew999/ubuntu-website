@@ -491,7 +491,23 @@ tasks:
   cf:delete:
     desc: "[DANGEROUS] Delete Cloudflare Pages project"
     cmds:
-      - 'echo "WARNING: This will delete your Pages project!"'
+      - |
+        echo "========================================"
+        echo "DANGER: DELETE CLOUDFLARE PAGES PROJECT"
+        echo "========================================"
+        echo ""
+        echo "This will PERMANENTLY delete:"
+        echo "  Project: {{.PROJECT_NAME}}"
+        echo "  Production: {{.URL_PRODUCTION}}"
+        echo "  Preview: {{.URL_PREVIEW}}"
+        echo ""
+        echo "This action CANNOT be undone!"
+        echo ""
+        read -p "Type 'DELETE {{.PROJECT_NAME}}' to confirm: " CONFIRM
+        if [ "$CONFIRM" != "DELETE {{.PROJECT_NAME}}" ]; then
+          echo "Cancelled."
+          exit 1
+        fi
       - '{{.WRANGLER_CMD}} pages project delete {{.PROJECT_NAME}}'
 
   # ============================================================================
