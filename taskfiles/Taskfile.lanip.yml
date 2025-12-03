@@ -3,7 +3,7 @@
 # Cross-platform LAN IP detection using Go.
 # Works on macOS, Linux, Windows.
 #
-# REQUIRES: go (for go run ./cmd/lanip)
+# REQUIRES: golang
 
 version: '3'
 
@@ -11,68 +11,14 @@ tasks:
   # ===========================================================================
   # Checks (check:* - diagnostics for this module)
   # ===========================================================================
-  # deps     - ensure required tools are installed
+  # deps     - ensure required tools are installed (delegates to golang)
   # validate - smoke test, runs in CI on change
   # health   - external system check (network reachability)
 
   check:deps:
-    desc: Ensure Go is installed (installs locally, fails in CI with instructions)
+    desc: Ensure dependencies are installed (delegates to toolchain:golang)
     cmds:
-      - |
-        if command -v go >/dev/null 2>&1; then
-          echo "OK: go $(go version | cut -d' ' -f3)"
-          exit 0
-        fi
-
-        # Detect CI environment
-        if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
-          echo "ERROR: Go is not installed"
-          echo ""
-          echo "Add to your workflow before running tasks:"
-          echo ""
-          echo "    - name: Setup Go"
-          echo "      uses: actions/setup-go@v5"
-          echo "      with:"
-          echo "        go-version: '1.21'"
-          echo ""
-          exit 1
-        fi
-
-        # Local: try to install
-        echo "Installing Go..."
-
-        case "$(uname -s)" in
-          Darwin)
-            if command -v brew >/dev/null 2>&1; then
-              brew install go
-            else
-              echo "ERROR: brew not found. Install from https://go.dev/dl/"
-              exit 1
-            fi
-            ;;
-          Linux)
-            if command -v apt-get >/dev/null 2>&1; then
-              sudo apt-get update && sudo apt-get install -y golang-go
-            elif command -v yum >/dev/null 2>&1; then
-              sudo yum install -y golang
-            else
-              echo "ERROR: No package manager found. Install from https://go.dev/dl/"
-              exit 1
-            fi
-            ;;
-          *)
-            echo "ERROR: Unsupported OS. Install Go from https://go.dev/dl/"
-            exit 1
-            ;;
-        esac
-
-        # Verify installation
-        if command -v go >/dev/null 2>&1; then
-          echo "OK: go $(go version | cut -d' ' -f3) installed"
-        else
-          echo "ERROR: Go installation failed"
-          exit 1
-        fi
+      - task: :toolchain:golang:check:deps
 
   check:validate:
     desc: Smoke test lanip module works

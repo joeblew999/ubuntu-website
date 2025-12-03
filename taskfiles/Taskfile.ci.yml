@@ -25,14 +25,21 @@ tasks:
         echo "OS: $(uname -s 2>/dev/null || echo Windows)"
         echo ""
 
-      # Ensure dependencies are installed
-      - echo "### Dependency Check"
+      # Ensure runtime toolchains are installed
+      - echo "### Runtime Toolchain Check"
+      - task: :toolchain:golang:check:deps
+      # - task: :toolchain:rust:check:deps  # Uncomment when rust modules are added
+
+      # Ensure module dependencies are installed
+      - echo ""
+      - echo "### Module Dependency Check"
       - task: :git:check:deps
       - task: :lanip:check:deps
 
       # Validate all included modules (check:validate pattern)
       - echo ""
       - echo "### Module Validation"
+      - task: :toolchain:golang:check:validate
       - task: :git:check:validate
       - task: :lanip:check:validate
 

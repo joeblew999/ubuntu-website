@@ -23,6 +23,10 @@ version: '3'
 
 # Includes (modular task files)
 includes:
+  # Toolchains (compilers/runtimes) - nested namespace
+  # Usage: task toolchain:golang:check:deps, task toolchain:rust:check:deps
+  toolchain: ./taskfiles/Taskfile.toolchain.yml
+  # Feature modules
   ci: ./taskfiles/Taskfile.ci.yml
   git: ./taskfiles/Taskfile.git.yml
   lanip: ./taskfiles/Taskfile.lanip.yml

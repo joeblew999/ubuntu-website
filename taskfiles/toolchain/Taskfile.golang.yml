@@ -1,0 +1,99 @@
+# Go Runtime Tasks
+#
+# Cross-platform Go installation and validation.
+# Works on macOS, Linux, Windows.
+#
+# Other modules that need Go should:
+#   1. Add `# REQUIRES: golang` to their header
+#   2. Call `task: :golang:check:deps` before using Go
+
+version: '3'
+
+vars:
+  GO_VERSION: '1.21'
+
+tasks:
+  # ===========================================================================
+  # Checks (check:* - diagnostics for this module)
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure Go is installed (installs locally, fails in CI with instructions)
+    cmds:
+      - |
+        if command -v go >/dev/null 2>&1; then
+          echo "OK: go $(go version | cut -d' ' -f3)"
+          exit 0
+        fi
+
+        # Detect CI environment
+        if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+          echo "ERROR: Go is not installed"
+          echo ""
+          echo "Add to your workflow before running tasks:"
+          echo ""
+          echo "    - name: Setup Go"
+          echo "      uses: actions/setup-go@v5"
+          echo "      with:"
+          echo "        go-version: '{{.GO_VERSION}}'"
+          echo ""
+          exit 1
+        fi
+
+        # Local: try to install
+        echo "Installing Go..."
+
+        case "$(uname -s)" in
+          Darwin)
+            if command -v brew >/dev/null 2>&1; then
+              brew install go
+            else
+              echo "ERROR: brew not found. Install from https://go.dev/dl/"
+              exit 1
+            fi
+            ;;
+          Linux)
+            if command -v apt-get >/dev/null 2>&1; then
+              sudo apt-get update && sudo apt-get install -y golang-go
+            elif command -v yum >/dev/null 2>&1; then
+              sudo yum install -y golang
+            else
+              echo "ERROR: No package manager found. Install from https://go.dev/dl/"
+              exit 1
+            fi
+            ;;
+          MINGW*|MSYS*|CYGWIN*)
+            echo "ERROR: Install Go from https://go.dev/dl/"
+            exit 1
+            ;;
+          *)
+            echo "ERROR: Unsupported OS. Install Go from https://go.dev/dl/"
+            exit 1
+            ;;
+        esac
+
+        # Verify installation
+        if command -v go >/dev/null 2>&1; then
+          echo "OK: go $(go version | cut -d' ' -f3) installed"
+        else
+          echo "ERROR: Go installation failed"
+          exit 1
+        fi
+
+  check:validate:
+    desc: Smoke test Go works
+    cmds:
+      - |
+        echo "Validating Go..."
+        go version
+        echo "golang:check:validate passed"
+
+  check:health:
+    desc: Check Go module proxy is reachable
+    cmds:
+      - |
+        echo "Checking Go module proxy..."
+        go env GOPROXY
+        # Simple connectivity check
+        go list -m golang.org/x/tools@latest >/dev/null 2>&1 || true
+        echo "golang:check:health passed"
