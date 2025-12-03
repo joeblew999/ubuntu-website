@@ -4,6 +4,7 @@
 # Creates a GitHub Issue if failures detected or significant changes occur.
 #
 # Uses check-host.net API (no secrets required)
+# Optional: Set SITE_URL variable to monitor a different site
 
 name: Site Monitor
 
@@ -44,6 +45,8 @@ jobs:
       # Run site check via Taskfile
       - name: Run Site Check
         id: check
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
         run: task ci:sitecheck > report.md
         continue-on-error: true
 

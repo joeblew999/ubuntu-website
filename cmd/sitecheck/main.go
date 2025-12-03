@@ -34,14 +34,44 @@ import (
 )
 
 const (
-	defaultURL   = "https://www.ubuntusoftware.net/robots.txt"
-	defaultHost  = "www.ubuntusoftware.net"
-	apexURL      = "http://ubuntusoftware.net" // Apex should redirect to www
-	defaultNodes = 56                          // Use all available nodes
-	defaultWait  = 8                           // Seconds to wait for global responses
+	// Fallback values if SITE_URL env var not set
+	fallbackSiteURL = "https://www.ubuntusoftware.net"
+
+	defaultNodes = 56                        // Use all available nodes
+	defaultWait  = 8                         // Seconds to wait for global responses
 	apiBase      = "https://check-host.net"
 	stateFile    = ".sitecheck-state.json"
 )
+
+// Package-level config derived from SITE_URL environment variable
+var (
+	defaultURL  string // Full URL to check (e.g., https://www.example.com/robots.txt)
+	defaultHost string // Host portion (e.g., www.example.com)
+	apexURL     string // Apex domain URL for redirect check (e.g., http://example.com)
+)
+
+func init() {
+	siteURL := os.Getenv("SITE_URL")
+	if siteURL == "" {
+		siteURL = fallbackSiteURL
+	}
+	// Ensure no trailing slash
+	siteURL = strings.TrimSuffix(siteURL, "/")
+
+	// Derive check URL (robots.txt for HTTP check)
+	defaultURL = siteURL + "/robots.txt"
+
+	// Extract host from URL
+	if parsed, err := url.Parse(siteURL); err == nil {
+		defaultHost = parsed.Host
+		// Derive apex URL (remove www. prefix, use http for redirect check)
+		apexHost := strings.TrimPrefix(defaultHost, "www.")
+		apexURL = "http://" + apexHost
+	} else {
+		defaultHost = "www.ubuntusoftware.net"
+		apexURL = "http://ubuntusoftware.net"
+	}
+}
 
 // Check type to API endpoint mapping
 var checkEndpoints = map[string]string{

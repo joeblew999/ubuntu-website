@@ -3,7 +3,9 @@
 # Runs every Sunday at 9am UTC to check Cloudflare Web Analytics.
 # Creates a GitHub Issue if visits or pageviews change >20% from previous week.
 #
-# Required secret: CLOUDFLARE_API_TOKEN (with Account Analytics:Read permission)
+# Required secrets:
+#   - CLOUDFLARE_API_TOKEN (with Account Analytics:Read permission)
+#   - CF_WEB_ANALYTICS_SITE_TAG (optional, has fallback default)
 
 name: Weekly Analytics Report
 
@@ -46,6 +48,8 @@ jobs:
         id: analytics
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
+          CF_WEB_ANALYTICS_SITE_TAG: ${{ vars.CF_WEB_ANALYTICS_SITE_TAG }}
         run: task ci:analytics > report.md
         continue-on-error: true
 
