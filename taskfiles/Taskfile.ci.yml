@@ -31,3 +31,23 @@ tasks:
         echo "DOMAIN: {{.DOMAIN}}"
         echo ""
         echo "Taskfile validated successfully"
+
+  health:
+    desc: Run all health checks (used by scheduled CI)
+    cmds:
+      - |
+        echo "## Health Check"
+        echo ""
+        echo "Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        echo ""
+
+      - echo "### Module Health Checks"
+      - task: :git:check:health
+
+      # Add more health checks as modules are added:
+      # - task: :hugo:check:health
+      # - task: :cf:check:health
+
+      - |
+        echo ""
+        echo "All health checks passed"
