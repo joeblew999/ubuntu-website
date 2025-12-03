@@ -28,6 +28,7 @@ tasks:
       # Validate all included modules (check:validate pattern)
       - echo "### Module Validation"
       - task: :git:check:validate
+      - task: :lanip:check:validate
 
       # Validate workflow↔task bindings
       - echo ""

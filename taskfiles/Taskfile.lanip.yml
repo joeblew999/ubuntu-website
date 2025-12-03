@@ -1,0 +1,34 @@
+# LAN IP Tasks
+#
+# Cross-platform LAN IP detection using Go.
+# Works on macOS, Linux, Windows.
+
+version: '3'
+
+tasks:
+  # ===========================================================================
+  # Checks (check:* - diagnostics for this module)
+  # ===========================================================================
+  # validate - smoke test, runs in CI on change
+
+  check:validate:
+    desc: Smoke test lanip module works
+    cmds:
+      - |
+        echo "Validating lanip module..."
+        LAN_IP=$(go run ./cmd/lanip 2>&1)
+        if [ $? -ne 0 ]; then
+          echo "lanip:check:validate FAILED: $LAN_IP"
+          exit 1
+        fi
+        echo "LAN IP: $LAN_IP"
+        echo "lanip:check:validate passed"
+
+  # ===========================================================================
+  # Tasks
+  # ===========================================================================
+
+  get:
+    desc: Get LAN IP address
+    cmds:
+      - go run ./cmd/lanip

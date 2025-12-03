@@ -25,6 +25,7 @@ version: '3'
 includes:
   ci: ./taskfiles/Taskfile.ci.yml
   git: ./taskfiles/Taskfile.git.yml
+  lanip: ./taskfiles/Taskfile.lanip.yml
 
 dotenv: ['.env']
 
