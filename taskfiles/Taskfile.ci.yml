@@ -51,3 +51,16 @@ tasks:
       - |
         echo ""
         echo "All health checks passed"
+
+  health:test-fail:
+    desc: "[TEST] Force health check failure to test notifications"
+    cmds:
+      - |
+        echo "## Health Check (TEST FAILURE)"
+        echo ""
+        echo "Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        echo ""
+        echo "This is an intentional failure to test the notification system."
+        echo ""
+
+      - task: :git:check:health:fail

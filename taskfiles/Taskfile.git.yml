@@ -9,8 +9,9 @@ tasks:
   # ===========================================================================
   # Checks (check:* - diagnostics for this module)
   # ===========================================================================
-  # validate - smoke test, runs in CI on change
-  # health   - external system check, runs on cron
+  # validate      - smoke test, runs in CI on change
+  # health        - external system check, runs on cron
+  # health:fail   - test failure path (for testing notifications)
 
   check:validate:
     desc: Smoke test git module works
@@ -28,6 +29,14 @@ tasks:
         echo "Checking git remote health..."
         git ls-remote --exit-code origin HEAD > /dev/null
         echo "git:check:health passed"
+
+  check:health:fail:
+    desc: "[TEST] Force health check failure (for testing notifications)"
+    cmds:
+      - |
+        echo "Simulating health check failure..."
+        echo "git:check:health FAILED (intentional test)"
+        exit 1
 
   # ===========================================================================
   # Tasks

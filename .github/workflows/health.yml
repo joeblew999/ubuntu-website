@@ -5,6 +5,15 @@
 #
 # Pattern: Each taskfile include has check:health tasks that verify
 # external systems (git remotes, APIs, etc.) are reachable.
+#
+# NOTIFICATIONS:
+# - GitHub Issue created with label 'health-check' on failure
+# - Repo watchers get notified via GitHub notification settings
+# - Configure: Settings → Notifications → Watching
+#
+# TEST FAILURE:
+# - Manual trigger with test_failure=true to test notification flow
+# - Or run locally: task ci:health:test-fail
 
 name: Health Check
 
@@ -13,6 +22,15 @@ on:
     # Run every 6 hours
     - cron: '0 */6 * * *'
   workflow_dispatch:
+    inputs:
+      test_failure:
+        description: 'Force failure to test notifications'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   health:
@@ -26,7 +44,13 @@ jobs:
           version: 3.x
 
       - name: Run health checks
-        run: task ci:health
+        run: |
+          if [ "${{ inputs.test_failure }}" = "true" ]; then
+            echo "Running TEST FAILURE mode..."
+            task ci:health:test-fail
+          else
+            task ci:health
+          fi
 
       - name: Create issue on failure
         if: failure()
