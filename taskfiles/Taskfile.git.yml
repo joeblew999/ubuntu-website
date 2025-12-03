@@ -17,7 +17,7 @@ tasks:
   # health:fail   - test failure path (for testing notifications)
 
   check:deps:
-    desc: Ensure git is installed (installs if missing)
+    desc: Ensure git is installed (installs locally, fails in CI with instructions)
     cmds:
       - |
         if command -v git >/dev/null 2>&1; then
@@ -25,13 +25,18 @@ tasks:
           exit 0
         fi
 
+        # Detect CI environment - git should always be pre-installed
+        if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+          echo "ERROR: Git is not installed (unexpected in CI)"
+          exit 1
+        fi
+
+        # Local: try to install
         echo "Installing git..."
 
-        # Detect OS and install
         case "$(uname -s)" in
           Darwin)
             xcode-select --install 2>/dev/null || true
-            # Wait for install
             until command -v git >/dev/null 2>&1; do
               echo "Waiting for Xcode CLI tools..."
               sleep 5
