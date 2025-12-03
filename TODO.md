@@ -32,3 +32,17 @@ The env tool expects a specific .env structure and will corrupt your .env file.
 
 Investigate https://github.com/helmfile/vals for proper secrets management.
 vals supports multiple backends (Vault, AWS SSM, GCP Secrets, SOPS, etc.)
+
+---
+
+cmd/translate is broken - DO NOT RUN
+
+Current workflow: Claude Code + Taskfile shell scripts (translate:status, translate:done, etc.)
+
+The manual workflow is prototyping what cmd/translate should eventually do:
+- Learning what prompts work best for translation quality
+- Understanding file structure requirements
+- Handling edge cases (missing files, orphaned translations)
+- Defining the right workflow (status → translate → done checkpoint)
+
+Once patterns are solid from manual use, codify them into cmd/translate.
