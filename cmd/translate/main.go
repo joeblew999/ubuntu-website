@@ -1,3 +1,21 @@
+// translate provides automated content translation using Claude API.
+//
+// WARNING: DO NOT RUN - This tool is currently broken/incomplete!
+// Translation is currently done manually via Claude Code + Taskfile shell scripts.
+//
+// Current workflow (use this instead):
+//
+//	task translate:status   # See what English files changed
+//	task translate:missing  # See which languages need files
+//	# Then manually translate with Claude Code
+//	task translate:done     # Mark translations complete
+//
+// Commands (when fixed):
+//
+//	go run cmd/translate/main.go -check              # Check changed files
+//	go run cmd/translate/main.go -all                # Translate all changed
+//	go run cmd/translate/main.go -lang de            # Translate to German
+//	go run cmd/translate/main.go -i18n               # Translate i18n files
 package main
 
 import (
