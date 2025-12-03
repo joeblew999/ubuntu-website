@@ -35,6 +35,11 @@ tasks:
       - echo "### CI Binding Validation"
       - task: check:validate
 
+      # Validate workflow dependencies
+      - echo ""
+      - echo "### Workflow Dependencies"
+      - task: check:workflow-deps
+
       - |
         echo ""
         echo "### Include Test"
@@ -138,3 +143,38 @@ tasks:
         echo ""
         gh run list --limit 5 --json name,status,conclusion,createdAt \
           --jq '.[] | "\(.name): \(.status) (\(.conclusion)) - \(.createdAt)"'
+
+  check:workflow-deps:
+    desc: Verify workflows have required dependencies (Go, etc.)
+    cmds:
+      - |
+        echo "========================================"
+        echo "Workflow Dependency Check"
+        echo "========================================"
+        ERRORS=0
+
+        # Workflows that call tasks using Go
+        GO_WORKFLOWS="taskfile.yml health.yml"
+
+        echo ""
+        echo "Checking Go dependency in workflows..."
+        echo "----------------------------------------"
+        for WF in $GO_WORKFLOWS; do
+          if [ -f ".github/workflows/$WF" ]; then
+            if grep -q "setup-go" ".github/workflows/$WF"; then
+              echo "OK: $WF has Go setup"
+            else
+              echo "ERROR: $WF missing 'actions/setup-go' (needed for lanip)"
+              ERRORS=$((ERRORS + 1))
+            fi
+          fi
+        done
+
+        echo ""
+        echo "========================================"
+        if [ $ERRORS -gt 0 ]; then
+          echo "FAILED: $ERRORS workflow(s) missing dependencies"
+          exit 1
+        else
+          echo "PASSED: All workflows have required dependencies"
+        fi
