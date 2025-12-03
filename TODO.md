@@ -1,5 +1,14 @@
 # todo
 
+logs folder is big and not gitignored ? is useful though to keep around ?
+
+--
+
+narun
+
+https://github.com/akhenakh/narun
+
+TO help buiuld out the stuff we are building into cmd to be genertic ? 
 
 ---
 

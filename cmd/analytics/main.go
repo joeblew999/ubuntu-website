@@ -36,9 +36,25 @@ const (
 	cfGraphQLEndpoint = "https://api.cloudflare.com/client/v4/graphql"
 	stateFile         = ".analytics-state.json"
 	changeThreshold   = 0.20 // 20% change triggers alert
-	siteTag           = "4c28a6bfb5514996914a603c999d5c79"
-	accountTag        = "7384af54e33b8a54ff240371ea368440"
+
+	// Default values (fallbacks if env vars not set)
+	defaultAccountTag = "7384af54e33b8a54ff240371ea368440"
+	defaultSiteTag    = "4c28a6bfb5514996914a603c999d5c79"
 )
+
+// getConfig returns Cloudflare account and site tags from environment variables,
+// falling back to defaults for backward compatibility.
+func getConfig() (accountTag, siteTag string) {
+	accountTag = os.Getenv("CF_ACCOUNT_ID")
+	if accountTag == "" {
+		accountTag = defaultAccountTag
+	}
+	siteTag = os.Getenv("CF_WEB_ANALYTICS_SITE_TAG")
+	if siteTag == "" {
+		siteTag = defaultSiteTag
+	}
+	return
+}
 
 // State represents the stored analytics state from previous run
 type State struct {
@@ -189,6 +205,9 @@ func main() {
 }
 
 func fetchAnalytics(token string, since, until time.Time) (*State, error) {
+	// Get config from environment (with fallbacks)
+	accountTag, siteTag := getConfig()
+
 	// Build GraphQL request with proper filter structure
 	filter := map[string]any{
 		"AND": []map[string]any{

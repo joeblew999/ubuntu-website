@@ -10,6 +10,7 @@ vars:
   # Cloudflare Account
   CF_ACCOUNT_ID: 7384af54e33b8a54ff240371ea368440
   CF_ZONE_ID: 867fb5996096b895b47114b6564ee0fb
+  CF_WEB_ANALYTICS_SITE_TAG: 4c28a6bfb5514996914a603c999d5c79
 
   # Deployment URLs
   URL_PRODUCTION: https://www.ubuntusoftware.net
@@ -830,7 +831,7 @@ tasks:
   seo:open:cf-analytics:
     desc: Open Cloudflare Web Analytics
     cmds:
-      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in=4c28a6bfb5514996914a603c999d5c79"
+      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in={{.CF_WEB_ANALYTICS_SITE_TAG}}"
 
   seo:setup:
     desc: Open all SEO setup pages (Search Console + Cloudflare Analytics)
@@ -838,7 +839,7 @@ tasks:
       - echo "Opening Google Search Console..."
       - open "https://search.google.com/search-console"
       - echo "Opening Cloudflare Web Analytics..."
-      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in=4c28a6bfb5514996914a603c999d5c79"
+      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in={{.CF_WEB_ANALYTICS_SITE_TAG}}"
       - echo ""
       - echo "Setup steps:"
       - echo "1. Google Search Console - Add property, Domain, ubuntusoftware.net"
