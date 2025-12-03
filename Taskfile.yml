@@ -489,6 +489,45 @@ tasks:
     cmds:
       - '{{.WRANGLER_CMD}} pages secret list --project-name={{.PROJECT_NAME}}'
 
+  # GitHub Repository Secrets & Variables
+  # Secrets: Encrypted, for sensitive values (API tokens)
+  # Variables: Plain text, for non-sensitive config (account IDs, URLs)
+
+  gh:secret:list:
+    desc: List GitHub repository secrets
+    cmds:
+      - gh secret list
+
+  gh:secret:set:
+    desc: Set a GitHub repository secret (e.g., task gh:secret:set -- CLOUDFLARE_API_TOKEN)
+    cmds:
+      - gh secret set {{.CLI_ARGS}}
+
+  gh:var:list:
+    desc: List GitHub repository variables
+    cmds:
+      - gh variable list
+
+  gh:var:set:
+    desc: Set a GitHub repository variable (e.g., task gh:var:set -- CF_ACCOUNT_ID value)
+    cmds:
+      - gh variable set {{.CLI_ARGS}}
+
+  gh:var:sync:
+    desc: Sync repository variables from Taskfile values
+    cmds:
+      - |
+        echo "Syncing GitHub repository variables..."
+        echo ""
+        echo "Setting CF_ACCOUNT_ID={{.CF_ACCOUNT_ID}}"
+        gh variable set CF_ACCOUNT_ID --body "{{.CF_ACCOUNT_ID}}"
+        echo "Setting CF_WEB_ANALYTICS_SITE_TAG={{.CF_WEB_ANALYTICS_SITE_TAG}}"
+        gh variable set CF_WEB_ANALYTICS_SITE_TAG --body "{{.CF_WEB_ANALYTICS_SITE_TAG}}"
+        echo "Setting SITE_URL={{.URL_PRODUCTION}}"
+        gh variable set SITE_URL --body "{{.URL_PRODUCTION}}"
+        echo ""
+        echo "✓ Variables synced. Verify with: task gh:var:list"
+
   cf:delete:
     desc: "[DANGEROUS] Delete Cloudflare Pages project"
     cmds:
