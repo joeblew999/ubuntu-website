@@ -70,14 +70,14 @@ All deployments use the same codebase. No feature compromises for higher securit
 
 ## Vendor Compliance
 
-NATS JetStream is our only external dependency. Synadia (the company behind NATS) maintains SOC 2 Type I certification.
+NATS JetStream is our only external dependency. Synadia (the company behind NATS) maintains SOC 2 Type II certification.
 
 | Vendor | Certification | Compliance Platform |
 |--------|---------------|---------------------|
-| **Synadia (NATS)** | SOC 2 Type I | Vanta |
+| **Synadia (NATS)** | SOC 2 Type II | Vanta |
 
-- [View Synadia SOC 2 Report (PDF) →](/doc/synadia-soc2-type1-report.pdf)
 - [Synadia SOC 2 Type II Announcement →](https://www.synadia.com/blog/synadia-soc2-type2-compliant)
+- [View Synadia SOC 2 Type II Report (PDF) →](/doc/synadia-soc2-type2-report.pdf)
 
 **One vendor. One audit.** That's the advantage of minimal dependencies.
 
