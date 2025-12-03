@@ -155,21 +155,18 @@ tasks:
         echo "Discovering modules..."
         echo "----------------------------------------"
 
-        # Use ls with grep for Windows compatibility
-        for TF in $(ls taskfiles/*.yml 2>/dev/null | grep 'Taskfile\.' || true); do
-          [ -f "$TF" ] || continue
-          MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
+        # Discover top-level modules via task --list (works cross-platform)
+        # Pattern matches "* modulename:check:deps:" (not nested like toolchain:golang:)
+        MODULES=$(task --list 2>/dev/null | grep -E '^\* [a-z]+:check:deps:' | sed 's/^\* \([a-z]*\):check:deps:.*/\1/' | sort -u)
 
-          # Skip special modules
+        for MODULE in $MODULES; do
+          # Skip ci and toolchain (toolchain is a parent, we check its children separately)
           case "$MODULE" in
             ci|toolchain) continue ;;
           esac
 
-          # Check if module has check:deps task
-          if task --list 2>/dev/null | grep -q "^\* ${MODULE}:check:deps:"; then
-            echo "Checking $MODULE..."
-            task "${MODULE}:check:deps" || exit 1
-          fi
+          echo "Checking $MODULE..."
+          task "${MODULE}:check:deps" || exit 1
         done
 
   check:module-validate:
@@ -179,33 +176,17 @@ tasks:
         echo "Validating modules..."
         echo "----------------------------------------"
 
-        # Use ls with grep for Windows compatibility
+        # Discover all modules with check:validate (including nested like toolchain:golang)
+        MODULES=$(task --list 2>/dev/null | grep ':check:validate:' | sed 's/^\* \(.*\):check:validate:.*/\1/' | sort -u)
 
-        # First validate toolchains
-        for TF in $(ls taskfiles/toolchain/*.yml 2>/dev/null | grep 'Taskfile\.' || true); do
-          [ -f "$TF" ] || continue
-          TC=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
-          if task --list 2>/dev/null | grep -q "^\* toolchain:${TC}:check:validate:"; then
-            echo "Validating toolchain:$TC..."
-            task "toolchain:${TC}:check:validate" || exit 1
-          fi
-        done
-
-        # Then validate feature modules
-        for TF in $(ls taskfiles/*.yml 2>/dev/null | grep 'Taskfile\.' || true); do
-          [ -f "$TF" ] || continue
-          MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
-
-          # Skip special modules
+        for MODULE in $MODULES; do
+          # Skip ci module
           case "$MODULE" in
-            ci|toolchain) continue ;;
+            ci) continue ;;
           esac
 
-          # Check if module has check:validate task
-          if task --list 2>/dev/null | grep -q "^\* ${MODULE}:check:validate:"; then
-            echo "Validating $MODULE..."
-            task "${MODULE}:check:validate" || exit 1
-          fi
+          echo "Validating $MODULE..."
+          task "${MODULE}:check:validate" || exit 1
         done
 
   check:module-health:
@@ -215,21 +196,17 @@ tasks:
         echo "Running health checks..."
         echo "----------------------------------------"
 
-        # Use ls with grep for Windows compatibility
-        for TF in $(ls taskfiles/*.yml 2>/dev/null | grep 'Taskfile\.' || true); do
-          [ -f "$TF" ] || continue
-          MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
+        # Discover all modules with check:health (including nested)
+        MODULES=$(task --list 2>/dev/null | grep ':check:health:' | sed 's/^\* \(.*\):check:health:.*/\1/' | sort -u)
 
-          # Skip special modules
+        for MODULE in $MODULES; do
+          # Skip ci module (to avoid recursion)
           case "$MODULE" in
-            ci|toolchain) continue ;;
+            ci) continue ;;
           esac
 
-          # Check if module has check:health task
-          if task --list 2>/dev/null | grep -q "^\* ${MODULE}:check:health:"; then
-            echo "Health check: $MODULE..."
-            task "${MODULE}:check:health" || exit 1
-          fi
+          echo "Health check: $MODULE..."
+          task "${MODULE}:check:health" || exit 1
         done
 
   # ===========================================================================
