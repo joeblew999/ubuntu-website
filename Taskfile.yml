@@ -286,7 +286,7 @@ tasks:
         fi
         echo ""
         echo "Local URL: {{.URL_DEV}}"
-        LAN_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | head -1 | awk '{print $2}')
+        LAN_IP=$(go run ./cmd/lanip 2>/dev/null || echo "unknown")
         echo "LAN URL:   http://$LAN_IP:1313"
         echo ""
         echo "Quick Commands:"
@@ -301,7 +301,7 @@ tasks:
     desc: Start Hugo dev server with LAN IP (for mobile testing)
     cmds:
       - |
-        LAN_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | head -1 | awk '{print $2}')
+        LAN_IP=$(go run ./cmd/lanip 2>/dev/null || echo "127.0.0.1")
         echo "========================================"
         echo "Hugo Development Server (LAN Mode)"
         echo "========================================"
