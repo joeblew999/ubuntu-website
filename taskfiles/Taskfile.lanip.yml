@@ -11,8 +11,26 @@ tasks:
   # ===========================================================================
   # Checks (check:* - diagnostics for this module)
   # ===========================================================================
+  # deps     - ensure required tools are installed
   # validate - smoke test, runs in CI on change
   # health   - external system check (network reachability)
+
+  check:deps:
+    desc: Ensure Go is installed (required for lanip)
+    cmds:
+      - |
+        if command -v go >/dev/null 2>&1; then
+          echo "OK: go is installed ($(go version | cut -d' ' -f3))"
+        else
+          echo "ERROR: go is not installed"
+          echo ""
+          echo "Install Go:"
+          echo "  macOS:   brew install go"
+          echo "  Linux:   sudo apt install golang-go"
+          echo "  Windows: choco install golang"
+          echo "  Or:      https://go.dev/dl/"
+          exit 1
+        fi
 
   check:validate:
     desc: Smoke test lanip module works

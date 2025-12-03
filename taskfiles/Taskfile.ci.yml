@@ -25,7 +25,13 @@ tasks:
         echo "OS: $(uname -s 2>/dev/null || echo Windows)"
         echo ""
 
+      # Ensure dependencies are installed
+      - echo "### Dependency Check"
+      - task: :git:check:deps
+      - task: :lanip:check:deps
+
       # Validate all included modules (check:validate pattern)
+      - echo ""
       - echo "### Module Validation"
       - task: :git:check:validate
       - task: :lanip:check:validate

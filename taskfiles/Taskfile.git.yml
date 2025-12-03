@@ -11,9 +11,26 @@ tasks:
   # ===========================================================================
   # Checks (check:* - diagnostics for this module)
   # ===========================================================================
+  # deps          - ensure required tools are installed
   # validate      - smoke test, runs in CI on change
   # health        - external system check, runs on cron
   # health:fail   - test failure path (for testing notifications)
+
+  check:deps:
+    desc: Ensure git is installed (required for git module)
+    cmds:
+      - |
+        if command -v git >/dev/null 2>&1; then
+          echo "OK: git is installed ($(git --version | cut -d' ' -f3))"
+        else
+          echo "ERROR: git is not installed"
+          echo ""
+          echo "Install git:"
+          echo "  macOS:   xcode-select --install"
+          echo "  Linux:   sudo apt install git"
+          echo "  Windows: choco install git"
+          exit 1
+        fi
 
   check:validate:
     desc: Smoke test git module works
