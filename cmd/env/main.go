@@ -1,3 +1,20 @@
+// env provides environment management for the Hugo site.
+//
+// WARNING: DO NOT RUN - This tool is currently broken!
+// It expects a specific .env structure and will corrupt your .env file.
+//
+// TODO: Investigate https://github.com/helmfile/vals for proper secrets management.
+// The vals tool supports multiple backends (Vault, AWS SSM, GCP Secrets, etc.)
+// and could replace this custom implementation.
+//
+// Commands (when fixed):
+//
+//	go run cmd/env/main.go admin           # Open admin GUI
+//	go run cmd/env/main.go validate        # Fast .env validation
+//	go run cmd/env/main.go validate-deep   # Validate with API checks
+//	go run cmd/env/main.go build           # Build site with preview server
+//	go run cmd/env/main.go deploy-preview  # Deploy to Cloudflare Pages preview
+//	go run cmd/env/main.go deploy-production # Deploy to production
 package main
 
 import (
