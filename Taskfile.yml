@@ -33,6 +33,7 @@ vars:
   DIR_BIN: bin
   DIR_PLAYWRIGHT: .playwright-mcp
   DIR_VIA: .via
+  DIR_LOGS: logs
 
   # Files
   FILE_HUGO_LOCK: .hugo_build.lock
@@ -178,15 +179,65 @@ tasks:
   # Environment Management
   # ============================================================================
 
-  env:web:gui:
-    desc: "Open web GUI for environment setup"
+  env:admin:
+    desc: "Open admin GUI for environment setup (starts Caddy + Via GUI)"
     cmds:
-      - go run {{.ENV_CMD}} web-gui
+      - go run {{.ENV_CMD}} admin
 
-  env:web:gui-mock:
-    desc: "Open web GUI with mock validation (for testing)"
+  env:admin:mock:
+    desc: "Open admin GUI with mock validation (for testing)"
     cmds:
-      - go run {{.ENV_CMD}} web-gui-mock
+      - go run {{.ENV_CMD}} admin-mock
+
+  env:validate:
+    desc: "Validate .env file (fast format checks)"
+    cmds:
+      - go run {{.ENV_CMD}} validate
+
+  env:validate:deep:
+    desc: "Validate .env file with API checks"
+    cmds:
+      - go run {{.ENV_CMD}} validate-deep
+
+  env:build:
+    desc: "Build site via env manager (starts preview server with Caddy)"
+    cmds:
+      - go run {{.ENV_CMD}} build
+
+  env:deploy:preview:
+    desc: "Build + deploy to Cloudflare Pages preview"
+    cmds:
+      - go run {{.ENV_CMD}} deploy-preview
+
+  env:deploy:production:
+    desc: "Build + deploy to Cloudflare Pages production"
+    cmds:
+      - go run {{.ENV_CMD}} deploy-production
+
+  env:domain-status:
+    desc: "Check custom domain status for Cloudflare Pages"
+    cmds:
+      - go run {{.ENV_CMD}} domain-status
+
+  env:caddy:start:
+    desc: "Start local Caddy HTTPS proxy"
+    cmds:
+      - go run {{.ENV_CMD}} caddy-start
+
+  env:caddy:stop:
+    desc: "Stop local Caddy HTTPS proxy"
+    cmds:
+      - go run {{.ENV_CMD}} caddy-stop
+
+  env:caddy:status:
+    desc: "Show local Caddy status"
+    cmds:
+      - go run {{.ENV_CMD}} caddy-status
+
+  env:kill-all:
+    desc: "Stop Caddy, Hugo, and Via processes started by env manager"
+    cmds:
+      - go run {{.ENV_CMD}} kill-all
 
   # ============================================================================
   # Development
@@ -624,6 +675,9 @@ tasks:
         # Environment
         {{.FILE_ENV}}
         {{.FILE_ENV}}.*
+
+        # Logs
+        {{.DIR_LOGS}}/
 
         # Testing
         {{.DIR_PLAYWRIGHT}}/
