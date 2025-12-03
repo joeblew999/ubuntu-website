@@ -670,60 +670,7 @@ tasks:
     cmds:
       - go run ./cmd/sitecheck/ -github-issue
 
-  # ci:taskfile is in taskfiles/Taskfile.ci.yml (included as ci:*)
-
-  ci:workflow-status:
-    desc: Check recent workflow run status
-    cmds:
-      - |
-        echo "## Recent Workflow Runs"
-        echo ""
-        gh run list --limit 5 --json name,status,conclusion,createdAt \
-          --jq '.[] | "\(.name): \(.status) (\(.conclusion)) - \(.createdAt)"'
-
-  ci:validate:
-    desc: Verify bidirectional binding between workflows and ci tasks
-    cmds:
-      - |
-        echo "========================================"
-        echo "CI Binding Validation"
-        echo "========================================"
-        ERRORS=0
-
-        echo ""
-        echo "1. Workflow → Task (workflows call valid tasks)"
-        echo "----------------------------------------"
-        for TASK_CALL in $(grep -h "task ci:" .github/workflows/*.yml 2>/dev/null | grep -oE "ci:[a-z_-]+" | sort -u); do
-          if ! task --list 2>/dev/null | grep -q "^\* $TASK_CALL:"; then
-            echo "ERROR: Workflow calls '$TASK_CALL' but task doesn't exist"
-            ERRORS=$((ERRORS + 1))
-          else
-            echo "OK: $TASK_CALL"
-          fi
-        done
-
-        echo ""
-        echo "2. Task → Workflow (ci tasks have workflows)"
-        echo "----------------------------------------"
-        for TASK in $(task --list 2>/dev/null | grep "^\* ci:" | grep -v "ci:validate\|ci:workflow-status" | sed 's/\* \(ci:[a-z_-]*\):.*/\1/'); do
-          # ci:sitecheck → sitecheck.yml
-          WORKFLOW_NAME=$(echo "$TASK" | sed 's/ci://')
-          if [ ! -f ".github/workflows/${WORKFLOW_NAME}.yml" ]; then
-            echo "ERROR: Task '$TASK' has no workflow .github/workflows/${WORKFLOW_NAME}.yml"
-            ERRORS=$((ERRORS + 1))
-          else
-            echo "OK: $TASK → ${WORKFLOW_NAME}.yml"
-          fi
-        done
-
-        echo ""
-        echo "========================================"
-        if [ $ERRORS -gt 0 ]; then
-          echo "FAILED: $ERRORS error(s)"
-          exit 1
-        else
-          echo "PASSED: All bindings valid"
-        fi
+  # ci:taskfile, ci:health, ci:check:* are in taskfiles/Taskfile.ci.yml (included as ci:*)
 
   # ============================================================================
   # Code Quality

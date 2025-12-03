@@ -4,10 +4,18 @@
 # Each ci:<name> task should have a matching .github/workflows/<name>.yml
 #
 # Validation: Run `task ci:validate` to check bindings
+#
+# This file is designed to be reusable across repos via Taskfile includes.
 
 version: '3'
 
 tasks:
+  # ===========================================================================
+  # Taskfile Validation (ci:taskfile)
+  # ===========================================================================
+  # Called by taskfile.yml workflow on push/PR
+  # Runs cross-platform (Linux, macOS, Windows)
+
   taskfile:
     desc: Validate Taskfile works (used by CI matrix)
     cmds:
@@ -20,6 +28,11 @@ tasks:
       # Validate all included modules (check:validate pattern)
       - echo "### Module Validation"
       - task: :git:check:validate
+
+      # Validate workflow↔task bindings
+      - echo ""
+      - echo "### CI Binding Validation"
+      - task: check:validate
 
       - |
         echo ""
@@ -64,3 +77,62 @@ tasks:
         echo ""
 
       - task: :git:check:health:fail
+
+  # ===========================================================================
+  # Checks (check:* - diagnostics for this module)
+  # ===========================================================================
+  # validate      - verify workflow↔task bindings
+  # workflow-status - show recent workflow runs
+
+  check:validate:
+    desc: Verify bidirectional binding between workflows and ci tasks
+    cmds:
+      - |
+        echo "========================================"
+        echo "CI Binding Validation"
+        echo "========================================"
+        ERRORS=0
+
+        echo ""
+        echo "1. Workflow → Task (workflows call valid tasks)"
+        echo "----------------------------------------"
+        for TASK_CALL in $(grep -h "task ci:" .github/workflows/*.yml 2>/dev/null | grep -oE "ci:[a-z_-]+" | sort -u); do
+          if ! task --list 2>/dev/null | grep -q "^\* $TASK_CALL:"; then
+            echo "ERROR: Workflow calls '$TASK_CALL' but task doesn't exist"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "OK: $TASK_CALL"
+          fi
+        done
+
+        echo ""
+        echo "2. Task → Workflow (ci tasks have workflows)"
+        echo "----------------------------------------"
+        for TASK in $(task --list 2>/dev/null | grep "^\* ci:" | grep -v "ci:check:\|ci:health:test" | sed 's/\* \(ci:[a-z_-]*\):.*/\1/' | sort -u); do
+          # ci:sitecheck → sitecheck.yml
+          WORKFLOW_NAME=$(echo "$TASK" | sed 's/ci://')
+          if [ ! -f ".github/workflows/${WORKFLOW_NAME}.yml" ]; then
+            echo "ERROR: Task '$TASK' has no workflow .github/workflows/${WORKFLOW_NAME}.yml"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "OK: $TASK → ${WORKFLOW_NAME}.yml"
+          fi
+        done
+
+        echo ""
+        echo "========================================"
+        if [ $ERRORS -gt 0 ]; then
+          echo "FAILED: $ERRORS error(s)"
+          exit 1
+        else
+          echo "PASSED: All bindings valid"
+        fi
+
+  check:workflow-status:
+    desc: Check recent workflow run status
+    cmds:
+      - |
+        echo "## Recent Workflow Runs"
+        echo ""
+        gh run list --limit 5 --json name,status,conclusion,createdAt \
+          --jq '.[] | "\(.name): \(.status) (\(.conclusion)) - \(.createdAt)"'
