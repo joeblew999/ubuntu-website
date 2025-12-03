@@ -1,0 +1,133 @@
+# Git Tasks
+#
+# Cross-platform git workflow tasks.
+# Pure git commands - works on macOS, Linux, Windows.
+
+version: '3'
+
+tasks:
+  status:
+    desc: Show git status and recent commits
+    cmds:
+      - |
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+
+        echo "========================================"
+        echo "GIT STATUS"
+        echo "========================================"
+        echo ""
+        echo "========== CURRENT BRANCH =========="
+        if [ "$CURRENT_BRANCH" = "main" ]; then
+          echo "WARNING: Branch: MAIN (production)"
+        else
+          echo "Branch: $CURRENT_BRANCH (preview)"
+        fi
+        echo "===================================="
+        echo ""
+      - git status
+      - 'echo ""'
+      - 'echo "Recent commits:"'
+      - git log --oneline -5
+
+  commit:
+    desc: Generate gitignore, commit and push changes (triggers Cloudflare deployment)
+    cmds:
+      - |
+        # Check current branch
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+
+        echo ""
+        echo "========================================"
+        echo "GIT COMMIT & PUSH"
+        echo "========================================"
+        echo "Branch: $CURRENT_BRANCH"
+        echo ""
+
+        if [ "$CURRENT_BRANCH" = "main" ]; then
+          echo "WARNING WARNING WARNING WARNING WARNING"
+          echo ""
+          echo "You are committing to MAIN branch!"
+          echo "This will trigger PRODUCTION deployment"
+          echo "to: {{.URL_PRODUCTION}}"
+          echo ""
+          echo "WARNING WARNING WARNING WARNING WARNING"
+          echo ""
+          echo "Press Ctrl+C to cancel, or"
+          read -p "Type 'DEPLOY' to continue: " CONFIRM
+          if [ "$CONFIRM" != "DEPLOY" ]; then
+            echo "Cancelled."
+            exit 1
+          fi
+        else
+          echo "Safe: Preview deployment only"
+        fi
+      - task: :generate:gitignore
+      - git add -A
+      - git diff --cached --stat
+      - 'echo ""'
+      - |
+        # Get commit message
+        if [ -n "{{.MESSAGE}}" ]; then
+          MSG="{{.MESSAGE}}"
+        else
+          read -p "Commit message: " MSG
+          if [ -z "$MSG" ]; then
+            MSG="Update site"
+          fi
+        fi
+        git commit -m "$MSG"
+      - git push
+      - 'echo ""'
+      - 'echo "Deployment triggered. Check status with: task cf:status"'
+
+  deploy:
+    desc: Quick commit and deploy to Cloudflare Pages
+    cmds:
+      - task: commit
+        vars:
+          MESSAGE: '{{.MESSAGE | default "Update site"}}'
+
+  preview:
+    desc: Create a preview branch for testing (triggers preview deployment)
+    cmds:
+      - git checkout -b preview/{{.BRANCH}}
+      - git push -u origin preview/{{.BRANCH}}
+      - |
+        COMMIT=$(git rev-parse --short HEAD)
+
+        echo ""
+        echo "========================================"
+        echo "Preview Branch Created"
+        echo "========================================"
+        echo "Branch: preview/{{.BRANCH}}"
+        echo ""
+        echo "Preview URLs (after deployment):"
+        echo "  Main: {{.URL_PREVIEW}}"
+        echo "  Commit: https://$COMMIT.ubuntu-website.pages.dev"
+        echo ""
+        echo "Dashboard: {{.CF_DASH_PAGES}}"
+        echo ""
+        echo "Quick Commands:"
+        echo "  task cf:status  - Check deployment status"
+        echo "  task cf:logs    - View deployment logs"
+        echo "========================================"
+    requires:
+      vars: [BRANCH]
+
+  cleanup-preview:
+    desc: Delete a preview branch
+    cmds:
+      - git checkout main
+      - git branch -D preview/{{.BRANCH}}
+      - git push origin --delete preview/{{.BRANCH}}
+      - 'echo "Deleted preview branch: preview/{{.BRANCH}}"'
+    requires:
+      vars: [BRANCH]
+
+  sync:
+    desc: Sync with remote and show deployment status
+    cmds:
+      - git pull
+      - 'echo ""'
+      - 'echo "Latest deployments:"'
+      - task: :cf:logs
