@@ -151,6 +151,34 @@ Keep aliases for 6+ months to preserve bookmarks and search rankings.
 
 **Config**: `refLinksErrorLevel = "error"` in hugo.toml ensures broken relrefs fail the build.
 
+### SEO & Structured Data
+
+**SEO is automatic** - every page gets JSON-LD schema, Open Graph, and Twitter cards via `layouts/_partials/basic-seo.html`.
+
+Schema types applied:
+- **Homepage**: Organization (company info, founder, social links)
+- **Blog posts**: Article (headline, author, dates, publisher)
+- **Other pages**: WebPage (name, description, publisher)
+- **All non-home pages**: BreadcrumbList (navigation hierarchy)
+
+**When creating/editing content**, ensure these front matter fields are set:
+
+```yaml
+---
+title: "Page Title"           # Required - used in breadcrumbs
+meta_title: "SEO Title | Ubuntu Software"  # Optional - overrides title in <title> tag
+description: "150-160 char description for search results and social sharing"
+image: "images/page-image.png"  # Optional - for blog posts, used in Article schema
+author: "Gerard Webb"           # For blog posts
+---
+```
+
+**Validation tools:**
+- Rich Results Test: https://search.google.com/test/rich-results
+- Schema Validator: https://validator.schema.org/
+
+**robots.txt**: Custom file at `static/robots.txt` - explicitly allows all AI crawlers.
+
 ### Theme Upgrade Policy
 
 **DO NOT modify theme CSS, Tailwind config, or `data/theme.json`** - keep upgrades easy.
