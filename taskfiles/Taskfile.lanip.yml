@@ -16,19 +16,47 @@ tasks:
   # health   - external system check (network reachability)
 
   check:deps:
-    desc: Ensure Go is installed (required for lanip)
+    desc: Ensure Go is installed (installs if missing)
     cmds:
       - |
         if command -v go >/dev/null 2>&1; then
-          echo "OK: go is installed ($(go version | cut -d' ' -f3))"
+          echo "OK: go $(go version | cut -d' ' -f3)"
+          exit 0
+        fi
+
+        echo "Installing Go..."
+
+        # Detect OS and install
+        case "$(uname -s)" in
+          Darwin)
+            if command -v brew >/dev/null 2>&1; then
+              brew install go
+            else
+              echo "ERROR: brew not found. Install from https://go.dev/dl/"
+              exit 1
+            fi
+            ;;
+          Linux)
+            if command -v apt-get >/dev/null 2>&1; then
+              sudo apt-get update && sudo apt-get install -y golang-go
+            elif command -v yum >/dev/null 2>&1; then
+              sudo yum install -y golang
+            else
+              echo "ERROR: No package manager found. Install from https://go.dev/dl/"
+              exit 1
+            fi
+            ;;
+          *)
+            echo "ERROR: Unsupported OS. Install Go from https://go.dev/dl/"
+            exit 1
+            ;;
+        esac
+
+        # Verify installation
+        if command -v go >/dev/null 2>&1; then
+          echo "OK: go $(go version | cut -d' ' -f3) installed"
         else
-          echo "ERROR: go is not installed"
-          echo ""
-          echo "Install Go:"
-          echo "  macOS:   brew install go"
-          echo "  Linux:   sudo apt install golang-go"
-          echo "  Windows: choco install golang"
-          echo "  Or:      https://go.dev/dl/"
+          echo "ERROR: Go installation failed"
           exit 1
         fi
 

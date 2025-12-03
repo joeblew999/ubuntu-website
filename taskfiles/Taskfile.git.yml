@@ -17,18 +17,47 @@ tasks:
   # health:fail   - test failure path (for testing notifications)
 
   check:deps:
-    desc: Ensure git is installed (required for git module)
+    desc: Ensure git is installed (installs if missing)
     cmds:
       - |
         if command -v git >/dev/null 2>&1; then
-          echo "OK: git is installed ($(git --version | cut -d' ' -f3))"
+          echo "OK: git $(git --version | cut -d' ' -f3)"
+          exit 0
+        fi
+
+        echo "Installing git..."
+
+        # Detect OS and install
+        case "$(uname -s)" in
+          Darwin)
+            xcode-select --install 2>/dev/null || true
+            # Wait for install
+            until command -v git >/dev/null 2>&1; do
+              echo "Waiting for Xcode CLI tools..."
+              sleep 5
+            done
+            ;;
+          Linux)
+            if command -v apt-get >/dev/null 2>&1; then
+              sudo apt-get update && sudo apt-get install -y git
+            elif command -v yum >/dev/null 2>&1; then
+              sudo yum install -y git
+            else
+              echo "ERROR: No package manager found"
+              exit 1
+            fi
+            ;;
+          *)
+            echo "ERROR: Unsupported OS"
+            exit 1
+            ;;
+        esac
+
+        # Verify installation
+        if command -v git >/dev/null 2>&1; then
+          echo "OK: git $(git --version | cut -d' ' -f3) installed"
         else
-          echo "ERROR: git is not installed"
-          echo ""
-          echo "Install git:"
-          echo "  macOS:   xcode-select --install"
-          echo "  Linux:   sudo apt install git"
-          echo "  Windows: choco install git"
+          echo "ERROR: Git installation failed"
           exit 1
         fi
 
