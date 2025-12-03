@@ -775,6 +775,11 @@ tasks:
     cmds:
       - open {{.CF_DASH_DOMAIN}}
 
+  cf:open:ai-audit:
+    desc: Open Cloudflare AI Audit settings (configure AI bot access)
+    cmds:
+      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/ubuntusoftware.net/ai-audit"
+
   cf:purge:
     desc: Purge Cloudflare CDN cache
     cmds:
