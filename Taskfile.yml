@@ -1,5 +1,18 @@
 version: '3'
 
+# =============================================================================
+# TASK DEPENDENCIES (what calls what)
+# =============================================================================
+#
+#   setup           → install:hugo, install:bun, install:deps
+#   sitecheck:all   → sitecheck:dns, sitecheck:tcp, sitecheck:redirect, sitecheck
+#   git:deploy      → git:commit
+#   git:commit      → generate:gitignore
+#   git:sync        → cf:logs
+#
+# Everything else is a leaf task (runs commands directly)
+# =============================================================================
+
 dotenv: ['.env']
 
 vars:
@@ -627,6 +640,32 @@ tasks:
         gh run list --limit 5 --json name,status,conclusion,createdAt \
           --jq '.[] | "\(.name): \(.status) (\(.conclusion)) - \(.createdAt)"'
 
+  ci:validate:
+    desc: Verify GitHub workflows call valid Taskfile tasks
+    cmds:
+      - |
+        echo "Checking workflow task references..."
+        ERRORS=0
+
+        # Extract task names from workflows
+        for TASK_CALL in $(grep -h "task " .github/workflows/*.yml 2>/dev/null | grep -v "^#" | grep -oE "task [a-z:_-]+" | sed 's/task //' | sort -u); do
+          # Check if task exists
+          if ! task --list 2>/dev/null | grep -q "^\* $TASK_CALL:"; then
+            echo "ERROR: Task '$TASK_CALL' referenced in workflow but not found in Taskfile"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "OK: $TASK_CALL"
+          fi
+        done
+
+        if [ $ERRORS -gt 0 ]; then
+          echo ""
+          echo "Found $ERRORS invalid task reference(s)"
+          exit 1
+        fi
+        echo ""
+        echo "All workflow task references are valid"
+
   # ============================================================================
   # Code Quality
   # ============================================================================
@@ -958,8 +997,8 @@ tasks:
   # Site Check (cmd/sitecheck)
   # ============================================================================
 
-  sitecheck:run:
-    desc: Check site HTTP reachability from all global locations
+  sitecheck:
+    desc: Check site HTTP reachability from all global locations (default)
     cmds:
       - go run ./cmd/sitecheck/
 
@@ -981,7 +1020,10 @@ tasks:
   sitecheck:all:
     desc: Run all site checks (DNS, TCP, Redirect, HTTP)
     cmds:
-      - go run ./cmd/sitecheck/ -type all
+      - task: sitecheck:dns
+      - task: sitecheck:tcp
+      - task: sitecheck:redirect
+      - task: sitecheck
 
   # ============================================================================
   # Help

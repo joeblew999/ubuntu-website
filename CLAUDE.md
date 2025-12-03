@@ -15,17 +15,26 @@ USE TASKFILE - it makes conventions for development.
 - All secrets/config should be in `.env` (gitignored)
 - `.env.test` provides template with placeholder values
 
-**Namespace Convention:**
-- Task namespaces match `cmd/` tool names for consistency
-- `cmd/analytics` → `analytics:*` tasks
-- `cmd/sitecheck` → `sitecheck:*` tasks
-- `cmd/genlogo` → `genlogo:*` tasks
-- `cmd/env` → `env:*` tasks
+**Naming Convention (everything aligned):**
+
+| Component | Pattern | Example |
+|-----------|---------|---------|
+| cmd/ tool | `cmd/<name>` | `cmd/analytics` |
+| Taskfile tasks | `<name>:*` | `analytics:report` |
+| Workflow file | `<name>.yml` | `analytics.yml` |
+| CI task | `ci:<name>` | `ci:analytics` |
+
+**Task Suffixes:**
+- `namespace:action` - Leaf task (`sitecheck:dns`)
+- `namespace:all` - Calls other tasks in namespace (`sitecheck:all`)
+- `namespace` (bare) - Default action (`sitecheck`)
+
+**Task Dependencies** (see Taskfile header for full list)
 
 **DRY Principle - GitHub Actions:**
-- GitHub Actions should call Taskfile tasks, not run commands directly
+- GitHub Actions call Taskfile tasks, not run commands directly
 - This ensures local `task X` runs the same as CI
-- Pattern: `run: task ci:<toolname>` in workflows
+- Pattern: `run: task ci:<name>` in workflows
 
 **CI Tasks:**
 - `ci:*` namespace is the interface for GitHub Actions
