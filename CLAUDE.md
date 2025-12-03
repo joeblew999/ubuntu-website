@@ -6,14 +6,37 @@
 
 Apex domain (`ubuntusoftware.net`) redirects to www via Cloudflare redirect rule.
 
-USE TASKFILE - it makes conventions for development...
+USE TASKFILE - it makes conventions for development.
+
+### Taskfile Conventions
+
+**Environment Variables:**
+- Taskfile loads `.env` automatically via `dotenv: ['.env']`
+- All secrets/config should be in `.env` (gitignored)
+- `.env.test` provides template with placeholder values
+
+**Namespace Convention:**
+- Task namespaces match `cmd/` tool names for consistency
+- `cmd/analytics` → `analytics:*` tasks
+- `cmd/sitecheck` → `sitecheck:*` tasks
+- `cmd/genlogo` → `genlogo:*` tasks
+- `cmd/env` → `env:*` tasks
+
+**DRY Principle - GitHub Actions:**
+- GitHub Actions should call Taskfile tasks, not run commands directly
+- This ensures local `task X` runs the same as CI
+- Pattern: `run: task ci:<toolname>` in workflows
+
+**CI Tasks:**
+- `ci:*` namespace is the interface for GitHub Actions
+- These tasks output markdown and use exit codes for workflow control
 
 ### Branding Assets
 
 **IMPORTANT:** Logo SVGs are generated from Go code, NOT edited directly!
 
 - Source of truth: `cmd/genlogo/main.go`
-- Regenerate: `task generate:assets`
+- Regenerate: `task genlogo:all`
 - Generated files: `assets/images/logo.svg`, `logo-darkmode.svg`, `favicon.png`, `og-image.png`
 - DO NOT edit SVG files directly - changes will be overwritten
 

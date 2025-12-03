@@ -1,5 +1,13 @@
 # todo
 
+---
+
+BLUESKY_APP_PASSWORD 
+
+I was lazy and did not put it into .env !!!
+
+---
+
 logs folder is big and not gitignored ? is useful though to keep around ?
 
 ---

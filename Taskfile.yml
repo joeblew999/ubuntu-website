@@ -162,10 +162,10 @@ tasks:
       - go mod download
 
   # ============================================================================
-  # Asset Generation (uses Go genlogo tool - no external dependencies)
+  # Logo Generation (cmd/genlogo)
   # ============================================================================
 
-  generate:assets:
+  genlogo:all:
     desc: Generate all branding assets (favicon, logos, og-image, email-logo, avatar, banner)
     cmds:
       - go run cmd/genlogo/main.go -asset all
@@ -939,46 +939,46 @@ tasks:
       - echo "2. Copy verification TXT record to Cloudflare DNS"
       - echo "3. Cloudflare Analytics - Enable Web Analytics (one click)"
 
-  seo:report:
+  analytics:report:
     desc: Check analytics and report changes (>20% threshold)
     cmds:
       - go run ./cmd/analytics/
 
-  seo:report:verbose:
+  analytics:report:verbose:
     desc: Check analytics with verbose output
     cmds:
       - go run ./cmd/analytics/ -v
 
-  seo:report:webhook:
+  analytics:report:webhook:
     desc: Post analytics changes to webhook (set ANALYTICS_WEBHOOK_URL)
     cmds:
       - go run ./cmd/analytics/ -webhook "$ANALYTICS_WEBHOOK_URL"
 
   # ============================================================================
-  # Site Monitoring
+  # Site Check (cmd/sitecheck)
   # ============================================================================
 
-  site:check:
+  sitecheck:run:
     desc: Check site HTTP reachability from all global locations
     cmds:
       - go run ./cmd/sitecheck/
 
-  site:check:dns:
+  sitecheck:dns:
     desc: Check DNS resolution from all global locations
     cmds:
       - go run ./cmd/sitecheck/ -type dns
 
-  site:check:tcp:
+  sitecheck:tcp:
     desc: Check TCP port 443 from all global locations
     cmds:
       - go run ./cmd/sitecheck/ -type tcp
 
-  site:check:redirect:
+  sitecheck:redirect:
     desc: Check apex domain redirects to www
     cmds:
       - go run ./cmd/sitecheck/ -type redirect
 
-  site:check:all:
+  sitecheck:all:
     desc: Run all site checks (DNS, TCP, Redirect, HTTP)
     cmds:
       - go run ./cmd/sitecheck/ -type all
