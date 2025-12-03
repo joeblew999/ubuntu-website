@@ -115,8 +115,14 @@ tasks:
         echo "----------------------------------------"
 
         # Collect unique toolchains from all module REQUIRES
+        # Use find instead of shell globs for Windows compatibility
         TOOLCHAINS=""
-        for TF in taskfiles/Taskfile.*.yml taskfiles/toolchain/Taskfile.*.yml; do
+
+        # Find all taskfiles
+        TASKFILES=$(find taskfiles -maxdepth 1 -name 'Taskfile.*.yml' 2>/dev/null || true)
+        TOOLCHAIN_FILES=$(find taskfiles/toolchain -maxdepth 1 -name 'Taskfile.*.yml' 2>/dev/null || true)
+
+        for TF in $TASKFILES $TOOLCHAIN_FILES; do
           [ -f "$TF" ] || continue
           REQUIRES=$(grep "^# REQUIRES:" "$TF" 2>/dev/null | sed 's/# REQUIRES: //')
           for REQ in $REQUIRES; do
@@ -152,7 +158,10 @@ tasks:
         echo "Discovering modules..."
         echo "----------------------------------------"
 
-        for TF in taskfiles/Taskfile.*.yml; do
+        # Use find instead of shell globs for Windows compatibility
+        TASKFILES=$(find taskfiles -maxdepth 1 -name 'Taskfile.*.yml' 2>/dev/null || true)
+
+        for TF in $TASKFILES; do
           [ -f "$TF" ] || continue
           MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
 
@@ -175,8 +184,11 @@ tasks:
         echo "Validating modules..."
         echo "----------------------------------------"
 
+        # Use find instead of shell globs for Windows compatibility
+
         # First validate toolchains
-        for TF in taskfiles/toolchain/Taskfile.*.yml; do
+        TOOLCHAIN_FILES=$(find taskfiles/toolchain -maxdepth 1 -name 'Taskfile.*.yml' 2>/dev/null || true)
+        for TF in $TOOLCHAIN_FILES; do
           [ -f "$TF" ] || continue
           TC=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
           if task --list 2>/dev/null | grep -q "^\* toolchain:${TC}:check:validate:"; then
@@ -186,7 +198,8 @@ tasks:
         done
 
         # Then validate feature modules
-        for TF in taskfiles/Taskfile.*.yml; do
+        TASKFILES=$(find taskfiles -maxdepth 1 -name 'Taskfile.*.yml' 2>/dev/null || true)
+        for TF in $TASKFILES; do
           [ -f "$TF" ] || continue
           MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
 
@@ -209,7 +222,10 @@ tasks:
         echo "Running health checks..."
         echo "----------------------------------------"
 
-        for TF in taskfiles/Taskfile.*.yml; do
+        # Use find instead of shell globs for Windows compatibility
+        TASKFILES=$(find taskfiles -maxdepth 1 -name 'Taskfile.*.yml' 2>/dev/null || true)
+
+        for TF in $TASKFILES; do
           [ -f "$TF" ] || continue
           MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
 
@@ -245,7 +261,18 @@ tasks:
         echo ""
         echo "1. Workflow → Task (workflows call valid tasks)"
         echo "----------------------------------------"
-        for TASK_CALL in $(grep -h "task ci:" .github/workflows/*.yml 2>/dev/null | grep -oE "ci:[a-z_-]+" | sort -u); do
+
+        # Use find instead of shell globs for Windows compatibility
+        WORKFLOWS=$(find .github/workflows -maxdepth 1 -name '*.yml' 2>/dev/null || true)
+        TASK_CALLS=""
+        for WF in $WORKFLOWS; do
+          [ -f "$WF" ] || continue
+          CALLS=$(grep "task ci:" "$WF" 2>/dev/null | grep -oE "ci:[a-z_-]+" || true)
+          TASK_CALLS="$TASK_CALLS $CALLS"
+        done
+
+        for TASK_CALL in $(echo "$TASK_CALLS" | tr ' ' '\n' | sort -u); do
+          [ -z "$TASK_CALL" ] && continue
           if ! task --list 2>/dev/null | grep -q "^\* $TASK_CALL:"; then
             echo "ERROR: Workflow calls '$TASK_CALL' but task doesn't exist"
             ERRORS=$((ERRORS + 1))
@@ -302,8 +329,12 @@ tasks:
 
         # Collect required secrets from workflow comments
         # Pattern: "# Required secrets:" followed by "#   - SECRET_NAME"
+
+        # Use find instead of shell globs for Windows compatibility
         REQUIRED_SECRETS=""
-        for WF in .github/workflows/*.yml; do
+        WORKFLOWS=$(find .github/workflows -maxdepth 1 -name '*.yml' 2>/dev/null || true)
+
+        for WF in $WORKFLOWS; do
           [ -f "$WF" ] || continue
           WF_NAME=$(basename "$WF")
 
@@ -388,8 +419,12 @@ tasks:
         echo "Module requirements (from REQUIRES comments):"
         echo "----------------------------------------"
 
+        # Use find instead of shell globs for Windows compatibility
         ALL_TOOLCHAINS=""
-        for TF in taskfiles/Taskfile.*.yml taskfiles/toolchain/Taskfile.*.yml; do
+        TASKFILES=$(find taskfiles -maxdepth 1 -name 'Taskfile.*.yml' 2>/dev/null || true)
+        TOOLCHAIN_FILES=$(find taskfiles/toolchain -maxdepth 1 -name 'Taskfile.*.yml' 2>/dev/null || true)
+
+        for TF in $TASKFILES $TOOLCHAIN_FILES; do
           [ -f "$TF" ] || continue
           MODULE=$(basename "$TF" | sed 's/Taskfile\.\(.*\)\.yml/\1/')
           REQUIRES=$(grep "^# REQUIRES:" "$TF" 2>/dev/null | sed 's/# REQUIRES: //')
@@ -419,7 +454,10 @@ tasks:
         echo "Checking workflows..."
         echo "----------------------------------------"
 
-        for WF in .github/workflows/*.yml; do
+        # Use find instead of shell globs for Windows compatibility
+        WORKFLOWS=$(find .github/workflows -maxdepth 1 -name '*.yml' 2>/dev/null || true)
+
+        for WF in $WORKFLOWS; do
           [ -f "$WF" ] || continue
           WF_NAME=$(basename "$WF")
 

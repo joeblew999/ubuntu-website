@@ -40,7 +40,9 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate Taskfile syntax
+        shell: bash
         run: task --list
 
       - name: Run ci:taskfile task
+        shell: bash
         run: task ci:taskfile
