@@ -10,6 +10,7 @@ tasks:
   # Checks (check:* - diagnostics for this module)
   # ===========================================================================
   # validate - smoke test, runs in CI on change
+  # health   - external system check (network reachability)
 
   check:validate:
     desc: Smoke test lanip module works
@@ -23,6 +24,19 @@ tasks:
         fi
         echo "LAN IP: $LAN_IP"
         echo "lanip:check:validate passed"
+
+  check:health:
+    desc: Check network connectivity (can reach external DNS)
+    cmds:
+      - |
+        echo "Checking network health..."
+        LAN_IP=$(go run ./cmd/lanip 2>&1)
+        if [ $? -ne 0 ] || [ -z "$LAN_IP" ]; then
+          echo "lanip:check:health FAILED: No LAN IP detected"
+          exit 1
+        fi
+        echo "LAN IP: $LAN_IP"
+        echo "lanip:check:health passed"
 
   # ===========================================================================
   # Tasks

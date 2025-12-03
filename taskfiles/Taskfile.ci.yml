@@ -57,6 +57,7 @@ tasks:
 
       - echo "### Module Health Checks"
       - task: :git:check:health
+      - task: :lanip:check:health
 
       # Add more health checks as modules are added:
       # - task: :hugo:check:health
