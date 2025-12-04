@@ -220,3 +220,44 @@ tasks:
           exit 1
         fi
         {{.GH_BIN}} api "$ENDPOINT"
+
+  # ===========================================================================
+  # Repository Secrets & Variables
+  # ===========================================================================
+  # Secrets: Encrypted, for sensitive values (API tokens)
+  # Variables: Plain text, for non-sensitive config (account IDs, URLs)
+
+  secret:list:
+    desc: List GitHub repository secrets
+    cmds:
+      - '{{.GH_BIN}} secret list'
+
+  secret:set:
+    desc: Set a GitHub repository secret (e.g., task tools:gh:secret:set -- CLOUDFLARE_API_TOKEN)
+    cmds:
+      - '{{.GH_BIN}} secret set {{.CLI_ARGS}}'
+
+  var:list:
+    desc: List GitHub repository variables
+    cmds:
+      - '{{.GH_BIN}} variable list'
+
+  var:set:
+    desc: Set a GitHub repository variable (e.g., task tools:gh:var:set -- CF_ACCOUNT_ID value)
+    cmds:
+      - '{{.GH_BIN}} variable set {{.CLI_ARGS}}'
+
+  var:sync:
+    desc: Sync repository variables from Taskfile values
+    cmds:
+      - |
+        echo "Syncing GitHub repository variables..."
+        echo ""
+        echo "Setting CF_ACCOUNT_ID={{.CF_ACCOUNT_ID}}"
+        {{.GH_BIN}} variable set CF_ACCOUNT_ID --body "{{.CF_ACCOUNT_ID}}"
+        echo "Setting CF_WEB_ANALYTICS_SITE_TAG={{.CF_WEB_ANALYTICS_SITE_TAG}}"
+        {{.GH_BIN}} variable set CF_WEB_ANALYTICS_SITE_TAG --body "{{.CF_WEB_ANALYTICS_SITE_TAG}}"
+        echo "Setting SITE_URL={{.URL_PRODUCTION}}"
+        {{.GH_BIN}} variable set SITE_URL --body "{{.URL_PRODUCTION}}"
+        echo ""
+        echo "✓ Variables synced. Verify with: task tools:gh:var:list"

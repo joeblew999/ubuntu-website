@@ -1,40 +1,68 @@
 version: '3'
 
 # =============================================================================
-# TASK DEPENDENCIES (what calls what)
+# Ubuntu Website - Root Taskfile
 # =============================================================================
 #
-#   setup           → install:hugo, install:bun, install:deps
-#   sitecheck:all   → sitecheck:dns, sitecheck:tcp, sitecheck:redirect, sitecheck
-#   git:deploy      → git:commit
-#   git:commit      → generate:gitignore
-#   git:sync        → cf:logs
-#   cf:deploy       → hugo:build
+# This is the root Taskfile that includes all domain-specific modules.
+# Most tasks are defined in taskfiles/*.yml for organization.
 #
-#   Aliases (backward compat):
-#   build           → hugo:build
-#   dev             → hugo:dev
-#   dev:lan         → hugo:dev:lan
-#   preview         → hugo:preview
-#   clean           → hugo:clean
+# Quick Reference:
+#   task                 - Show project info
+#   task dev             - Start Hugo dev server
+#   task build           - Build production site
+#   task git:deploy      - Commit and deploy
+#   task help            - List all tasks
 #
-# Everything else is a leaf task (runs commands directly)
+# Module Namespaces:
+#   hugo:*      - Hugo static site generator
+#   cf:*        - Cloudflare Pages management
+#   git:*       - Git operations
+#   translate:* - Translation workflow
+#   seo:*       - SEO & analytics
+#   sitecheck:* - Site reachability checks
+#   env:*       - Environment management
+#   url:*       - URL shortcuts
+#   tools:*     - Cross-platform tools (xplat, gh, task)
+#   toolchain:* - Compilers/runtimes (golang, rust)
+#   ci:*        - CI interface tasks
+#
 # =============================================================================
 
-# Includes (modular task files)
+# =============================================================================
+# Includes
+# =============================================================================
+
 includes:
-  # Tools (cross-platform utilities)
-  # Usage: task tools:xplat:check:deps
-  tools: ./taskfiles/Taskfile.tools.yml
-  # Toolchains (compilers/runtimes) - nested namespace
-  # Usage: task toolchain:golang:check:deps, task toolchain:rust:check:deps
-  toolchain: ./taskfiles/Taskfile.toolchain.yml
-  # Feature modules
-  ci: ./taskfiles/Taskfile.ci.yml
+  # Domain modules
+  hugo: ./taskfiles/Taskfile.hugo.yml
+  cf: ./taskfiles/Taskfile.cf.yml
+  translate: ./taskfiles/Taskfile.translate.yml
+  seo: ./taskfiles/Taskfile.seo.yml
+  sitecheck: ./taskfiles/Taskfile.sitecheck.yml
+  env: ./taskfiles/Taskfile.env.yml
+  url: ./taskfiles/Taskfile.url.yml
+
+  # Infrastructure modules
   git: ./taskfiles/Taskfile.git.yml
   lanip: ./taskfiles/Taskfile.lanip.yml
+  ci: ./taskfiles/Taskfile.ci.yml
 
-dotenv: ['.env']
+  # Tools & Toolchains
+  tools: ./taskfiles/Taskfile.tools.yml
+  toolchain: ./taskfiles/Taskfile.toolchain.yml
+
+# =============================================================================
+# Environment
+# =============================================================================
+
+dotenv:
+  - '.env'
+  - 'versions.env'
+
+# =============================================================================
+# Variables
+# =============================================================================
 
 vars:
   # Project
@@ -82,16 +110,20 @@ vars:
   HUGO_PREVIEW_FLAGS: -e production --minify
 
   # Go
-  GO_VERSION: "1.24"
+  GO_VERSION: "1.25"
   CGO_ENABLED: "1"
 
   # Wrangler
   WRANGLER_CMD: bunx wrangler
 
+# =============================================================================
+# Tasks
+# =============================================================================
+
 tasks:
-  # ============================================================================
+  # ===========================================================================
   # Default & Info
-  # ============================================================================
+  # ===========================================================================
 
   default:
     desc: Show project information (runs when you type 'task')
@@ -145,18 +177,23 @@ tasks:
         echo ""
         echo "Quick Commands:"
         echo "  task setup             - Install Hugo, Bun, dependencies"
-        echo "  task hugo:dev          - Start development server (or: task dev)"
+        echo "  task dev               - Start development server"
         echo "  task url:dev           - Open local dev in browser"
-        echo "  task hugo:build        - Build production site (or: task build)"
+        echo "  task build             - Build production site"
         echo "  task git:deploy        - Commit and deploy to production"
         echo "  task cf:status         - Check deployment status"
         echo "  task url:prod          - Open production site"
         echo "  task help              - Show all available tasks"
         echo "========================================"
 
-  # ============================================================================
+  help:
+    desc: Show help
+    cmds:
+      - task --list
+
+  # ===========================================================================
   # Setup & Installation
-  # ============================================================================
+  # ===========================================================================
 
   setup:
     desc: Complete setup - install Hugo, Bun, and dependencies
@@ -195,148 +232,10 @@ tasks:
       - bun install
       - go mod download
 
-  # ============================================================================
-  # Logo Generation (cmd/genlogo)
-  # ============================================================================
-
-  genlogo:all:
-    desc: Generate all branding assets (favicon, logos, og-image, email-logo, avatar, banner)
-    cmds:
-      - go run cmd/genlogo/main.go -asset all
-      - echo ""
-      - echo "✓ Assets generated. Next steps:"
-      - echo "  1. Deploy website (task cf:deploy) - updates Hugo site with new favicon, logos, og-image"
-      - echo "  2. Gmail signature - re-upload email-logo.png at https://mail.google.com/mail/u/0/#settings/general"
-      - echo "  3. Bluesky profile - re-upload avatar & banner at https://bsky.app/profile/ubuntusoftware.net"
-
-  # ============================================================================
-  # Environment Management
-  # ============================================================================
-
-  env:admin:
-    desc: "Open admin GUI for environment setup (starts Caddy + Via GUI)"
-    cmds:
-      - go run {{.ENV_CMD}} admin
-
-  env:admin:mock:
-    desc: "Open admin GUI with mock validation (for testing)"
-    cmds:
-      - go run {{.ENV_CMD}} admin-mock
-
-  env:validate:
-    desc: "Validate .env file (fast format checks)"
-    cmds:
-      - go run {{.ENV_CMD}} validate
-
-  env:validate:deep:
-    desc: "Validate .env file with API checks"
-    cmds:
-      - go run {{.ENV_CMD}} validate-deep
-
-  env:build:
-    desc: "Build site via env manager (starts preview server with Caddy)"
-    cmds:
-      - go run {{.ENV_CMD}} build
-
-  env:deploy:preview:
-    desc: "Build + deploy to Cloudflare Pages preview"
-    cmds:
-      - go run {{.ENV_CMD}} deploy-preview
-
-  env:deploy:production:
-    desc: "Build + deploy to Cloudflare Pages production"
-    cmds:
-      - go run {{.ENV_CMD}} deploy-production
-
-  env:domain-status:
-    desc: "Check custom domain status for Cloudflare Pages"
-    cmds:
-      - go run {{.ENV_CMD}} domain-status
-
-  env:caddy:start:
-    desc: "Start local Caddy HTTPS proxy"
-    cmds:
-      - go run {{.ENV_CMD}} caddy-start
-
-  env:caddy:stop:
-    desc: "Stop local Caddy HTTPS proxy"
-    cmds:
-      - go run {{.ENV_CMD}} caddy-stop
-
-  env:caddy:status:
-    desc: "Show local Caddy status"
-    cmds:
-      - go run {{.ENV_CMD}} caddy-status
-
-  env:kill-all:
-    desc: "Stop Caddy, Hugo, and Via processes started by env manager"
-    cmds:
-      - go run {{.ENV_CMD}} kill-all
-
-  # ============================================================================
-  # Hugo (external binary)
-  # ============================================================================
-
-  hugo:dev:
-    desc: Start Hugo development server
-    cmds:
-      - |
-        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
-
-        echo "========================================"
-        echo "Hugo Development Server"
-        echo "========================================"
-        echo ""
-        if [ "$CURRENT_BRANCH" = "main" ]; then
-          echo "Branch: MAIN (production)"
-        else
-          echo "Branch: $CURRENT_BRANCH (preview)"
-        fi
-        echo ""
-        echo "Local URL: {{.URL_DEV}}"
-        LAN_IP=$(go run ./cmd/lanip 2>/dev/null || echo "unknown")
-        echo "LAN URL:   http://$LAN_IP:1313"
-        echo ""
-        echo "Quick Commands:"
-        echo "  task url:dev       - Open in browser"
-        echo "  task hugo:dev:lan  - Start with LAN baseURL (for mobile)"
-        echo "  Ctrl+C             - Stop server"
-        echo "========================================"
-        echo ""
-      - hugo server {{.HUGO_DEV_FLAGS}} --bind 0.0.0.0
-
-  hugo:dev:lan:
-    desc: Start Hugo dev server with LAN IP (for mobile testing)
-    cmds:
-      - |
-        LAN_IP=$(go run ./cmd/lanip 2>/dev/null || echo "127.0.0.1")
-        echo "========================================"
-        echo "Hugo Development Server (LAN Mode)"
-        echo "========================================"
-        echo ""
-        echo "LAN URL: http://$LAN_IP:1313"
-        echo ""
-        echo "Use this URL on your mobile device"
-        echo "========================================"
-        echo ""
-        hugo server {{.HUGO_DEV_FLAGS}} --bind 0.0.0.0 --baseURL "http://$LAN_IP:1313"
-
-  hugo:build:
-    desc: Build production site
-    cmds:
-      - hugo {{.HUGO_BUILD_FLAGS}}
-
-  hugo:preview:
-    desc: Preview production build
-    cmds:
-      - hugo server {{.HUGO_PREVIEW_FLAGS}}
-
-  hugo:clean:
-    desc: Clean build artifacts
-    cmds:
-      - xplat rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
-
+  # ===========================================================================
   # Aliases (backward compatibility)
+  # ===========================================================================
+
   dev:
     desc: "[alias] Start Hugo development server"
     cmds:
@@ -362,311 +261,25 @@ tasks:
     cmds:
       - task: hugo:clean
 
-  # ============================================================================
-  # Translation (use Claude Code interactively)
-  # ============================================================================
-  # Workflow:
-  #   1. task translate:status    - see what changed since last translation
-  #   2. Ask Claude Code: "Translate the changed files to all languages"
-  #   3. task translate:done      - mark translations complete
-  #
-  # Target languages: de (German), zh (Chinese), ja (Japanese)
+  # ===========================================================================
+  # Logo Generation (cmd/genlogo)
+  # ===========================================================================
 
-  translate:status:
-    desc: Show what English files changed since last translation
+  genlogo:all:
+    desc: Generate all branding assets (favicon, logos, og-image, email-logo, avatar, banner)
     cmds:
-      - |
-        echo "========================================"
-        echo "Translation Status"
-        echo "========================================"
-        echo ""
-        echo "=== New (untracked) files ==="
-        git ls-files --others --exclude-standard -- content/english/ | grep -E '\.md$' || echo "(none)"
-        echo ""
-        echo "=== Uncommitted changes (modified) ==="
-        git diff --name-only -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null | grep -E '\.(md|toml|yaml)$' || echo "(none)"
-        echo ""
-        echo "=== Committed since last translation ==="
-        git diff --name-only last-translation..HEAD -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null || echo "(No checkpoint tag yet - run 'task translate:done' to set baseline)"
-        echo ""
-        echo "========================================"
-        echo "To translate, ask Claude Code:"
-        echo "  'Translate the changed files to all languages'"
-        echo ""
-        echo "After translating: task translate:done"
-        echo "========================================"
+      - go run cmd/genlogo/main.go -asset all
+      - echo ""
+      - echo "Assets generated. Next steps:"
+      - echo "  1. Deploy website (git push) - updates Hugo site with new favicon, logos, og-image"
+      - echo "  2. Gmail signature - re-upload email-logo.png at https://mail.google.com/mail/u/0/#settings/general"
+      - echo "  3. Bluesky profile - re-upload avatar & banner at https://bsky.app/profile/ubuntusoftware.net"
 
-  translate:done:
-    desc: Mark current translations as complete (update checkpoint tag)
-    cmds:
-      - git tag -f last-translation HEAD
-      - echo "✓ Translation checkpoint updated to current commit"
-
-  translate:missing:
-    desc: Show which languages are missing content files compared to English
-    cmds:
-      - |
-        echo "========================================"
-        echo "Missing Content Files by Language"
-        echo "========================================"
-        echo ""
-
-        LANGS="german chinese japanese"
-
-        for LANG in $LANGS; do
-          MISSING=0
-          MISSING_FILES=""
-
-          # Check each English content file
-          for EN_FILE in $(xplat glob "content/english/**/*.md"); do
-            # Convert path: content/english/foo.md -> content/german/foo.md
-            LANG_FILE=$(echo "$EN_FILE" | sed "s|content/english|content/$LANG|")
-
-            if [ ! -f "$LANG_FILE" ]; then
-              MISSING=$((MISSING + 1))
-              MISSING_FILES="$MISSING_FILES\n  - ${EN_FILE#content/english/}"
-            fi
-          done
-
-          if [ $MISSING -eq 0 ]; then
-            echo "✓ $LANG: Complete"
-          else
-            echo "✗ $LANG: Missing $MISSING files"
-            echo -e "$MISSING_FILES"
-            echo ""
-          fi
-        done
-
-        echo "========================================"
-
-  translate:orphans:
-    desc: Show files in target languages that no longer exist in English (should be deleted)
-    cmds:
-      - |
-        echo "========================================"
-        echo "Orphaned Files (exist in target but not in English)"
-        echo "========================================"
-        echo ""
-
-        LANGS="german chinese japanese"
-        TOTAL_ORPHANS=0
-
-        for LANG in $LANGS; do
-          ORPHAN_COUNT=0
-          ORPHAN_FILES=""
-
-          # Check each file in target language
-          for LANG_FILE in $(xplat glob "content/$LANG/**/*.md" 2>/dev/null); do
-            # Convert path: content/german/foo.md -> content/english/foo.md
-            EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
-
-            if [ ! -f "$EN_FILE" ]; then
-              ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
-              TOTAL_ORPHANS=$((TOTAL_ORPHANS + 1))
-              ORPHAN_FILES="$ORPHAN_FILES\n  - ${LANG_FILE}"
-            fi
-          done
-
-          if [ $ORPHAN_COUNT -eq 0 ]; then
-            echo "✓ $LANG: No orphans"
-          else
-            echo "✗ $LANG: $ORPHAN_COUNT orphaned files (DELETE THESE)"
-            echo -e "$ORPHAN_FILES"
-            echo ""
-          fi
-        done
-
-        echo "========================================"
-        if [ $TOTAL_ORPHANS -gt 0 ]; then
-          echo "Run 'task translate:clean' to delete all orphaned files"
-        fi
-        echo "========================================"
-
-  translate:clean:
-    desc: Delete orphaned files in target languages that no longer exist in English
-    cmds:
-      - |
-        echo "Cleaning orphaned translation files..."
-        LANGS="german chinese japanese"
-        DELETED=0
-
-        for LANG in $LANGS; do
-          for LANG_FILE in $(xplat glob "content/$LANG/**/*.md" 2>/dev/null); do
-            EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
-            if [ ! -f "$EN_FILE" ]; then
-              echo "Deleting: $LANG_FILE"
-              xplat rm "$LANG_FILE"
-              DELETED=$((DELETED + 1))
-            fi
-          done
-        done
-
-        echo "✓ Deleted $DELETED orphaned files"
-
-  # ============================================================================
-  # Cloudflare Pages (DEPRECATED - using Git integration)
-  # ============================================================================
-  # NOTE: Deployments now happen automatically via Cloudflare Pages Git integration
-  # These tasks are kept for reference but should not be used for regular deployments
-
-  cf:login:
-    desc: "[DEPRECATED] Login to Cloudflare"
-    cmds:
-      - 'echo "DEPRECATED: This task is no longer needed with Git integration"'
-      - '{{.WRANGLER_CMD}} login'
-
-  cf:init:
-    desc: "[DEPRECATED] Initialize Cloudflare Pages project"
-    cmds:
-      - 'echo "DEPRECATED: Project is configured via Cloudflare dashboard"'
-      - '{{.WRANGLER_CMD}} pages project create {{.PROJECT_NAME}} --production-branch=main'
-
-  cf:deploy:
-    desc: "[DEPRECATED] Deploy to Cloudflare Pages - Use git push instead"
-    deps: [hugo:build]
-    cmds:
-      - 'echo "DEPRECATED: Deployments happen automatically on git push"'
-      - 'echo "Just run: git push"'
-      - exit 1
-
-  cf:status:
-    desc: Check deployment status
-    cmds:
-      - |
-        echo "========================================"
-        echo "Cloudflare Pages Status"
-        echo "========================================"
-        echo "Project: {{.PROJECT_NAME}}"
-        echo ""
-        echo "URLs:"
-        echo "  Production: {{.URL_PRODUCTION}}"
-        echo "  Preview: {{.URL_PREVIEW}}"
-        echo ""
-        echo "Dashboards:"
-        echo "  Pages: {{.CF_DASH_PAGES}}"
-        echo "  Settings: {{.CF_DASH_PAGES_SETTINGS}}"
-        echo ""
-        echo "Recent Deployments:"
-        echo "========================================"
-      - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}}'
-
-  cf:logs:
-    desc: View deployment logs
-    cmds:
-      - |
-        echo "========================================"
-        echo "Recent Deployments"
-        echo "========================================"
-        echo "Dashboard: {{.CF_DASH_PAGES}}"
-        echo ""
-      - '{{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}} | head -10'
-
-  cf:tail:
-    desc: Tail latest deployment logs
-    cmds:
-      - |
-        echo "========================================"
-        echo "Tailing Deployment Logs"
-        echo "========================================"
-        echo "Dashboard: {{.CF_DASH_PAGES}}"
-        echo ""
-      - '{{.WRANGLER_CMD}} pages deployment tail --project-name={{.PROJECT_NAME}}'
-
-  cf:preview-url:
-    desc: Get and open the latest preview deployment URL
-    cmds:
-      - |
-        echo "========================================"
-        echo "Latest Preview Deployment"
-        echo "========================================"
-        LATEST_URL=$({{.WRANGLER_CMD}} pages deployment list --project-name={{.PROJECT_NAME}} | grep "Preview" | head -1 | awk '{print $10}')
-        if [ -n "$LATEST_URL" ]; then
-          echo "URL: $LATEST_URL"
-          echo ""
-          echo "Opening in browser..."
-          open "$LATEST_URL"
-        else
-          echo "No preview deployments found"
-        fi
-
-  cf:secret:set:
-    desc: Set a secret for Cloudflare Pages (e.g., HUGO_VERSION)
-    cmds:
-      - 'echo "Setting secret for Pages project..."'
-      - '{{.WRANGLER_CMD}} pages secret put {{.CLI_ARGS}} --project-name={{.PROJECT_NAME}}'
-
-  cf:secret:list:
-    desc: List secrets for Cloudflare Pages
-    cmds:
-      - '{{.WRANGLER_CMD}} pages secret list --project-name={{.PROJECT_NAME}}'
-
-  # GitHub Repository Secrets & Variables
-  # Secrets: Encrypted, for sensitive values (API tokens)
-  # Variables: Plain text, for non-sensitive config (account IDs, URLs)
-
-  gh:secret:list:
-    desc: List GitHub repository secrets
-    cmds:
-      - gh secret list
-
-  gh:secret:set:
-    desc: Set a GitHub repository secret (e.g., task gh:secret:set -- CLOUDFLARE_API_TOKEN)
-    cmds:
-      - gh secret set {{.CLI_ARGS}}
-
-  gh:var:list:
-    desc: List GitHub repository variables
-    cmds:
-      - gh variable list
-
-  gh:var:set:
-    desc: Set a GitHub repository variable (e.g., task gh:var:set -- CF_ACCOUNT_ID value)
-    cmds:
-      - gh variable set {{.CLI_ARGS}}
-
-  gh:var:sync:
-    desc: Sync repository variables from Taskfile values
-    cmds:
-      - |
-        echo "Syncing GitHub repository variables..."
-        echo ""
-        echo "Setting CF_ACCOUNT_ID={{.CF_ACCOUNT_ID}}"
-        gh variable set CF_ACCOUNT_ID --body "{{.CF_ACCOUNT_ID}}"
-        echo "Setting CF_WEB_ANALYTICS_SITE_TAG={{.CF_WEB_ANALYTICS_SITE_TAG}}"
-        gh variable set CF_WEB_ANALYTICS_SITE_TAG --body "{{.CF_WEB_ANALYTICS_SITE_TAG}}"
-        echo "Setting SITE_URL={{.URL_PRODUCTION}}"
-        gh variable set SITE_URL --body "{{.URL_PRODUCTION}}"
-        echo ""
-        echo "✓ Variables synced. Verify with: task gh:var:list"
-
-  cf:delete:
-    desc: "[DANGEROUS] Delete Cloudflare Pages project"
-    cmds:
-      - |
-        echo "========================================"
-        echo "DANGER: DELETE CLOUDFLARE PAGES PROJECT"
-        echo "========================================"
-        echo ""
-        echo "This will PERMANENTLY delete:"
-        echo "  Project: {{.PROJECT_NAME}}"
-        echo "  Production: {{.URL_PRODUCTION}}"
-        echo "  Preview: {{.URL_PREVIEW}}"
-        echo ""
-        echo "This action CANNOT be undone!"
-        echo ""
-        read -p "Type 'DELETE {{.PROJECT_NAME}}' to confirm: " CONFIRM
-        if [ "$CONFIRM" != "DELETE {{.PROJECT_NAME}}" ]; then
-          echo "Cancelled."
-          exit 1
-        fi
-      - '{{.WRANGLER_CMD}} pages project delete {{.PROJECT_NAME}}'
-
-  # ============================================================================
+  # ===========================================================================
   # CI Interface (called by GitHub Actions workflows)
-  # ============================================================================
-  # These tasks are the contract between GitHub Actions and local tooling.
+  # ===========================================================================
   # Workflows call these tasks - all logic stays in Taskfile.
-  # Pattern: `task ci:*` for anything called from CI
+  # Most ci:* tasks are in taskfiles/Taskfile.ci.yml
 
   ci:analytics:
     desc: Run analytics check for CI (outputs markdown, exit 1 if changes)
@@ -678,11 +291,9 @@ tasks:
     cmds:
       - go run ./cmd/sitecheck/ -github-issue
 
-  # ci:taskfile, ci:health, ci:check:* are in taskfiles/Taskfile.ci.yml (included as ci:*)
-
-  # ============================================================================
+  # ===========================================================================
   # Code Quality
-  # ============================================================================
+  # ===========================================================================
 
   fmt:
     desc: Format code
@@ -699,9 +310,9 @@ tasks:
     cmds:
       - go test ./... -v
 
-  # ============================================================================
+  # ===========================================================================
   # Git Utilities
-  # ============================================================================
+  # ===========================================================================
 
   generate:gitignore:
     desc: Generate .gitignore from vars
@@ -742,156 +353,3 @@ tasks:
         .vscode/
         .DS_Store
         EOF
-
-  # git:* tasks are in taskfiles/Taskfile.git.yml (included as git:*)
-
-  # ============================================================================
-  # URL Helpers
-  # ============================================================================
-
-  url:dev:
-    desc: Open local development server in browser
-    cmds:
-      - open {{.URL_DEV}}
-
-  url:prod:
-    desc: Open production website in browser
-    cmds:
-      - open {{.URL_PRODUCTION}}
-
-  url:preview:
-    desc: Open preview website in browser
-    cmds:
-      - open {{.URL_PREVIEW}}
-
-  url:commit:
-    desc: Open commit preview URL in browser
-    cmds:
-      - |
-        COMMIT=$(git rev-parse --short HEAD)
-        open https://$COMMIT.ubuntu-website.pages.dev
-
-  cf:open:
-    desc: Open Cloudflare Pages dashboard in browser
-    cmds:
-      - open {{.CF_DASH_PAGES}}
-
-  cf:open:settings:
-    desc: Open Cloudflare Pages settings in browser
-    cmds:
-      - open {{.CF_DASH_PAGES_SETTINGS}}
-
-  cf:open:domain:
-    desc: Open domain dashboard in browser
-    cmds:
-      - open {{.CF_DASH_DOMAIN}}
-
-  cf:open:ai:
-    desc: Open Cloudflare AI Crawl Control (configure AI bot access)
-    cmds:
-      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/ubuntusoftware.net/ai"
-
-  cf:purge:
-    desc: Purge Cloudflare CDN cache
-    cmds:
-      - |
-        if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-          echo "ERROR: CLOUDFLARE_API_TOKEN must be set in .env"
-          exit 1
-        fi
-        echo "Purging Cloudflare cache for {{.DOMAIN}}..."
-        RESPONSE=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/{{.CF_ZONE_ID}}/purge_cache" \
-          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-          -H "Content-Type: application/json" \
-          --data '{"purge_everything":true}')
-
-        if echo "$RESPONSE" | grep -q '"success": true'; then
-          echo "✓ Cache purged successfully"
-        else
-          echo "✗ Cache purge failed:"
-          echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
-          exit 1
-        fi
-
-  # ============================================================================
-  # SEO & Analytics
-  # ============================================================================
-
-  seo:open:search-console:
-    desc: Open Google Search Console
-    cmds:
-      - open "https://search.google.com/search-console"
-
-  seo:open:cf-analytics:
-    desc: Open Cloudflare Web Analytics
-    cmds:
-      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in={{.CF_WEB_ANALYTICS_SITE_TAG}}"
-
-  seo:setup:
-    desc: Open all SEO setup pages (Search Console + Cloudflare Analytics)
-    cmds:
-      - echo "Opening Google Search Console..."
-      - open "https://search.google.com/search-console"
-      - echo "Opening Cloudflare Web Analytics..."
-      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in={{.CF_WEB_ANALYTICS_SITE_TAG}}"
-      - echo ""
-      - echo "Setup steps:"
-      - echo "1. Google Search Console - Add property, Domain, ubuntusoftware.net"
-      - echo "2. Copy verification TXT record to Cloudflare DNS"
-      - echo "3. Cloudflare Analytics - Enable Web Analytics (one click)"
-
-  analytics:report:
-    desc: Check analytics and report changes (>20% threshold)
-    cmds:
-      - go run ./cmd/analytics/
-
-  analytics:report:verbose:
-    desc: Check analytics with verbose output
-    cmds:
-      - go run ./cmd/analytics/ -v
-
-  analytics:report:webhook:
-    desc: Post analytics changes to webhook (set ANALYTICS_WEBHOOK_URL)
-    cmds:
-      - go run ./cmd/analytics/ -webhook "$ANALYTICS_WEBHOOK_URL"
-
-  # ============================================================================
-  # Site Check (cmd/sitecheck)
-  # ============================================================================
-
-  sitecheck:
-    desc: Check site HTTP reachability from all global locations (default)
-    cmds:
-      - go run ./cmd/sitecheck/
-
-  sitecheck:dns:
-    desc: Check DNS resolution from all global locations
-    cmds:
-      - go run ./cmd/sitecheck/ -type dns
-
-  sitecheck:tcp:
-    desc: Check TCP port 443 from all global locations
-    cmds:
-      - go run ./cmd/sitecheck/ -type tcp
-
-  sitecheck:redirect:
-    desc: Check apex domain redirects to www
-    cmds:
-      - go run ./cmd/sitecheck/ -type redirect
-
-  sitecheck:all:
-    desc: Run all site checks (DNS, TCP, Redirect, HTTP)
-    cmds:
-      - task: sitecheck:dns
-      - task: sitecheck:tcp
-      - task: sitecheck:redirect
-      - task: sitecheck
-
-  # ============================================================================
-  # Help
-  # ============================================================================
-
-  help:
-    desc: Show help
-    cmds:
-      - task --list

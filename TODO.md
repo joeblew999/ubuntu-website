@@ -12,6 +12,21 @@
 - [x] Task version check taskfile added (tools:task:check:deps)
 - [x] Taskfile Registry validated via .github/workflows/remote-taskfile-test.yml
 - [x] Deprecated deploy.yml.old workflow deleted
+- [x] Centralized versions.env - single source of truth for Task/Go versions
+- [x] Go version standardized to 1.25 across all workflows (matches go.mod)
+- [x] Version consistency check added (ci:check:versions)
+- [x] DRY version management - versions.env loaded via root Taskfile dotenv
+  - Taskfile tasks read $GO_VERSION, $TASK_VERSION from versions.env
+  - Workflow YAML still has hardcoded values (GitHub Actions limitation)
+  - ci:check:versions validates workflow values match versions.env
+- [x] Go toolchain version management (rustup-style parity)
+  - Flexible mode (default): warns on version mismatch
+  - Strict mode: fails on version mismatch (GO_VERSION_STRICT=true)
+  - Bootstrap task: `task toolchain:golang:bootstrap` uses `golang.org/dl`
+- [x] Taskfile refactor - extracted domain modules from root (900→355 lines)
+  - New modules: hugo, cf, translate, seo, sitecheck, env, url
+  - gh:secret/var tasks merged into tools:gh
+  - All 146 tasks tested and working
 
 ## In Progress
 

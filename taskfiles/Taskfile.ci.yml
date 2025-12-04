@@ -62,6 +62,11 @@ tasks:
       - echo "### Workflow Dependencies"
       - task: check:workflow-deps
 
+      # Validate version consistency
+      - echo ""
+      - echo "### Version Consistency"
+      - task: check:versions
+
       - |
         echo ""
         echo "### Include Test"
@@ -361,6 +366,87 @@ tasks:
           exit 1
         else
           echo "PASSED: All secrets configured"
+        fi
+
+  check:versions:
+    desc: Verify tool versions are consistent across codebase
+    cmds:
+      - |
+        echo "========================================"
+        echo "Version Consistency Check"
+        echo "========================================"
+        echo ""
+        echo "Source of truth: versions.env"
+        echo "----------------------------------------"
+        ERRORS=0
+
+        # Read expected versions from versions.env
+        if [ ! -f "versions.env" ]; then
+          echo "ERROR: versions.env not found"
+          exit 1
+        fi
+
+        TASK_EXPECTED=$(grep "^TASK_VERSION=" versions.env | cut -d= -f2)
+        GO_EXPECTED=$(grep "^GO_VERSION=" versions.env | cut -d= -f2)
+
+        echo "TASK_VERSION=$TASK_EXPECTED"
+        echo "GO_VERSION=$GO_EXPECTED"
+        echo ""
+
+        # Check Task version in workflows
+        echo "Task version in workflows:"
+        echo "----------------------------------------"
+        for WF in $(xplat glob ".github/workflows/*.yml"); do
+          [ -f "$WF" ] || continue
+          WF_NAME=$(basename "$WF")
+          VERSION=$(grep -E "version: ['\"]?[0-9]+\.[0-9]+\.[0-9]+['\"]?" "$WF" 2>/dev/null | grep -v "go-version" | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" || echo "")
+          if [ -n "$VERSION" ]; then
+            if [ "$VERSION" = "$TASK_EXPECTED" ]; then
+              echo "  OK: $WF_NAME (Task $VERSION)"
+            else
+              echo "  ERROR: $WF_NAME has Task $VERSION, expected $TASK_EXPECTED"
+              ERRORS=$((ERRORS + 1))
+            fi
+          fi
+        done
+
+        echo ""
+        echo "Go version in workflows:"
+        echo "----------------------------------------"
+        for WF in $(xplat glob ".github/workflows/*.yml"); do
+          [ -f "$WF" ] || continue
+          WF_NAME=$(basename "$WF")
+          VERSION=$(grep "go-version:" "$WF" 2>/dev/null | grep -oE "[0-9]+\.[0-9]+" | head -1 || echo "")
+          if [ -n "$VERSION" ]; then
+            if [ "$VERSION" = "$GO_EXPECTED" ]; then
+              echo "  OK: $WF_NAME (Go $VERSION)"
+            else
+              echo "  ERROR: $WF_NAME has Go $VERSION, expected $GO_EXPECTED"
+              ERRORS=$((ERRORS + 1))
+            fi
+          fi
+        done
+
+        echo ""
+        echo "Go version in Taskfile:"
+        echo "----------------------------------------"
+        TF_GO=$(grep "GO_VERSION:" Taskfile.yml 2>/dev/null | head -1 | grep -oE '"[0-9]+\.[0-9]+"' | tr -d '"' || echo "")
+        if [ -n "$TF_GO" ]; then
+          if [ "$TF_GO" = "$GO_EXPECTED" ]; then
+            echo "  OK: Taskfile.yml (Go $TF_GO)"
+          else
+            echo "  ERROR: Taskfile.yml has Go $TF_GO, expected $GO_EXPECTED"
+            ERRORS=$((ERRORS + 1))
+          fi
+        fi
+
+        echo ""
+        echo "========================================"
+        if [ $ERRORS -gt 0 ]; then
+          echo "FAILED: $ERRORS version mismatch(es)"
+          exit 1
+        else
+          echo "PASSED: All versions consistent"
         fi
 
   check:workflow-deps:

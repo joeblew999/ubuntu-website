@@ -3,14 +3,18 @@
 # Cross-platform Go installation and validation.
 # Works on macOS, Linux, Windows.
 #
+# Version Management:
+#   - GO_VERSION from versions.env (loaded by root Taskfile dotenv)
+#   - GO_VERSION_STRICT controls flexible vs strict mode
+#   - Use `task toolchain:golang:bootstrap` to install exact version
+#
 # Other modules that need Go should:
 #   1. Add `# REQUIRES: golang` to their header
 #   2. Call `task: :golang:check:deps` before using Go
 
 version: '3'
 
-vars:
-  GO_VERSION: '1.21'
+# REQUIRES: golang
 
 tasks:
   # ===========================================================================
@@ -18,67 +22,67 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure Go is installed (installs locally, fails in CI with instructions)
+    desc: Ensure Go is installed at correct version (flexible mode warns, strict mode fails)
     run: once
     cmds:
       - |
-        if command -v go >/dev/null 2>&1; then
-          echo "OK: go $(go version | cut -d' ' -f3)"
+        # GO_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+        EXPECTED="${GO_VERSION:-1.25}"
+        STRICT="${GO_VERSION_STRICT:-false}"
+
+        # Check if go exists
+        if ! command -v go >/dev/null 2>&1; then
+          # Detect CI environment
+          if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+            echo "ERROR: Go is not installed"
+            echo ""
+            echo "Add to your workflow before running tasks:"
+            echo ""
+            echo "    - name: Setup Go"
+            echo "      uses: actions/setup-go@v5"
+            echo "      with:"
+            echo "        go-version: '$EXPECTED'"
+            echo ""
+            exit 1
+          fi
+
+          # Local: provide install instructions
+          echo "ERROR: Go not found in PATH"
+          echo ""
+          echo "Install options:"
+          echo "  1. Official: https://go.dev/dl/"
+          echo "  2. macOS: brew install go"
+          echo "  3. Exact version: task toolchain:golang:bootstrap"
+          exit 1
+        fi
+
+        # Get installed version (e.g., "1.25" from "go version go1.25.5 darwin/arm64")
+        INSTALLED=$(go version | grep -oE 'go[0-9]+\.[0-9]+' | sed 's/go//')
+
+        if [ "$INSTALLED" = "$EXPECTED" ]; then
+          echo "OK: go $INSTALLED (matches expected)"
           exit 0
         fi
 
-        # Detect CI environment
-        if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
-          echo "ERROR: Go is not installed"
+        # Version mismatch
+        if [ "$STRICT" = "true" ]; then
+          echo "ERROR: Go version mismatch (strict mode)"
+          echo "  Expected: $EXPECTED"
+          echo "  Installed: $INSTALLED"
           echo ""
-          echo "Add to your workflow before running tasks:"
+          echo "To install correct version:"
+          echo "  task toolchain:golang:bootstrap"
           echo ""
-          echo "    - name: Setup Go"
-          echo "      uses: actions/setup-go@v5"
-          echo "      with:"
-          echo "        go-version: '{{.GO_VERSION}}'"
-          echo ""
+          echo "Or disable strict mode:"
+          echo "  Set GO_VERSION_STRICT=false in versions.env"
           exit 1
-        fi
-
-        # Local: try to install
-        echo "Installing Go..."
-
-        case "$(uname -s)" in
-          Darwin)
-            if command -v brew >/dev/null 2>&1; then
-              brew install go
-            else
-              echo "ERROR: brew not found. Install from https://go.dev/dl/"
-              exit 1
-            fi
-            ;;
-          Linux)
-            if command -v apt-get >/dev/null 2>&1; then
-              sudo apt-get update && sudo apt-get install -y golang-go
-            elif command -v yum >/dev/null 2>&1; then
-              sudo yum install -y golang
-            else
-              echo "ERROR: No package manager found. Install from https://go.dev/dl/"
-              exit 1
-            fi
-            ;;
-          MINGW*|MSYS*|CYGWIN*)
-            echo "ERROR: Install Go from https://go.dev/dl/"
-            exit 1
-            ;;
-          *)
-            echo "ERROR: Unsupported OS. Install Go from https://go.dev/dl/"
-            exit 1
-            ;;
-        esac
-
-        # Verify installation
-        if command -v go >/dev/null 2>&1; then
-          echo "OK: go $(go version | cut -d' ' -f3) installed"
         else
-          echo "ERROR: Go installation failed"
-          exit 1
+          echo "WARN: Go version mismatch"
+          echo "  Expected: $EXPECTED (from versions.env)"
+          echo "  Installed: $INSTALLED"
+          echo ""
+          echo "To enforce exact version, set GO_VERSION_STRICT=true in versions.env"
+          echo "To install exact version: task toolchain:golang:bootstrap"
         fi
 
   check:validate:
@@ -98,3 +102,64 @@ tasks:
         # Simple connectivity check
         go list -m golang.org/x/tools@latest >/dev/null 2>&1 || true
         echo "golang:check:health passed"
+
+  # ===========================================================================
+  # Bootstrap (install exact Go version)
+  # ===========================================================================
+
+  bootstrap:
+    desc: Install exact Go version from versions.env using golang.org/dl
+    cmds:
+      - |
+        # GO_VERSION comes from versions.env
+        EXPECTED="${GO_VERSION:-1.25}"
+
+        echo "========================================"
+        echo "Go Bootstrap"
+        echo "========================================"
+        echo ""
+        echo "Target version: $EXPECTED"
+        echo ""
+
+        # Need some Go to bootstrap
+        if ! command -v go >/dev/null 2>&1; then
+          echo "ERROR: Need Go to bootstrap Go"
+          echo ""
+          echo "Install any Go version first:"
+          echo "  macOS: brew install go"
+          echo "  Linux: apt-get install golang-go"
+          echo "  Other: https://go.dev/dl/"
+          exit 1
+        fi
+
+        CURRENT=$(go version | grep -oE 'go[0-9]+\.[0-9]+' | sed 's/go//')
+        echo "Current Go: $CURRENT"
+        echo ""
+
+        if [ "$CURRENT" = "$EXPECTED" ]; then
+          echo "Already at correct version. Nothing to do."
+          exit 0
+        fi
+
+        # Install version wrapper using official golang.org/dl method
+        echo "Installing Go $EXPECTED wrapper..."
+        go install golang.org/dl/go${EXPECTED}@latest
+
+        # Download SDK
+        echo ""
+        echo "Downloading Go $EXPECTED SDK..."
+        "$HOME/go/bin/go${EXPECTED}" download
+
+        echo ""
+        echo "========================================"
+        echo "Go $EXPECTED installed to ~/sdk/go${EXPECTED}"
+        echo ""
+        echo "To use this version:"
+        echo "  Option 1: Add alias to your shell config:"
+        echo "    alias go=go${EXPECTED}"
+        echo ""
+        echo "  Option 2: Run commands with version suffix:"
+        echo "    go${EXPECTED} build ./..."
+        echo ""
+        echo "  Option 3: Add ~/sdk/go${EXPECTED}/bin to PATH"
+        echo "========================================"

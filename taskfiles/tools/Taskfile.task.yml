@@ -7,11 +7,11 @@
 #   task tools:task:check:deps   - Verify Task version matches expected
 #
 # Pattern: All tool taskfiles define TOOL_BIN with {{exeExt}} for Windows support
+# Version: Reads TASK_VERSION from root versions.env (loaded by root Taskfile)
 
 version: '3'
 
 vars:
-  TASK_VERSION: 3.45.5
   # Binary name with platform-specific extension (.exe on Windows)
   TASK_BIN: 'task{{exeExt}}'
 
@@ -25,6 +25,9 @@ tasks:
     run: once
     cmds:
       - |
+        # TASK_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+        EXPECTED="${TASK_VERSION:-3.45.5}"
+
         # Get installed version
         INSTALLED=$({{.TASK_BIN}} --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 
@@ -34,15 +37,15 @@ tasks:
           exit 1
         fi
 
-        if [ "$INSTALLED" != "{{.TASK_VERSION}}" ]; then
+        if [ "$INSTALLED" != "$EXPECTED" ]; then
           echo "WARN: Task version mismatch"
-          echo "  Expected: {{.TASK_VERSION}}"
+          echo "  Expected: $EXPECTED"
           echo "  Installed: $INSTALLED"
           echo ""
           echo "Update with: brew upgrade go-task (macOS)"
-          echo "  or: go install github.com/go-task/task/v3/cmd/task@v{{.TASK_VERSION}}"
+          echo "  or: go install github.com/go-task/task/v3/cmd/task@v$EXPECTED"
           echo ""
-          echo "Note: CI uses {{.TASK_VERSION}} - version mismatch may cause issues"
+          echo "Note: CI uses $EXPECTED - version mismatch may cause issues"
         else
           echo "OK: task $INSTALLED"
         fi

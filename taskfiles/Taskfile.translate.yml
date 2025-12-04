@@ -1,0 +1,157 @@
+# Translation Tasks
+#
+# Workflow for managing multilingual content translations.
+# Uses git tags to track translation checkpoints.
+#
+# Workflow:
+#   1. task translate:status    - see what changed since last translation
+#   2. Ask Claude Code: "Translate the changed files to all languages"
+#   3. task translate:done      - mark translations complete
+#
+# Target languages: de (German), zh (Chinese), ja (Japanese)
+
+version: '3'
+
+vars:
+  # Language directories under content/
+  LANGS: "german chinese japanese"
+
+tasks:
+  # ===========================================================================
+  # Status
+  # ===========================================================================
+
+  status:
+    desc: Show what English files changed since last translation
+    cmds:
+      - |
+        echo "========================================"
+        echo "Translation Status"
+        echo "========================================"
+        echo ""
+        echo "=== New (untracked) files ==="
+        git ls-files --others --exclude-standard -- content/english/ | grep -E '\.md$' || echo "(none)"
+        echo ""
+        echo "=== Uncommitted changes (modified) ==="
+        git diff --name-only -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null | grep -E '\.(md|toml|yaml)$' || echo "(none)"
+        echo ""
+        echo "=== Committed since last translation ==="
+        git diff --name-only last-translation..HEAD -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null || echo "(No checkpoint tag yet - run 'task translate:done' to set baseline)"
+        echo ""
+        echo "========================================"
+        echo "To translate, ask Claude Code:"
+        echo "  'Translate the changed files to all languages'"
+        echo ""
+        echo "After translating: task translate:done"
+        echo "========================================"
+
+  done:
+    desc: Mark current translations as complete (update checkpoint tag)
+    cmds:
+      - git tag -f last-translation HEAD
+      - echo "✓ Translation checkpoint updated to current commit"
+
+  # ===========================================================================
+  # Validation
+  # ===========================================================================
+
+  missing:
+    desc: Show which languages are missing content files compared to English
+    cmds:
+      - |
+        echo "========================================"
+        echo "Missing Content Files by Language"
+        echo "========================================"
+        echo ""
+
+        LANGS="{{.LANGS}}"
+
+        for LANG in $LANGS; do
+          MISSING=0
+          MISSING_FILES=""
+
+          # Check each English content file
+          for EN_FILE in $(xplat glob "content/english/**/*.md"); do
+            # Convert path: content/english/foo.md -> content/german/foo.md
+            LANG_FILE=$(echo "$EN_FILE" | sed "s|content/english|content/$LANG|")
+
+            if [ ! -f "$LANG_FILE" ]; then
+              MISSING=$((MISSING + 1))
+              MISSING_FILES="$MISSING_FILES\n  - ${EN_FILE#content/english/}"
+            fi
+          done
+
+          if [ $MISSING -eq 0 ]; then
+            echo "✓ $LANG: Complete"
+          else
+            echo "✗ $LANG: Missing $MISSING files"
+            echo -e "$MISSING_FILES"
+            echo ""
+          fi
+        done
+
+        echo "========================================"
+
+  orphans:
+    desc: Show files in target languages that no longer exist in English (should be deleted)
+    cmds:
+      - |
+        echo "========================================"
+        echo "Orphaned Files (exist in target but not in English)"
+        echo "========================================"
+        echo ""
+
+        LANGS="{{.LANGS}}"
+        TOTAL_ORPHANS=0
+
+        for LANG in $LANGS; do
+          ORPHAN_COUNT=0
+          ORPHAN_FILES=""
+
+          # Check each file in target language
+          for LANG_FILE in $(xplat glob "content/$LANG/**/*.md" 2>/dev/null); do
+            # Convert path: content/german/foo.md -> content/english/foo.md
+            EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
+
+            if [ ! -f "$EN_FILE" ]; then
+              ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+              TOTAL_ORPHANS=$((TOTAL_ORPHANS + 1))
+              ORPHAN_FILES="$ORPHAN_FILES\n  - ${LANG_FILE}"
+            fi
+          done
+
+          if [ $ORPHAN_COUNT -eq 0 ]; then
+            echo "✓ $LANG: No orphans"
+          else
+            echo "✗ $LANG: $ORPHAN_COUNT orphaned files (DELETE THESE)"
+            echo -e "$ORPHAN_FILES"
+            echo ""
+          fi
+        done
+
+        echo "========================================"
+        if [ $TOTAL_ORPHANS -gt 0 ]; then
+          echo "Run 'task translate:clean' to delete all orphaned files"
+        fi
+        echo "========================================"
+
+  clean:
+    desc: Delete orphaned files in target languages that no longer exist in English
+    cmds:
+      - |
+        echo "Cleaning orphaned translation files..."
+        LANGS="{{.LANGS}}"
+        DELETED=0
+
+        for LANG in $LANGS; do
+          for LANG_FILE in $(xplat glob "content/$LANG/**/*.md" 2>/dev/null); do
+            EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
+            if [ ! -f "$EN_FILE" ]; then
+              echo "Deleting: $LANG_FILE"
+              xplat rm "$LANG_FILE"
+              DELETED=$((DELETED + 1))
+            fi
+          done
+        done
+
+        echo "✓ Deleted $DELETED orphaned files"

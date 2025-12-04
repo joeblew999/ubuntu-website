@@ -1,0 +1,42 @@
+# URL Helper Tasks
+#
+# Quick shortcuts to open various URLs in the browser.
+#
+# Usage:
+#   task url:dev      - Open local dev server
+#   task url:prod     - Open production site
+#   task url:preview  - Open preview deployment
+#   task url:commit   - Open current commit preview
+
+version: '3'
+
+tasks:
+  # ===========================================================================
+  # Development
+  # ===========================================================================
+
+  dev:
+    desc: Open local development server in browser
+    cmds:
+      - open {{.URL_DEV}}
+
+  # ===========================================================================
+  # Production
+  # ===========================================================================
+
+  prod:
+    desc: Open production website in browser
+    cmds:
+      - open {{.URL_PRODUCTION}}
+
+  preview:
+    desc: Open preview website in browser
+    cmds:
+      - open {{.URL_PREVIEW}}
+
+  commit:
+    desc: Open commit preview URL in browser
+    cmds:
+      - |
+        COMMIT=$(git rev-parse --short HEAD)
+        open https://$COMMIT.ubuntu-website.pages.dev

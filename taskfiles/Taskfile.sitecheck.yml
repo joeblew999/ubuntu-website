@@ -1,0 +1,50 @@
+# Site Check Tasks
+#
+# Global site reachability checks via cmd/sitecheck.
+# Tests DNS, TCP, HTTP, and redirect from multiple locations.
+#
+# Usage:
+#   task sitecheck          - HTTP check (default)
+#   task sitecheck:all      - Run all checks
+#   task sitecheck:dns      - DNS resolution check
+#   task sitecheck:tcp      - TCP port 443 check
+#   task sitecheck:redirect - Apex redirect check
+
+version: '3'
+
+tasks:
+  # ===========================================================================
+  # Individual Checks
+  # ===========================================================================
+
+  http:
+    desc: Check site HTTP reachability from all global locations (default)
+    cmds:
+      - go run ./cmd/sitecheck/
+
+  dns:
+    desc: Check DNS resolution from all global locations
+    cmds:
+      - go run ./cmd/sitecheck/ -type dns
+
+  tcp:
+    desc: Check TCP port 443 from all global locations
+    cmds:
+      - go run ./cmd/sitecheck/ -type tcp
+
+  redirect:
+    desc: Check apex domain redirects to www
+    cmds:
+      - go run ./cmd/sitecheck/ -type redirect
+
+  # ===========================================================================
+  # Combined
+  # ===========================================================================
+
+  all:
+    desc: Run all site checks (DNS, TCP, Redirect, HTTP)
+    cmds:
+      - task: dns
+      - task: tcp
+      - task: redirect
+      - task: http
