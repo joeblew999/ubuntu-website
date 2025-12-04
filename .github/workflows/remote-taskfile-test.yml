@@ -71,6 +71,12 @@ jobs:
             "      - task tools:xplat:check:deps" \
             "      - xplat version" \
             "      - xplat which task" \
+            "      - xplat mkdir -p /tmp/xplat-test/nested" \
+            "      - xplat touch /tmp/xplat-test/file.txt" \
+            "      - xplat cp /tmp/xplat-test/file.txt /tmp/xplat-test/copy.txt" \
+            "      - xplat mv /tmp/xplat-test/copy.txt /tmp/xplat-test/moved.txt" \
+            "      - xplat rm -rf /tmp/xplat-test" \
+            "      - echo 'SUCCESS - All xplat commands work!'" \
             > /tmp/consumer-test/Taskfile.yml
 
           echo "=== Consumer Taskfile ==="
@@ -80,6 +86,27 @@ jobs:
           echo "=== Running Test ==="
           cd /tmp/consumer-test
           task test --yes
+
+      - name: Test gh taskfile (optional tool)
+        env:
+          REPO: ${{ github.repository }}
+          REF: ${{ github.head_ref || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "=== Testing gh Taskfile (optional) ==="
+          cd /tmp/consumer-test
+
+          # Add gh test task
+          printf '%s\n' \
+            "" \
+            "  test-gh:" \
+            "    desc: Test gh CLI taskfile" \
+            "    cmds:" \
+            "      - task tools:gh:check:deps" \
+            "      - echo 'SUCCESS - gh taskfile works!'" \
+            >> /tmp/consumer-test/Taskfile.yml
+
+          task test-gh --yes
 
       - name: Verify xplat was downloaded (not built)
         run: |
