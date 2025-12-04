@@ -1,0 +1,91 @@
+# Remote Taskfile Include Test
+#
+# Validates that external consumers can include Taskfiles from this repo.
+# Uses ${{ github.sha }} for stable, immutable references that work on any branch/PR.
+#
+# This simulates the consumer experience:
+# 1. Creates a temp Taskfile outside this repo
+# 2. Includes our tools module via git URL
+# 3. Bootstraps xplat via download (not build from source)
+
+name: Remote Taskfile Include Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'taskfiles/**'
+      - '.github/workflows/remote-taskfile-test.yml'
+  pull_request:
+    paths:
+      - 'taskfiles/**'
+  workflow_dispatch:
+
+env:
+  TASK_X_REMOTE_TASKFILES: '1'
+
+jobs:
+  test-remote-include:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
+      - name: Test Remote Tools Include (xplat bootstrap)
+        run: |
+          echo "=== Testing Remote Taskfile Include ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo ""
+
+          # Create consumer-like Taskfile in temp dir (outside this repo)
+          mkdir -p /tmp/consumer-test
+          cat > /tmp/consumer-test/Taskfile.yml << EOF
+          version: '3'
+
+          includes:
+            tools:
+              taskfile: https://github.com/${{ github.repository }}.git//taskfiles/Taskfile.tools.yml?ref=${{ github.sha }}
+
+          tasks:
+            test:
+              desc: Test that remote include works
+              cmds:
+                - echo "Step 1: Bootstrap xplat via remote include..."
+                - task tools:xplat:check:deps
+                - echo ""
+                - echo "Step 2: Verify xplat works..."
+                - xplat version
+                - xplat which task
+                - echo ""
+                - echo "SUCCESS: Remote include + xplat bootstrap works!"
+          EOF
+
+          echo "=== Consumer Taskfile ==="
+          cat /tmp/consumer-test/Taskfile.yml
+          echo ""
+
+          echo "=== Running Test ==="
+          cd /tmp/consumer-test
+          task test --yes
+
+      - name: Verify xplat was downloaded (not built)
+        run: |
+          echo "=== Verifying Download Path ==="
+          # xplat should be in ~/.local/bin from the download
+          if [ -f "$HOME/.local/bin/xplat" ]; then
+            echo "OK: xplat found in ~/.local/bin (downloaded)"
+            $HOME/.local/bin/xplat version
+          else
+            echo "ERROR: xplat not found in expected location"
+            exit 1
+          fi
