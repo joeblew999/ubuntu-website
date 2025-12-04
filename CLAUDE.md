@@ -47,6 +47,20 @@ USE TASKFILE - it makes conventions for development.
 **CI Tasks:**
 - `ci:*` namespace is the interface for GitHub Actions
 - These tasks output markdown and use exit codes for workflow control
+- Task descriptions include `[Category]` prefix matching the workflow
+
+**Workflow → Task Mapping:**
+
+| Workflow | Task | Purpose |
+|----------|------|---------|
+| `core-taskfile.yml` | `ci:taskfile` | Validate Taskfile across platforms |
+| `monitor-analytics.yml` | `ci:analytics` | Weekly analytics check |
+| `monitor-sitecheck.yml` | `ci:sitecheck` | Site reachability check |
+| `monitor-health.yml` | `ci:health` | Health checks for external deps |
+| `core-xplat.yml` | *(direct)* | xplat cross-platform build tests |
+| `core-tools.yml` | *(direct)* | Binary tools build tests |
+| `release-xplat.yml` | *(direct)* | xplat release automation |
+| `syndication-bluesky.yml` | *(direct)* | Blog post syndication |
 
 **Binary Pattern (using xplat binary:install):**
 

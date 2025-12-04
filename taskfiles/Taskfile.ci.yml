@@ -25,7 +25,7 @@ tasks:
   # Runs cross-platform (Linux, macOS, Windows)
 
   taskfile:
-    desc: Validate Taskfile works (used by CI matrix)
+    desc: "[Core] Taskfile - Validate Taskfile works across platforms"
     cmds:
       - |
         echo "## Taskfile Validation"
@@ -79,7 +79,7 @@ tasks:
         echo "Taskfile validated successfully"
 
   health:
-    desc: Run all health checks (used by scheduled CI)
+    desc: "[Monitor] Health - Run all health checks"
     cmds:
       - |
         echo "## Health Check"

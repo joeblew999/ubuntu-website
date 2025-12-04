@@ -276,13 +276,13 @@ tasks:
   # Note: ci:analytics and ci:sitecheck use binaries via their respective taskfiles
 
   ci:analytics:
-    desc: Run analytics check for CI (outputs markdown, exit 1 if changes)
+    desc: "[Monitor] Analytics - Run analytics check for CI"
     cmds:
       - task: analytics:check:deps
       - '{{.HOME}}/.local/bin/analytics{{exeExt}} -github-issue'
 
   ci:sitecheck:
-    desc: Run site check for CI (outputs markdown, exit 1 if changes)
+    desc: "[Monitor] Sitecheck - Run site check for CI"
     cmds:
       - task: sitecheck:check:deps
       - '{{.HOME}}/.local/bin/sitecheck{{exeExt}} -github-issue'
