@@ -23,6 +23,9 @@ version: '3'
 
 # Includes (modular task files)
 includes:
+  # Tools (cross-platform utilities)
+  # Usage: task tools:xplat:check:deps
+  tools: ./taskfiles/Taskfile.tools.yml
   # Toolchains (compilers/runtimes) - nested namespace
   # Usage: task toolchain:golang:check:deps, task toolchain:rust:check:deps
   toolchain: ./taskfiles/Taskfile.toolchain.yml

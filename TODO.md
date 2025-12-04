@@ -1,8 +1,11 @@
 # todo
 
----
+you are going to need a cross platform golang tool for some of the things you doing maybe ? all task files might need to depend on it. For example i was using go-which  ( a golang installable thng ) so that the which thing was cross platform. I call these base tools because local and ci task files need them, and again they need to be idempotently checked and installed.    also the golang version of jq too.   so just like oyu have runtime , you have tools.  Also all this CI is going to cost me on my CI plan ?  Maybe i am over baking the cake too early too ?   Task is good but you need to file in the holes ? 
 
-can we have a ci task that checks that CI runs across a matrix ? I dont want to run everything across all OS. I just want to make sure the task files work on al OS within CI. this is to make sure out task file works for end users on different OS. some will be on Windows .
+Its normal to recactor back to golang.
+
+task is good and i plan to iuse it in production on servers and desktops with real users editing it.   this is why its worth getting this right .
+
 
 ---
 

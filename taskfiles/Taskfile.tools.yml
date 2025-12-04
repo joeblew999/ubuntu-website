@@ -1,0 +1,35 @@
+# Tools Module
+#
+# Cross-platform development tools that bootstrap themselves.
+# Unlike toolchain modules (which manage compilers/runtimes),
+# tools are standalone binaries that fill gaps in Task's shell.
+#
+# Included tools:
+#   xplat - Cross-platform shell utilities (which, glob, etc.)
+
+version: '3'
+
+includes:
+  xplat:
+    taskfile: ./tools/Taskfile.xplat.yml
+    optional: false
+
+tasks:
+  # ===========================================================================
+  # Checks (check:* - diagnostics for this module)
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure all tools are installed
+    cmds:
+      - task: xplat:check:deps
+
+  check:validate:
+    desc: Validate all tools work
+    cmds:
+      - task: xplat:check:validate
+
+  check:health:
+    desc: Health check all tools
+    cmds:
+      - task: xplat:check:health

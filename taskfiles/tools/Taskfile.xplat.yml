@@ -1,0 +1,158 @@
+# xplat - Cross-Platform Taskfile Utilities
+#
+# Downloads and installs the xplat binary from GitHub Releases.
+# This module has no REQUIRES as it bootstraps itself.
+#
+# Other modules can use xplat for cross-platform operations:
+#   xplat which <binary>   - Find binary in PATH
+#   xplat glob <pattern>   - Expand glob pattern (supports **)
+
+version: '3'
+
+vars:
+  XPLAT_VERSION: v0.1.0
+  XPLAT_REPO: joeblew999/ubuntu-website
+  # Install location - ~/.local/bin on Unix, ~/bin on Windows
+  XPLAT_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+
+tasks:
+  # ===========================================================================
+  # Checks (check:* - diagnostics for this module)
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure xplat is installed (builds from source or downloads)
+    run: once
+    cmds:
+      - |
+        # Check if xplat exists and works
+        if command -v xplat >/dev/null 2>&1; then
+          INSTALLED=$(xplat version 2>/dev/null || echo "unknown")
+          echo "OK: xplat $INSTALLED"
+          exit 0
+        fi
+
+        # Create install directory
+        mkdir -p "{{.XPLAT_INSTALL_DIR}}"
+
+        # Detect OS for extension
+        EXT=""
+        case "$(uname -s)" in
+          MINGW*|MSYS*|CYGWIN*) EXT=".exe" ;;
+        esac
+
+        # Strategy 1: Build from source if Go is available
+        # This works in CI (always has Go) and locally (if Go installed)
+        if command -v go >/dev/null 2>&1; then
+          echo "Building xplat from source..."
+          # Build from repo root ({{.ROOT_DIR}} is set by Task)
+          go build -o "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" "{{.ROOT_DIR}}/cmd/xplat"
+          chmod +x "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
+          echo "OK: xplat built from source"
+          echo ""
+          echo "Add to PATH if not already:"
+          echo "  export PATH=\"{{.XPLAT_INSTALL_DIR}}:\$PATH\""
+          exit 0
+        fi
+
+        # Strategy 2: Download from GitHub Release (for users without Go)
+        echo "Go not found, downloading xplat {{.XPLAT_VERSION}} from GitHub..."
+
+        # Detect OS and architecture
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        ARCH=$(uname -m)
+
+        case "$OS" in
+          mingw*|msys*|cygwin*) OS="windows" ;;
+        esac
+
+        case "$ARCH" in
+          x86_64) ARCH="amd64" ;;
+          aarch64|arm64) ARCH="arm64" ;;
+        esac
+
+        BINARY="xplat-${OS}-${ARCH}${EXT}"
+        URL="https://github.com/{{.XPLAT_REPO}}/releases/download/xplat-{{.XPLAT_VERSION}}/${BINARY}"
+
+        echo "Downloading from: $URL"
+
+        # Download binary
+        if command -v curl >/dev/null 2>&1; then
+          HTTP_CODE=$(curl -sL -w "%{http_code}" "$URL" -o "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "ERROR: Download failed (HTTP $HTTP_CODE)"
+            echo "Release xplat-{{.XPLAT_VERSION}} may not exist yet."
+            echo "Install Go and re-run to build from source."
+            rm -f "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
+            exit 1
+          fi
+        elif command -v wget >/dev/null 2>&1; then
+          wget -q "$URL" -O "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" || {
+            echo "ERROR: Download failed"
+            echo "Release xplat-{{.XPLAT_VERSION}} may not exist yet."
+            echo "Install Go and re-run to build from source."
+            rm -f "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
+            exit 1
+          }
+        else
+          echo "ERROR: curl or wget required to download xplat"
+          exit 1
+        fi
+
+        # Make executable
+        chmod +x "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
+
+        # Verify
+        if "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" version >/dev/null 2>&1; then
+          echo "OK: xplat {{.XPLAT_VERSION}} installed to {{.XPLAT_INSTALL_DIR}}"
+          echo ""
+          echo "Add to PATH if not already:"
+          echo "  export PATH=\"{{.XPLAT_INSTALL_DIR}}:\$PATH\""
+        else
+          echo "ERROR: xplat installation failed"
+          exit 1
+        fi
+
+  check:validate:
+    desc: Verify xplat works correctly
+    cmds:
+      - |
+        echo "Validating xplat..."
+        xplat version
+        xplat which go || echo "(go not found - OK if not installed)"
+        xplat glob "taskfiles/*.yml" | head -3
+        echo "xplat:check:validate passed"
+
+  check:health:
+    desc: Check xplat can access GitHub (for updates)
+    cmds:
+      - |
+        echo "Checking GitHub connectivity..."
+        if curl -sI "https://github.com/{{.XPLAT_REPO}}/releases" >/dev/null 2>&1; then
+          echo "OK: GitHub reachable"
+        else
+          echo "WARN: Cannot reach GitHub (offline?)"
+        fi
+        echo "xplat:check:health passed"
+
+  # ===========================================================================
+  # Tasks
+  # ===========================================================================
+
+  upgrade:
+    desc: Upgrade xplat to latest version
+    cmds:
+      - |
+        echo "Checking for updates..."
+        LATEST=$(curl -sI "https://github.com/{{.XPLAT_REPO}}/releases/latest" | grep -i location | sed 's/.*tag\/xplat-//' | tr -d '\r\n')
+        CURRENT=$(xplat version 2>/dev/null || echo "unknown")
+
+        if [ "$LATEST" = "$CURRENT" ]; then
+          echo "Already at latest version: $CURRENT"
+          exit 0
+        fi
+
+        echo "Upgrading from $CURRENT to $LATEST..."
+        # Force reinstall
+        rm -f "{{.XPLAT_INSTALL_DIR}}/xplat"
+        XPLAT_VERSION="$LATEST" task tools:xplat:check:deps
