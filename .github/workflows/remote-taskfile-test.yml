@@ -1,7 +1,8 @@
 # Remote Taskfile Include Test
 #
 # Validates that external consumers can include Taskfiles from this repo.
-# Uses ${{ github.sha }} for stable, immutable references that work on any branch/PR.
+# Uses the branch name (head_ref for PRs, ref_name for pushes) since Task's
+# remote include requires branch/tag names, not commit SHAs.
 #
 # This simulates the consumer experience:
 # 1. Creates a temp Taskfile outside this repo
@@ -41,41 +42,36 @@ jobs:
           version: 3.x
 
       - name: Test Remote Tools Include (xplat bootstrap)
+        env:
+          REPO: ${{ github.repository }}
+          # For PRs, use head_ref (branch name); for pushes, use ref_name (branch name)
+          # Task's remote include requires a branch/tag name, not a commit SHA
+          REF: ${{ github.head_ref || github.ref_name }}
         run: |
           echo "=== Testing Remote Taskfile Include ==="
-          echo "Repository: ${{ github.repository }}"
-          echo "Commit SHA: ${{ github.sha }}"
+          echo "Repository: $REPO"
+          echo "Ref: $REF"
           echo ""
 
           # Create consumer-like Taskfile in temp dir (outside this repo)
           mkdir -p /tmp/consumer-test
-          cat > /tmp/consumer-test/Taskfile.yml << 'TASKFILE_EOF'
-          version: '3'
 
-          includes:
-            tools:
-              taskfile: https://github.com/REPO_PLACEHOLDER.git//taskfiles/Taskfile.tools.yml?ref=SHA_PLACEHOLDER
-
-          tasks:
-            test:
-              desc: Test that remote include works
-              cmds:
-                - echo "Step 1: Bootstrap xplat via remote include..."
-                - task tools:xplat:check:deps
-                - echo ""
-                - echo "Step 2: Verify xplat works..."
-                - xplat version
-                - xplat which task
-                - echo ""
-                - echo "SUCCESS: Remote include + xplat bootstrap works!"
-          TASKFILE_EOF
-
-          # Replace placeholders with actual values (heredoc with single quotes prevents expansion)
-          sed -i "s|REPO_PLACEHOLDER|${{ github.repository }}|g" /tmp/consumer-test/Taskfile.yml
-          sed -i "s|SHA_PLACEHOLDER|${{ github.sha }}|g" /tmp/consumer-test/Taskfile.yml
-
-          # Fix indentation - heredoc preserves leading spaces, remove them
-          sed -i 's/^          //' /tmp/consumer-test/Taskfile.yml
+          # Write Taskfile using printf to avoid heredoc indentation issues
+          printf '%s\n' \
+            "version: '3'" \
+            "" \
+            "includes:" \
+            "  tools:" \
+            "    taskfile: https://github.com/${REPO}.git//taskfiles/Taskfile.tools.yml?ref=${REF}" \
+            "" \
+            "tasks:" \
+            "  test:" \
+            "    desc: Test that remote include works" \
+            "    cmds:" \
+            "      - task tools:xplat:check:deps" \
+            "      - xplat version" \
+            "      - xplat which task" \
+            > /tmp/consumer-test/Taskfile.yml
 
           echo "=== Consumer Taskfile ==="
           cat /tmp/consumer-test/Taskfile.yml
