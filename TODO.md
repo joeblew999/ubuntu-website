@@ -5,6 +5,8 @@
 - [x] xplat v0.2.0 released with Windows support, mv command, unit tests
 - [x] Remote taskfile includes work (validated in CI)
 - [x] Cross-platform CI testing (Linux, macOS, Windows)
+- [x] gh CLI taskfile added (tools:gh:*) - releases, workflows, PRs, issues
+- [x] xplat release workflow migrated from softprops/action-gh-release to gh CLI
 
 ## In Progress
 
@@ -70,11 +72,12 @@ Could move reusable taskfiles to a dedicated repo so all repos can pull versione
 
 https://github.com/akhenakh/narun - could help generalize cmd/* tools
 
-### gh CLI in CI
+### gh CLI - Future Enhancements
 
-Use `gh` CLI inside GitHub Actions workflows for releases and other operations.
-Already use it locally - could simplify CI release workflows (vs softprops/action-gh-release).
-Worth testing to see what it offers.
+Now that we have `tools:gh:*` tasks and migrated xplat release to use gh CLI:
+- Consider migrating other workflows to use gh CLI
+- Add `gh:workflow:run` to trigger CI from local (useful for manual releases)
+- Explore `gh api` for more advanced GitHub integrations
 
 ### Logo/Branding Updates
 

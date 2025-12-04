@@ -304,51 +304,58 @@ jobs:
           ls -la release/
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: release/*
-          generate_release_notes: true
-          body: |
-            ## xplat - Cross-platform utilities for Taskfile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Create release notes file
+          cat > /tmp/release-notes.md << 'EOF'
+          ## xplat - Cross-platform utilities for Taskfile
 
-            Download the binary for your platform and add it to your PATH.
+          Download the binary for your platform and add it to your PATH.
 
-            ### Installation
+          ### Installation
 
-            ```bash
-            # macOS (Apple Silicon)
-            curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/xplat-darwin-arm64 -o /usr/local/bin/xplat
-            chmod +x /usr/local/bin/xplat
+          ```bash
+          # macOS (Apple Silicon)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/xplat-darwin-arm64 -o /usr/local/bin/xplat
+          chmod +x /usr/local/bin/xplat
 
-            # macOS (Intel)
-            curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/xplat-darwin-amd64 -o /usr/local/bin/xplat
-            chmod +x /usr/local/bin/xplat
+          # macOS (Intel)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/xplat-darwin-amd64 -o /usr/local/bin/xplat
+          chmod +x /usr/local/bin/xplat
 
-            # Linux (x86_64)
-            curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/xplat-linux-amd64 -o ~/.local/bin/xplat
-            chmod +x ~/.local/bin/xplat
+          # Linux (x86_64)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/xplat-linux-amd64 -o ~/.local/bin/xplat
+          chmod +x ~/.local/bin/xplat
 
-            # Linux (ARM64)
-            curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/xplat-linux-arm64 -o ~/.local/bin/xplat
-            chmod +x ~/.local/bin/xplat
-            ```
+          # Linux (ARM64)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/xplat-linux-arm64 -o ~/.local/bin/xplat
+          chmod +x ~/.local/bin/xplat
+          ```
 
-            ### Commands
+          ### Commands
 
-            ```
-            # Core (P0)
-            xplat version          # Print version
-            xplat which <binary>   # Find binary in PATH
-            xplat glob <pattern>   # Expand glob pattern (supports **)
+          ```
+          # Core (P0)
+          xplat version          # Print version
+          xplat which <binary>   # Find binary in PATH
+          xplat glob <pattern>   # Expand glob pattern (supports **)
 
-            # File Operations (P1)
-            xplat rm [-rf] <path>  # Remove files or directories
-            xplat mkdir [-p] <dir> # Create directories
-            xplat cp [-r] <s> <d>  # Copy files or directories
-            xplat mv <src> <dst>   # Move or rename files/directories
+          # File Operations (P1)
+          xplat rm [-rf] <path>  # Remove files or directories
+          xplat mkdir [-p] <dir> # Create directories
+          xplat cp [-r] <s> <d>  # Copy files or directories
+          xplat mv <src> <dst>   # Move or rename files/directories
 
-            # Utilities (P2)
-            xplat cat <file>       # Print file contents
-            xplat touch <file>     # Create or update file
-            xplat env <key> [-d v] # Get environment variable
-            ```
+          # Utilities (P2)
+          xplat cat <file>       # Print file contents
+          xplat touch <file>     # Create or update file
+          xplat env <key> [-d v] # Get environment variable
+          ```
+          EOF
+
+          # Create release with gh CLI (replaces softprops/action-gh-release)
+          gh release create "${{ github.ref_name }}" \
+            --title "xplat ${GITHUB_REF_NAME#xplat-}" \
+            --notes-file /tmp/release-notes.md \
+            release/*

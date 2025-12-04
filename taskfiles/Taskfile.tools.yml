@@ -6,6 +6,7 @@
 #
 # Included tools:
 #   xplat - Cross-platform shell utilities (which, glob, etc.)
+#   gh    - GitHub CLI for releases, workflows, PRs, issues
 
 version: '3'
 
@@ -13,6 +14,9 @@ includes:
   xplat:
     taskfile: ./tools/Taskfile.xplat.yml
     optional: false
+  gh:
+    taskfile: ./tools/Taskfile.gh.yml
+    optional: true  # gh not required for basic operations
 
 tasks:
   # ===========================================================================

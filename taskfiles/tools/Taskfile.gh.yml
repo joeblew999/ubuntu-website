@@ -1,0 +1,216 @@
+# gh - GitHub CLI Taskfile
+#
+# Wraps gh CLI for common GitHub operations.
+# Works both locally and in CI (gh is pre-installed in GitHub Actions).
+#
+# REQUIRES: gh (GitHub CLI)
+
+version: '3'
+
+tasks:
+  # ===========================================================================
+  # Checks
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure gh CLI is installed and authenticated
+    run: once
+    cmds:
+      - |
+        if ! command -v gh >/dev/null 2>&1; then
+          echo "ERROR: gh CLI not found"
+          echo "Install: https://cli.github.com/"
+          exit 1
+        fi
+        echo "OK: gh $(gh --version | head -1 | cut -d' ' -f3)"
+
+        # Check auth (skip in CI - uses GITHUB_TOKEN automatically)
+        if [ -z "$GITHUB_ACTIONS" ]; then
+          if ! gh auth status >/dev/null 2>&1; then
+            echo "WARN: gh not authenticated. Run: gh auth login"
+          else
+            echo "OK: gh authenticated"
+          fi
+        else
+          echo "OK: Running in GitHub Actions (uses GITHUB_TOKEN)"
+        fi
+
+  # ===========================================================================
+  # Releases
+  # ===========================================================================
+
+  release:list:
+    desc: List recent releases
+    cmds:
+      - gh release list --limit 10
+
+  release:view:
+    desc: View latest release details
+    cmds:
+      - gh release view
+
+  release:create:
+    desc: Create a release (usage - task gh:release:create -- TAG)
+    cmds:
+      - |
+        TAG="{{.CLI_ARGS}}"
+        if [ -z "$TAG" ]; then
+          echo "Usage: task gh:release:create -- TAG"
+          echo "Example: task gh:release:create -- v1.0.0"
+          exit 1
+        fi
+        gh release create "$TAG" --generate-notes
+
+  release:create-with-assets:
+    desc: Create release with assets (usage - task gh:release:create-with-assets -- TAG FILE1 FILE2...)
+    cmds:
+      - |
+        ARGS="{{.CLI_ARGS}}"
+        TAG=$(echo "$ARGS" | cut -d' ' -f1)
+        FILES=$(echo "$ARGS" | cut -d' ' -f2-)
+
+        if [ -z "$TAG" ] || [ "$TAG" = "$FILES" ]; then
+          echo "Usage: task gh:release:create-with-assets -- TAG FILE1 [FILE2...]"
+          echo "Example: task gh:release:create-with-assets -- v1.0.0 dist/*"
+          exit 1
+        fi
+
+        gh release create "$TAG" --generate-notes $FILES
+
+  release:upload:
+    desc: Upload assets to existing release (usage - task gh:release:upload -- TAG FILE1 FILE2...)
+    cmds:
+      - |
+        ARGS="{{.CLI_ARGS}}"
+        TAG=$(echo "$ARGS" | cut -d' ' -f1)
+        FILES=$(echo "$ARGS" | cut -d' ' -f2-)
+
+        if [ -z "$TAG" ] || [ "$TAG" = "$FILES" ]; then
+          echo "Usage: task gh:release:upload -- TAG FILE1 [FILE2...]"
+          exit 1
+        fi
+
+        gh release upload "$TAG" $FILES --clobber
+
+  release:delete:
+    desc: Delete a release (usage - task gh:release:delete -- TAG)
+    cmds:
+      - |
+        TAG="{{.CLI_ARGS}}"
+        if [ -z "$TAG" ]; then
+          echo "Usage: task gh:release:delete -- TAG"
+          exit 1
+        fi
+        gh release delete "$TAG" --yes --cleanup-tag
+
+  # ===========================================================================
+  # Workflows & Runs
+  # ===========================================================================
+
+  workflow:list:
+    desc: List workflows
+    cmds:
+      - gh workflow list
+
+  workflow:run:
+    desc: Trigger a workflow (usage - task gh:workflow:run -- WORKFLOW)
+    cmds:
+      - |
+        WORKFLOW="{{.CLI_ARGS}}"
+        if [ -z "$WORKFLOW" ]; then
+          echo "Usage: task gh:workflow:run -- WORKFLOW"
+          echo "Example: task gh:workflow:run -- xplat.yml"
+          exit 1
+        fi
+        gh workflow run "$WORKFLOW"
+        echo "Triggered workflow: $WORKFLOW"
+
+  run:list:
+    desc: List recent workflow runs
+    cmds:
+      - gh run list --limit 10
+
+  run:watch:
+    desc: Watch latest run until completion
+    cmds:
+      - gh run watch
+
+  run:view:
+    desc: View latest run details
+    cmds:
+      - gh run view
+
+  run:failed:
+    desc: Show failed runs
+    cmds:
+      - gh run list --status failure --limit 5
+
+  run:logs:
+    desc: View logs for latest run
+    cmds:
+      - gh run view --log
+
+  # ===========================================================================
+  # PRs & Issues
+  # ===========================================================================
+
+  pr:list:
+    desc: List open pull requests
+    cmds:
+      - gh pr list
+
+  pr:create:
+    desc: Create PR from current branch
+    cmds:
+      - gh pr create --fill
+
+  pr:view:
+    desc: View current PR
+    cmds:
+      - gh pr view
+
+  pr:checks:
+    desc: View PR check status
+    cmds:
+      - gh pr checks
+
+  issue:list:
+    desc: List open issues
+    cmds:
+      - gh issue list
+
+  # ===========================================================================
+  # Repository
+  # ===========================================================================
+
+  repo:view:
+    desc: View repository info
+    cmds:
+      - gh repo view
+
+  repo:clone:
+    desc: Clone a repository (usage - task gh:repo:clone -- REPO)
+    cmds:
+      - |
+        REPO="{{.CLI_ARGS}}"
+        if [ -z "$REPO" ]; then
+          echo "Usage: task gh:repo:clone -- OWNER/REPO"
+          exit 1
+        fi
+        gh repo clone "$REPO"
+
+  # ===========================================================================
+  # API (raw access)
+  # ===========================================================================
+
+  api:
+    desc: Make raw API call (usage - task gh:api -- ENDPOINT)
+    cmds:
+      - |
+        ENDPOINT="{{.CLI_ARGS}}"
+        if [ -z "$ENDPOINT" ]; then
+          echo "Usage: task gh:api -- ENDPOINT"
+          echo "Example: task gh:api -- repos/{owner}/{repo}/releases"
+          exit 1
+        fi
+        gh api "$ENDPOINT"
