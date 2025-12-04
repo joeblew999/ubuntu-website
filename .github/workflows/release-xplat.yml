@@ -7,7 +7,7 @@
 #   git tag xplat-v0.1.0
 #   git push origin xplat-v0.1.0
 
-name: xplat Release
+name: "[Release] xplat"
 
 on:
   push:

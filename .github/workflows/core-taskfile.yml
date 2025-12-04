@@ -4,7 +4,7 @@
 # Tests includes mechanism and variable expansion.
 # Runs on push to main and PRs to catch issues early.
 
-name: Taskfile Validation
+name: "[Core] Taskfile"
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
     paths:
       - 'Taskfile.yml'
       - 'taskfiles/**'
-      - '.github/workflows/taskfile.yml'
+      - '.github/workflows/core-taskfile.yml'
   pull_request:
     paths:
       - 'Taskfile.yml'

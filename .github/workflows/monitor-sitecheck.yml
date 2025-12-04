@@ -6,7 +6,7 @@
 # Uses check-host.net API (no secrets required)
 # Optional: Set SITE_URL variable to monitor a different site
 
-name: Site Monitor
+name: "[Monitor] Sitecheck"
 
 on:
   schedule:

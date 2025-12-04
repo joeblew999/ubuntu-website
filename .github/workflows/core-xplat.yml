@@ -3,14 +3,14 @@
 # Runs on every push/PR to ensure xplat works on all platforms.
 # This catches Windows compatibility issues early.
 
-name: xplat Tests
+name: "[Core] xplat"
 
 on:
   push:
     branches: [main]
     paths:
       - 'cmd/xplat/**'
-      - '.github/workflows/xplat-test.yml'
+      - '.github/workflows/core-xplat.yml'
   pull_request:
     paths:
       - 'cmd/xplat/**'

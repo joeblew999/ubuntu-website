@@ -21,8 +21,16 @@ USE TASKFILE - it makes conventions for development.
 |-----------|---------|---------|
 | cmd/ tool | `cmd/<name>` | `cmd/analytics` |
 | Taskfile tasks | `<name>:*` | `analytics:report` |
-| Workflow file | `<name>.yml` | `analytics.yml` |
 | CI task | `ci:<name>` | `ci:analytics` |
+
+**Workflow Naming:** `{category}-{name}.yml`
+
+| Category | Purpose | Examples |
+|----------|---------|----------|
+| `core-` | P0 - must pass for merge | `core-taskfile.yml`, `core-xplat.yml`, `core-tools.yml` |
+| `monitor-` | Scheduled health checks | `monitor-analytics.yml`, `monitor-sitecheck.yml` |
+| `syndication-` | Content distribution | `syndication-bluesky.yml` |
+| `release-` | Build & release pipelines | `release-xplat.yml` |
 
 **Task Suffixes:**
 - `namespace:action` - Leaf task (`sitecheck:dns`)
@@ -39,6 +47,43 @@ USE TASKFILE - it makes conventions for development.
 **CI Tasks:**
 - `ci:*` namespace is the interface for GitHub Actions
 - These tasks output markdown and use exit codes for workflow control
+
+**Binary Pattern (using xplat binary:install):**
+
+Binary tools use `xplat binary:install` for cross-platform installation. This command:
+1. Checks if binary exists in PATH or install dir (skip if found)
+2. Builds from local source if Go is available
+3. Downloads from GitHub release as fallback
+
+| Category | Tools | Installation |
+|----------|-------|--------------|
+| With releases | xplat, analytics, sitecheck, genlogo | `xplat binary:install` |
+| Local-only | lanip, env, translate | `go run` (simple/broken) |
+
+Version management:
+- Versions defined in `versions.env` (single source of truth)
+- Taskfiles reference `{{.TOOL_VERSION}}` from dotenv
+- Release tag format: `<tool>-v<version>` (e.g., `analytics-v0.1.0`)
+- Install location: `~/.local/bin/` (unix) or `~/bin/` (windows)
+
+Example taskfile:
+```yaml
+vars:
+  # ANALYTICS_VERSION comes from versions.env
+  # XPLAT_BIN comes from root Taskfile.yml (handles .exe on Windows)
+  ANALYTICS_REPO: joeblew999/ubuntu-website
+  ANALYTICS_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+
+tasks:
+  check:deps:
+    cmds:
+      - '{{.XPLAT_BIN}} binary install analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source {{.ROOT_DIR}}/cmd/analytics'
+
+  report:
+    deps: [check:deps]
+    cmds:
+      - '{{.ANALYTICS_INSTALL_DIR}}/analytics{{exeExt}}'
+```
 
 ### Branding Assets
 
@@ -59,7 +104,7 @@ Colors: `#58a6ff` (blue), `#121212` (dark), `#f8f9fa` (background)
 
 ### Bluesky Syndication
 
-Blog posts auto-post to Bluesky via `.github/workflows/bluesky-syndication.yml`.
+Blog posts auto-post to Bluesky via `.github/workflows/syndication-bluesky.yml`.
 
 - Runs every 6 hours (or manual trigger)
 - RSS feed: `https://www.ubuntusoftware.net/blog/index.xml`

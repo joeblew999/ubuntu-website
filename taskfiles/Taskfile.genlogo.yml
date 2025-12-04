@@ -1,0 +1,75 @@
+# Genlogo Tasks
+#
+# Logo and branding asset generation via cmd/genlogo.
+# Uses xplat binary:install for cross-platform binary management.
+#
+# Usage:
+#   task genlogo:all      - Generate all branding assets
+#   task genlogo:favicon  - Generate favicon only
+#   task genlogo:logo     - Generate logo SVGs only
+#
+# REQUIRES: xplat (for binary management)
+
+version: '3'
+
+vars:
+  # GENLOGO_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+  GENLOGO_REPO: joeblew999/ubuntu-website
+  GENLOGO_BIN: 'genlogo{{exeExt}}'
+  GENLOGO_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+
+tasks:
+  # ===========================================================================
+  # Checks
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure genlogo binary is available (builds from source or downloads)
+    run: once
+    cmds:
+      - '{{.XPLAT_BIN}} binary install genlogo {{.GENLOGO_VERSION}} {{.GENLOGO_REPO}} --source {{.ROOT_DIR}}/cmd/genlogo'
+
+  # ===========================================================================
+  # Generation Tasks
+  # ===========================================================================
+
+  all:
+    desc: Generate all branding assets (favicon, logos, og-image, email-logo, avatar, banner)
+    deps: [check:deps]
+    cmds:
+      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset all'
+      - echo ""
+      - echo "Assets generated. Next steps:"
+      - echo "  1. Deploy website (git push) - updates Hugo site with new favicon, logos, og-image"
+      - echo "  2. Gmail signature - re-upload email-logo.png at https://mail.google.com/mail/u/0/#settings/general"
+      - echo "  3. Bluesky profile - re-upload avatar & banner at https://bsky.app/profile/ubuntusoftware.net"
+
+  favicon:
+    desc: Generate favicon only
+    deps: [check:deps]
+    cmds:
+      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset favicon'
+
+  logo:
+    desc: Generate logo SVGs only
+    deps: [check:deps]
+    cmds:
+      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset logo'
+
+  og-image:
+    desc: Generate Open Graph image only
+    deps: [check:deps]
+    cmds:
+      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset og-image'
+
+  avatar:
+    desc: Generate avatar only
+    deps: [check:deps]
+    cmds:
+      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset avatar'
+
+  banner:
+    desc: Generate banner only
+    deps: [check:deps]
+    cmds:
+      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset banner'

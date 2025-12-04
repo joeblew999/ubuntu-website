@@ -7,7 +7,7 @@
 #   - CLOUDFLARE_API_TOKEN (with Account Analytics:Read permission)
 #   - CF_WEB_ANALYTICS_SITE_TAG (optional, has fallback default)
 
-name: Weekly Analytics Report
+name: "[Monitor] Analytics"
 
 on:
   schedule:

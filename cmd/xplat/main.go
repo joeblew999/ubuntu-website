@@ -43,6 +43,9 @@ Designed to fill gaps in Task's built-in shell interpreter.`,
 	rootCmd.AddCommand(cmd.TouchCmd)
 	rootCmd.AddCommand(cmd.EnvCmd)
 
+	// P3 (binary management)
+	rootCmd.AddCommand(cmd.BinaryCmd)
+
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}

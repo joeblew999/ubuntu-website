@@ -15,7 +15,7 @@
 # - Manual trigger with test_failure=true to test notification flow
 # - Or run locally: task ci:health:test-fail
 
-name: Health Check
+name: "[Monitor] Health"
 
 on:
   schedule:

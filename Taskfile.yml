@@ -19,10 +19,11 @@ version: '3'
 #   cf:*        - Cloudflare Pages management
 #   git:*       - Git operations
 #   translate:* - Translation workflow
-#   seo:*       - SEO & analytics
-#   sitecheck:* - Site reachability checks
+#   analytics:* - Cloudflare Web Analytics (cmd/analytics)
+#   sitecheck:* - Site reachability checks (cmd/sitecheck)
+#   genlogo:*   - Logo/branding generation (cmd/genlogo)
 #   env:*       - Environment management
-#   url:*       - URL shortcuts
+#   url:*       - URL shortcuts + SEO dashboards
 #   tools:*     - Cross-platform tools (xplat, gh, task)
 #   toolchain:* - Compilers/runtimes (golang, rust)
 #   ci:*        - CI interface tasks
@@ -38,8 +39,9 @@ includes:
   hugo: ./taskfiles/Taskfile.hugo.yml
   cf: ./taskfiles/Taskfile.cf.yml
   translate: ./taskfiles/Taskfile.translate.yml
-  seo: ./taskfiles/Taskfile.seo.yml
+  analytics: ./taskfiles/Taskfile.analytics.yml
   sitecheck: ./taskfiles/Taskfile.sitecheck.yml
+  genlogo: ./taskfiles/Taskfile.genlogo.yml
   env: ./taskfiles/Taskfile.env.yml
   url: ./taskfiles/Taskfile.url.yml
 
@@ -115,6 +117,11 @@ vars:
 
   # Wrangler
   WRANGLER_CMD: bunx wrangler
+
+  # xplat - cross-platform binary (with .exe on Windows)
+  # Install dir: ~/.local/bin (Unix) or ~/bin (Windows)
+  XPLAT_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+  XPLAT_BIN: '{{.XPLAT_INSTALL_DIR}}/xplat{{exeExt}}'
 
 # =============================================================================
 # Tasks
@@ -262,34 +269,23 @@ tasks:
       - task: hugo:clean
 
   # ===========================================================================
-  # Logo Generation (cmd/genlogo)
-  # ===========================================================================
-
-  genlogo:all:
-    desc: Generate all branding assets (favicon, logos, og-image, email-logo, avatar, banner)
-    cmds:
-      - go run cmd/genlogo/main.go -asset all
-      - echo ""
-      - echo "Assets generated. Next steps:"
-      - echo "  1. Deploy website (git push) - updates Hugo site with new favicon, logos, og-image"
-      - echo "  2. Gmail signature - re-upload email-logo.png at https://mail.google.com/mail/u/0/#settings/general"
-      - echo "  3. Bluesky profile - re-upload avatar & banner at https://bsky.app/profile/ubuntusoftware.net"
-
-  # ===========================================================================
   # CI Interface (called by GitHub Actions workflows)
   # ===========================================================================
   # Workflows call these tasks - all logic stays in Taskfile.
   # Most ci:* tasks are in taskfiles/Taskfile.ci.yml
+  # Note: ci:analytics and ci:sitecheck use binaries via their respective taskfiles
 
   ci:analytics:
     desc: Run analytics check for CI (outputs markdown, exit 1 if changes)
     cmds:
-      - go run ./cmd/analytics/ -github-issue
+      - task: analytics:check:deps
+      - '{{.HOME}}/.local/bin/analytics{{exeExt}} -github-issue'
 
   ci:sitecheck:
     desc: Run site check for CI (outputs markdown, exit 1 if changes)
     cmds:
-      - go run ./cmd/sitecheck/ -github-issue
+      - task: sitecheck:check:deps
+      - '{{.HOME}}/.local/bin/sitecheck{{exeExt}} -github-issue'
 
   # ===========================================================================
   # Code Quality

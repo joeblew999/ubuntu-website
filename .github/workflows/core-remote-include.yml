@@ -9,14 +9,14 @@
 # 2. Includes our tools module via git URL
 # 3. Bootstraps xplat via download (not build from source)
 
-name: Remote Taskfile Include Test
+name: "[Core] Remote Include"
 
 on:
   push:
     branches: [main]
     paths:
       - 'taskfiles/**'
-      - '.github/workflows/remote-taskfile-test.yml'
+      - '.github/workflows/core-remote-include.yml'
   pull_request:
     paths:
       - 'taskfiles/**'
