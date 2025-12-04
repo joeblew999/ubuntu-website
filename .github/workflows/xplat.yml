@@ -97,7 +97,10 @@ jobs:
       - name: Prepare release files
         run: |
           mkdir -p release
-          find artifacts -type f -exec mv {} release/ \;
+          # Move all artifact files to release directory
+          for dir in artifacts/*/; do
+            [ -d "$dir" ] && cp "$dir"* release/ 2>/dev/null || true
+          done
           ls -la release/
 
       - name: Create Release

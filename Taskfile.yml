@@ -334,7 +334,7 @@ tasks:
   hugo:clean:
     desc: Clean build artifacts
     cmds:
-      - rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
+      - xplat rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
 
   # Aliases (backward compatibility)
   dev:
@@ -418,7 +418,7 @@ tasks:
           MISSING_FILES=""
 
           # Check each English content file
-          for EN_FILE in $(find content/english -name "*.md" -type f); do
+          for EN_FILE in $(xplat glob "content/english/**/*.md"); do
             # Convert path: content/english/foo.md -> content/german/foo.md
             LANG_FILE=$(echo "$EN_FILE" | sed "s|content/english|content/$LANG|")
 
@@ -456,7 +456,7 @@ tasks:
           ORPHAN_FILES=""
 
           # Check each file in target language
-          for LANG_FILE in $(find content/$LANG -name "*.md" -type f 2>/dev/null); do
+          for LANG_FILE in $(xplat glob "content/$LANG/**/*.md" 2>/dev/null); do
             # Convert path: content/german/foo.md -> content/english/foo.md
             EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
 
@@ -491,11 +491,11 @@ tasks:
         DELETED=0
 
         for LANG in $LANGS; do
-          for LANG_FILE in $(find content/$LANG -name "*.md" -type f 2>/dev/null); do
+          for LANG_FILE in $(xplat glob "content/$LANG/**/*.md" 2>/dev/null); do
             EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
             if [ ! -f "$EN_FILE" ]; then
               echo "Deleting: $LANG_FILE"
-              rm "$LANG_FILE"
+              xplat rm "$LANG_FILE"
               DELETED=$((DELETED + 1))
             fi
           done
