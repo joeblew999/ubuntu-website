@@ -163,10 +163,12 @@ tasks:
           ERRORS=$((ERRORS + 1))
         fi
 
-        # Test mkdir
+        # Test mkdir (use cross-platform temp dir)
         echo ""
         echo "Testing: xplat mkdir"
-        TESTDIR="/tmp/xplat-test-$$"
+        # Use TEMP on Windows, TMPDIR on macOS, /tmp on Linux
+        TEMPBASE="${TEMP:-${TMPDIR:-/tmp}}"
+        TESTDIR="$TEMPBASE/xplat-test-$$"
         if xplat mkdir -p "$TESTDIR/nested/dir"; then
           if [ -d "$TESTDIR/nested/dir" ]; then
             echo "  OK: created nested directories"
