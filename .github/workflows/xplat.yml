@@ -293,13 +293,12 @@ jobs:
         run: |
           # Bootstrap xplat from just-built artifacts
           chmod +x artifacts/xplat-linux-amd64/xplat-linux-amd64
-          export PATH="$PWD/artifacts/xplat-linux-amd64:$PATH"
-          alias xplat="$PWD/artifacts/xplat-linux-amd64/xplat-linux-amd64"
+          XPLAT="$PWD/artifacts/xplat-linux-amd64/xplat-linux-amd64"
 
           # Use xplat for cross-platform operations
-          xplat mkdir -p release
-          for dir in $(xplat glob "artifacts/*"); do
-            [ -d "$dir" ] && xplat cp "$dir"/* release/ 2>/dev/null || true
+          $XPLAT mkdir -p release
+          for dir in $($XPLAT glob "artifacts/*"); do
+            [ -d "$dir" ] && $XPLAT cp "$dir"/* release/ 2>/dev/null || true
           done
           ls -la release/
 
