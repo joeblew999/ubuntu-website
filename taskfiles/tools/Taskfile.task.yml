@@ -1,0 +1,48 @@
+# Task - go-task/task Taskfile Runner
+#
+# Provides version checking to ensure local and CI use the same Task version.
+# This prevents subtle behavior differences between environments.
+#
+# Usage:
+#   task tools:task:check:deps   - Verify Task version matches expected
+#
+# Pattern: All tool taskfiles define TOOL_BIN with {{exeExt}} for Windows support
+
+version: '3'
+
+vars:
+  TASK_VERSION: 3.45.5
+  # Binary name with platform-specific extension (.exe on Windows)
+  TASK_BIN: 'task{{exeExt}}'
+
+tasks:
+  # ===========================================================================
+  # Checks (check:* - diagnostics for this module)
+  # ===========================================================================
+
+  check:deps:
+    desc: Verify Task version matches expected (warns on mismatch)
+    run: once
+    cmds:
+      - |
+        # Get installed version
+        INSTALLED=$({{.TASK_BIN}} --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+
+        if [ -z "$INSTALLED" ]; then
+          echo "ERROR: task not found in PATH"
+          echo "Install from: https://taskfile.dev/installation/"
+          exit 1
+        fi
+
+        if [ "$INSTALLED" != "{{.TASK_VERSION}}" ]; then
+          echo "WARN: Task version mismatch"
+          echo "  Expected: {{.TASK_VERSION}}"
+          echo "  Installed: $INSTALLED"
+          echo ""
+          echo "Update with: brew upgrade go-task (macOS)"
+          echo "  or: go install github.com/go-task/task/v3/cmd/task@v{{.TASK_VERSION}}"
+          echo ""
+          echo "Note: CI uses {{.TASK_VERSION}} - version mismatch may cause issues"
+        else
+          echo "OK: task $INSTALLED"
+        fi

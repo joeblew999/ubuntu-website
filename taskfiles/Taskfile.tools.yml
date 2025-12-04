@@ -5,12 +5,16 @@
 # tools are standalone binaries that fill gaps in Task's shell.
 #
 # Included tools:
+#   task  - Task version checker (ensures local matches CI)
 #   xplat - Cross-platform shell utilities (which, glob, etc.)
 #   gh    - GitHub CLI for releases, workflows, PRs, issues
 
 version: '3'
 
 includes:
+  task:
+    taskfile: ./tools/Taskfile.task.yml
+    optional: false
   xplat:
     taskfile: ./tools/Taskfile.xplat.yml
     optional: false
@@ -26,6 +30,7 @@ tasks:
   check:deps:
     desc: Ensure all tools are installed
     cmds:
+      - task: task:check:deps
       - task: xplat:check:deps
 
   check:validate:

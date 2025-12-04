@@ -7,31 +7,15 @@
 - [x] Cross-platform CI testing (Linux, macOS, Windows)
 - [x] gh CLI taskfile added (tools:gh:*) - releases, workflows, PRs, issues
 - [x] xplat release workflow migrated from softprops/action-gh-release to gh CLI
+- [x] TOOL_BIN pattern established ({{exeExt}} for Windows .exe support)
+- [x] Task version locked to 3.45.5 across all CI workflows
+- [x] Task version check taskfile added (tools:task:check:deps)
+- [x] Taskfile Registry validated via .github/workflows/remote-taskfile-test.yml
+- [x] Deprecated deploy.yml.old workflow deleted
 
 ## In Progress
 
-### Taskfile Registry Readiness
-
-The taskfile system is designed to be a registry that devs can extend and users can consume via remote includes.
-
-**Current structure:**
-```
-taskfiles/
-├── Taskfile.tools.yml      → tools/Taskfile.xplat.yml (nested, reusable)
-├── Taskfile.toolchain.yml  → toolchain/{golang,rust}.yml (nested, reusable)
-├── Taskfile.ci.yml         (flat, mostly reusable)
-├── Taskfile.git.yml        (flat, reusable)
-└── Taskfile.lanip.yml      (flat, project-specific)
-```
-
-**What works:**
-- `xplat` bootstraps via build-from-source OR GitHub release download
-- Remote includes validated in `.github/workflows/remote-taskfile-test.yml`
-- REQUIRES comment system for toolchain autodiscovery
-
-**Next steps:**
-- [ ] Test consumption from a fresh repo (real world validation)
-- [ ] Document consumption pattern for external devs
+(nothing currently)
 
 ---
 
@@ -56,6 +40,8 @@ Once patterns are solid from manual use, codify them into cmd/translate.
 ## Future Ideas
 
 ### Bigger Picture
+
+Via (Datastar web GUI) & Hugo extension work can leverage each other ? Maybe for collaboration aspects. real time, etc. Can redude what we are building to be simpler for inside vscode and outside in terms of code and compleyity. Def need to visit this !!
 
 Building toward:
 1. **Via** - User IDE web GUI using Datastar
