@@ -36,6 +36,7 @@ Designed to fill gaps in Task's built-in shell interpreter.`,
 	rootCmd.AddCommand(cmd.RmCmd)
 	rootCmd.AddCommand(cmd.MkdirCmd)
 	rootCmd.AddCommand(cmd.CpCmd)
+	rootCmd.AddCommand(cmd.MvCmd)
 
 	// P2 (utilities)
 	rootCmd.AddCommand(cmd.CatCmd)

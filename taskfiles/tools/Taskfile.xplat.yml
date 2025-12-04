@@ -239,6 +239,37 @@ tasks:
           ERRORS=$((ERRORS + 1))
         fi
 
+        # Test mv (rename)
+        echo ""
+        echo "Testing: xplat mv (rename)"
+        xplat touch "$TESTDIR/to-rename.txt"
+        if xplat mv "$TESTDIR/to-rename.txt" "$TESTDIR/renamed.txt"; then
+          if [ -f "$TESTDIR/renamed.txt" ] && [ ! -f "$TESTDIR/to-rename.txt" ]; then
+            echo "  OK: renamed file"
+          else
+            echo "  FAILED: rename incomplete"
+            ERRORS=$((ERRORS + 1))
+          fi
+        else
+          echo "  FAILED: mv returned error"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test mv (move to directory)
+        echo ""
+        echo "Testing: xplat mv (move to directory)"
+        if xplat mv "$TESTDIR/renamed.txt" "$TESTDIR/nested/"; then
+          if [ -f "$TESTDIR/nested/renamed.txt" ]; then
+            echo "  OK: moved file to directory"
+          else
+            echo "  FAILED: move incomplete"
+            ERRORS=$((ERRORS + 1))
+          fi
+        else
+          echo "  FAILED: mv to directory returned error"
+          ERRORS=$((ERRORS + 1))
+        fi
+
         # Test env
         echo ""
         echo "Testing: xplat env"

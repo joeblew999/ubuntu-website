@@ -83,6 +83,16 @@ jobs:
           ./xplat cp -r /tmp/xplat-ci-test/nested /tmp/xplat-ci-test/nested-copy
           [ -d /tmp/xplat-ci-test/nested-copy/dir ] || exit 1
 
+          echo "Testing: mv (rename)"
+          ./xplat touch /tmp/xplat-ci-test/to-rename.txt
+          ./xplat mv /tmp/xplat-ci-test/to-rename.txt /tmp/xplat-ci-test/renamed.txt
+          [ -f /tmp/xplat-ci-test/renamed.txt ] || exit 1
+          [ ! -f /tmp/xplat-ci-test/to-rename.txt ] || exit 1
+
+          echo "Testing: mv (to directory)"
+          ./xplat mv /tmp/xplat-ci-test/renamed.txt /tmp/xplat-ci-test/nested/
+          [ -f /tmp/xplat-ci-test/nested/renamed.txt ] || exit 1
+
           echo "Testing: env"
           ./xplat env HOME
 
@@ -139,6 +149,16 @@ jobs:
           Write-Host "Testing: cp -r"
           .\xplat.exe cp -r "$env:TEMP\xplat-ci-test\nested" "$env:TEMP\xplat-ci-test\nested-copy"
           if (-not (Test-Path "$env:TEMP\xplat-ci-test\nested-copy\dir")) { exit 1 }
+
+          Write-Host "Testing: mv (rename)"
+          .\xplat.exe touch "$env:TEMP\xplat-ci-test\to-rename.txt"
+          .\xplat.exe mv "$env:TEMP\xplat-ci-test\to-rename.txt" "$env:TEMP\xplat-ci-test\renamed.txt"
+          if (-not (Test-Path "$env:TEMP\xplat-ci-test\renamed.txt")) { exit 1 }
+          if (Test-Path "$env:TEMP\xplat-ci-test\to-rename.txt") { exit 1 }
+
+          Write-Host "Testing: mv (to directory)"
+          .\xplat.exe mv "$env:TEMP\xplat-ci-test\renamed.txt" "$env:TEMP\xplat-ci-test\nested\"
+          if (-not (Test-Path "$env:TEMP\xplat-ci-test\nested\renamed.txt")) { exit 1 }
 
           Write-Host "Testing: env"
           .\xplat.exe env USERPROFILE
