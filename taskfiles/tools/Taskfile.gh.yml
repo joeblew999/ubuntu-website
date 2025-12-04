@@ -4,8 +4,14 @@
 # Works both locally and in CI (gh is pre-installed in GitHub Actions).
 #
 # REQUIRES: gh (GitHub CLI)
+#
+# Pattern: All tool taskfiles define TOOL_BIN with {{exeExt}} for Windows support
 
 version: '3'
+
+vars:
+  # Binary name with platform-specific extension (.exe on Windows)
+  GH_BIN: 'gh{{exeExt}}'
 
 tasks:
   # ===========================================================================
@@ -17,16 +23,16 @@ tasks:
     run: once
     cmds:
       - |
-        if ! command -v gh >/dev/null 2>&1; then
-          echo "ERROR: gh CLI not found"
+        if ! command -v {{.GH_BIN}} >/dev/null 2>&1; then
+          echo "ERROR: {{.GH_BIN}} not found"
           echo "Install: https://cli.github.com/"
           exit 1
         fi
-        echo "OK: gh $(gh --version | head -1 | cut -d' ' -f3)"
+        echo "OK: {{.GH_BIN}} $({{.GH_BIN}} --version | head -1 | cut -d' ' -f3)"
 
         # Check auth (skip in CI - uses GITHUB_TOKEN automatically)
         if [ -z "$GITHUB_ACTIONS" ]; then
-          if ! gh auth status >/dev/null 2>&1; then
+          if ! {{.GH_BIN}} auth status >/dev/null 2>&1; then
             echo "WARN: gh not authenticated. Run: gh auth login"
           else
             echo "OK: gh authenticated"
@@ -42,12 +48,12 @@ tasks:
   release:list:
     desc: List recent releases
     cmds:
-      - gh release list --limit 10
+      - '{{.GH_BIN}} release list --limit 10'
 
   release:view:
     desc: View latest release details
     cmds:
-      - gh release view
+      - '{{.GH_BIN}} release view'
 
   release:create:
     desc: Create a release (usage - task gh:release:create -- TAG)
@@ -59,7 +65,7 @@ tasks:
           echo "Example: task gh:release:create -- v1.0.0"
           exit 1
         fi
-        gh release create "$TAG" --generate-notes
+        {{.GH_BIN}} release create "$TAG" --generate-notes
 
   release:create-with-assets:
     desc: Create release with assets (usage - task gh:release:create-with-assets -- TAG FILE1 FILE2...)
@@ -75,7 +81,7 @@ tasks:
           exit 1
         fi
 
-        gh release create "$TAG" --generate-notes $FILES
+        {{.GH_BIN}} release create "$TAG" --generate-notes $FILES
 
   release:upload:
     desc: Upload assets to existing release (usage - task gh:release:upload -- TAG FILE1 FILE2...)
@@ -90,7 +96,7 @@ tasks:
           exit 1
         fi
 
-        gh release upload "$TAG" $FILES --clobber
+        {{.GH_BIN}} release upload "$TAG" $FILES --clobber
 
   release:delete:
     desc: Delete a release (usage - task gh:release:delete -- TAG)
@@ -101,7 +107,7 @@ tasks:
           echo "Usage: task gh:release:delete -- TAG"
           exit 1
         fi
-        gh release delete "$TAG" --yes --cleanup-tag
+        {{.GH_BIN}} release delete "$TAG" --yes --cleanup-tag
 
   # ===========================================================================
   # Workflows & Runs
@@ -110,7 +116,7 @@ tasks:
   workflow:list:
     desc: List workflows
     cmds:
-      - gh workflow list
+      - '{{.GH_BIN}} workflow list'
 
   workflow:run:
     desc: Trigger a workflow (usage - task gh:workflow:run -- WORKFLOW)
@@ -122,33 +128,33 @@ tasks:
           echo "Example: task gh:workflow:run -- xplat.yml"
           exit 1
         fi
-        gh workflow run "$WORKFLOW"
+        {{.GH_BIN}} workflow run "$WORKFLOW"
         echo "Triggered workflow: $WORKFLOW"
 
   run:list:
     desc: List recent workflow runs
     cmds:
-      - gh run list --limit 10
+      - '{{.GH_BIN}} run list --limit 10'
 
   run:watch:
     desc: Watch latest run until completion
     cmds:
-      - gh run watch
+      - '{{.GH_BIN}} run watch'
 
   run:view:
     desc: View latest run details
     cmds:
-      - gh run view
+      - '{{.GH_BIN}} run view'
 
   run:failed:
     desc: Show failed runs
     cmds:
-      - gh run list --status failure --limit 5
+      - '{{.GH_BIN}} run list --status failure --limit 5'
 
   run:logs:
     desc: View logs for latest run
     cmds:
-      - gh run view --log
+      - '{{.GH_BIN}} run view --log'
 
   # ===========================================================================
   # PRs & Issues
@@ -157,27 +163,27 @@ tasks:
   pr:list:
     desc: List open pull requests
     cmds:
-      - gh pr list
+      - '{{.GH_BIN}} pr list'
 
   pr:create:
     desc: Create PR from current branch
     cmds:
-      - gh pr create --fill
+      - '{{.GH_BIN}} pr create --fill'
 
   pr:view:
     desc: View current PR
     cmds:
-      - gh pr view
+      - '{{.GH_BIN}} pr view'
 
   pr:checks:
     desc: View PR check status
     cmds:
-      - gh pr checks
+      - '{{.GH_BIN}} pr checks'
 
   issue:list:
     desc: List open issues
     cmds:
-      - gh issue list
+      - '{{.GH_BIN}} issue list'
 
   # ===========================================================================
   # Repository
@@ -186,7 +192,7 @@ tasks:
   repo:view:
     desc: View repository info
     cmds:
-      - gh repo view
+      - '{{.GH_BIN}} repo view'
 
   repo:clone:
     desc: Clone a repository (usage - task gh:repo:clone -- REPO)
@@ -197,7 +203,7 @@ tasks:
           echo "Usage: task gh:repo:clone -- OWNER/REPO"
           exit 1
         fi
-        gh repo clone "$REPO"
+        {{.GH_BIN}} repo clone "$REPO"
 
   # ===========================================================================
   # API (raw access)
@@ -213,4 +219,4 @@ tasks:
           echo "Example: task gh:api -- repos/{owner}/{repo}/releases"
           exit 1
         fi
-        gh api "$ENDPOINT"
+        {{.GH_BIN}} api "$ENDPOINT"

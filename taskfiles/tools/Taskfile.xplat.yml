@@ -6,12 +6,16 @@
 # Other modules can use xplat for cross-platform operations:
 #   xplat which <binary>   - Find binary in PATH
 #   xplat glob <pattern>   - Expand glob pattern (supports **)
+#
+# Pattern: All tool taskfiles define TOOL_BIN with {{exeExt}} for Windows support
 
 version: '3'
 
 vars:
   XPLAT_VERSION: v0.2.0
   XPLAT_REPO: joeblew999/ubuntu-website
+  # Binary name with platform-specific extension (.exe on Windows)
+  XPLAT_BIN: 'xplat{{exeExt}}'
   # Install location - ~/.local/bin on Unix, ~/bin on Windows
   XPLAT_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
 
