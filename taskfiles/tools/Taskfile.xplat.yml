@@ -114,14 +114,189 @@ tasks:
         fi
 
   check:validate:
-    desc: Verify xplat works correctly
+    desc: Verify all xplat commands work correctly
     cmds:
       - |
-        echo "Validating xplat..."
-        xplat version
-        xplat which go || echo "(go not found - OK if not installed)"
-        xplat glob "taskfiles/*.yml" | head -3
-        echo "xplat:check:validate passed"
+        echo "========================================"
+        echo "xplat Command Validation"
+        echo "========================================"
+        ERRORS=0
+
+        # Test version
+        echo ""
+        echo "Testing: xplat version"
+        if xplat version; then
+          echo "  OK"
+        else
+          echo "  FAILED"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test which
+        echo ""
+        echo "Testing: xplat which"
+        if xplat which go >/dev/null 2>&1; then
+          echo "  OK: found $(xplat which go)"
+        else
+          echo "  SKIP: go not in PATH (expected in some environments)"
+        fi
+
+        # Test glob (using ROOT_DIR for absolute path)
+        echo ""
+        echo "Testing: xplat glob"
+        COUNT=$(xplat glob "{{.ROOT_DIR}}/taskfiles/*.yml" | wc -l | tr -d ' ')
+        if [ "$COUNT" -gt 0 ]; then
+          echo "  OK: found $COUNT files"
+        else
+          echo "  FAILED: no files found"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test glob with ** pattern
+        echo ""
+        echo "Testing: xplat glob (recursive **)"
+        COUNT=$(xplat glob "{{.ROOT_DIR}}/taskfiles/**/*.yml" | wc -l | tr -d ' ')
+        if [ "$COUNT" -gt 0 ]; then
+          echo "  OK: found $COUNT files recursively"
+        else
+          echo "  FAILED: recursive glob failed"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test mkdir
+        echo ""
+        echo "Testing: xplat mkdir"
+        TESTDIR="/tmp/xplat-test-$$"
+        if xplat mkdir -p "$TESTDIR/nested/dir"; then
+          if [ -d "$TESTDIR/nested/dir" ]; then
+            echo "  OK: created nested directories"
+          else
+            echo "  FAILED: directory not created"
+            ERRORS=$((ERRORS + 1))
+          fi
+        else
+          echo "  FAILED: mkdir returned error"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test touch
+        echo ""
+        echo "Testing: xplat touch"
+        if xplat touch "$TESTDIR/testfile.txt"; then
+          if [ -f "$TESTDIR/testfile.txt" ]; then
+            echo "  OK: created file"
+          else
+            echo "  FAILED: file not created"
+            ERRORS=$((ERRORS + 1))
+          fi
+        else
+          echo "  FAILED: touch returned error"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test cat
+        echo ""
+        echo "Testing: xplat cat"
+        echo "test content" > "$TESTDIR/testfile.txt"
+        CONTENT=$(xplat cat "$TESTDIR/testfile.txt")
+        if [ "$CONTENT" = "test content" ]; then
+          echo "  OK: read file contents"
+        else
+          echo "  FAILED: content mismatch"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test cp
+        echo ""
+        echo "Testing: xplat cp"
+        if xplat cp "$TESTDIR/testfile.txt" "$TESTDIR/copied.txt"; then
+          if [ -f "$TESTDIR/copied.txt" ]; then
+            echo "  OK: copied file"
+          else
+            echo "  FAILED: copied file not found"
+            ERRORS=$((ERRORS + 1))
+          fi
+        else
+          echo "  FAILED: cp returned error"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test cp -r (recursive)
+        echo ""
+        echo "Testing: xplat cp -r (recursive)"
+        if xplat cp -r "$TESTDIR/nested" "$TESTDIR/nested-copy"; then
+          if [ -d "$TESTDIR/nested-copy/dir" ]; then
+            echo "  OK: copied directory recursively"
+          else
+            echo "  FAILED: recursive copy incomplete"
+            ERRORS=$((ERRORS + 1))
+          fi
+        else
+          echo "  FAILED: cp -r returned error"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test env
+        echo ""
+        echo "Testing: xplat env"
+        HOME_VAL=$(xplat env HOME)
+        if [ -n "$HOME_VAL" ]; then
+          echo "  OK: HOME=$HOME_VAL"
+        else
+          echo "  FAILED: HOME not found"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test env with default
+        echo ""
+        echo "Testing: xplat env -d (default)"
+        VAL=$(xplat env NONEXISTENT_VAR_12345 -d "default_value")
+        if [ "$VAL" = "default_value" ]; then
+          echo "  OK: default value returned"
+        else
+          echo "  FAILED: default not returned"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test rm
+        echo ""
+        echo "Testing: xplat rm"
+        if xplat rm "$TESTDIR/copied.txt"; then
+          if [ ! -f "$TESTDIR/copied.txt" ]; then
+            echo "  OK: removed file"
+          else
+            echo "  FAILED: file still exists"
+            ERRORS=$((ERRORS + 1))
+          fi
+        else
+          echo "  FAILED: rm returned error"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Test rm -rf (recursive force)
+        echo ""
+        echo "Testing: xplat rm -rf (recursive)"
+        if xplat rm -rf "$TESTDIR"; then
+          if [ ! -d "$TESTDIR" ]; then
+            echo "  OK: removed directory tree"
+          else
+            echo "  FAILED: directory still exists"
+            ERRORS=$((ERRORS + 1))
+          fi
+        else
+          echo "  FAILED: rm -rf returned error"
+          ERRORS=$((ERRORS + 1))
+        fi
+
+        # Summary
+        echo ""
+        echo "========================================"
+        if [ $ERRORS -gt 0 ]; then
+          echo "FAILED: $ERRORS error(s)"
+          exit 1
+        else
+          echo "PASSED: All xplat commands validated"
+        fi
 
   check:health:
     desc: Check xplat can access GitHub (for updates)
@@ -138,6 +313,35 @@ tasks:
   # ===========================================================================
   # Tasks
   # ===========================================================================
+
+  debug:
+    desc: Show Task built-in variables and xplat commands
+    cmds:
+      - |
+        echo "========================================"
+        echo "Task Built-in Variables"
+        echo "========================================"
+        echo ""
+        echo "ROOT_DIR:     {{.ROOT_DIR}}"
+        echo "TASKFILE_DIR: {{.TASKFILE_DIR}}"
+        echo "USER_WORKING_DIR: {{.USER_WORKING_DIR}}"
+        echo ""
+        echo "OS:     {{OS}}"
+        echo "ARCH:   {{ARCH}}"
+        echo "exeExt: {{exeExt}}"
+        echo ""
+        echo "HOME:     {{.HOME}}"
+        echo ""
+        echo "========================================"
+        echo "xplat Commands"
+        echo "========================================"
+        echo ""
+        xplat --help | grep -A 100 "Available Commands:" | head -20
+        echo ""
+        echo "========================================"
+        echo "xplat Version"
+        echo "========================================"
+        xplat version
 
   upgrade:
     desc: Upgrade xplat to latest version
