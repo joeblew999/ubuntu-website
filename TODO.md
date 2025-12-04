@@ -70,6 +70,12 @@ Could move reusable taskfiles to a dedicated repo so all repos can pull versione
 
 https://github.com/akhenakh/narun - could help generalize cmd/* tools
 
+### gh CLI in CI
+
+Use `gh` CLI inside GitHub Actions workflows for releases and other operations.
+Already use it locally - could simplify CI release workflows (vs softprops/action-gh-release).
+Worth testing to see what it offers.
+
 ### Logo/Branding Updates
 
 When logo changes, need to update: Bluesky, Gmail signature.
