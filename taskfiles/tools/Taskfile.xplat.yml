@@ -10,7 +10,7 @@
 version: '3'
 
 vars:
-  XPLAT_VERSION: v0.1.0
+  XPLAT_VERSION: v0.2.0
   XPLAT_REPO: joeblew999/ubuntu-website
   # Install location - ~/.local/bin on Unix, ~/bin on Windows
   XPLAT_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'

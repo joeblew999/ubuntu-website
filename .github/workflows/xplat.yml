@@ -159,6 +159,17 @@ jobs:
           [ -d /tmp/xplat-test/nested-copy/dir ] && echo "  OK" || exit 1
 
           echo ""
+          echo "Testing: mv (rename)"
+          bin/xplat touch /tmp/xplat-test/to-rename.txt
+          bin/xplat mv /tmp/xplat-test/to-rename.txt /tmp/xplat-test/renamed.txt
+          [ -f /tmp/xplat-test/renamed.txt ] && [ ! -f /tmp/xplat-test/to-rename.txt ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: mv (to directory)"
+          bin/xplat mv /tmp/xplat-test/renamed.txt /tmp/xplat-test/nested/
+          [ -f /tmp/xplat-test/nested/renamed.txt ] && echo "  OK" || exit 1
+
+          echo ""
           echo "Testing: env"
           HOME_VAL=$(bin/xplat env HOME)
           [ -n "$HOME_VAL" ] && echo "  OK: HOME=$HOME_VAL" || exit 1
@@ -231,6 +242,17 @@ jobs:
           Write-Host "Testing: cp -r"
           & $bin cp -r "$env:TEMP\xplat-test\nested" "$env:TEMP\xplat-test\nested-copy"
           if (Test-Path "$env:TEMP\xplat-test\nested-copy\dir") { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: mv (rename)"
+          & $bin touch "$env:TEMP\xplat-test\to-rename.txt"
+          & $bin mv "$env:TEMP\xplat-test\to-rename.txt" "$env:TEMP\xplat-test\renamed.txt"
+          if ((Test-Path "$env:TEMP\xplat-test\renamed.txt") -and (-not (Test-Path "$env:TEMP\xplat-test\to-rename.txt"))) { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: mv (to directory)"
+          & $bin mv "$env:TEMP\xplat-test\renamed.txt" "$env:TEMP\xplat-test\nested\"
+          if (Test-Path "$env:TEMP\xplat-test\nested\renamed.txt") { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
 
           Write-Host ""
           Write-Host "Testing: env"
@@ -323,6 +345,7 @@ jobs:
             xplat rm [-rf] <path>  # Remove files or directories
             xplat mkdir [-p] <dir> # Create directories
             xplat cp [-r] <s> <d>  # Copy files or directories
+            xplat mv <src> <dst>   # Move or rename files/directories
 
             # Utilities (P2)
             xplat cat <file>       # Print file contents
