@@ -41,11 +41,11 @@ tasks:
           MINGW*|MSYS*|CYGWIN*) EXT=".exe" ;;
         esac
 
-        # Strategy 1: Build from source if Go is available
-        # This works in CI (always has Go) and locally (if Go installed)
-        if command -v go >/dev/null 2>&1; then
+        # Strategy 1: Build from source if Go is available AND source exists
+        # This works in CI (always has Go) and locally in this repo
+        # External consumers (remote includes) will skip to download
+        if command -v go >/dev/null 2>&1 && [ -d "{{.ROOT_DIR}}/cmd/xplat" ]; then
           echo "Building xplat from source..."
-          # Build from repo root ({{.ROOT_DIR}} is set by Task)
           go build -o "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" "{{.ROOT_DIR}}/cmd/xplat"
           chmod +x "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
           echo "OK: xplat built from source"
@@ -55,8 +55,9 @@ tasks:
           exit 0
         fi
 
-        # Strategy 2: Download from GitHub Release (for users without Go)
-        echo "Go not found, downloading xplat {{.XPLAT_VERSION}} from GitHub..."
+        # Strategy 2: Download from GitHub Release
+        # Used when: no Go installed, or source not available (remote includes)
+        echo "Downloading xplat {{.XPLAT_VERSION}} from GitHub..."
 
         # Detect OS and architecture
         OS=$(uname -s | tr '[:upper:]' '[:lower:]')
