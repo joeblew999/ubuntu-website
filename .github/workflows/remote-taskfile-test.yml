@@ -49,12 +49,12 @@ jobs:
 
           # Create consumer-like Taskfile in temp dir (outside this repo)
           mkdir -p /tmp/consumer-test
-          cat > /tmp/consumer-test/Taskfile.yml << EOF
+          cat > /tmp/consumer-test/Taskfile.yml << 'TASKFILE_EOF'
           version: '3'
 
           includes:
             tools:
-              taskfile: https://github.com/${{ github.repository }}.git//taskfiles/Taskfile.tools.yml?ref=${{ github.sha }}
+              taskfile: https://github.com/REPO_PLACEHOLDER.git//taskfiles/Taskfile.tools.yml?ref=SHA_PLACEHOLDER
 
           tasks:
             test:
@@ -68,7 +68,14 @@ jobs:
                 - xplat which task
                 - echo ""
                 - echo "SUCCESS: Remote include + xplat bootstrap works!"
-          EOF
+          TASKFILE_EOF
+
+          # Replace placeholders with actual values (heredoc with single quotes prevents expansion)
+          sed -i "s|REPO_PLACEHOLDER|${{ github.repository }}|g" /tmp/consumer-test/Taskfile.yml
+          sed -i "s|SHA_PLACEHOLDER|${{ github.sha }}|g" /tmp/consumer-test/Taskfile.yml
+
+          # Fix indentation - heredoc preserves leading spaces, remove them
+          sed -i 's/^          //' /tmp/consumer-test/Taskfile.yml
 
           echo "=== Consumer Taskfile ==="
           cat /tmp/consumer-test/Taskfile.yml
