@@ -291,15 +291,16 @@ jobs:
 
       - name: Prepare release files
         run: |
-          # Bootstrap xplat from just-built artifacts
-          chmod +x artifacts/xplat-linux-amd64/xplat-linux-amd64
-          XPLAT="$PWD/artifacts/xplat-linux-amd64/xplat-linux-amd64"
+          # Show artifact structure
+          echo "=== Artifact structure ==="
+          find artifacts -type f
 
-          # Use xplat for cross-platform operations
-          $XPLAT mkdir -p release
-          for dir in $($XPLAT glob "artifacts/*"); do
-            [ -d "$dir" ] && $XPLAT cp "$dir"/* release/ 2>/dev/null || true
-          done
+          # Move all binaries to release/ directory
+          mkdir -p release
+          find artifacts -type f -name 'xplat-*' -exec mv {} release/ \;
+
+          echo ""
+          echo "=== Release files ==="
           ls -la release/
 
       - name: Create Release
