@@ -133,7 +133,18 @@ jobs:
             ### Commands
 
             ```
+            # Core (P0)
+            xplat version          # Print version
             xplat which <binary>   # Find binary in PATH
             xplat glob <pattern>   # Expand glob pattern (supports **)
-            xplat version          # Print version
+
+            # File Operations (P1)
+            xplat rm [-rf] <path>  # Remove files or directories
+            xplat mkdir [-p] <dir> # Create directories
+            xplat cp [-r] <s> <d>  # Copy files or directories
+
+            # Utilities (P2)
+            xplat cat <file>       # Print file contents
+            xplat touch <file>     # Create or update file
+            xplat env <key> [-d v] # Get environment variable
             ```
