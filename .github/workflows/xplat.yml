@@ -82,8 +82,181 @@ jobs:
           name: xplat-${{ matrix.goos }}-${{ matrix.goarch }}
           path: xplat-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
 
-  release:
+  # Test xplat on all platforms
+  test:
     needs: build
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: xplat-linux-amd64
+            binary: xplat-linux-amd64
+          - os: macos-latest
+            artifact: xplat-darwin-arm64
+            binary: xplat-darwin-arm64
+          - os: windows-latest
+            artifact: xplat-windows-amd64
+            binary: xplat-windows-amd64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: bin
+
+      - name: Test xplat (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x bin/${{ matrix.binary }}
+          export PATH="$PWD/bin:$PATH"
+          mv bin/${{ matrix.binary }} bin/xplat
+
+          echo "=== xplat Test Suite (Unix) ==="
+          echo ""
+
+          echo "Testing: version"
+          bin/xplat version
+          echo "  OK"
+
+          echo ""
+          echo "Testing: which"
+          bin/xplat which bash || bin/xplat which sh
+          echo "  OK"
+
+          echo ""
+          echo "Testing: glob"
+          COUNT=$(bin/xplat glob "cmd/**/*.go" | wc -l)
+          echo "  Found $COUNT Go files"
+          [ "$COUNT" -gt 0 ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: mkdir -p"
+          bin/xplat mkdir -p /tmp/xplat-test/nested/dir
+          [ -d /tmp/xplat-test/nested/dir ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: touch"
+          bin/xplat touch /tmp/xplat-test/testfile.txt
+          [ -f /tmp/xplat-test/testfile.txt ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: cat"
+          echo "hello world" > /tmp/xplat-test/testfile.txt
+          CONTENT=$(bin/xplat cat /tmp/xplat-test/testfile.txt)
+          [ "$CONTENT" = "hello world" ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: cp"
+          bin/xplat cp /tmp/xplat-test/testfile.txt /tmp/xplat-test/copied.txt
+          [ -f /tmp/xplat-test/copied.txt ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: cp -r"
+          bin/xplat cp -r /tmp/xplat-test/nested /tmp/xplat-test/nested-copy
+          [ -d /tmp/xplat-test/nested-copy/dir ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: env"
+          HOME_VAL=$(bin/xplat env HOME)
+          [ -n "$HOME_VAL" ] && echo "  OK: HOME=$HOME_VAL" || exit 1
+
+          echo ""
+          echo "Testing: env -d (default)"
+          VAL=$(bin/xplat env NONEXISTENT_12345 -d "default")
+          [ "$VAL" = "default" ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: rm"
+          bin/xplat rm /tmp/xplat-test/copied.txt
+          [ ! -f /tmp/xplat-test/copied.txt ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "Testing: rm -rf"
+          bin/xplat rm -rf /tmp/xplat-test
+          [ ! -d /tmp/xplat-test ] && echo "  OK" || exit 1
+
+          echo ""
+          echo "=== All tests passed (Unix) ==="
+
+      - name: Test xplat (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $bin = "bin\${{ matrix.binary }}"
+
+          Write-Host "=== xplat Test Suite (Windows) ===" -ForegroundColor Cyan
+          Write-Host ""
+
+          Write-Host "Testing: version"
+          & $bin version
+          Write-Host "  OK" -ForegroundColor Green
+
+          Write-Host ""
+          Write-Host "Testing: which"
+          & $bin which powershell
+          Write-Host "  OK" -ForegroundColor Green
+
+          Write-Host ""
+          Write-Host "Testing: glob"
+          $count = (& $bin glob "cmd/**/*.go" | Measure-Object -Line).Lines
+          Write-Host "  Found $count Go files"
+          if ($count -gt 0) { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: mkdir -p"
+          & $bin mkdir -p "$env:TEMP\xplat-test\nested\dir"
+          if (Test-Path "$env:TEMP\xplat-test\nested\dir") { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: touch"
+          & $bin touch "$env:TEMP\xplat-test\testfile.txt"
+          if (Test-Path "$env:TEMP\xplat-test\testfile.txt") { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: cat"
+          "hello world" | Out-File -FilePath "$env:TEMP\xplat-test\testfile.txt" -Encoding utf8 -NoNewline
+          $content = & $bin cat "$env:TEMP\xplat-test\testfile.txt"
+          if ($content.Trim() -eq "hello world") { Write-Host "  OK" -ForegroundColor Green } else { Write-Host "  Got: $content"; exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: cp"
+          & $bin cp "$env:TEMP\xplat-test\testfile.txt" "$env:TEMP\xplat-test\copied.txt"
+          if (Test-Path "$env:TEMP\xplat-test\copied.txt") { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: cp -r"
+          & $bin cp -r "$env:TEMP\xplat-test\nested" "$env:TEMP\xplat-test\nested-copy"
+          if (Test-Path "$env:TEMP\xplat-test\nested-copy\dir") { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: env"
+          $homeVal = & $bin env USERPROFILE
+          if ($homeVal) { Write-Host "  OK: USERPROFILE=$homeVal" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: env -d (default)"
+          $val = & $bin env NONEXISTENT_12345 -d "default"
+          if ($val -eq "default") { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: rm"
+          & $bin rm "$env:TEMP\xplat-test\copied.txt"
+          if (-not (Test-Path "$env:TEMP\xplat-test\copied.txt")) { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "Testing: rm -rf"
+          & $bin rm -rf "$env:TEMP\xplat-test"
+          if (-not (Test-Path "$env:TEMP\xplat-test")) { Write-Host "  OK" -ForegroundColor Green } else { exit 1 }
+
+          Write-Host ""
+          Write-Host "=== All tests passed (Windows) ===" -ForegroundColor Cyan
+
+  release:
+    needs: [build, test]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/xplat-v')
     permissions:
