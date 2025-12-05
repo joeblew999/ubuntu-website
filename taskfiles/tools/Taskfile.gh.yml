@@ -315,4 +315,4 @@ tasks:
         echo "Setting SITE_URL={{.URL_PRODUCTION}}"
         {{.GH_BIN}} variable set SITE_URL --body "{{.URL_PRODUCTION}}"
         echo ""
-        echo "✓ Variables synced. Verify with: task tools:gh:var:list"
+        echo "Variables synced. Verify with: task tools:gh:var:list"

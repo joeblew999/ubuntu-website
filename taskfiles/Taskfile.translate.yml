@@ -49,7 +49,7 @@ tasks:
     desc: Mark current translations as complete (update checkpoint tag)
     cmds:
       - git tag -f last-translation HEAD
-      - echo "✓ Translation checkpoint updated to current commit"
+      - echo "OK: Translation checkpoint updated to current commit"
 
   # ===========================================================================
   # Validation
@@ -82,9 +82,9 @@ tasks:
           done
 
           if [ $MISSING -eq 0 ]; then
-            echo "✓ $LANG: Complete"
+            echo "OK: $LANG: Complete"
           else
-            echo "✗ $LANG: Missing $MISSING files"
+            echo "MISSING: $LANG: Missing $MISSING files"
             echo -e "$MISSING_FILES"
             echo ""
           fi
@@ -121,9 +121,9 @@ tasks:
           done
 
           if [ $ORPHAN_COUNT -eq 0 ]; then
-            echo "✓ $LANG: No orphans"
+            echo "OK: $LANG: No orphans"
           else
-            echo "✗ $LANG: $ORPHAN_COUNT orphaned files (DELETE THESE)"
+            echo "ORPHANS: $LANG: $ORPHAN_COUNT orphaned files (DELETE THESE)"
             echo -e "$ORPHAN_FILES"
             echo ""
           fi
@@ -154,4 +154,4 @@ tasks:
           done
         done
 
-        echo "✓ Deleted $DELETED orphaned files"
+        echo "OK: Deleted $DELETED orphaned files"

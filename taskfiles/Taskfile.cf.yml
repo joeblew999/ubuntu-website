@@ -95,9 +95,9 @@ tasks:
           --data '{"purge_everything":true}')
 
         if echo "$RESPONSE" | grep -q '"success": true'; then
-          echo "✓ Cache purged successfully"
+          echo "OK: Cache purged successfully"
         else
-          echo "✗ Cache purge failed:"
+          echo "ERROR: Cache purge failed:"
           echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
           exit 1
         fi

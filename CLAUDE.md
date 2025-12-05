@@ -37,6 +37,11 @@ USE TASKFILE - it makes conventions for development.
 - `namespace:all` - Calls other tasks in namespace (`sitecheck:all`)
 - `namespace` (bare) - Default action (`sitecheck`)
 
+**No Emojis in Taskfiles:**
+- NEVER use emojis in Taskfile echo/output statements
+- Emojis cause encoding issues and break cross-platform compatibility
+- Use plain text: `echo "Done"` not `echo "✓ Done"`
+
 **Lifecycle Phases (within each namespace):**
 
 Each module can define standard lifecycle tasks:
