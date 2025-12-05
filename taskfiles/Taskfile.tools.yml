@@ -21,6 +21,9 @@ includes:
   gh:
     taskfile: ./tools/Taskfile.gh.yml
     optional: true  # gh not required for basic operations
+  idempotency-test:
+    taskfile: ./tools/Taskfile.idempotency-test.yml
+    optional: true  # Only used for CI testing
 
 tasks:
   # ===========================================================================

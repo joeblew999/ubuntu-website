@@ -277,14 +277,14 @@ tasks:
 
   ci:analytics:
     desc: "[Monitor] Analytics - Run analytics check for CI"
+    deps: [analytics:check:deps]
     cmds:
-      - task: analytics:check:deps
       - '{{.HOME}}/.local/bin/analytics{{exeExt}} -github-issue'
 
   ci:sitecheck:
     desc: "[Monitor] Sitecheck - Run site check for CI"
+    deps: [sitecheck:check:deps]
     cmds:
-      - task: sitecheck:check:deps
       - '{{.HOME}}/.local/bin/sitecheck{{exeExt}} -github-issue'
 
   # ===========================================================================
@@ -306,46 +306,3 @@ tasks:
     cmds:
       - go test ./... -v
 
-  # ===========================================================================
-  # Git Utilities
-  # ===========================================================================
-
-  generate:gitignore:
-    desc: Generate .gitignore from vars
-    cmds:
-      - |
-        cat > .gitignore << 'EOF'
-        # Hugo
-        {{.DIR_PUBLIC}}/
-        {{.DIR_RESOURCES}}/
-        {{.FILE_HUGO_LOCK}}
-        {{.FILE_HUGO_STATS}}
-
-        # Node/Bun
-        {{.DIR_NODE_MODULES}}/
-        {{.FILE_BUN_LOCK}}
-        {{.FILE_NPM_LOCK}}
-
-        # Go
-        {{.DIR_BIN}}/
-        go.sum
-        *.test
-        *.out
-
-        # Environment
-        {{.FILE_ENV}}
-        {{.FILE_ENV}}.*
-
-        # Logs
-        {{.DIR_LOGS}}/
-
-        # Testing
-        {{.DIR_PLAYWRIGHT}}/
-
-        # Via framework
-        {{.DIR_VIA}}/
-
-        # IDE & OS
-        .vscode/
-        .DS_Store
-        EOF

@@ -25,7 +25,9 @@ tasks:
 
   check:deps:
     desc: Ensure analytics binary is available (builds from source or downloads)
-    run: once
+    # status: provides true idempotency - skips entirely if binary exists
+    status:
+      - test -f "{{.ANALYTICS_INSTALL_DIR}}/{{.ANALYTICS_BIN}}"
     cmds:
       - '{{.XPLAT_BIN}} binary install analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source {{.ROOT_DIR}}/cmd/analytics'
 

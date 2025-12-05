@@ -18,6 +18,7 @@ version: '3'
 includes:
   golang: ./toolchain/Taskfile.golang.yml
   rust: ./toolchain/Taskfile.rust.yml
+  bun: ./toolchain/Taskfile.bun.yml
 
 tasks:
   # ===========================================================================
@@ -29,6 +30,7 @@ tasks:
     cmds:
       - echo "Checking all toolchains..."
       - task: golang:check:deps
+      - task: bun:check:deps
       # Add more as needed:
       # - task: rust:check:deps
       # - task: node:check:deps
@@ -39,6 +41,7 @@ tasks:
     cmds:
       - echo "Validating all toolchains..."
       - task: golang:check:validate
+      - task: bun:check:validate
       # Add more as needed:
       # - task: rust:check:validate
 
@@ -47,5 +50,6 @@ tasks:
     cmds:
       - echo "Checking toolchain health..."
       - task: golang:check:health
+      - task: bun:check:health
       # Add more as needed:
       # - task: rust:check:health

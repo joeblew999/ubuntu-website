@@ -27,7 +27,9 @@ tasks:
 
   check:deps:
     desc: Ensure sitecheck binary is available (builds from source or downloads)
-    run: once
+    # status: provides true idempotency - skips entirely if binary exists
+    status:
+      - test -f "{{.SITECHECK_INSTALL_DIR}}/{{.SITECHECK_BIN}}"
     cmds:
       - '{{.XPLAT_BIN}} binary install sitecheck {{.SITECHECK_VERSION}} {{.SITECHECK_REPO}} --source {{.ROOT_DIR}}/cmd/sitecheck'
 

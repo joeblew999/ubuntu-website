@@ -37,6 +37,38 @@ USE TASKFILE - it makes conventions for development.
 - `namespace:all` - Calls other tasks in namespace (`sitecheck:all`)
 - `namespace` (bare) - Default action (`sitecheck`)
 
+**Lifecycle Phases (within each namespace):**
+
+Each module can define standard lifecycle tasks:
+
+| Phase | Pattern | Purpose |
+|-------|---------|---------|
+| `check:deps` | `<ns>:check:deps` | Ensure required tools/deps available |
+| `check:validate` | `<ns>:check:validate` | Smoke test the module works |
+| `check:health` | `<ns>:check:health` | External connectivity check |
+| `generate:*` | `<ns>:generate:<asset>` | Generate code/assets (idempotent) |
+
+**Idempotent Generation:**
+Generation tasks use Task's `sources:` and `generates:` for automatic caching:
+```yaml
+generate:gitignore:
+  sources:
+    - '{{.ROOT_DIR}}/Taskfile.yml'
+  generates:
+    - '{{.ROOT_DIR}}/.gitignore'
+  cmds:
+    - cat > {{.ROOT_DIR}}/.gitignore << 'EOF'
+      ...
+```
+Second run shows "Task is up to date" if inputs unchanged.
+
+**CI Auto-Discovery:**
+CI discovers and runs lifecycle tasks automatically:
+- `ci:check:module-deps` - runs all `*:check:deps`
+- `ci:check:module-validate` - runs all `*:check:validate`
+- `ci:check:module-health` - runs all `*:check:health`
+- `ci:check:module-generate` - runs all `*:generate:*`
+
 **Task Dependencies** (see Taskfile header for full list)
 
 **DRY Principle - GitHub Actions:**
@@ -62,6 +94,17 @@ USE TASKFILE - it makes conventions for development.
 | `release-xplat.yml` | *(direct)* | xplat release automation |
 | `syndication-bluesky.yml` | *(direct)* | Blog post syndication |
 
+**BIN Variable Pattern (cross-platform):**
+
+All tool taskfiles define `<TOOLNAME>_BIN` with `{{exeExt}}` for Windows support:
+
+| Variable | Pattern | Example |
+|----------|---------|---------|
+| `<TOOL>_BIN` | `'<tool>{{exeExt}}'` | `XPLAT_BIN: 'xplat{{exeExt}}'` |
+| `<TOOL>_INSTALL_DIR` | Platform-specific | `'{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'` |
+
+Full binary path: `{{.TOOL_INSTALL_DIR}}/{{.TOOL_BIN}}`
+
 **Binary Pattern (using xplat binary:install):**
 
 Binary tools use `xplat binary:install` for cross-platform installation. This command:
@@ -86,17 +129,47 @@ vars:
   # ANALYTICS_VERSION comes from versions.env
   # XPLAT_BIN comes from root Taskfile.yml (handles .exe on Windows)
   ANALYTICS_REPO: joeblew999/ubuntu-website
+  ANALYTICS_BIN: 'analytics{{exeExt}}'
   ANALYTICS_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
 
 tasks:
   check:deps:
+    # status: provides TRUE idempotency - skips entirely if binary exists
+    status:
+      - test -f "{{.ANALYTICS_INSTALL_DIR}}/{{.ANALYTICS_BIN}}"
     cmds:
       - '{{.XPLAT_BIN}} binary install analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source {{.ROOT_DIR}}/cmd/analytics'
 
   report:
-    deps: [check:deps]
+    deps: [check:deps]  # Use deps: for declarative dependencies
     cmds:
-      - '{{.ANALYTICS_INSTALL_DIR}}/analytics{{exeExt}}'
+      - '{{.ANALYTICS_INSTALL_DIR}}/{{.ANALYTICS_BIN}}'
+```
+
+**Idempotency Pattern (status: vs run: once):**
+
+| Mechanism | Behavior | When to Use |
+|-----------|----------|-------------|
+| `run: once` | Runs once per `task` invocation | Deduplication within same run |
+| `status:` | Skips entirely if checks pass | **True idempotency** across runs |
+
+Always use `status:` for binary installation - it provides zero overhead when binary already exists:
+- First run: `status:` check fails → runs install
+- Second run: `status:` check passes → prints "Task is up to date", skips entirely
+
+Use `deps:` (not `- task:`) for callers to declare dependencies declaratively:
+```yaml
+# Good: declarative dependency
+ci:analytics:
+  deps: [analytics:check:deps]
+  cmds:
+    - analytics -github-issue
+
+# Avoid: imperative call
+ci:analytics:
+  cmds:
+    - task: analytics:check:deps  # Less efficient
+    - analytics -github-issue
 ```
 
 ### Branding Assets
