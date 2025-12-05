@@ -12,21 +12,21 @@ version: '3'
 
 vars:
   TEST_TOOL: gofumpt
-  TEST_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+  # BIN_INSTALL_DIR comes from root Taskfile.yml
 
 tasks:
   check:deps:
     desc: "[TEST] Install gofumpt using status: pattern for idempotency"
     status:
-      - test -f "{{.TEST_INSTALL_DIR}}/{{.TEST_TOOL}}{{exeExt}}"
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.TEST_TOOL}}{{exeExt}}"
     cmds:
       - |
         echo "Installing {{.TEST_TOOL}}..."
-        mkdir -p "{{.TEST_INSTALL_DIR}}"
+        mkdir -p "{{.BIN_INSTALL_DIR}}"
         go install mvdan.cc/gofumpt@latest
         GOPATH_BIN="$(go env GOPATH)/bin"
-        cp "${GOPATH_BIN}/{{.TEST_TOOL}}{{exeExt}}" "{{.TEST_INSTALL_DIR}}/"
-        echo "OK: {{.TEST_TOOL}} installed to {{.TEST_INSTALL_DIR}}"
+        cp "${GOPATH_BIN}/{{.TEST_TOOL}}{{exeExt}}" "{{.BIN_INSTALL_DIR}}/"
+        echo "OK: {{.TEST_TOOL}} installed to {{.BIN_INSTALL_DIR}}"
 
   check:validate:
     desc: "[TEST] Validate idempotency pattern works"
@@ -41,7 +41,7 @@ tasks:
         echo ""
 
         # Clean up first to ensure fresh test
-        rm -f "{{.TEST_INSTALL_DIR}}/{{.TEST_TOOL}}{{exeExt}}"
+        rm -f "{{.BIN_INSTALL_DIR}}/{{.TEST_TOOL}}{{exeExt}}"
 
         # Run 1: Should install (fresh)
         echo "----------------------------------------"
@@ -61,7 +61,7 @@ tasks:
         echo "----------------------------------------"
         echo "Test 3: Verify binary works"
         echo "----------------------------------------"
-        "{{.TEST_INSTALL_DIR}}/{{.TEST_TOOL}}{{exeExt}}" --version
+        "{{.BIN_INSTALL_DIR}}/{{.TEST_TOOL}}{{exeExt}}" --version
         echo ""
 
         echo "========================================"

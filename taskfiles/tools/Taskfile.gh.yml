@@ -255,6 +255,26 @@ tasks:
         fi
         {{.GH_BIN}} issue create --title "{{.TITLE}}" --body-file "{{.FILE}}" --label "{{.LABELS}}"
 
+  issue:create-or-comment:
+    desc: Create issue or add comment if one exists (TITLE, TITLE_PREFIX, FILE, LABELS, SEARCH_LABEL)
+    cmds:
+      - |
+        if [ -z "{{.TITLE}}" ] || [ -z "{{.FILE}}" ]; then
+          echo "Usage: task tools:gh:issue:create-or-comment TITLE='...' TITLE_PREFIX='...' FILE='...' LABELS='...' SEARCH_LABEL='...'"
+          exit 1
+        fi
+
+        EXISTING=$({{.GH_BIN}} issue list --state open --label "{{.SEARCH_LABEL}}" \
+          --search "{{.TITLE_PREFIX}} in:title" --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+        if [ -n "$EXISTING" ]; then
+          echo "Adding comment to existing issue #$EXISTING"
+          {{.GH_BIN}} issue comment "$EXISTING" --body-file "{{.FILE}}"
+        else
+          echo "Creating new issue"
+          {{.GH_BIN}} issue create --title "{{.TITLE}}" --body-file "{{.FILE}}" --label "{{.LABELS}}"
+        fi
+
   # ===========================================================================
   # Repository
   # ===========================================================================

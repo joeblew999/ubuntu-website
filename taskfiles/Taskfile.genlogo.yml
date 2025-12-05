@@ -14,9 +14,9 @@ version: '3'
 
 vars:
   # GENLOGO_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+  # BIN_INSTALL_DIR comes from root Taskfile.yml
   GENLOGO_REPO: joeblew999/ubuntu-website
   GENLOGO_BIN: 'genlogo{{exeExt}}'
-  GENLOGO_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
 
 tasks:
   # ===========================================================================
@@ -27,7 +27,7 @@ tasks:
     desc: Ensure genlogo binary is available (builds from source or downloads)
     # status: provides true idempotency - skips entirely if binary exists
     status:
-      - test -f "{{.GENLOGO_INSTALL_DIR}}/{{.GENLOGO_BIN}}"
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}}"
     cmds:
       # toSlash converts backslashes to forward slashes for shell compatibility on Windows
       - '{{.XPLAT_BIN}} binary install genlogo {{.GENLOGO_VERSION}} {{.GENLOGO_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/genlogo"'
@@ -52,7 +52,7 @@ tasks:
       - '{{.ROOT_DIR}}/static/images/bluesky-banner.png'
     cmds:
       # toSlash converts backslashes to forward slashes for shell compatibility on Windows
-      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset all -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset all -dir "{{toSlash .ROOT_DIR}}"'
       - echo ""
       - echo "Assets generated. Next steps:"
       - echo "  1. Deploy website (git push) - updates Hugo site with new favicon, logos, og-image"
@@ -67,7 +67,7 @@ tasks:
     generates:
       - '{{.ROOT_DIR}}/assets/images/favicon.png'
     cmds:
-      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset favicon -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset favicon -dir "{{toSlash .ROOT_DIR}}"'
 
   generate:logo:
     desc: Generate logo SVGs only
@@ -78,7 +78,7 @@ tasks:
       - '{{.ROOT_DIR}}/assets/images/logo.svg'
       - '{{.ROOT_DIR}}/assets/images/logo-darkmode.svg'
     cmds:
-      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset logo-svg -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset logo-svg -dir "{{toSlash .ROOT_DIR}}"'
 
   generate:og-image:
     desc: Generate Open Graph image only
@@ -88,7 +88,7 @@ tasks:
     generates:
       - '{{.ROOT_DIR}}/static/images/og-image.png'
     cmds:
-      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset og -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset og -dir "{{toSlash .ROOT_DIR}}"'
 
   generate:avatar:
     desc: Generate avatar only
@@ -98,7 +98,7 @@ tasks:
     generates:
       - '{{.ROOT_DIR}}/static/images/bluesky-avatar.png'
     cmds:
-      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset avatar -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset avatar -dir "{{toSlash .ROOT_DIR}}"'
 
   generate:banner:
     desc: Generate banner only
@@ -108,7 +108,7 @@ tasks:
     generates:
       - '{{.ROOT_DIR}}/static/images/bluesky-banner.png'
     cmds:
-      - '{{.GENLOGO_INSTALL_DIR}}/genlogo{{exeExt}} -asset banner -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset banner -dir "{{toSlash .ROOT_DIR}}"'
 
   # ===========================================================================
   # Aliases (backwards compatibility)

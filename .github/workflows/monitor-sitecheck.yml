@@ -72,7 +72,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue create \
-            --title "Site Alert: Reachability issue detected" \
-            --body-file report.md \
-            --label "site-monitor,automated"
+          task tools:gh:issue:create-from-file \
+            TITLE="Site Alert: Reachability issue detected" \
+            FILE="report.md" \
+            LABELS="site-monitor,automated"

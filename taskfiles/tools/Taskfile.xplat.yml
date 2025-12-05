@@ -16,8 +16,7 @@ vars:
   XPLAT_REPO: joeblew999/ubuntu-website
   # Binary name with platform-specific extension (.exe on Windows)
   XPLAT_BIN: 'xplat{{exeExt}}'
-  # Install location - ~/.local/bin on Unix, ~/bin on Windows
-  XPLAT_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+  # BIN_INSTALL_DIR comes from root Taskfile.yml (parent provides this)
 
 tasks:
   # ===========================================================================
@@ -37,7 +36,7 @@ tasks:
         fi
 
         # Create install directory
-        mkdir -p "{{.XPLAT_INSTALL_DIR}}"
+        mkdir -p "{{.BIN_INSTALL_DIR}}"
 
         # Detect OS for extension
         EXT=""
@@ -51,12 +50,12 @@ tasks:
         # toSlash converts backslashes to forward slashes for shell compatibility on Windows
         if command -v go >/dev/null 2>&1 && [ -d "{{toSlash .ROOT_DIR}}/cmd/xplat" ]; then
           echo "Building xplat from source..."
-          go build -o "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" "{{toSlash .ROOT_DIR}}/cmd/xplat"
-          chmod +x "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
+          go build -o "{{.BIN_INSTALL_DIR}}/xplat${EXT}" "{{toSlash .ROOT_DIR}}/cmd/xplat"
+          chmod +x "{{.BIN_INSTALL_DIR}}/xplat${EXT}"
           echo "OK: xplat built from source"
           echo ""
           echo "Add to PATH if not already:"
-          echo "  export PATH=\"{{.XPLAT_INSTALL_DIR}}:\$PATH\""
+          echo "  export PATH=\"{{.BIN_INSTALL_DIR}}:\$PATH\""
           exit 0
         fi
 
@@ -84,20 +83,20 @@ tasks:
 
         # Download binary
         if command -v curl >/dev/null 2>&1; then
-          HTTP_CODE=$(curl -sL -w "%{http_code}" "$URL" -o "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}")
+          HTTP_CODE=$(curl -sL -w "%{http_code}" "$URL" -o "{{.BIN_INSTALL_DIR}}/xplat${EXT}")
           if [ "$HTTP_CODE" != "200" ]; then
             echo "ERROR: Download failed (HTTP $HTTP_CODE)"
             echo "Release xplat-{{.XPLAT_VERSION}} may not exist yet."
             echo "Install Go and re-run to build from source."
-            rm -f "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
+            rm -f "{{.BIN_INSTALL_DIR}}/xplat${EXT}"
             exit 1
           fi
         elif command -v wget >/dev/null 2>&1; then
-          wget -q "$URL" -O "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" || {
+          wget -q "$URL" -O "{{.BIN_INSTALL_DIR}}/xplat${EXT}" || {
             echo "ERROR: Download failed"
             echo "Release xplat-{{.XPLAT_VERSION}} may not exist yet."
             echo "Install Go and re-run to build from source."
-            rm -f "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
+            rm -f "{{.BIN_INSTALL_DIR}}/xplat${EXT}"
             exit 1
           }
         else
@@ -106,14 +105,14 @@ tasks:
         fi
 
         # Make executable
-        chmod +x "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
+        chmod +x "{{.BIN_INSTALL_DIR}}/xplat${EXT}"
 
         # Verify
-        if "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" version >/dev/null 2>&1; then
-          echo "OK: xplat {{.XPLAT_VERSION}} installed to {{.XPLAT_INSTALL_DIR}}"
+        if "{{.BIN_INSTALL_DIR}}/xplat${EXT}" version >/dev/null 2>&1; then
+          echo "OK: xplat {{.XPLAT_VERSION}} installed to {{.BIN_INSTALL_DIR}}"
           echo ""
           echo "Add to PATH if not already:"
-          echo "  export PATH=\"{{.XPLAT_INSTALL_DIR}}:\$PATH\""
+          echo "  export PATH=\"{{.BIN_INSTALL_DIR}}:\$PATH\""
         else
           echo "ERROR: xplat installation failed"
           exit 1
@@ -397,5 +396,5 @@ tasks:
 
         echo "Upgrading from $CURRENT to $LATEST..."
         # Force reinstall
-        rm -f "{{.XPLAT_INSTALL_DIR}}/xplat"
+        rm -f "{{.BIN_INSTALL_DIR}}/xplat"
         XPLAT_VERSION="$LATEST" task tools:xplat:check:deps

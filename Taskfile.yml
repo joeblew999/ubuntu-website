@@ -118,10 +118,13 @@ vars:
   # Wrangler
   WRANGLER_CMD: bunx wrangler
 
-  # xplat - cross-platform binary (with .exe on Windows)
-  # Install dir: ~/.local/bin (Unix) or ~/bin (Windows)
-  XPLAT_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
-  XPLAT_BIN: '{{.XPLAT_INSTALL_DIR}}/xplat{{exeExt}}'
+  # Global binary install directory - all tools use this
+  # Unix: ~/.local/bin (standard for user binaries)
+  # Windows: ~/bin (simpler path)
+  BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+
+  # xplat - cross-platform binary (uses global BIN_INSTALL_DIR)
+  XPLAT_BIN: '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}}'
 
 # =============================================================================
 # Tasks

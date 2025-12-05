@@ -14,9 +14,9 @@ version: '3'
 
 vars:
   # ANALYTICS_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+  # BIN_INSTALL_DIR comes from root Taskfile.yml
   ANALYTICS_REPO: joeblew999/ubuntu-website
   ANALYTICS_BIN: 'analytics{{exeExt}}'
-  ANALYTICS_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
 
 tasks:
   # ===========================================================================
@@ -27,7 +27,7 @@ tasks:
     desc: Ensure analytics binary is available (builds from source or downloads)
     # status: provides true idempotency - skips entirely if binary exists
     status:
-      - test -f "{{.ANALYTICS_INSTALL_DIR}}/{{.ANALYTICS_BIN}}"
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.ANALYTICS_BIN}}"
     cmds:
       # toSlash converts backslashes to forward slashes for shell compatibility on Windows
       - '{{.XPLAT_BIN}} binary install analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/analytics"'
@@ -40,16 +40,16 @@ tasks:
     desc: Check analytics and report changes (>20% threshold)
     deps: [check:deps]
     cmds:
-      - '{{.ANALYTICS_INSTALL_DIR}}/analytics{{exeExt}}'
+      - '{{.BIN_INSTALL_DIR}}/analytics{{exeExt}}'
 
   report:verbose:
     desc: Check analytics with verbose output
     deps: [check:deps]
     cmds:
-      - '{{.ANALYTICS_INSTALL_DIR}}/analytics{{exeExt}} -v'
+      - '{{.BIN_INSTALL_DIR}}/analytics{{exeExt}} -v'
 
   report:webhook:
     desc: Post analytics changes to webhook (set ANALYTICS_WEBHOOK_URL)
     deps: [check:deps]
     cmds:
-      - '{{.ANALYTICS_INSTALL_DIR}}/analytics{{exeExt}} -webhook "$ANALYTICS_WEBHOOK_URL"'
+      - '{{.BIN_INSTALL_DIR}}/analytics{{exeExt}} -webhook "$ANALYTICS_WEBHOOK_URL"'

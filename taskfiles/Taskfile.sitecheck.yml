@@ -16,9 +16,9 @@ version: '3'
 
 vars:
   # SITECHECK_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+  # BIN_INSTALL_DIR comes from root Taskfile.yml
   SITECHECK_REPO: joeblew999/ubuntu-website
   SITECHECK_BIN: 'sitecheck{{exeExt}}'
-  SITECHECK_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
 
 tasks:
   # ===========================================================================
@@ -29,7 +29,7 @@ tasks:
     desc: Ensure sitecheck binary is available (builds from source or downloads)
     # status: provides true idempotency - skips entirely if binary exists
     status:
-      - test -f "{{.SITECHECK_INSTALL_DIR}}/{{.SITECHECK_BIN}}"
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}"
     cmds:
       # toSlash converts backslashes to forward slashes for shell compatibility on Windows
       - '{{.XPLAT_BIN}} binary install sitecheck {{.SITECHECK_VERSION}} {{.SITECHECK_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/sitecheck"'
@@ -42,7 +42,7 @@ tasks:
     desc: Check site HTTP reachability from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.SITECHECK_INSTALL_DIR}}/sitecheck{{exeExt}}'
+      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}}'
 
   # ===========================================================================
   # Individual Checks
@@ -52,25 +52,25 @@ tasks:
     desc: Check site HTTP reachability from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.SITECHECK_INSTALL_DIR}}/sitecheck{{exeExt}}'
+      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}}'
 
   dns:
     desc: Check DNS resolution from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.SITECHECK_INSTALL_DIR}}/sitecheck{{exeExt}} -type dns'
+      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}} -type dns'
 
   tcp:
     desc: Check TCP port 443 from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.SITECHECK_INSTALL_DIR}}/sitecheck{{exeExt}} -type tcp'
+      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}} -type tcp'
 
   redirect:
     desc: Check apex domain redirects to www
     deps: [check:deps]
     cmds:
-      - '{{.SITECHECK_INSTALL_DIR}}/sitecheck{{exeExt}} -type redirect'
+      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}} -type redirect'
 
   # ===========================================================================
   # Combined

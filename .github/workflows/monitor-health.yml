@@ -67,10 +67,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           DATE=$(date -u +%Y-%m-%d)
-          TITLE="Health Check Failed - $DATE"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          BODY=$(cat <<EOF
+          # Write report to file for taskfile task
+          cat > report.md <<EOF
           ## Health Check Failure
 
           **Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -85,22 +85,10 @@ jobs:
           ---
           *This issue was automatically created by the health check workflow.*
           EOF
-          )
 
-          # Check for existing open issue with health-check label
-          EXISTING=$(gh issue list --state open --label health-check --search "Health Check Failed in:title" --json number --jq '.[0].number' 2>/dev/null || echo "")
-
-          if [ -n "$EXISTING" ]; then
-            # Add comment to existing issue
-            echo "Adding comment to existing issue #$EXISTING"
-            gh issue comment "$EXISTING" --body "### Still failing
-
-          $BODY"
-          else
-            # Create new issue
-            echo "Creating new health check issue"
-            gh issue create \
-              --title "$TITLE" \
-              --body "$BODY" \
-              --label "health-check,automated"
-          fi
+          task tools:gh:issue:create-or-comment \
+            TITLE="Health Check Failed - $DATE" \
+            TITLE_PREFIX="Health Check Failed" \
+            FILE="report.md" \
+            LABELS="health-check,automated" \
+            SEARCH_LABEL="health-check"

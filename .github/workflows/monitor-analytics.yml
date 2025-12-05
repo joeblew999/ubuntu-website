@@ -75,7 +75,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue create \
-            --title "Analytics Alert: Significant traffic change detected" \
-            --body-file report.md \
-            --label "analytics,automated"
+          task tools:gh:issue:create-from-file \
+            TITLE="Analytics Alert: Significant traffic change detected" \
+            FILE="report.md" \
+            LABELS="analytics,automated"
