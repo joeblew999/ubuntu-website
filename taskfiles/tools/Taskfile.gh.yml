@@ -192,17 +192,19 @@ tasks:
         echo "Deleted $COUNT failed runs"
 
   run:cleanup:
-    desc: Delete old workflow runs (keeps last 10 per workflow)
+    desc: Delete old workflow runs (keeps last KEEP per workflow, default 5)
+    vars:
+      KEEP: '{{.KEEP | default "5"}}'
     cmds:
       - |
-        echo "Cleaning up old workflow runs..."
+        echo "Cleaning up old workflow runs (keeping last {{.KEEP}} per workflow)..."
         echo ""
 
         # Get workflow IDs (more reliable than names with special chars)
         {{.GH_BIN}} workflow list --json id,name | jq -r '.[] | "\(.id) \(.name)"' | while read -r ID NAME; do
           echo "Processing: $NAME (id: $ID)"
-          # Get runs older than the 10 most recent
-          RUNS=$({{.GH_BIN}} run list --workflow "$ID" --json databaseId --jq '.[10:] | .[].databaseId' 2>/dev/null)
+          # Get runs older than the KEEP most recent
+          RUNS=$({{.GH_BIN}} run list --workflow "$ID" --json databaseId --jq '.[{{.KEEP}}:] | .[].databaseId' 2>/dev/null)
 
           if [ -n "$RUNS" ]; then
             for RUN_ID in $RUNS; do
@@ -215,6 +217,48 @@ tasks:
         done
         echo ""
         echo "Cleanup complete"
+
+  run:delete-all:
+    desc: Delete ALL workflow runs (use with caution!)
+    cmds:
+      - |
+        echo "Deleting ALL workflow runs..."
+        echo ""
+
+        TOTAL=0
+        # Get all run IDs
+        while true; do
+          RUNS=$({{.GH_BIN}} run list --json databaseId --jq '.[].databaseId' 2>/dev/null)
+          if [ -z "$RUNS" ]; then
+            break
+          fi
+
+          for RUN_ID in $RUNS; do
+            {{.GH_BIN}} run delete "$RUN_ID" 2>/dev/null || true
+            TOTAL=$((TOTAL + 1))
+            echo "  Deleted run $RUN_ID ($TOTAL total)"
+          done
+        done
+
+        echo ""
+        echo "Deleted $TOTAL workflow runs total"
+
+  run:count:
+    desc: Count workflow runs by status
+    cmds:
+      - |
+        echo "Workflow Run Summary"
+        echo "===================="
+        TOTAL=$({{.GH_BIN}} run list --json databaseId --jq 'length')
+        SUCCESS=$({{.GH_BIN}} run list --status success --json databaseId --jq 'length')
+        FAILURE=$({{.GH_BIN}} run list --status failure --json databaseId --jq 'length')
+        PENDING=$({{.GH_BIN}} run list --status pending --json databaseId --jq 'length')
+        IN_PROGRESS=$({{.GH_BIN}} run list --status in_progress --json databaseId --jq 'length')
+        echo "Total:       $TOTAL"
+        echo "Success:     $SUCCESS"
+        echo "Failed:      $FAILURE"
+        echo "Pending:     $PENDING"
+        echo "In Progress: $IN_PROGRESS"
 
   # ===========================================================================
   # PRs & Issues
