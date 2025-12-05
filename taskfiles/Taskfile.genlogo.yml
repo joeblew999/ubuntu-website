@@ -29,7 +29,8 @@ tasks:
     status:
       - test -f "{{.GENLOGO_INSTALL_DIR}}/{{.GENLOGO_BIN}}"
     cmds:
-      - '{{.XPLAT_BIN}} binary install genlogo {{.GENLOGO_VERSION}} {{.GENLOGO_REPO}} --source {{.ROOT_DIR}}/cmd/genlogo'
+      # toSlash converts backslashes to forward slashes for shell compatibility on Windows
+      - '{{.XPLAT_BIN}} binary install genlogo {{.GENLOGO_VERSION}} {{.GENLOGO_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/genlogo"'
 
   # ===========================================================================
   # Generate (generate:* - lifecycle phase)

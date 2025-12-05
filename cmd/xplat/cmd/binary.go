@@ -110,32 +110,17 @@ func runBinaryInstall(cmd *cobra.Command, args []string) error {
 	// Strategy 1: Build from source if Go available AND source path provided
 	if binarySource != "" {
 		if _, err := exec.LookPath("go"); err == nil {
-			fmt.Printf("DEBUG: binarySource (raw): %q\n", binarySource)
-
-			// Clean the path to handle mixed separators (e.g., D:\foo/bar → D:\foo\bar)
-			// MUST clean BEFORE checking IsAbs, because mixed separators confuse IsAbs on Windows
+			// Clean the path to normalize separators (handles both / and \ on all platforms)
 			sourcePath := filepath.Clean(binarySource)
-			fmt.Printf("DEBUG: after Clean: %q\n", sourcePath)
-			fmt.Printf("DEBUG: IsAbs: %v\n", filepath.IsAbs(sourcePath))
 
 			// Only join with cwd if path is relative
-			// After Clean, IsAbs works correctly on Windows
 			if !filepath.IsAbs(sourcePath) {
 				if cwd, err := os.Getwd(); err == nil {
-					fmt.Printf("DEBUG: cwd: %q\n", cwd)
 					sourcePath = filepath.Join(cwd, sourcePath)
-					fmt.Printf("DEBUG: after Join: %q\n", sourcePath)
 				}
 			}
 
-			info, statErr := os.Stat(sourcePath)
-			if statErr != nil {
-				fmt.Printf("DEBUG: source path stat failed: %s (error: %v)\n", sourcePath, statErr)
-			} else if !info.IsDir() {
-				fmt.Printf("DEBUG: source path is not a directory: %s\n", sourcePath)
-			}
-
-			if statErr == nil && info.IsDir() {
+			if info, err := os.Stat(sourcePath); err == nil && info.IsDir() {
 				fmt.Printf("Building %s from source...\n", name)
 				fmt.Printf("    Source: %s\n", sourcePath)
 				buildCmd := exec.Command("go", "build", "-o", binPath, sourcePath)

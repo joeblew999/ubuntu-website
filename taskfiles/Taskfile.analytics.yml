@@ -29,7 +29,8 @@ tasks:
     status:
       - test -f "{{.ANALYTICS_INSTALL_DIR}}/{{.ANALYTICS_BIN}}"
     cmds:
-      - '{{.XPLAT_BIN}} binary install analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source {{.ROOT_DIR}}/cmd/analytics'
+      # toSlash converts backslashes to forward slashes for shell compatibility on Windows
+      - '{{.XPLAT_BIN}} binary install analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/analytics"'
 
   # ===========================================================================
   # Reports

@@ -31,7 +31,8 @@ tasks:
     status:
       - test -f "{{.SITECHECK_INSTALL_DIR}}/{{.SITECHECK_BIN}}"
     cmds:
-      - '{{.XPLAT_BIN}} binary install sitecheck {{.SITECHECK_VERSION}} {{.SITECHECK_REPO}} --source {{.ROOT_DIR}}/cmd/sitecheck'
+      # toSlash converts backslashes to forward slashes for shell compatibility on Windows
+      - '{{.XPLAT_BIN}} binary install sitecheck {{.SITECHECK_VERSION}} {{.SITECHECK_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/sitecheck"'
 
   # ===========================================================================
   # Default Task
