@@ -3,6 +3,12 @@
 # Cross-platform git workflow tasks.
 # Pure git commands - works on macOS, Linux, Windows.
 #
+# Lifecycle:
+#   task git:check:deps       - Ensure git is installed
+#   task git:check:validate   - Smoke test git works
+#   task git:check:health     - Check git remote is reachable
+#   task git:generate:gitignore - Generate .gitignore from vars
+#
 # REQUIRES: git
 
 version: '3'
@@ -92,6 +98,57 @@ tasks:
         exit 1
 
   # ===========================================================================
+  # Generate (generate:* - lifecycle phase)
+  # ===========================================================================
+  # Uses Task's sources/generates for idempotency - skips if unchanged
+
+  generate:gitignore:
+    desc: Generate .gitignore from Taskfile vars
+    sources:
+      - '{{.ROOT_DIR}}/Taskfile.yml'
+    generates:
+      - '{{.ROOT_DIR}}/.gitignore'
+    cmds:
+      # toSlash converts backslashes to forward slashes for shell compatibility on Windows
+      - |
+        cat > "{{toSlash .ROOT_DIR}}/.gitignore" << 'EOF'
+        # Hugo
+        {{.DIR_PUBLIC}}/
+        {{.DIR_RESOURCES}}/
+        {{.FILE_HUGO_LOCK}}
+        {{.FILE_HUGO_STATS}}
+
+        # Node/Bun
+        {{.DIR_NODE_MODULES}}/
+        {{.FILE_BUN_LOCK}}
+        {{.FILE_NPM_LOCK}}
+
+        # Go
+        {{.DIR_BIN}}/
+        go.sum
+        *.test
+        *.out
+
+        # Environment
+        {{.FILE_ENV}}
+        {{.FILE_ENV}}.*
+
+        # Logs
+        {{.DIR_LOGS}}/
+
+        # Testing
+        {{.DIR_PLAYWRIGHT}}/
+
+        # Via framework
+        {{.DIR_VIA}}/
+
+        # IDE & OS
+        .vscode/
+        .DS_Store
+        EOF
+      - echo "Generated .gitignore"
+
+  # ===========================================================================
   # Tasks
   # ===========================================================================
 
@@ -150,7 +207,7 @@ tasks:
         else
           echo "Safe: Preview deployment only"
         fi
-      - task: :generate:gitignore
+      - task: generate:gitignore
       - git add -A
       - git diff --cached --stat
       - 'echo ""'

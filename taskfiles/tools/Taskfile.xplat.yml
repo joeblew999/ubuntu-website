@@ -48,9 +48,10 @@ tasks:
         # Strategy 1: Build from source if Go is available AND source exists
         # This works in CI (always has Go) and locally in this repo
         # External consumers (remote includes) will skip to download
-        if command -v go >/dev/null 2>&1 && [ -d "{{.ROOT_DIR}}/cmd/xplat" ]; then
+        # toSlash converts backslashes to forward slashes for shell compatibility on Windows
+        if command -v go >/dev/null 2>&1 && [ -d "{{toSlash .ROOT_DIR}}/cmd/xplat" ]; then
           echo "Building xplat from source..."
-          go build -o "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" "{{.ROOT_DIR}}/cmd/xplat"
+          go build -o "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}" "{{toSlash .ROOT_DIR}}/cmd/xplat"
           chmod +x "{{.XPLAT_INSTALL_DIR}}/xplat${EXT}"
           echo "OK: xplat built from source"
           echo ""
@@ -149,7 +150,7 @@ tasks:
         # Test glob (using ROOT_DIR for absolute path)
         echo ""
         echo "Testing: xplat glob"
-        COUNT=$(xplat glob "{{.ROOT_DIR}}/taskfiles/*.yml" | wc -l | tr -d ' ')
+        COUNT=$(xplat glob "{{toSlash .ROOT_DIR}}/taskfiles/*.yml" | wc -l | tr -d ' ')
         if [ "$COUNT" -gt 0 ]; then
           echo "  OK: found $COUNT files"
         else
@@ -160,7 +161,7 @@ tasks:
         # Test glob with ** pattern
         echo ""
         echo "Testing: xplat glob (recursive **)"
-        COUNT=$(xplat glob "{{.ROOT_DIR}}/taskfiles/**/*.yml" | wc -l | tr -d ' ')
+        COUNT=$(xplat glob "{{toSlash .ROOT_DIR}}/taskfiles/**/*.yml" | wc -l | tr -d ' ')
         if [ "$COUNT" -gt 0 ]; then
           echo "  OK: found $COUNT files recursively"
         else
@@ -360,7 +361,7 @@ tasks:
         echo "Task Built-in Variables"
         echo "========================================"
         echo ""
-        echo "ROOT_DIR:     {{.ROOT_DIR}}"
+        echo "ROOT_DIR:     {{toSlash .ROOT_DIR}}"
         echo "TASKFILE_DIR: {{.TASKFILE_DIR}}"
         echo "USER_WORKING_DIR: {{.USER_WORKING_DIR}}"
         echo ""
