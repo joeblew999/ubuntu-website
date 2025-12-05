@@ -111,16 +111,25 @@ func runBinaryInstall(cmd *cobra.Command, args []string) error {
 	if binarySource != "" {
 		if _, err := exec.LookPath("go"); err == nil {
 			// Check if source exists
-			sourcePath := binarySource
+			// Clean the path to handle mixed separators (e.g., D:\foo/bar → D:\foo\bar)
+			sourcePath := filepath.Clean(binarySource)
 			if !filepath.IsAbs(sourcePath) {
 				// Try to resolve relative path
 				if cwd, err := os.Getwd(); err == nil {
-					sourcePath = filepath.Join(cwd, binarySource)
+					sourcePath = filepath.Join(cwd, sourcePath)
 				}
 			}
 
-			if info, err := os.Stat(sourcePath); err == nil && info.IsDir() {
+			info, statErr := os.Stat(sourcePath)
+			if statErr != nil {
+				fmt.Printf("DEBUG: source path stat failed: %s (error: %v)\n", sourcePath, statErr)
+			} else if !info.IsDir() {
+				fmt.Printf("DEBUG: source path is not a directory: %s\n", sourcePath)
+			}
+
+			if statErr == nil && info.IsDir() {
 				fmt.Printf("Building %s from source...\n", name)
+				fmt.Printf("    Source: %s\n", sourcePath)
 				buildCmd := exec.Command("go", "build", "-o", binPath, sourcePath)
 				buildCmd.Stdout = os.Stdout
 				buildCmd.Stderr = os.Stderr
