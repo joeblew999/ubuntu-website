@@ -193,13 +193,11 @@ tasks:
         echo "Cleaning up old workflow runs..."
         echo ""
 
-        # Get all workflows
-        WORKFLOWS=$({{.GH_BIN}} workflow list --json name,id --jq '.[].name')
-
-        for WORKFLOW in $WORKFLOWS; do
-          echo "Processing: $WORKFLOW"
+        # Get workflow IDs (more reliable than names with special chars)
+        {{.GH_BIN}} workflow list --json id,name | jq -r '.[] | "\(.id) \(.name)"' | while read -r ID NAME; do
+          echo "Processing: $NAME (id: $ID)"
           # Get runs older than the 10 most recent
-          RUNS=$({{.GH_BIN}} run list --workflow "$WORKFLOW" --json databaseId --jq '.[10:] | .[].databaseId' 2>/dev/null)
+          RUNS=$({{.GH_BIN}} run list --workflow "$ID" --json databaseId --jq '.[10:] | .[].databaseId' 2>/dev/null)
 
           if [ -n "$RUNS" ]; then
             for RUN_ID in $RUNS; do
