@@ -110,13 +110,21 @@ func runBinaryInstall(cmd *cobra.Command, args []string) error {
 	// Strategy 1: Build from source if Go available AND source path provided
 	if binarySource != "" {
 		if _, err := exec.LookPath("go"); err == nil {
-			// Check if source exists
+			fmt.Printf("DEBUG: binarySource (raw): %q\n", binarySource)
+
 			// Clean the path to handle mixed separators (e.g., D:\foo/bar → D:\foo\bar)
+			// MUST clean BEFORE checking IsAbs, because mixed separators confuse IsAbs on Windows
 			sourcePath := filepath.Clean(binarySource)
+			fmt.Printf("DEBUG: after Clean: %q\n", sourcePath)
+			fmt.Printf("DEBUG: IsAbs: %v\n", filepath.IsAbs(sourcePath))
+
+			// Only join with cwd if path is relative
+			// After Clean, IsAbs works correctly on Windows
 			if !filepath.IsAbs(sourcePath) {
-				// Try to resolve relative path
 				if cwd, err := os.Getwd(); err == nil {
+					fmt.Printf("DEBUG: cwd: %q\n", cwd)
 					sourcePath = filepath.Join(cwd, sourcePath)
+					fmt.Printf("DEBUG: after Join: %q\n", sourcePath)
 				}
 			}
 
