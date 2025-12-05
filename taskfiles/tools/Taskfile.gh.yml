@@ -171,7 +171,7 @@ tasks:
           echo "Get RUN_ID from: task tools:gh:run:list"
           exit 1
         fi
-        {{.GH_BIN}} run delete "$RUN_ID" --yes
+        {{.GH_BIN}} run delete "$RUN_ID"
         echo "Deleted run: $RUN_ID"
 
   run:delete-failed:
@@ -186,7 +186,7 @@ tasks:
         fi
         COUNT=0
         for RUN_ID in $FAILED_RUNS; do
-          {{.GH_BIN}} run delete "$RUN_ID" --yes 2>/dev/null || true
+          {{.GH_BIN}} run delete "$RUN_ID" 2>/dev/null || true
           COUNT=$((COUNT + 1))
         done
         echo "Deleted $COUNT failed runs"
@@ -206,7 +206,7 @@ tasks:
 
           if [ -n "$RUNS" ]; then
             for RUN_ID in $RUNS; do
-              {{.GH_BIN}} run delete "$RUN_ID" --yes 2>/dev/null || true
+              {{.GH_BIN}} run delete "$RUN_ID" 2>/dev/null || true
             done
             echo "  Cleaned up old runs"
           else
