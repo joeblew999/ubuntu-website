@@ -66,8 +66,10 @@ jobs:
       # Create issue if changes detected (exit code 1)
       - name: Create Issue
         if: steps.analytics.outcome == 'failure'
-        uses: peter-evans/create-issue-from-file@v5
-        with:
-          title: 'Analytics Alert: Significant traffic change detected'
-          content-filepath: report.md
-          labels: analytics, automated
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "Analytics Alert: Significant traffic change detected" \
+            --body-file report.md \
+            --label "analytics,automated"

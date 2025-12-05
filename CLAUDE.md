@@ -42,6 +42,12 @@ USE TASKFILE - it makes conventions for development.
 - Emojis cause encoding issues and break cross-platform compatibility
 - Use plain text: `echo "Done"` not `echo "✓ Done"`
 
+**Quote Echo Statements with Colons:**
+- YAML interprets colons specially - quote echo statements containing `:`
+- Wrong: `- echo "OK: done"` (YAML error)
+- Right: `- 'echo "OK: done"'`
+- Inside `|` multiline blocks, quoting is not needed
+
 **Lifecycle Phases (within each namespace):**
 
 Each module can define standard lifecycle tasks:

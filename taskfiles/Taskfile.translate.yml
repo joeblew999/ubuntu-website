@@ -49,7 +49,7 @@ tasks:
     desc: Mark current translations as complete (update checkpoint tag)
     cmds:
       - git tag -f last-translation HEAD
-      - echo "OK: Translation checkpoint updated to current commit"
+      - 'echo "OK: Translation checkpoint updated to current commit"'
 
   # ===========================================================================
   # Validation

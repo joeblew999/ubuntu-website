@@ -20,19 +20,24 @@ tasks:
 
   check:deps:
     desc: Ensure gh CLI is installed and authenticated
-    run: once
+    # status: provides true idempotency - skips entirely if gh exists
+    status:
+      - command -v gh
     cmds:
       - |
-        if ! command -v {{.GH_BIN}} >/dev/null 2>&1; then
-          echo "ERROR: {{.GH_BIN}} not found"
-          echo "Install: https://cli.github.com/"
-          exit 1
-        fi
-        echo "OK: {{.GH_BIN}} $({{.GH_BIN}} --version | head -1 | cut -d' ' -f3)"
+        echo "ERROR: gh not found"
+        echo "Install: https://cli.github.com/"
+        exit 1
+
+  check:validate:
+    desc: Validate gh CLI works and show auth status
+    cmds:
+      - |
+        echo "OK: gh $(gh --version | head -1 | cut -d' ' -f3)"
 
         # Check auth (skip in CI - uses GITHUB_TOKEN automatically)
         if [ -z "$GITHUB_ACTIONS" ]; then
-          if ! {{.GH_BIN}} auth status >/dev/null 2>&1; then
+          if ! gh auth status >/dev/null 2>&1; then
             echo "WARN: gh not authenticated. Run: gh auth login"
           else
             echo "OK: gh authenticated"
@@ -239,6 +244,16 @@ tasks:
     desc: List open issues
     cmds:
       - '{{.GH_BIN}} issue list'
+
+  issue:create-from-file:
+    desc: Create an issue from a file (requires TITLE, FILE, LABELS vars)
+    cmds:
+      - |
+        if [ -z "{{.TITLE}}" ] || [ -z "{{.FILE}}" ]; then
+          echo "Usage: task tools:gh:issue:create-from-file TITLE='...' FILE='...' LABELS='...'"
+          exit 1
+        fi
+        {{.GH_BIN}} issue create --title "{{.TITLE}}" --body-file "{{.FILE}}" --label "{{.LABELS}}"
 
   # ===========================================================================
   # Repository
