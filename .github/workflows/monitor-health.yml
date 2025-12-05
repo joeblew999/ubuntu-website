@@ -61,53 +61,46 @@ jobs:
             task ci:health
           fi
 
-      - name: Create issue on failure
+      - name: Create or update issue on failure
         if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const title = `Health Check Failed - ${new Date().toISOString().split('T')[0]}`;
-            const body = `## Health Check Failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          TITLE="Health Check Failed - $DATE"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-            **Time:** ${new Date().toISOString()}
-            **Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+          BODY=$(cat <<EOF
+          ## Health Check Failure
 
-            One or more health checks failed. Check the workflow run for details.
+          **Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          **Run:** $RUN_URL
 
-            ### Quick Actions
-            - Check [workflow logs](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-            - Run locally: \`task git:check:health\`
+          One or more health checks failed. Check the workflow run for details.
 
-            ---
-            *This issue was automatically created by the health check workflow.*`;
+          ### Quick Actions
+          - Check [workflow logs]($RUN_URL)
+          - Run locally: \`task git:check:health\`
 
-            // Check for existing open issue with same title prefix
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: 'health-check'
-            });
+          ---
+          *This issue was automatically created by the health check workflow.*
+          EOF
+          )
 
-            const existingIssue = issues.data.find(i => i.title.startsWith('Health Check Failed'));
+          # Check for existing open issue with health-check label
+          EXISTING=$(gh issue list --state open --label health-check --search "Health Check Failed in:title" --json number --jq '.[0].number' 2>/dev/null || echo "")
 
-            if (existingIssue) {
-              // Add comment to existing issue
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existingIssue.number,
-                body: `### Still failing\n\n${body}`
-              });
-              console.log(`Added comment to existing issue #${existingIssue.number}`);
-            } else {
-              // Create new issue
-              await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: title,
-                body: body,
-                labels: ['health-check', 'automated']
-              });
-              console.log('Created new health check issue');
-            }
+          if [ -n "$EXISTING" ]; then
+            # Add comment to existing issue
+            echo "Adding comment to existing issue #$EXISTING"
+            gh issue comment "$EXISTING" --body "### Still failing
+
+          $BODY"
+          else
+            # Create new issue
+            echo "Creating new health check issue"
+            gh issue create \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --label "health-check,automated"
+          fi

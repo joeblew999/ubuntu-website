@@ -33,6 +33,12 @@ jobs:
         with:
           version: 3.45.5
 
+      # Bootstrap xplat (required by analytics:check:deps)
+      - name: Install xplat
+        run: |
+          task tools:xplat:check:deps
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       # Download previous state from artifact (if exists)
       - name: Download previous state
         uses: dawidd6/action-download-artifact@v6
