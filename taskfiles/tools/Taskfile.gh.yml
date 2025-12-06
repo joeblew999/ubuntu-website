@@ -219,14 +219,40 @@ tasks:
         echo "Cleanup complete"
 
   run:delete-all:
-    desc: Delete ALL workflow runs (use with caution!)
+    desc: Delete ALL workflow runs (shows progress and rate limit)
     cmds:
       - |
-        echo "Deleting ALL workflow runs..."
+        # Pre-flight checks
+        REMAINING=$({{.GH_BIN}} api rate_limit --jq '.resources.core.remaining')
+        TOTAL_RUNS=$({{.GH_BIN}} run list --json databaseId --jq 'length')
+
+        echo "GitHub API Rate Limit"
+        echo "====================="
+        echo "Remaining: $REMAINING"
+        echo "Runs to delete: $TOTAL_RUNS"
         echo ""
 
-        TOTAL=0
-        # Get all run IDs
+        if [ "$TOTAL_RUNS" -eq 0 ]; then
+          echo "No workflow runs to delete"
+          exit 0
+        fi
+
+        # Estimate time (~0.5s per delete)
+        ESTIMATED_SECS=$((TOTAL_RUNS / 2))
+        echo "Estimated time: ~${ESTIMATED_SECS}s"
+        echo ""
+
+        # Check if we have enough quota
+        NEEDED=$((TOTAL_RUNS + 10))
+        if [ "$REMAINING" -lt "$NEEDED" ]; then
+          echo "WARNING: May hit rate limit ($REMAINING remaining, need ~$NEEDED)"
+          echo "Consider waiting for reset or running in batches"
+          echo ""
+        fi
+
+        echo "Deleting..."
+        DELETED=0
+
         while true; do
           RUNS=$({{.GH_BIN}} run list --json databaseId --jq '.[].databaseId' 2>/dev/null)
           if [ -z "$RUNS" ]; then
@@ -235,18 +261,53 @@ tasks:
 
           for RUN_ID in $RUNS; do
             {{.GH_BIN}} run delete "$RUN_ID" 2>/dev/null || true
-            TOTAL=$((TOTAL + 1))
-            echo "  Deleted run $RUN_ID ($TOTAL total)"
+            DELETED=$((DELETED + 1))
+            # Progress every 10 deletions
+            if [ $((DELETED % 10)) -eq 0 ]; then
+              echo "  Progress: $DELETED/$TOTAL_RUNS deleted"
+            fi
           done
         done
 
         echo ""
-        echo "Deleted $TOTAL workflow runs total"
+        echo "Done: Deleted $DELETED workflow runs"
 
-  run:count:
-    desc: Count workflow runs by status
+        # Final rate limit check
+        FINAL=$({{.GH_BIN}} api rate_limit --jq '.resources.core.remaining')
+        echo "Rate limit remaining: $FINAL"
+
+  run:rate-limit:
+    desc: Show GitHub API rate limit status
     cmds:
       - |
+        echo "GitHub API Rate Limit"
+        echo "====================="
+        DATA=$({{.GH_BIN}} api rate_limit --jq '.resources.core')
+        LIMIT=$(echo "$DATA" | jq -r '.limit')
+        REMAINING=$(echo "$DATA" | jq -r '.remaining')
+        USED=$((LIMIT - REMAINING))
+        RESET=$(echo "$DATA" | jq -r '.reset')
+        RESET_TIME=$(date -r "$RESET" "+%Y-%m-%d %H:%M:%S UTC" 2>/dev/null || date -d "@$RESET" "+%Y-%m-%d %H:%M:%S UTC" 2>/dev/null || echo "$RESET")
+        echo "Limit:     $LIMIT"
+        echo "Remaining: $REMAINING"
+        echo "Used:      $USED"
+        echo "Resets:    $RESET_TIME"
+
+  run:count:
+    desc: Count workflow runs by status (with rate limit)
+    cmds:
+      - |
+        # Rate limit first
+        echo "GitHub API Rate Limit"
+        echo "====================="
+        DATA=$({{.GH_BIN}} api rate_limit --jq '.resources.core')
+        LIMIT=$(echo "$DATA" | jq -r '.limit')
+        REMAINING=$(echo "$DATA" | jq -r '.remaining')
+        RESET=$(echo "$DATA" | jq -r '.reset')
+        RESET_TIME=$(date -r "$RESET" "+%H:%M:%S" 2>/dev/null || date -d "@$RESET" "+%H:%M:%S" 2>/dev/null || echo "$RESET")
+        echo "Remaining: $REMAINING/$LIMIT (resets $RESET_TIME)"
+        echo ""
+
         echo "Workflow Run Summary"
         echo "===================="
         TOTAL=$({{.GH_BIN}} run list --json databaseId --jq 'length')
