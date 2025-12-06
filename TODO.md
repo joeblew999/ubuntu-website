@@ -1,5 +1,8 @@
 # TODO
 
+
+Get claude to update global config to allpw its MCP to access file system .. I keep getting prompts !!
+
 ## Completed
 
 - [x] xplat v0.2.0 released with Windows support, mv command, unit tests

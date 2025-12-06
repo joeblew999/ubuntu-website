@@ -73,6 +73,27 @@ Both platforms share core infrastructure:
 
 ---
 
+## Sensing: Perception Layer
+
+**Multi-sensor integration for spatial intelligence.**
+
+Connect LiDAR, cameras, and industrial sensors to your spatial models. Hardware-agnostic edge agent with 5G/eSIM connectivity for any deployment—aerial, ground, robotic, or fixed.
+
+### For Organizations That Need:
+
+- **Sensor fusion** — Multiple streams into coherent spatial data
+- **Edge deployment** — Lightweight agent runs anywhere
+- **5G/eSIM OTA** — Remote connectivity without SIM swapping
+- **Industrial protocols** — Modbus, CAN bus integration
+
+### Industries:
+
+Surveying. Construction. Robotics. Security. Smart infrastructure.
+
+[Explore Sensing →](/platform/sensing/)
+
+---
+
 ## Choose Your Path
 
 **Need content management?**

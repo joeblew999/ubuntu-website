@@ -28,6 +28,12 @@ parent = "Platform"
 weight = 3
 
 [[main]]
+name = "Sensing"
+url = "/platform/sensing"
+parent = "Platform"
+weight = 4
+
+[[main]]
 name = "Applications"
 url = "/applications"
 weight = 3
