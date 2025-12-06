@@ -3,6 +3,8 @@
 
 User-agent: *
 Allow: /
+# Block duplicate /english/ paths (Hugo module mount artifact)
+Disallow: /english/
 
 # Sitemap
 Sitemap: https://www.ubuntusoftware.net/sitemap.xml
