@@ -46,7 +46,7 @@
 #   task translate:menu:check GITHUB_ISSUE=true
 #
 # Language Management Examples:
-#   task translate:lang:add CODE=fr NAME="Français" DIRNAME=french
+#   task translate:lang:add CODE=fr NAME="Francais" DIRNAME=french
 #   task translate:lang:remove CODE=fr FORCE=true
 #   task translate:lang:init CODE=fr
 
@@ -78,7 +78,7 @@ tasks:
     desc: Show what English files changed since last translation
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} status'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} content status'
     vars:
       GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
@@ -86,7 +86,7 @@ tasks:
     desc: Show next file to translate (with progress indicator)
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} next'
+      - '{{.TRANSLATE_CMD}} content next'
 
   content:diff:
     desc: Show git diff for a specific English file since last translation
@@ -94,19 +94,19 @@ tasks:
     requires:
       vars: [FILE]
     cmds:
-      - '{{.TRANSLATE_CMD}} diff {{.FILE}}'
+      - '{{.TRANSLATE_CMD}} content diff {{.FILE}}'
 
   content:changed:
     desc: Show detailed changes for all English files since last translation
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} changed'
+      - '{{.TRANSLATE_CMD}} content changed'
 
   content:done:
     desc: Mark current translations as complete (update checkpoint tag)
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} done'
+      - '{{.TRANSLATE_CMD}} content done'
 
   # ===========================================================================
   # Content Problems - What's wrong in translations?
@@ -116,7 +116,7 @@ tasks:
     desc: Show which languages are missing content files
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} missing'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} content missing'
     vars:
       GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
@@ -124,7 +124,7 @@ tasks:
     desc: Show files in target languages with no English source
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} orphans'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} content orphans'
     vars:
       GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
@@ -132,7 +132,7 @@ tasks:
     desc: Show translations that may be outdated (target < 50% of source size)
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} stale'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} content stale'
     vars:
       GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
@@ -140,7 +140,7 @@ tasks:
     desc: Delete orphaned files (prompts unless FORCE=true)
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} {{if eq .FORCE "true"}}-force{{end}} clean'
+      - '{{.TRANSLATE_CMD}} {{if eq .FORCE "true"}}-force{{end}} content clean'
     vars:
       FORCE: '{{.FORCE | default "false"}}'
 
@@ -152,7 +152,7 @@ tasks:
     desc: Validate menu files for broken links and sync issues
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} menu-check'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} menu check'
     vars:
       GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
@@ -160,7 +160,7 @@ tasks:
     desc: Generate translated menu files from English
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} menu-sync'
+      - '{{.TRANSLATE_CMD}} menu sync'
 
   # ===========================================================================
   # Language Management - Add/remove languages
@@ -170,13 +170,13 @@ tasks:
     desc: Show configured languages and detect stray directories
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} langs'
+      - '{{.TRANSLATE_CMD}} lang list'
 
   lang:validate:
     desc: Verify translator config matches Hugo config
     deps: [check:deps]
     cmds:
-      - '{{.TRANSLATE_CMD}} validate'
+      - '{{.TRANSLATE_CMD}} lang validate'
 
   lang:add:
     desc: Add a new target language

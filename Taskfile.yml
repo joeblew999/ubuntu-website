@@ -296,8 +296,20 @@ tasks:
   ci:translate:
     desc: "[Monitor] Translate - Check translation status for CI"
     deps: [translate:check:deps]
+    vars:
+      TRANSLATE: '{{.HOME}}/.local/bin/translate{{exeExt}}'
     cmds:
-      - '{{.HOME}}/.local/bin/translate{{exeExt}} -github-issue missing'
+      # Run all checks, output markdown report
+      # Exits non-zero if ANY check finds issues
+      - |
+        echo "# Translation Status Report"
+        echo ""
+        FOUND=0
+        {{.TRANSLATE}} -github-issue content missing || FOUND=1
+        {{.TRANSLATE}} -github-issue content stale || FOUND=1
+        {{.TRANSLATE}} -github-issue content orphans || FOUND=1
+        {{.TRANSLATE}} -github-issue menu check || FOUND=1
+        [ $FOUND -eq 0 ]
 
   # ===========================================================================
   # Code Quality
