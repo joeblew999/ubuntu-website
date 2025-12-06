@@ -1,27 +1,27 @@
-// translate provides automated content translation using Claude API.
+// translate provides translation workflow management for Hugo multilingual content.
 //
-// WARNING: DO NOT RUN - This tool is currently broken/incomplete!
-// Translation is currently done manually via Claude Code + Taskfile shell scripts.
+// Usage:
 //
-// Current workflow (use this instead):
+//	translate status              Show what English files changed since last translation
+//	translate diff <file>         Show git diff for specific file since checkpoint
+//	translate missing             Show files missing in target languages
+//	translate stale               Show potentially outdated translations
+//	translate orphans             Show target files with no English source
+//	translate clean               Delete orphaned translation files
+//	translate done                Update checkpoint tag to current commit
+//	translate next                Show next file to translate with progress
+//	translate changed             Show detailed changes for all files
+//	translate validate            Check translator config matches Hugo config
 //
-//	task translate:status   # See what English files changed
-//	task translate:missing  # See which languages need files
-//	# Then manually translate with Claude Code
-//	task translate:done     # Mark translations complete
+// Flags:
 //
-// Commands (when fixed):
-//
-//	go run cmd/translate/main.go -check              # Check changed files
-//	go run cmd/translate/main.go -all                # Translate all changed
-//	go run cmd/translate/main.go -lang de            # Translate to German
-//	go run cmd/translate/main.go -i18n               # Translate i18n files
+//	-github-issue    Output markdown for GitHub Issue (exit 1 if action needed)
+//	-version         Print version and exit
 package main
 
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/joeblew999/ubuntu-website/internal/translator"
@@ -30,63 +30,97 @@ import (
 const version = "0.1.0"
 
 func main() {
-	// Define flags
-	check := flag.Bool("check", false, "Check which English files have changed since last translation")
-	all := flag.Bool("all", false, "Translate all changed English content to all languages")
-	lang := flag.String("lang", "", "Translate to specific language (e.g., de, sv, zh, ja, th)")
-	i18n := flag.Bool("i18n", false, "Translate i18n TOML files")
+	// Global flags
+	githubIssue := flag.Bool("github-issue", false, "Output markdown for GitHub Issue")
 	ver := flag.Bool("version", false, "Print version and exit")
-
 	flag.Parse()
 
-	// Print version and exit
 	if *ver {
 		fmt.Printf("translate v%s\n", version)
 		os.Exit(0)
 	}
 
-	// Get Claude API key from environment
-	apiKey := os.Getenv("CLAUDE_API_KEY")
-	if apiKey == "" {
-		log.Fatal("CLAUDE_API_KEY environment variable not set")
-	}
-
-	// Create translator instance
-	t, err := translator.New(apiKey)
-	if err != nil {
-		log.Fatalf("Failed to create translator: %v", err)
-	}
-
-	// Execute commands
-	switch {
-	case *check:
-		if err := t.Check(); err != nil {
-			log.Fatalf("Check failed: %v", err)
-		}
-
-	case *all:
-		fmt.Println("🔄 Translating all changed English content to all languages...")
-		if err := t.TranslateAll(); err != nil {
-			log.Fatalf("Translation failed: %v", err)
-		}
-		fmt.Println("✅ Translation complete!")
-
-	case *lang != "":
-		fmt.Printf("🔄 Translating to %s...\n", *lang)
-		if err := t.TranslateLang(*lang); err != nil {
-			log.Fatalf("Translation failed: %v", err)
-		}
-		fmt.Printf("✅ Translation to %s complete!\n", *lang)
-
-	case *i18n:
-		fmt.Println("🔄 Translating i18n files...")
-		if err := t.TranslateI18n(); err != nil {
-			log.Fatalf("Translation failed: %v", err)
-		}
-		fmt.Println("✅ i18n translation complete!")
-
-	default:
-		flag.Usage()
+	if flag.NArg() < 1 {
+		usage()
 		os.Exit(1)
 	}
+
+	// Create translator instance (no API key needed for status commands)
+	t, err := translator.NewChecker()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
+	cmd := flag.Arg(0)
+	var exitCode int
+
+	switch cmd {
+	case "status":
+		exitCode = t.Status(*githubIssue)
+	case "diff":
+		file := flag.Arg(1)
+		if file == "" {
+			fmt.Fprintln(os.Stderr, "Error: diff requires a file argument")
+			fmt.Fprintln(os.Stderr, "Usage: translate diff <file>")
+			os.Exit(1)
+		}
+		exitCode = t.Diff(file)
+	case "missing":
+		exitCode = t.Missing(*githubIssue)
+	case "stale":
+		exitCode = t.Stale(*githubIssue)
+	case "orphans":
+		exitCode = t.Orphans(*githubIssue)
+	case "clean":
+		exitCode = t.Clean()
+	case "done":
+		exitCode = t.Done()
+	case "next":
+		exitCode = t.Next()
+	case "changed":
+		exitCode = t.Changed()
+	case "validate":
+		exitCode = t.Validate()
+	case "langs":
+		exitCode = t.Langs()
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", cmd)
+		usage()
+		os.Exit(1)
+	}
+
+	os.Exit(exitCode)
+}
+
+func usage() {
+	fmt.Fprintf(os.Stderr, `translate - Translation workflow for Hugo multilingual content
+
+Usage:
+  translate <command> [flags]
+
+Commands:
+  status      Show what English files changed since last translation
+  diff <file> Show git diff for specific file since checkpoint
+  missing     Show files missing in target languages
+  stale       Show potentially outdated translations (target < 50%% of source)
+  orphans     Show target files with no English source (should be deleted)
+  clean       Delete orphaned translation files
+  done        Update checkpoint tag to current commit
+  next        Show next file to translate with progress
+  changed     Show detailed changes for all files
+  validate    Check translator config matches Hugo config
+  langs       Show configured languages and detect stray directories
+
+Flags:
+  -github-issue  Output markdown for GitHub Issue (exit 1 if action needed)
+  -version       Print version and exit
+
+Examples:
+  translate status                    # See what changed
+  translate diff blog/my-post.md      # See specific file changes
+  translate missing -github-issue     # CI mode: exit 1 if missing files
+  translate done                      # Mark translations complete
+
+`)
 }
