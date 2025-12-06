@@ -237,6 +237,8 @@ Style: Hugo Plate grayscale line-art (white, `#f5f5f5`, `#ccc`, `#999`, `#666`)
 
 ### Translation Workflow
 
+**Status: ENGLISH ONLY for now.** Multi-language support exists but is deferred until content stabilizes. Non-English blog posts (German, Chinese, Japanese) contain placeholder content that should be ignored.
+
 Tasks:
 - `task translate:status` - what English files changed since last translation
 - `task translate:missing` - which languages are missing content files
