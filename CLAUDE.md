@@ -239,19 +239,35 @@ Style: Hugo Plate grayscale line-art (white, `#f5f5f5`, `#ccc`, `#999`, `#666`)
 
 Languages: de (German), zh (Chinese), ja (Japanese) - auto-loaded from `config/_default/languages.toml`.
 
-**Commands:**
-- `task translate:status` - shows uncommitted + committed changes since last checkpoint
-- `task translate:diff FILE=path` - shows diff for specific file (works with uncommitted changes)
-- `task translate:missing` - files missing in target languages
-- `task translate:stale` - translations that may be outdated
-- `task translate:next` - next file to translate with progress
-- `task translate:done` - update checkpoint after translating
+**Architecture - Separation of Concerns:**
+- `internal/translator/hugo.go` - ALL Hugo-specific code (language parsing, menu parsing)
+- `internal/translator/checker.go` - Pure query functions (CheckStatus, CheckMissing, etc.)
+- `internal/translator/mutator.go` - Side-effect functions (DoClean, DoDone, etc.)
+- `internal/translator/presenter.go` - Terminal and Markdown output formatting
+- `taskfiles/Taskfile.translate.yml` - CLI interface (calls Go binary)
+
+**Taskfile Commands (all namespaced):**
+
+| Namespace | Commands | Purpose |
+|-----------|----------|---------|
+| `content:` | status, diff, changed, next, done | Track English source changes |
+| `content:` | missing, orphans, stale, clean | Find translation problems |
+| `menu:` | check, sync | Manage navigation menus |
+| `lang:` | list, add, remove, init, validate | Manage languages |
+
+**Common Commands:**
+- `task translate:content:status` - what English files changed since last translation?
+- `task translate:content:missing` - what's missing in target languages?
+- `task translate:content:next` - which file should I translate next?
+- `task translate:content:done` - mark translations complete
+- `task translate:menu:check` - validate menus for broken links
+- `task translate:lang:list` - show configured languages
 
 **Lifecycle:**
-1. Edit English file (uncommitted) → `translate:status` shows it, `translate:diff` shows changes
-2. Commit English file → still shows in status/diff until translated
+1. Edit English file → `translate:content:status` shows it
+2. Run `translate:content:next` → get next file to translate
 3. Translate to all languages, commit translations
-4. `task translate:done` → moves checkpoint, status is clean
+4. Run `translate:content:done` → moves checkpoint, status is clean
 
 **CI:** `monitor-translate.yml` runs weekly, creates GitHub Issue if missing translations.
 
