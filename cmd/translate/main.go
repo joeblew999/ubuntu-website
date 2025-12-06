@@ -39,7 +39,8 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/translator"
 )
 
-const version = "0.2.0"
+// version is set via ldflags at build time
+var version = "dev"
 
 func main() {
 	// Global flags
@@ -49,7 +50,7 @@ func main() {
 	flag.Parse()
 
 	if *ver {
-		fmt.Printf("translate v%s\n", version)
+		fmt.Printf("translate %s\n", version)
 		os.Exit(0)
 	}
 

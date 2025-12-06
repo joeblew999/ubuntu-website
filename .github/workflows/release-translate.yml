@@ -1,0 +1,249 @@
+# translate Cross-Platform Build & Release
+#
+# Builds the translate binary for all major platforms and releases
+# to GitHub Releases when a tag matching translate-v* is pushed.
+#
+# Usage:
+#   git tag translate-v0.2.0
+#   git push origin translate-v0.2.0
+
+name: "[Release] translate"
+
+on:
+  push:
+    tags: ['translate-v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v0.2.0)'
+        required: true
+        default: 'dev'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ''
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            # Extract version from tag (translate-v0.2.0 -> v0.2.0)
+            echo "version=${GITHUB_REF_NAME#translate-}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build translate
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          OUTPUT="translate-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          go build -ldflags="-s -w -X main.version=${VERSION}" -o "${OUTPUT}" ./cmd/translate
+          echo "Built ${OUTPUT}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: translate-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: translate-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+
+  # Test translate on all platforms
+  test:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: translate-linux-amd64
+            binary: translate-linux-amd64
+          - os: macos-latest
+            artifact: translate-darwin-arm64
+            binary: translate-darwin-arm64
+          - os: windows-latest
+            artifact: translate-windows-amd64
+            binary: translate-windows-amd64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: bin
+
+      - name: Test translate (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x bin/${{ matrix.binary }}
+          mv bin/${{ matrix.binary }} bin/translate
+
+          echo "=== translate Test Suite (Unix) ==="
+          echo ""
+
+          echo "Testing: version"
+          bin/translate -version
+          echo "  OK"
+
+          echo ""
+          echo "Testing: help"
+          bin/translate 2>&1 | head -10
+          echo "  OK"
+
+          echo ""
+          echo "Testing: content status"
+          bin/translate content status 2>&1 | head -5
+          echo "  OK"
+
+          echo ""
+          echo "Testing: lang list"
+          bin/translate lang list 2>&1 | head -5
+          echo "  OK"
+
+          echo ""
+          echo "=== All tests passed (Unix) ==="
+
+      - name: Test translate (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $bin = "bin\${{ matrix.binary }}"
+
+          Write-Host "=== translate Test Suite (Windows) ===" -ForegroundColor Cyan
+          Write-Host ""
+
+          Write-Host "Testing: version"
+          & $bin -version
+          Write-Host "  OK" -ForegroundColor Green
+
+          Write-Host ""
+          Write-Host "Testing: help"
+          & $bin 2>&1 | Select-Object -First 10
+          Write-Host "  OK" -ForegroundColor Green
+
+          Write-Host ""
+          Write-Host "=== All tests passed (Windows) ===" -ForegroundColor Cyan
+
+  release:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/translate-v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          echo "=== Artifact structure ==="
+          find artifacts -type f
+
+          mkdir -p release
+          find artifacts -type f -name 'translate-*' -exec mv {} release/ \;
+
+          echo ""
+          echo "=== Release files ==="
+          ls -la release/
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > /tmp/release-notes.md << 'EOF'
+          ## translate - Translation workflow for Hugo multilingual content
+
+          Download the binary for your platform and add it to your PATH.
+
+          ### Installation
+
+          The easiest way is via xplat (if you have it):
+          ```bash
+          xplat binary install translate <version> joeblew999/ubuntu-website
+          ```
+
+          Or manually:
+          ```bash
+          # macOS (Apple Silicon)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/translate-darwin-arm64 -o ~/.local/bin/translate
+          chmod +x ~/.local/bin/translate
+
+          # macOS (Intel)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/translate-darwin-amd64 -o ~/.local/bin/translate
+          chmod +x ~/.local/bin/translate
+
+          # Linux (x86_64)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/translate-linux-amd64 -o ~/.local/bin/translate
+          chmod +x ~/.local/bin/translate
+          ```
+
+          ### Commands
+
+          ```
+          translate content status     # What English files changed?
+          translate content missing    # What's missing in translations?
+          translate content orphans    # Files with no English source
+          translate content stale      # Outdated translations
+          translate content clean      # Delete orphans
+          translate content done       # Mark translations complete
+
+          translate menu check         # Validate menu files
+          translate menu sync          # Regenerate menus from English
+
+          translate lang list          # Show configured languages
+          translate lang add           # Add a new language
+          translate lang remove        # Remove a language
+          ```
+
+          ### Flags
+
+          ```
+          -github-issue    Output markdown for GitHub Issues
+          -force           Skip confirmation prompts
+          -version         Print version
+          ```
+          EOF
+
+          gh release create "${{ github.ref_name }}" \
+            --repo "${{ github.repository }}" \
+            --title "translate ${GITHUB_REF_NAME#translate-}" \
+            --notes-file /tmp/release-notes.md \
+            release/*
