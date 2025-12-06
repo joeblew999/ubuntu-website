@@ -432,7 +432,6 @@ func (c *Checker) Next() int {
 	}
 
 	// Find first missing
-	current := 0
 	for _, enFile := range englishFiles {
 		relPath := strings.TrimPrefix(enFile, c.sourcePath()+string(os.PathSeparator))
 		var missingIn []string
@@ -441,13 +440,16 @@ func (c *Checker) Next() int {
 			langFile := filepath.Join(c.config.ContentDir, lang.DirName, relPath)
 			if _, err := os.Stat(langFile); os.IsNotExist(err) {
 				missingIn = append(missingIn, lang.DirName)
-				current++
 			}
 		}
 
 		if len(missingIn) > 0 {
+			// Calculate completed translations
+			totalPossible := len(englishFiles) * len(c.config.TargetLangs)
+			completed := totalPossible - totalMissing
+
 			fmt.Println("========================================")
-			fmt.Printf("Progress: %d of %d translations remaining\n", current, totalMissing)
+			fmt.Printf("Progress: %d/%d translations complete (%d remaining)\n", completed, totalPossible, totalMissing)
 			fmt.Println()
 			fmt.Println("Next file to translate:")
 			fmt.Printf("  %s\n", relPath)
