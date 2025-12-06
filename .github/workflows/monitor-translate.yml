@@ -46,27 +46,24 @@ jobs:
       - name: Build translate
         run: task translate:check:deps
 
-      # Run translation check
+      # Run translation check and capture report
       - name: Check Translation Status
         id: check
         run: |
-          $HOME/.local/bin/translate -github-issue missing > report.md 2>&1 || true
-          if [ -s report.md ]; then
-            echo "has_issues=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_issues=false" >> $GITHUB_OUTPUT
-          fi
-          # Check actual exit code
-          $HOME/.local/bin/translate -github-issue missing > /dev/null 2>&1
-        continue-on-error: true
+          set +e
+          $HOME/.local/bin/translate -github-issue missing > report.md 2>&1
+          exit_code=$?
+          cat report.md
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+          exit 0
 
-      # Create issue if missing translations
+      # Create issue if missing translations (exit code 1 means issues found)
       - name: Create Issue
-        if: steps.check.outputs.has_issues == 'true' && steps.check.outcome == 'failure'
+        if: steps.check.outputs.exit_code == '1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          task tools:gh:issue:create-from-file \
-            TITLE="Translation: Missing or stale content detected" \
-            FILE="report.md" \
-            LABELS="translation,automated"
+          gh issue create \
+            --title "Translation: Missing or stale content detected" \
+            --body-file report.md \
+            --label "translation,automated"
