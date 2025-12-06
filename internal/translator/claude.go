@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -15,10 +17,11 @@ const (
 	maxTokens    = 4096
 )
 
-// ClaudeClient handles communication with Claude API
+// ClaudeClient handles communication with Claude API or CLI
 type ClaudeClient struct {
 	apiKey     string
 	httpClient *http.Client
+	useCLI     bool // true if using claude CLI instead of API
 }
 
 // ClaudeRequest represents a request to Claude API
@@ -52,10 +55,13 @@ type ClaudeResponse struct {
 	} `json:"usage"`
 }
 
-// NewClaudeClient creates a new Claude API client
+// NewClaudeClient creates a new Claude client (API or CLI)
+// If apiKey is empty, uses the claude CLI (web auth)
 func NewClaudeClient(apiKey string) (*ClaudeClient, error) {
 	if apiKey == "" {
-		return nil, fmt.Errorf("API key is required")
+		return &ClaudeClient{
+			useCLI: true,
+		}, nil
 	}
 
 	return &ClaudeClient{
@@ -63,6 +69,7 @@ func NewClaudeClient(apiKey string) (*ClaudeClient, error) {
 		httpClient: &http.Client{
 			Timeout: 60 * time.Second,
 		},
+		useCLI: false,
 	}, nil
 }
 
@@ -84,6 +91,9 @@ func (c *ClaudeClient) Translate(text, targetLang, targetLangName string) (strin
 		"Please provide ONLY the translated text, with no explanations or additional commentary.",
 		targetLangName, targetLang, text)
 
+	if c.useCLI {
+		return c.callCLI(prompt)
+	}
 	return c.callAPI(prompt)
 }
 
@@ -106,7 +116,12 @@ func (c *ClaudeClient) TranslateI18n(data map[string]string, targetLang, targetL
 		"Please provide ONLY the translated JSON, with no explanations or additional commentary.",
 		targetLangName, targetLang, string(jsonData))
 
-	translated, err := c.callAPI(prompt)
+	var translated string
+	if c.useCLI {
+		translated, err = c.callCLI(prompt)
+	} else {
+		translated, err = c.callAPI(prompt)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -172,4 +187,25 @@ func (c *ClaudeClient) callAPI(prompt string) (string, error) {
 	}
 
 	return claudeResp.Content[0].Text, nil
+}
+
+// callCLI uses the claude CLI for translation (web auth, no API key needed)
+func (c *ClaudeClient) callCLI(prompt string) (string, error) {
+	// Use claude CLI with -p flag for prompt mode (non-interactive)
+	cmd := exec.Command("claude", "-p", prompt)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("claude CLI failed: %w\nstderr: %s", err, stderr.String())
+	}
+
+	output := strings.TrimSpace(stdout.String())
+	if output == "" {
+		return "", fmt.Errorf("claude CLI returned empty response")
+	}
+
+	return output, nil
 }

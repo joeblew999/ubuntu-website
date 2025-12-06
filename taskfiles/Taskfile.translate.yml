@@ -3,155 +3,125 @@
 # Workflow for managing multilingual content translations.
 # Uses git tags to track translation checkpoints.
 #
-# Workflow:
-#   1. task translate:status    - see what changed since last translation
-#   2. Ask Claude Code: "Translate the changed files to all languages"
-#   3. task translate:done      - mark translations complete
+# Configuration:
+#   - Hugo projects: Languages auto-loaded from config/_default/languages.toml
+#   - Standalone: Uses defaults (de, zh, ja) - edit internal/translator/translator.go
 #
-# Target languages: de (German), zh (Chinese), ja (Japanese)
+# Workflow:
+#   1. task translate:status    - see what source files changed since last translation
+#   2. task translate:missing   - see which files don't exist in target languages
+#   3. task translate:next      - show next file to translate (with progress)
+#   4. task translate:stale     - find existing translations that may be outdated
+#   5. task translate:diff FILE=path  - show what changed in a specific source file
+#   6. Ask Claude Code: "Translate X to all languages"
+#   7. task translate:done      - mark translations complete
+#
+# Validation:
+#   - task translate:orphans    - find target files with no source (delete these)
+#   - task translate:clean      - auto-delete orphaned files
+#   - task translate:validate   - show current config (Hugo or standalone)
 
 version: '3'
 
 vars:
-  # Language directories under content/
-  LANGS: "german chinese japanese"
+  TRANSLATE_REPO: joeblew999/ubuntu-website
+  TRANSLATE_BIN: 'translate{{exeExt}}'
 
 tasks:
   # ===========================================================================
-  # Status
+  # Dependency Management
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure translate binary is available (builds from source or downloads)
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}}"
+    cmds:
+      - '{{.XPLAT_BIN}} binary install translate {{.TRANSLATE_VERSION}} {{.TRANSLATE_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/translate"'
+
+  # ===========================================================================
+  # Status Commands
   # ===========================================================================
 
   status:
     desc: Show what English files changed since last translation
+    deps: [check:deps]
     cmds:
-      - |
-        echo "========================================"
-        echo "Translation Status"
-        echo "========================================"
-        echo ""
-        echo "=== New (untracked) files ==="
-        git ls-files --others --exclude-standard -- content/english/ | grep -E '\.md$' || echo "(none)"
-        echo ""
-        echo "=== Uncommitted changes (modified) ==="
-        git diff --name-only -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null | grep -E '\.(md|toml|yaml)$' || echo "(none)"
-        echo ""
-        echo "=== Committed since last translation ==="
-        git diff --name-only last-translation..HEAD -- content/english/ config/_default/menus.en.toml i18n/en.yaml 2>/dev/null || echo "(No checkpoint tag yet - run 'task translate:done' to set baseline)"
-        echo ""
-        echo "========================================"
-        echo "To translate, ask Claude Code:"
-        echo "  'Translate the changed files to all languages'"
-        echo ""
-        echo "After translating: task translate:done"
-        echo "========================================"
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} status'
 
   done:
     desc: Mark current translations as complete (update checkpoint tag)
+    deps: [check:deps]
     cmds:
-      - git tag -f last-translation HEAD
-      - 'echo "OK: Translation checkpoint updated to current commit"'
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} done'
+
+  diff:
+    desc: Show git diff for a specific English file since last translation
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+    cmds:
+      - |
+        FILE="{{.FILE}}"
+        if [ -z "$FILE" ]; then
+          echo "========================================"
+          echo "Usage: task translate:diff FILE=blog/my-post.md"
+          echo ""
+          echo "Shows what changed in an English file since last translation."
+          echo "The FILE path is relative to content/english/"
+          echo "========================================"
+          exit 1
+        fi
+        {{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} diff "$FILE"
+
+  changed:
+    desc: Show detailed changes for all English files since last translation
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} changed'
 
   # ===========================================================================
-  # Validation
+  # Validation Commands
   # ===========================================================================
 
   missing:
     desc: Show which languages are missing content files compared to English
+    deps: [check:deps]
     cmds:
-      - |
-        echo "========================================"
-        echo "Missing Content Files by Language"
-        echo "========================================"
-        echo ""
-
-        LANGS="{{.LANGS}}"
-
-        for LANG in $LANGS; do
-          MISSING=0
-          MISSING_FILES=""
-
-          # Check each English content file
-          for EN_FILE in $(xplat glob "content/english/**/*.md"); do
-            # Convert path: content/english/foo.md -> content/german/foo.md
-            LANG_FILE=$(echo "$EN_FILE" | sed "s|content/english|content/$LANG|")
-
-            if [ ! -f "$LANG_FILE" ]; then
-              MISSING=$((MISSING + 1))
-              MISSING_FILES="$MISSING_FILES\n  - ${EN_FILE#content/english/}"
-            fi
-          done
-
-          if [ $MISSING -eq 0 ]; then
-            echo "OK: $LANG: Complete"
-          else
-            echo "MISSING: $LANG: Missing $MISSING files"
-            echo -e "$MISSING_FILES"
-            echo ""
-          fi
-        done
-
-        echo "========================================"
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} missing'
 
   orphans:
     desc: Show files in target languages that no longer exist in English (should be deleted)
+    deps: [check:deps]
     cmds:
-      - |
-        echo "========================================"
-        echo "Orphaned Files (exist in target but not in English)"
-        echo "========================================"
-        echo ""
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} orphans'
 
-        LANGS="{{.LANGS}}"
-        TOTAL_ORPHANS=0
+  next:
+    desc: Show the next file to translate (first missing file)
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} next'
 
-        for LANG in $LANGS; do
-          ORPHAN_COUNT=0
-          ORPHAN_FILES=""
-
-          # Check each file in target language
-          for LANG_FILE in $(xplat glob "content/$LANG/**/*.md" 2>/dev/null); do
-            # Convert path: content/german/foo.md -> content/english/foo.md
-            EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
-
-            if [ ! -f "$EN_FILE" ]; then
-              ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
-              TOTAL_ORPHANS=$((TOTAL_ORPHANS + 1))
-              ORPHAN_FILES="$ORPHAN_FILES\n  - ${LANG_FILE}"
-            fi
-          done
-
-          if [ $ORPHAN_COUNT -eq 0 ]; then
-            echo "OK: $LANG: No orphans"
-          else
-            echo "ORPHANS: $LANG: $ORPHAN_COUNT orphaned files (DELETE THESE)"
-            echo -e "$ORPHAN_FILES"
-            echo ""
-          fi
-        done
-
-        echo "========================================"
-        if [ $TOTAL_ORPHANS -gt 0 ]; then
-          echo "Run 'task translate:clean' to delete all orphaned files"
-        fi
-        echo "========================================"
+  stale:
+    desc: Show target files that are smaller than English (may need updating)
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} stale'
 
   clean:
     desc: Delete orphaned files in target languages that no longer exist in English
+    deps: [check:deps]
     cmds:
-      - |
-        echo "Cleaning orphaned translation files..."
-        LANGS="{{.LANGS}}"
-        DELETED=0
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} clean'
 
-        for LANG in $LANGS; do
-          for LANG_FILE in $(xplat glob "content/$LANG/**/*.md" 2>/dev/null); do
-            EN_FILE=$(echo "$LANG_FILE" | sed "s|content/$LANG|content/english|")
-            if [ ! -f "$EN_FILE" ]; then
-              echo "Deleting: $LANG_FILE"
-              xplat rm "$LANG_FILE"
-              DELETED=$((DELETED + 1))
-            fi
-          done
-        done
+  validate:
+    desc: Show current language configuration (auto-detected from Hugo or defaults)
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} validate'
 
-        echo "OK: Deleted $DELETED orphaned files"
+  langs:
+    desc: Show configured languages and detect stray content directories
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} langs'

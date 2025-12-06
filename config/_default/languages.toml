@@ -5,25 +5,25 @@ languageCode = "en-us"
 contentDir = "content/english"
 weight = 1
 
-# ################ German ##################
-# [de]
-# languageName = "Deutsch"
-# languageCode = "de-de"
-# contentDir = "content/german"
-# weight = 2
+################ German ##################
+[de]
+languageName = "Deutsch"
+languageCode = "de-de"
+contentDir = "content/german"
+weight = 2
 
-# ################ Chinese (Simplified) ##################
-# [zh]
-# languageName = "中文"
-# languageCode = "zh-cn"
-# contentDir = "content/chinese"
-# weight = 3
-# hasCJKLanguage = true
+################ Chinese (Simplified) ##################
+[zh]
+languageName = "中文"
+languageCode = "zh-cn"
+contentDir = "content/chinese"
+weight = 3
+hasCJKLanguage = true
 
-# ################ Japanese ##################
-# [ja]
-# languageName = "日本語"
-# languageCode = "ja"
-# contentDir = "content/japanese"
-# weight = 4
-# hasCJKLanguage = true
+################ Japanese ##################
+[ja]
+languageName = "日本語"
+languageCode = "ja"
+contentDir = "content/japanese"
+weight = 4
+hasCJKLanguage = true

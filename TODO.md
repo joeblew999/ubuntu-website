@@ -1,7 +1,6 @@
 # TODO
 
 
-Get claude to update global config to allpw its MCP to access file system .. I keep getting prompts !!
 
 ## Completed
 

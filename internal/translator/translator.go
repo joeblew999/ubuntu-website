@@ -4,9 +4,79 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-// Translator handles translation operations
+// Language represents a target language for translation
+type Language struct {
+	Code    string // ISO code: de, zh, ja, etc.
+	Name    string // Full name: German, Chinese, etc.
+	DirName string // Content directory name: german, chinese, etc.
+}
+
+// Config holds translation configuration
+type Config struct {
+	SourceLang    string
+	SourceDir     string // english
+	TargetLangs   []Language
+	ContentDir    string
+	I18nDir       string
+	CheckpointTag string
+}
+
+// DefaultConfig returns the default configuration.
+// If in a Hugo project, reads languages from config/_default/languages.toml.
+// Otherwise uses sensible defaults for standalone markdown translation.
+func DefaultConfig() *Config {
+	config := &Config{
+		SourceLang:    "en",
+		SourceDir:     "english",
+		ContentDir:    "content",
+		I18nDir:       "i18n",
+		CheckpointTag: "last-translation",
+		// Default fallback languages (used when not a Hugo project)
+		TargetLangs: []Language{
+			{Code: "de", Name: "German", DirName: "german"},
+			{Code: "zh", Name: "Chinese", DirName: "chinese"},
+			{Code: "ja", Name: "Japanese", DirName: "japanese"},
+		},
+	}
+
+	// Try to load from Hugo config (overwrites defaults if found)
+	TryLoadHugoConfig(config)
+
+	return config
+}
+
+// GetLanguageName returns the full name for a language code
+func (c *Config) GetLanguageName(code string) string {
+	for _, lang := range c.TargetLangs {
+		if lang.Code == code {
+			return lang.Name
+		}
+	}
+	return code
+}
+
+// GetLanguageDir returns the content directory name for a language code
+func (c *Config) GetLanguageDir(code string) string {
+	for _, lang := range c.TargetLangs {
+		if lang.Code == code {
+			return lang.DirName
+		}
+	}
+	return code
+}
+
+// GetTargetPath converts a source path to a target language path
+// content/english/blog/post.md → content/german/blog/post.md
+func (c *Config) GetTargetPath(sourcePath, targetLangCode string) string {
+	targetDir := c.GetLanguageDir(targetLangCode)
+	relPath := strings.TrimPrefix(sourcePath, filepath.Join(c.ContentDir, c.SourceDir)+string(os.PathSeparator))
+	return filepath.Join(c.ContentDir, targetDir, relPath)
+}
+
+// Translator handles translation operations (requires Claude API key)
 type Translator struct {
 	apiKey string
 	config *Config
@@ -14,27 +84,7 @@ type Translator struct {
 	git    *GitManager
 }
 
-// Config holds translation configuration
-type Config struct {
-	SourceLang    string
-	TargetLangs   []string
-	ContentDir    string
-	I18nDir       string
-	CheckpointTag string
-}
-
-// DefaultConfig returns the default configuration
-func DefaultConfig() *Config {
-	return &Config{
-		SourceLang:    "en",
-		TargetLangs:   []string{"de", "sv", "zh", "ja", "th"},
-		ContentDir:    "content",
-		I18nDir:       "i18n",
-		CheckpointTag: "last-translation",
-	}
-}
-
-// New creates a new Translator instance
+// New creates a new Translator instance for automated translation
 func New(apiKey string) (*Translator, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("API key is required")
@@ -64,19 +114,20 @@ func New(apiKey string) (*Translator, error) {
 
 // Check shows which English files have changed since last translation
 func (t *Translator) Check() error {
-	fmt.Println("🔍 Checking for changes since last translation...")
+	fmt.Println("Checking for changes since last translation...")
 
-	changes, err := t.git.GetChangedFiles(t.config.CheckpointTag, "content/english")
+	sourcePath := filepath.Join(t.config.ContentDir, t.config.SourceDir)
+	changes, err := t.git.GetChangedFiles(t.config.CheckpointTag, sourcePath)
 	if err != nil {
 		return fmt.Errorf("failed to get changed files: %w", err)
 	}
 
 	if len(changes) == 0 {
-		fmt.Println("✅ No changes detected. All content is up to date!")
+		fmt.Println("No changes detected. All content is up to date!")
 		return nil
 	}
 
-	fmt.Printf("\n📝 Found %d changed files:\n\n", len(changes))
+	fmt.Printf("\nFound %d changed files:\n\n", len(changes))
 	for _, file := range changes {
 		fmt.Printf("  - %s\n", file)
 	}
@@ -87,21 +138,22 @@ func (t *Translator) Check() error {
 
 // TranslateAll translates all changed English content to all target languages
 func (t *Translator) TranslateAll() error {
-	changes, err := t.git.GetChangedFiles(t.config.CheckpointTag, "content/english")
+	sourcePath := filepath.Join(t.config.ContentDir, t.config.SourceDir)
+	changes, err := t.git.GetChangedFiles(t.config.CheckpointTag, sourcePath)
 	if err != nil {
 		return fmt.Errorf("failed to get changed files: %w", err)
 	}
 
 	if len(changes) == 0 {
-		fmt.Println("✅ No changes detected. Nothing to translate.")
+		fmt.Println("No changes detected. Nothing to translate.")
 		return nil
 	}
 
-	fmt.Printf("📝 Translating %d files to %d languages...\n\n", len(changes), len(t.config.TargetLangs))
+	fmt.Printf("Translating %d files to %d languages...\n\n", len(changes), len(t.config.TargetLangs))
 
-	for _, targetLang := range t.config.TargetLangs {
-		if err := t.translateFiles(changes, targetLang); err != nil {
-			return fmt.Errorf("failed to translate to %s: %w", targetLang, err)
+	for _, lang := range t.config.TargetLangs {
+		if err := t.translateFiles(changes, lang); err != nil {
+			return fmt.Errorf("failed to translate to %s: %w", lang.Name, err)
 		}
 	}
 
@@ -114,38 +166,40 @@ func (t *Translator) TranslateAll() error {
 }
 
 // TranslateLang translates changed English content to a specific language
-func (t *Translator) TranslateLang(targetLang string) error {
-	// Validate target language
-	validLang := false
+func (t *Translator) TranslateLang(targetLangCode string) error {
+	// Find the target language
+	var targetLang *Language
 	for _, lang := range t.config.TargetLangs {
-		if lang == targetLang {
-			validLang = true
+		if lang.Code == targetLangCode {
+			targetLang = &lang
 			break
 		}
 	}
-	if !validLang {
-		return fmt.Errorf("invalid target language: %s (valid: %v)", targetLang, t.config.TargetLangs)
+	if targetLang == nil {
+		codes := make([]string, len(t.config.TargetLangs))
+		for i, lang := range t.config.TargetLangs {
+			codes[i] = lang.Code
+		}
+		return fmt.Errorf("invalid target language: %s (valid: %v)", targetLangCode, codes)
 	}
 
-	changes, err := t.git.GetChangedFiles(t.config.CheckpointTag, "content/english")
+	sourcePath := filepath.Join(t.config.ContentDir, t.config.SourceDir)
+	changes, err := t.git.GetChangedFiles(t.config.CheckpointTag, sourcePath)
 	if err != nil {
 		return fmt.Errorf("failed to get changed files: %w", err)
 	}
 
 	if len(changes) == 0 {
-		fmt.Println("✅ No changes detected. Nothing to translate.")
+		fmt.Println("No changes detected. Nothing to translate.")
 		return nil
 	}
 
-	return t.translateFiles(changes, targetLang)
+	return t.translateFiles(changes, *targetLang)
 }
 
 // translateFiles translates a list of files to a target language
-func (t *Translator) translateFiles(files []string, targetLang string) error {
-	langName := t.getLanguageName(targetLang)
-	targetDir := t.getContentDir(targetLang)
-
-	fmt.Printf("🌍 Translating to %s (%s)...\n", langName, targetLang)
+func (t *Translator) translateFiles(files []string, lang Language) error {
+	fmt.Printf("Translating to %s (%s)...\n", lang.Name, lang.Code)
 
 	for i, file := range files {
 		fmt.Printf("  [%d/%d] %s\n", i+1, len(files), filepath.Base(file))
@@ -163,7 +217,7 @@ func (t *Translator) translateFiles(files []string, targetLang string) error {
 		}
 
 		// Translate the content (not front matter or code blocks)
-		translatedBody, err := t.claude.Translate(md.Body, targetLang, langName)
+		translatedBody, err := t.claude.Translate(md.Body, lang.Code, lang.Name)
 		if err != nil {
 			return fmt.Errorf("failed to translate %s: %w", file, err)
 		}
@@ -175,8 +229,8 @@ func (t *Translator) translateFiles(files []string, targetLang string) error {
 			return fmt.Errorf("failed to reconstruct %s: %w", file, err)
 		}
 
-		// Write to target language directory
-		targetFile := filepath.Join(targetDir, filepath.Base(filepath.Dir(file)), filepath.Base(file))
+		// Write to target language directory (preserving path structure)
+		targetFile := t.config.GetTargetPath(file, lang.Code)
 		targetFileDir := filepath.Dir(targetFile)
 
 		if err := os.MkdirAll(targetFileDir, 0755); err != nil {
@@ -191,7 +245,7 @@ func (t *Translator) translateFiles(files []string, targetLang string) error {
 	return nil
 }
 
-// TranslateI18n translates i18n TOML files
+// TranslateI18n translates i18n YAML files
 func (t *Translator) TranslateI18n() error {
 	sourceFile := filepath.Join(t.config.I18nDir, "en.yaml")
 
@@ -200,9 +254,8 @@ func (t *Translator) TranslateI18n() error {
 		return fmt.Errorf("source i18n file not found: %s", sourceFile)
 	}
 
-	for _, targetLang := range t.config.TargetLangs {
-		langName := t.getLanguageName(targetLang)
-		fmt.Printf("🌍 Translating i18n to %s (%s)...\n", langName, targetLang)
+	for _, lang := range t.config.TargetLangs {
+		fmt.Printf("Translating i18n to %s (%s)...\n", lang.Name, lang.Code)
 
 		// Read source i18n file
 		content, err := os.ReadFile(sourceFile)
@@ -217,13 +270,13 @@ func (t *Translator) TranslateI18n() error {
 		}
 
 		// Translate values
-		translatedData, err := t.claude.TranslateI18n(i18nData, targetLang, langName)
+		translatedData, err := t.claude.TranslateI18n(i18nData, lang.Code, lang.Name)
 		if err != nil {
-			return fmt.Errorf("failed to translate i18n to %s: %w", targetLang, err)
+			return fmt.Errorf("failed to translate i18n to %s: %w", lang.Name, err)
 		}
 
 		// Write translated i18n file
-		targetFile := filepath.Join(t.config.I18nDir, fmt.Sprintf("%s.yaml", targetLang))
+		targetFile := filepath.Join(t.config.I18nDir, fmt.Sprintf("%s.yaml", lang.Code))
 		output, err := ReconstructI18n(translatedData)
 		if err != nil {
 			return fmt.Errorf("failed to reconstruct i18n: %w", err)
@@ -235,34 +288,4 @@ func (t *Translator) TranslateI18n() error {
 	}
 
 	return nil
-}
-
-// getLanguageName returns the full language name for a language code
-func (t *Translator) getLanguageName(langCode string) string {
-	names := map[string]string{
-		"de": "German",
-		"sv": "Swedish",
-		"zh": "Simplified Chinese",
-		"ja": "Japanese",
-		"th": "Thai",
-	}
-	if name, ok := names[langCode]; ok {
-		return name
-	}
-	return langCode
-}
-
-// getContentDir returns the content directory for a language code
-func (t *Translator) getContentDir(langCode string) string {
-	dirs := map[string]string{
-		"de": "content/german",
-		"sv": "content/swedish",
-		"zh": "content/chinese",
-		"ja": "content/japanese",
-		"th": "content/thai",
-	}
-	if dir, ok := dirs[langCode]; ok {
-		return dir
-	}
-	return fmt.Sprintf("content/%s", langCode)
 }
