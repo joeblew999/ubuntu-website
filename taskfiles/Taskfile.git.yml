@@ -136,11 +136,18 @@ tasks:
         # Logs
         {{.DIR_LOGS}}/
 
+        # Task (checksum cache)
+        {{.DIR_TASK}}/
+
         # Testing
         {{.DIR_PLAYWRIGHT}}/
 
         # Via framework
         {{.DIR_VIA}}/
+
+        # Analytics & monitoring state
+        {{.FILE_ANALYTICS_STATE}}
+        {{.FILE_SITECHECK_STATE}}
 
         # IDE & OS
         .vscode/

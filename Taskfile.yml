@@ -90,7 +90,7 @@ vars:
   # Commands
   ENV_CMD: cmd/env/main.go
 
-  # Directories
+  # Directories (gitignored)
   DIR_PUBLIC: public
   DIR_RESOURCES: resources
   DIR_NODE_MODULES: node_modules
@@ -98,13 +98,16 @@ vars:
   DIR_PLAYWRIGHT: .playwright-mcp
   DIR_VIA: .via
   DIR_LOGS: logs
+  DIR_TASK: .task
 
-  # Files
+  # Files (gitignored)
   FILE_HUGO_LOCK: .hugo_build.lock
   FILE_HUGO_STATS: hugo_stats.json
   FILE_BUN_LOCK: bun.lockb
   FILE_NPM_LOCK: package-lock.json
   FILE_ENV: .env
+  FILE_ANALYTICS_STATE: .analytics-state.json
+  FILE_SITECHECK_STATE: .sitecheck-state.json
 
   # Hugo
   HUGO_BUILD_FLAGS: --gc --minify
