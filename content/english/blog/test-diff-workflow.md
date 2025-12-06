@@ -16,6 +16,16 @@ This is a test post for the diff workflow.
 
 This section exists from the start.
 
+## NEW SECTION ADDED
+
+This section was added AFTER the initial translation to test the UPDATE workflow.
+
+When you run `task translate:diff FILE=blog/test-diff-workflow.md`, it should show:
+- The new section that was added
+- Any lines that were modified
+
+This helps translators know exactly what changed.
+
 ## Conclusion
 
-Testing complete.
+Testing complete with more content now.
