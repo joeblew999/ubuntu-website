@@ -42,15 +42,27 @@ jobs:
           task tools:xplat:check:deps
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # Run translation check via Taskfile
+      # Build translate binary
+      - name: Build translate
+        run: task translate:check:deps
+
+      # Run translation check
       - name: Check Translation Status
         id: check
-        run: task ci:translate > report.md
+        run: |
+          $HOME/.local/bin/translate -github-issue missing > report.md 2>&1 || true
+          if [ -s report.md ]; then
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+          fi
+          # Check actual exit code
+          $HOME/.local/bin/translate -github-issue missing > /dev/null 2>&1
         continue-on-error: true
 
-      # Create issue if missing translations (exit code 1)
+      # Create issue if missing translations
       - name: Create Issue
-        if: steps.check.outcome == 'failure'
+        if: steps.check.outputs.has_issues == 'true' && steps.check.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
