@@ -293,6 +293,12 @@ tasks:
     cmds:
       - '{{.HOME}}/.local/bin/sitecheck{{exeExt}} -github-issue'
 
+  ci:translate:
+    desc: "[Monitor] Translate - Check translation status for CI"
+    deps: [translate:check:deps]
+    cmds:
+      - '{{.HOME}}/.local/bin/translate{{exeExt}} -github-issue missing'
+
   # ===========================================================================
   # Code Quality
   # ===========================================================================
