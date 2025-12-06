@@ -125,8 +125,8 @@ Binary tools use `xplat binary:install` for cross-platform installation. This co
 
 | Category | Tools | Installation |
 |----------|-------|--------------|
-| With releases | xplat, analytics, sitecheck, genlogo | `xplat binary:install` |
-| Local-only | lanip, env, translate | `go run` (simple/broken) |
+| With releases | xplat, analytics, sitecheck, genlogo, translate | `xplat binary:install` |
+| Local-only | lanip, env | `go run` (simple) |
 
 Version management:
 - Versions defined in `versions.env` (single source of truth)
@@ -237,20 +237,23 @@ Style: Hugo Plate grayscale line-art (white, `#f5f5f5`, `#ccc`, `#999`, `#666`)
 
 ### Translation Workflow
 
-**Status: ENGLISH ONLY for now.** Multi-language support exists but is deferred until content stabilizes. Non-English blog posts (German, Chinese, Japanese) contain placeholder content that should be ignored.
+Languages: de (German), zh (Chinese), ja (Japanese) - auto-loaded from `config/_default/languages.toml`.
 
-Tasks:
-- `task translate:status` - what English files changed since last translation
-- `task translate:missing` - which languages are missing content files
-- `task translate:done` - mark translations complete (updates checkpoint)
+**Commands:**
+- `task translate:status` - shows uncommitted + committed changes since last checkpoint
+- `task translate:diff FILE=path` - shows diff for specific file (works with uncommitted changes)
+- `task translate:missing` - files missing in target languages
+- `task translate:stale` - translations that may be outdated
+- `task translate:next` - next file to translate with progress
+- `task translate:done` - update checkpoint after translating
 
-Workflow:
-1. `task translate:status` → translate changed files to all languages
-2. `task translate:done` → update checkpoint
+**Lifecycle:**
+1. Edit English file (uncommitted) → `translate:status` shows it, `translate:diff` shows changes
+2. Commit English file → still shows in status/diff until translated
+3. Translate to all languages, commit translations
+4. `task translate:done` → moves checkpoint, status is clean
 
-Languages: de (German), zh (Chinese), ja (Japanese)
-
-Note: When adding/removing languages, also update Taskfile.yml
+**CI:** `monitor-translate.yml` runs weekly, creates GitHub Issue if missing translations.
 
 ### Path Convention
 **ALWAYS use `joeblew999` (with three 9s), NEVER `joeblew99` (with two 9s)**

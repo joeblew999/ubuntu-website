@@ -160,19 +160,48 @@ func (c *Checker) Diff(file string) int {
 		fmt.Print(string(content))
 		fmt.Println("----------------------------------------")
 	} else {
-		// Show diff since last translation
+		// Show diff since last translation (committed changes)
 		diffCmd := exec.Command("git", "diff", c.config.CheckpointTag+"..HEAD", "--", enFile)
-		output, _ := diffCmd.Output()
+		committedDiff, _ := diffCmd.Output()
 
-		if len(output) == 0 {
+		// Also check for uncommitted changes (working directory vs HEAD)
+		uncommittedCmd := exec.Command("git", "diff", "HEAD", "--", enFile)
+		uncommittedDiff, _ := uncommittedCmd.Output()
+
+		// And check for staged but uncommitted
+		stagedCmd := exec.Command("git", "diff", "--cached", "--", enFile)
+		stagedDiff, _ := stagedCmd.Output()
+
+		hasCommitted := len(committedDiff) > 0
+		hasUncommitted := len(uncommittedDiff) > 0 || len(stagedDiff) > 0
+
+		if !hasCommitted && !hasUncommitted {
 			fmt.Println("STATUS: NO CHANGES since last translation")
 		} else {
-			fmt.Println("STATUS: MODIFIED since last translation")
-			fmt.Println()
-			fmt.Println("Changes:")
-			fmt.Println("----------------------------------------")
-			fmt.Print(string(output))
-			fmt.Println("----------------------------------------")
+			if hasCommitted {
+				fmt.Println("STATUS: MODIFIED since last translation (committed)")
+				fmt.Println()
+				fmt.Println("Committed changes:")
+				fmt.Println("----------------------------------------")
+				fmt.Print(string(committedDiff))
+				fmt.Println("----------------------------------------")
+			}
+			if hasUncommitted {
+				if hasCommitted {
+					fmt.Println()
+				}
+				fmt.Println("STATUS: UNCOMMITTED CHANGES (not yet committed)")
+				fmt.Println()
+				fmt.Println("Uncommitted changes:")
+				fmt.Println("----------------------------------------")
+				if len(stagedDiff) > 0 {
+					fmt.Print(string(stagedDiff))
+				}
+				if len(uncommittedDiff) > 0 {
+					fmt.Print(string(uncommittedDiff))
+				}
+				fmt.Println("----------------------------------------")
+			}
 		}
 	}
 
