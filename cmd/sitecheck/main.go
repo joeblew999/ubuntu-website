@@ -43,6 +43,9 @@ const (
 	stateFile    = ".sitecheck-state.json"
 )
 
+// version is set via ldflags at build time
+var version = "dev"
+
 // Package-level config derived from SITE_URL environment variable
 var (
 	defaultURL  string // Full URL to check (e.g., https://www.example.com/robots.txt)
@@ -117,7 +120,13 @@ func main() {
 	nodesFlag := flag.Int("nodes", defaultNodes, "Maximum number of global nodes to check from")
 	waitFlag := flag.Int("wait", defaultWait, "Seconds to wait for results")
 	githubIssue := flag.Bool("github-issue", false, "Output markdown for GitHub Issue (exits 1 if issues detected)")
+	ver := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
+
+	if *ver {
+		fmt.Printf("sitecheck %s\n", version)
+		os.Exit(0)
+	}
 
 	checkType := strings.ToLower(*typeFlag)
 

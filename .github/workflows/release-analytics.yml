@@ -1,0 +1,178 @@
+# analytics Cross-Platform Build & Release
+#
+# Builds the analytics binary for all major platforms and releases
+# to GitHub Releases when a tag matching analytics-v* is pushed.
+#
+# Usage:
+#   git tag analytics-v0.1.0
+#   git push origin analytics-v0.1.0
+
+name: "[Release] analytics"
+
+on:
+  push:
+    tags: ['analytics-v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v0.1.0)'
+        required: true
+        default: 'dev'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ''
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF_NAME#analytics-}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build analytics
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          OUTPUT="analytics-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          go build -ldflags="-s -w -X main.version=${VERSION}" -o "${OUTPUT}" ./cmd/analytics
+          echo "Built ${OUTPUT}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: analytics-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: analytics-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+
+  test:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: analytics-linux-amd64
+            binary: analytics-linux-amd64
+          - os: macos-latest
+            artifact: analytics-darwin-arm64
+            binary: analytics-darwin-arm64
+          - os: windows-latest
+            artifact: analytics-windows-amd64
+            binary: analytics-windows-amd64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: bin
+
+      - name: Test analytics (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x bin/${{ matrix.binary }}
+          echo "Testing: version"
+          bin/${{ matrix.binary }} -version
+          echo "  OK"
+
+      - name: Test analytics (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Testing: version"
+          & "bin\${{ matrix.binary }}" -version
+          Write-Host "  OK"
+
+  release:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/analytics-v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts -type f -name 'analytics-*' -exec mv {} release/ \;
+          ls -la release/
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > /tmp/release-notes.md << 'EOF'
+          ## analytics - Cloudflare Web Analytics reporter
+
+          Fetches Cloudflare Web Analytics and reports significant changes.
+
+          ### Installation
+
+          ```bash
+          # Via xplat
+          xplat binary install analytics <version> joeblew999/ubuntu-website
+
+          # Or manually (macOS Apple Silicon)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/analytics-darwin-arm64 -o ~/.local/bin/analytics
+          chmod +x ~/.local/bin/analytics
+          ```
+
+          ### Usage
+
+          Requires `CLOUDFLARE_API_TOKEN` environment variable.
+
+          ```
+          analytics                      # Print report to terminal
+          analytics -days 14             # Compare last 14 days
+          analytics -github-issue        # Output markdown for GitHub Issue
+          analytics -webhook URL         # Post to webhook if changed
+          ```
+          EOF
+
+          gh release create "${{ github.ref_name }}" \
+            --repo "${{ github.repository }}" \
+            --title "analytics ${GITHUB_REF_NAME#analytics-}" \
+            --notes-file /tmp/release-notes.md \
+            release/*

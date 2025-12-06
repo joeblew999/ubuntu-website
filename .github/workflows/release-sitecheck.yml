@@ -1,0 +1,178 @@
+# sitecheck Cross-Platform Build & Release
+#
+# Builds the sitecheck binary for all major platforms and releases
+# to GitHub Releases when a tag matching sitecheck-v* is pushed.
+#
+# Usage:
+#   git tag sitecheck-v0.1.0
+#   git push origin sitecheck-v0.1.0
+
+name: "[Release] sitecheck"
+
+on:
+  push:
+    tags: ['sitecheck-v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v0.1.0)'
+        required: true
+        default: 'dev'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ''
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF_NAME#sitecheck-}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build sitecheck
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          OUTPUT="sitecheck-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          go build -ldflags="-s -w -X main.version=${VERSION}" -o "${OUTPUT}" ./cmd/sitecheck
+          echo "Built ${OUTPUT}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitecheck-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: sitecheck-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+
+  test:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: sitecheck-linux-amd64
+            binary: sitecheck-linux-amd64
+          - os: macos-latest
+            artifact: sitecheck-darwin-arm64
+            binary: sitecheck-darwin-arm64
+          - os: windows-latest
+            artifact: sitecheck-windows-amd64
+            binary: sitecheck-windows-amd64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: bin
+
+      - name: Test sitecheck (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x bin/${{ matrix.binary }}
+          echo "Testing: version"
+          bin/${{ matrix.binary }} -version
+          echo "  OK"
+
+      - name: Test sitecheck (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Testing: version"
+          & "bin\${{ matrix.binary }}" -version
+          Write-Host "  OK"
+
+  release:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/sitecheck-v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts -type f -name 'sitecheck-*' -exec mv {} release/ \;
+          ls -la release/
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > /tmp/release-notes.md << 'EOF'
+          ## sitecheck - Site reachability checker
+
+          Checks site reachability from multiple global locations using check-host.net API.
+
+          ### Installation
+
+          ```bash
+          # Via xplat
+          xplat binary install sitecheck <version> joeblew999/ubuntu-website
+
+          # Or manually (macOS Apple Silicon)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sitecheck-darwin-arm64 -o ~/.local/bin/sitecheck
+          chmod +x ~/.local/bin/sitecheck
+          ```
+
+          ### Usage
+
+          ```
+          sitecheck                      # HTTP check (default)
+          sitecheck -type dns            # DNS resolution check
+          sitecheck -type tcp            # TCP port 443 check
+          sitecheck -type redirect       # Apex->www redirect check
+          sitecheck -type all            # Run all checks
+          sitecheck -github-issue        # Output markdown for GitHub Issue
+          ```
+          EOF
+
+          gh release create "${{ github.ref_name }}" \
+            --repo "${{ github.repository }}" \
+            --title "sitecheck ${GITHUB_REF_NAME#sitecheck-}" \
+            --notes-file /tmp/release-notes.md \
+            release/*

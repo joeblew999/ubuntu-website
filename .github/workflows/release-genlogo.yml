@@ -1,0 +1,177 @@
+# genlogo Cross-Platform Build & Release
+#
+# Builds the genlogo binary for macOS only (requires system fonts).
+# Releases to GitHub when a tag matching genlogo-v* is pushed.
+#
+# Note: genlogo uses macOS system fonts (Menlo, Helvetica) so only
+# macOS builds are functional. Linux/Windows builds are included
+# for completeness but would need font bundling to work properly.
+#
+# Usage:
+#   git tag genlogo-v0.1.0
+#   git push origin genlogo-v0.1.0
+
+name: "[Release] genlogo"
+
+on:
+  push:
+    tags: ['genlogo-v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v0.1.0)'
+        required: true
+        default: 'dev'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          # macOS builds (primary - uses system fonts)
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ''
+          # Linux/Windows for completeness (fonts not bundled)
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF_NAME#genlogo-}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build genlogo
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          OUTPUT="genlogo-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          go build -ldflags="-s -w -X main.version=${VERSION}" -o "${OUTPUT}" ./cmd/genlogo
+          echo "Built ${OUTPUT}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlogo-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: genlogo-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+
+  test:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          # Only test macOS since it has the required fonts
+          - os: macos-latest
+            artifact: genlogo-darwin-arm64
+            binary: genlogo-darwin-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: bin
+
+      - name: Test genlogo
+        run: |
+          chmod +x bin/${{ matrix.binary }}
+          echo "Testing: version"
+          bin/${{ matrix.binary }} -version
+          echo "  OK"
+
+  release:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/genlogo-v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts -type f -name 'genlogo-*' -exec mv {} release/ \;
+          ls -la release/
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > /tmp/release-notes.md << 'EOF'
+          ## genlogo - Brand asset generator
+
+          Generates Ubuntu Software logo assets (SVG, PNG) from a single source of truth.
+
+          **Note:** This tool uses macOS system fonts (Menlo, Helvetica). Only macOS
+          builds are fully functional. Linux/Windows builds require font bundling.
+
+          ### Installation
+
+          ```bash
+          # Via xplat (macOS only)
+          xplat binary install genlogo <version> joeblew999/ubuntu-website
+
+          # Or manually (macOS Apple Silicon)
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/genlogo-darwin-arm64 -o ~/.local/bin/genlogo
+          chmod +x ~/.local/bin/genlogo
+          ```
+
+          ### Usage
+
+          ```
+          genlogo -asset all             # Generate all assets
+          genlogo -asset favicon         # Generate favicon only
+          genlogo -asset logo-svg        # Generate SVG logos
+          genlogo -asset og              # Generate OG image
+          ```
+
+          ### Generated Assets
+
+          - `assets/images/favicon.png` - 512x512 browser icon
+          - `assets/images/logo.svg` - Light mode logo
+          - `assets/images/logo-darkmode.svg` - Dark mode logo
+          - `static/images/og-image.png` - 1200x630 social preview
+          - `static/images/email-logo.png` - Gmail signature
+          - `static/images/bluesky-avatar.png` - Profile picture
+          - `static/images/bluesky-banner.png` - Header banner
+          EOF
+
+          gh release create "${{ github.ref_name }}" \
+            --repo "${{ github.repository }}" \
+            --title "genlogo ${GITHUB_REF_NAME#genlogo-}" \
+            --notes-file /tmp/release-notes.md \
+            release/*
