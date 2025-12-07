@@ -278,6 +278,9 @@ func runReleaseBuild(cmd *cobra.Command, args []string) error {
 	// Determine which platforms to build
 	var targetPlatforms []Platform
 
+	// Check if we're in CI environment
+	inCI := os.Getenv("CI") != "" || os.Getenv("GITHUB_ACTIONS") != ""
+
 	if buildCurrent {
 		// Only current platform
 		targetPlatforms = []Platform{{
@@ -294,16 +297,25 @@ func runReleaseBuild(cmd *cobra.Command, args []string) error {
 			OS:   parts[0],
 			Arch: parts[1],
 		}}
+	} else if !matrix.CGO && inCI && runtime.GOOS != "linux" {
+		// CGO=0 in CI on non-Linux: Skip, Linux runner builds all platforms
+		fmt.Printf("Skipping: CGO=0 tool on %s in CI, Linux runner builds all platforms\n", runtime.GOOS)
+		return nil
 	} else {
 		// All platforms
 		if matrix.CGO {
-			// CGO=1: Can only build current platform
-			fmt.Printf("Warning: %s requires CGO, can only build for current platform\n", tool)
-			targetPlatforms = []Platform{{
-				OS:   runtime.GOOS,
-				Arch: runtime.GOARCH,
-			}}
+			// CGO=1: Build only platforms matching current OS
+			fmt.Printf("CGO=1: Building %s platforms for %s\n", runtime.GOOS, tool)
+			for _, p := range matrix.Platforms {
+				if p.OS == runtime.GOOS {
+					targetPlatforms = append(targetPlatforms, p)
+				}
+			}
+			if len(targetPlatforms) == 0 {
+				return fmt.Errorf("no platforms to build for %s on %s", tool, runtime.GOOS)
+			}
 		} else {
+			// CGO=0: Can cross-compile all platforms
 			targetPlatforms = matrix.Platforms
 		}
 	}

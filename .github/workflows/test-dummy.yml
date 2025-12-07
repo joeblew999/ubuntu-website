@@ -1,11 +1,9 @@
 # Test workflow for dummy tool round-trip
-# Since dummy has CGO=0, we can cross-compile from Linux only
+# Uses 3-platform matrix, but xplat is smart about what to build:
+# - CGO=0: Linux builds ALL platforms, macOS/Windows skip
+# - CGO=1: Each platform builds its own binaries
 #
-# Tests:
-#   1. Build xplat (needed by other tasks)
-#   2. Build dummy for current platform
-#   3. Build dummy for ALL platforms (cross-compile)
-#   4. Test install via xplat binary install
+# This pattern allows ONE workflow for ALL tools
 #
 name: "Test: Dummy Round-Trip"
 
@@ -21,7 +19,10 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -50,15 +51,19 @@ jobs:
       - name: Test built binary
         run: task dummy:release:test
 
-      # Step 5: Cross-compile for ALL platforms (CGO=0 allows this)
-      - name: Cross-compile all platforms
+      # Step 5: xplat release build - smart based on CGO and OS
+      # CGO=0 on Linux: builds ALL platforms
+      # CGO=0 on macOS/Windows: skips (Linux already built)
+      # CGO=1 on any OS: builds that OS's platforms
+      - name: Cross-compile (xplat smart build)
         run: xplat release build dummy
 
-      # Step 6: Verify all binaries were built
+      # Step 6: Verify binaries (Linux only for CGO=0)
       - name: Verify cross-compile output
+        if: runner.os == 'Linux'
         run: |
           echo "Built binaries:"
-          ls -la .build/dummy-*
+          ls -la .build/dummy-* || echo "No binaries in .build/"
 
           # Check all 6 expected binaries exist
           for BINARY in dummy-linux-amd64 dummy-linux-arm64 dummy-darwin-amd64 dummy-darwin-arm64 dummy-windows-amd64.exe dummy-windows-arm64.exe; do
@@ -71,8 +76,10 @@ jobs:
 
       # Step 7: Clean installed dummy, then test check:deps
       - name: Clean and test check:deps
+        shell: bash
         run: |
-          rm -f ~/.local/bin/dummy
+          rm -f ~/.local/bin/dummy 2>/dev/null || true
+          rm -f ~/bin/dummy.exe 2>/dev/null || true
           task dummy:check:deps
 
       # Step 8: Test dummy:run
@@ -81,6 +88,7 @@ jobs:
 
       # Step 9: Verify version output
       - name: Verify output
+        shell: bash
         run: |
           OUTPUT=$(task dummy:run 2>&1 | tail -1)
           echo "Output: $OUTPUT"
