@@ -36,8 +36,19 @@ jobs:
           version: 3.x
 
       # Step 1: Build xplat first (needed by other tasks)
+      # Build directly to avoid nested taskfile path issues on Windows
       - name: Build xplat
-        run: task tools:xplat:check:deps
+        shell: bash
+        run: |
+          mkdir -p ~/.local/bin ~/bin
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            go build -o ~/bin/xplat.exe ./cmd/xplat
+            echo "$HOME/bin" >> $GITHUB_PATH
+          else
+            go build -o ~/.local/bin/xplat ./cmd/xplat
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
+          fi
+          echo "xplat built successfully"
 
       # Step 2: Test dummy:build (local dev build)
       - name: Build dummy (current platform)
