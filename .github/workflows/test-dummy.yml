@@ -156,19 +156,22 @@ jobs:
         run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:cross
 
       # Verify platform-specific binaries built
+      # CGO=1 builds ONLY the native architecture (no cross-compile)
+      # ubuntu-latest: x86_64 (amd64)
+      # macos-latest: arm64 (Apple Silicon)
+      # windows-latest: x86_64 (amd64)
       - name: Verify platform build output (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
           echo "Built binaries:"
           ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
-          for BINARY in dummy-cgo-linux-amd64 dummy-cgo-linux-arm64; do
-            if [ ! -f ".build/$BINARY" ]; then
-              echo "ERROR: Missing .build/$BINARY"
-              exit 1
-            fi
-          done
-          echo "OK: Linux binaries built (CGO=1 builds 2 platforms)"
+          # ubuntu-latest is x86_64, so only linux-amd64 is built
+          if [ ! -f ".build/dummy-cgo-linux-amd64" ]; then
+            echo "ERROR: Missing .build/dummy-cgo-linux-amd64"
+            exit 1
+          fi
+          echo "OK: linux-amd64 binary built (CGO=1 native build)"
 
       - name: Verify platform build output (macOS)
         if: runner.os == 'macOS'
@@ -176,13 +179,12 @@ jobs:
         run: |
           echo "Built binaries:"
           ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
-          for BINARY in dummy-cgo-darwin-amd64 dummy-cgo-darwin-arm64; do
-            if [ ! -f ".build/$BINARY" ]; then
-              echo "ERROR: Missing .build/$BINARY"
-              exit 1
-            fi
-          done
-          echo "OK: macOS binaries built (CGO=1 builds 2 platforms)"
+          # macos-latest is arm64 (Apple Silicon), so only darwin-arm64 is built
+          if [ ! -f ".build/dummy-cgo-darwin-arm64" ]; then
+            echo "ERROR: Missing .build/dummy-cgo-darwin-arm64"
+            exit 1
+          fi
+          echo "OK: darwin-arm64 binary built (CGO=1 native build)"
 
       - name: Verify platform build output (Windows)
         if: runner.os == 'Windows'
@@ -190,13 +192,12 @@ jobs:
         run: |
           echo "Built binaries:"
           ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
-          for BINARY in dummy-cgo-windows-amd64.exe dummy-cgo-windows-arm64.exe; do
-            if [ ! -f ".build/$BINARY" ]; then
-              echo "ERROR: Missing .build/$BINARY"
-              exit 1
-            fi
-          done
-          echo "OK: Windows binaries built (CGO=1 builds 2 platforms)"
+          # windows-latest is x86_64, so only windows-amd64 is built
+          if [ ! -f ".build/dummy-cgo-windows-amd64.exe" ]; then
+            echo "ERROR: Missing .build/dummy-cgo-windows-amd64.exe"
+            exit 1
+          fi
+          echo "OK: windows-amd64 binary built (CGO=1 native build)"
 
       - name: Run dummy-cgo
         shell: bash

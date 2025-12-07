@@ -338,16 +338,12 @@ func runReleaseBuild(cmd *cobra.Command, args []string) error {
 	} else {
 		// All platforms
 		if matrix.CGO {
-			// CGO=1: Build only platforms matching current OS
-			fmt.Printf("CGO=1: Building %s platforms for %s\n", runtime.GOOS, tool)
-			for _, p := range matrix.Platforms {
-				if p.OS == runtime.GOOS {
-					targetPlatforms = append(targetPlatforms, p)
-				}
-			}
-			if len(targetPlatforms) == 0 {
-				return fmt.Errorf("no platforms to build for %s on %s", tool, runtime.GOOS)
-			}
+			// CGO=1: Build only for current OS AND arch (need native C compiler)
+			fmt.Printf("CGO=1: Building for %s/%s only (native C compiler required)\n", runtime.GOOS, runtime.GOARCH)
+			targetPlatforms = []Platform{{
+				OS:   runtime.GOOS,
+				Arch: runtime.GOARCH,
+			}}
 		} else {
 			// CGO=0: Can cross-compile all platforms
 			targetPlatforms = matrix.Platforms

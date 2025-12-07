@@ -1,72 +1,65 @@
-# Development Workflow Tasks
-#
-# Unified local development experience combining:
-#   - Process-Compose (process orchestration with TUI)
-#   - Task-UI (web dashboard for task execution)
-#
-# Usage:
-#   task dev:up           Start Hugo + dev tools with TUI dashboard
-#   task dev:down         Stop all dev processes
-#   task dev:ui           Start Task-UI web dashboard at http://localhost:3000
-#
-# This is a convenience wrapper - you can also use the tools directly:
-#   task pc:up            Process-Compose directly
-#   task tui:up           Task-UI directly
-#
-# See: process-compose.yaml for process definitions
-
 version: '3'
 
+# Development workflow orchestration
+# Uses process-compose for local dev, task-ui for optional web dashboard
+
+vars:
+  PC_VERSION: v1.43.0
+  PC_REPO: F1bonacc1/process-compose
+  PC_BIN: 'process-compose{{exeExt}}'
+
 tasks:
-  # ===========================================================================
-  # Quick Start (dev:up/down)
-  # ===========================================================================
+  check:deps:
+    desc: Ensure process-compose is installed
+    silent: true
+    status:
+      - command -v process-compose
+    cmds:
+      - |
+        echo "process-compose not found. Install via:"
+        echo "  brew install f1bonacc1/tap/process-compose"
+        echo "  or: curl -sSL https://raw.githubusercontent.com/F1bonacc1/process-compose/main/scripts/get-pc.sh | sh"
+        exit 1
 
   up:
-    desc: Start all dev processes with TUI dashboard (Hugo + tools)
+    desc: Start all dev processes (Hugo + tools)
+    deps: [check:deps]
     cmds:
-      - task: :tools:pc:up
+      - process-compose up
 
   down:
     desc: Stop all dev processes
+    deps: [check:deps]
     cmds:
-      - task: :tools:pc:down
+      - process-compose down
 
   logs:
     desc: View combined process logs
+    deps: [check:deps]
     cmds:
-      - task: :tools:pc:logs
+      - process-compose logs
 
   status:
     desc: Show process status
+    deps: [check:deps]
     cmds:
-      - task: :tools:pc:status
+      - process-compose ps
 
-  # ===========================================================================
-  # Task-UI Web Dashboard
-  # ===========================================================================
-
+  # Task-UI (optional web dashboard)
   ui:
-    desc: Start Task-UI web dashboard at http://localhost:3000
+    desc: Start Task-UI web dashboard (Docker)
     cmds:
-      - task: :tools:tui:up
+      - |
+        docker run -d --name task-ui \
+          -p 3000:3000 \
+          -v "{{.ROOT_DIR}}:/app" \
+          -w /app \
+          titpetric/task-ui:latest \
+          task-ui --history-enable
+      - 'echo "Task UI: http://localhost:3000"'
 
-  # ===========================================================================
-  # Process Control (individual processes)
-  # ===========================================================================
-
-  restart:
-    desc: Restart a specific process (PROCESS=hugo)
-    requires:
-      vars: [PROCESS]
+  ui:stop:
+    desc: Stop Task-UI
     cmds:
-      - task: :tools:pc:restart
-        vars:
-          PROCESS: '{{.PROCESS}}'
-
-  hugo:
-    desc: Restart Hugo dev server
-    cmds:
-      - task: :tools:pc:restart
-        vars:
-          PROCESS: hugo
+      - docker stop task-ui 2>/dev/null || true
+      - docker rm task-ui 2>/dev/null || true
