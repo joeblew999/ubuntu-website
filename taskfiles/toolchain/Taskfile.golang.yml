@@ -219,12 +219,15 @@ tasks:
   build:test:
     desc: Test built Go binary
     # Caller must provide: BIN
+    # Caller can optionally provide: VERSION_CMD (default: -version)
     vars:
       TARGET_OS: '{{if env "GOOS"}}{{env "GOOS"}}{{else}}{{OS}}{{end}}'
       TARGET_ARCH: '{{if env "GOARCH"}}{{env "GOARCH"}}{{else}}{{ARCH}}{{end}}'
       EXT: '{{if eq .TARGET_OS "windows"}}.exe{{end}}'
       BIN_BASE: '{{trimSuffix ".exe" .BIN}}'
       BINARY: '{{.GO_BUILD_DIR}}/{{.BIN_BASE}}-{{.TARGET_OS}}-{{.TARGET_ARCH}}{{.EXT}}'
+      # Default to -version, but tools can override (e.g., "version" for process-compose)
+      TEST_CMD: '{{.VERSION_CMD | default "-version"}}'
     cmds:
       - |
         echo "Testing {{.BIN_BASE}}..."
@@ -233,5 +236,5 @@ tasks:
           exit 1
         fi
         chmod +x "{{.BINARY}}" 2>/dev/null || true
-        "{{.BINARY}}" -version
+        "{{.BINARY}}" {{.TEST_CMD}}
         echo "OK: {{.BIN_BASE}} binary works"
