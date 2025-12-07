@@ -1,12 +1,13 @@
 # Translation Monitor
 #
 # Runs weekly to check translation status.
-# Creates a GitHub Issue if translations are missing or stale.
+# Creates a GitHub Issue if translations are missing, stale, or orphaned.
 #
-# Checks:
+# Checks (via ci:translate task):
 # - Missing translations (English content not in target languages)
 # - Stale translations (target < 50% of source size)
 # - Orphaned files (target exists but source deleted)
+# - Menu issues (broken links, sync problems)
 
 name: "[Monitor] Translate"
 
@@ -42,28 +43,23 @@ jobs:
           task tools:xplat:check:deps
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # Build translate binary
-      - name: Build translate
-        run: task translate:check:deps
-
-      # Run translation check and capture report
+      # Run translation check via Taskfile (DRY - same as local)
       - name: Check Translation Status
         id: check
         run: |
           set +e
-          $HOME/.local/bin/translate -github-issue missing > report.md 2>&1
-          exit_code=$?
+          task ci:translate > report.md 2>&1
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
           cat report.md
-          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
           exit 0
 
-      # Create issue if missing translations (exit code 1 means issues found)
+      # Create issue if any problems found (non-zero exit)
       - name: Create Issue
-        if: steps.check.outputs.exit_code == '1'
+        if: steps.check.outputs.exit_code != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh issue create \
-            --title "Translation: Missing or stale content detected" \
+            --title "Translation: Issues detected" \
             --body-file report.md \
             --label "translation,automated"

@@ -1,31 +1,62 @@
 # Translation Tasks
 #
-# Workflow for managing multilingual content translations.
-# Uses git tags to track translation checkpoints.
+# Thin orchestration layer for the translate Go binary.
+# All logic (validation, prompts, idempotency) is handled by Go code.
 #
-# Configuration:
-#   - Hugo projects: Languages auto-loaded from config/_default/languages.toml
-#   - Standalone: Uses defaults (de, zh, ja) - edit internal/translator/translator.go
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │ COMMAND REFERENCE                                                           │
+# ├─────────────────────────────────────────────────────────────────────────────┤
+# │ CONTENT TRACKING (what changed in English?)                                 │
+# │   content:status   → What English files changed since last translation?    │
+# │   content:diff     → Show diff for specific file (FILE=path)               │
+# │   content:changed  → Show detailed changes for all modified files          │
+# │   content:next     → Which file should I translate next? (shows progress)  │
+# │   content:done     → Mark translations complete (moves checkpoint)         │
+# ├─────────────────────────────────────────────────────────────────────────────┤
+# │ CONTENT PROBLEMS (what's wrong in translations?)                            │
+# │   content:missing  → Files missing in target languages                      │
+# │   content:orphans  → Files with no English source (should delete)           │
+# │   content:stale    → Translations outdated (<50% of source size)            │
+# │   content:clean    → Delete orphaned files (prompts, or FORCE=true)         │
+# ├─────────────────────────────────────────────────────────────────────────────┤
+# │ MENU MANAGEMENT (navigation menus per language)                             │
+# │   menu:check       → Validate menu files for broken links and sync issues  │
+# │   menu:sync        → Regenerate target menu files from English             │
+# ├─────────────────────────────────────────────────────────────────────────────┤
+# │ LANGUAGE MANAGEMENT (add/remove languages)                                  │
+# │   lang:list        → Show configured languages, detect stray directories   │
+# │   lang:add         → Add language: Hugo config + content dir + menu file   │
+# │   lang:remove      → Remove language: Hugo config + content dir + menu     │
+# │   lang:init        → Create content directory for configured language      │
+# │   lang:validate    → Verify config matches Hugo languages.toml             │
+# └─────────────────────────────────────────────────────────────────────────────┘
 #
-# Workflow:
-#   1. task translate:status    - see what source files changed since last translation
-#   2. task translate:missing   - see which files don't exist in target languages
-#   3. task translate:next      - show next file to translate (with progress)
-#   4. task translate:stale     - find existing translations that may be outdated
-#   5. task translate:diff FILE=path  - show what changed in a specific source file
-#   6. Ask Claude Code: "Translate X to all languages"
-#   7. task translate:done      - mark translations complete
+# Typical Workflow:
+#   1. task translate:content:status   → see what English files changed
+#   2. task translate:content:missing  → see what's missing in each language
+#   3. task translate:content:next     → get next file to translate
+#   4. Translate content (Claude Code: "Translate X to all languages")
+#   5. task translate:content:done     → update checkpoint tag
 #
-# Validation:
-#   - task translate:orphans    - find target files with no source (delete these)
-#   - task translate:clean      - auto-delete orphaned files
-#   - task translate:validate   - show current config (Hugo or standalone)
+# CI Mode (add GITHUB_ISSUE=true → markdown output, exit 1 if issues):
+#   task translate:content:status GITHUB_ISSUE=true
+#   task translate:content:missing GITHUB_ISSUE=true
+#   task translate:content:orphans GITHUB_ISSUE=true
+#   task translate:content:stale GITHUB_ISSUE=true
+#   task translate:menu:check GITHUB_ISSUE=true
+#
+# Language Management Examples:
+#   task translate:lang:add CODE=fr NAME="Francais" DIRNAME=french
+#   task translate:lang:remove CODE=fr FORCE=true
+#   task translate:lang:init CODE=fr
 
 version: '3'
 
 vars:
   TRANSLATE_REPO: joeblew999/ubuntu-website
   TRANSLATE_BIN: 'translate{{exeExt}}'
+  TRANSLATE_CGO: '0'  # No CGO needed - can cross-compile
+  TRANSLATE_CMD: '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}}'
 
 tasks:
   # ===========================================================================
@@ -34,94 +65,163 @@ tasks:
 
   check:deps:
     desc: Ensure translate binary is available (builds from source or downloads)
+    internal: true
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}}"
     cmds:
       - '{{.XPLAT_BIN}} binary install translate {{.TRANSLATE_VERSION}} {{.TRANSLATE_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/translate"'
 
   # ===========================================================================
-  # Status Commands
+  # Content Tracking - What changed in English source?
   # ===========================================================================
 
-  status:
+  content:status:
     desc: Show what English files changed since last translation
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} status'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} content status'
+    vars:
+      GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
-  done:
-    desc: Mark current translations as complete (update checkpoint tag)
+  content:next:
+    desc: Show next file to translate (with progress indicator)
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} done'
+      - '{{.TRANSLATE_CMD}} content next'
 
-  diff:
+  content:diff:
     desc: Show git diff for a specific English file since last translation
     deps: [check:deps]
-    vars:
-      FILE: '{{.FILE | default ""}}'
+    requires:
+      vars: [FILE]
     cmds:
-      - |
-        FILE="{{.FILE}}"
-        if [ -z "$FILE" ]; then
-          echo "========================================"
-          echo "Usage: task translate:diff FILE=blog/my-post.md"
-          echo ""
-          echo "Shows what changed in an English file since last translation."
-          echo "The FILE path is relative to content/english/"
-          echo "========================================"
-          exit 1
-        fi
-        {{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} diff "$FILE"
+      - '{{.TRANSLATE_CMD}} content diff {{.FILE}}'
 
-  changed:
+  content:changed:
     desc: Show detailed changes for all English files since last translation
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} changed'
+      - '{{.TRANSLATE_CMD}} content changed'
+
+  content:done:
+    desc: Mark current translations as complete (update checkpoint tag)
+    deps: [check:deps]
+    cmds:
+      - '{{.TRANSLATE_CMD}} content done'
 
   # ===========================================================================
-  # Validation Commands
+  # Content Problems - What's wrong in translations?
   # ===========================================================================
 
-  missing:
-    desc: Show which languages are missing content files compared to English
+  content:missing:
+    desc: Show which languages are missing content files
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} missing'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} content missing'
+    vars:
+      GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
-  orphans:
-    desc: Show files in target languages that no longer exist in English (should be deleted)
+  content:orphans:
+    desc: Show files in target languages with no English source
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} orphans'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} content orphans'
+    vars:
+      GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
-  next:
-    desc: Show the next file to translate (first missing file)
+  content:stale:
+    desc: Show translations that may be outdated (target < 50% of source size)
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} next'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} content stale'
+    vars:
+      GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
-  stale:
-    desc: Show target files that are smaller than English (may need updating)
+  content:clean:
+    desc: Delete orphaned files (prompts unless FORCE=true)
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} stale'
+      - '{{.TRANSLATE_CMD}} {{if eq .FORCE "true"}}-force{{end}} content clean'
+    vars:
+      FORCE: '{{.FORCE | default "false"}}'
 
-  clean:
-    desc: Delete orphaned files in target languages that no longer exist in English
-    deps: [check:deps]
-    cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} clean'
+  # ===========================================================================
+  # Menu Management - Navigation menus per language
+  # ===========================================================================
 
-  validate:
-    desc: Show current language configuration (auto-detected from Hugo or defaults)
+  menu:check:
+    desc: Validate menu files for broken links and sync issues
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} validate'
+      - '{{.TRANSLATE_CMD}} {{if eq .GITHUB_ISSUE "true"}}-github-issue{{end}} menu check'
+    vars:
+      GITHUB_ISSUE: '{{.GITHUB_ISSUE | default "false"}}'
 
-  langs:
-    desc: Show configured languages and detect stray content directories
+  menu:sync:
+    desc: Generate translated menu files from English
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}} langs'
+      - '{{.TRANSLATE_CMD}} menu sync'
+
+  # ===========================================================================
+  # Language Management - Add/remove languages
+  # ===========================================================================
+
+  lang:list:
+    desc: Show configured languages and detect stray directories
+    deps: [check:deps]
+    cmds:
+      - '{{.TRANSLATE_CMD}} lang list'
+
+  lang:validate:
+    desc: Verify translator config matches Hugo config
+    deps: [check:deps]
+    cmds:
+      - '{{.TRANSLATE_CMD}} lang validate'
+
+  lang:add:
+    desc: Add a new target language
+    deps: [check:deps]
+    requires:
+      vars: [CODE, NAME, DIRNAME]
+    cmds:
+      - '{{.TRANSLATE_CMD}} lang add {{.CODE}} "{{.NAME}}" {{.DIRNAME}}'
+
+  lang:remove:
+    desc: Remove a target language (prompts unless FORCE=true)
+    deps: [check:deps]
+    requires:
+      vars: [CODE]
+    cmds:
+      - '{{.TRANSLATE_CMD}} {{if eq .FORCE "true"}}-force{{end}} lang remove {{.CODE}}'
+    vars:
+      FORCE: '{{.FORCE | default "false"}}'
+
+  lang:init:
+    desc: Initialize content directory for a configured language
+    deps: [check:deps]
+    requires:
+      vars: [CODE]
+    cmds:
+      - '{{.TRANSLATE_CMD}} lang init {{.CODE}}'
+
+  # ===========================================================================
+  # Release (release:* - build for distribution)
+  # ===========================================================================
+
+  release:build:
+    desc: Build translate for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.TRANSLATE_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .TRANSLATE_VERSION}}'
+          SOURCE: '{{.ROOT_DIR}}/cmd/translate'
+          CGO: '{{.TRANSLATE_CGO}}'
+
+  release:test:
+    desc: Test built translate release binary
+    cmds:
+      - task: :toolchain:golang:build:test
+        vars:
+          BIN: '{{.TRANSLATE_BIN}}'

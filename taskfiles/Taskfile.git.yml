@@ -124,7 +124,7 @@ tasks:
         {{.FILE_NPM_LOCK}}
 
         # Go
-        {{.DIR_BIN}}/
+        {{.DIR_BUILD}}/
         go.sum
         *.test
         *.out

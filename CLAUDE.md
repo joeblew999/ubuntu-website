@@ -125,8 +125,8 @@ Binary tools use `xplat binary:install` for cross-platform installation. This co
 
 | Category | Tools | Installation |
 |----------|-------|--------------|
-| With releases | xplat, analytics, sitecheck, genlogo | `xplat binary:install` |
-| Local-only | lanip, env, translate | `go run` (simple/broken) |
+| With releases | xplat, analytics, sitecheck, genlogo, translate | `xplat binary:install` |
+| Local-only | lanip, env | `go run` (simple) |
 
 Version management:
 - Versions defined in `versions.env` (single source of truth)
@@ -183,6 +183,78 @@ ci:analytics:
     - analytics -github-issue
 ```
 
+**Release Build Pattern (DRY via Toolchain):**
+
+Each tool Taskfile defines its own release tasks that call the shared `:toolchain:golang:build`:
+
+```yaml
+# In each tool's Taskfile (e.g., Taskfile.sitecheck.yml)
+vars:
+  SITECHECK_BIN: 'sitecheck{{exeExt}}'
+  SITECHECK_CGO: '0'  # No CGO - can cross-compile
+
+tasks:
+  release:build:
+    desc: Build for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.SITECHECK_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .SITECHECK_VERSION}}'
+          SOURCE: '{{.ROOT_DIR}}/cmd/sitecheck'
+          CGO: '{{.SITECHECK_CGO}}'
+
+  release:test:
+    desc: Test built release binary
+    cmds:
+      - task: :toolchain:golang:build:test
+        vars:
+          BIN: '{{.SITECHECK_BIN}}'
+```
+
+**CGO as source of truth:**
+- `*_CGO: '0'` = No CGO, can cross-compile from any platform
+- `*_CGO: '1'` = Needs CGO, must build on native platform
+
+**Shared build logic** in `taskfiles/toolchain/Taskfile.golang.yml`:
+- Handles GOOS/GOARCH from env vars
+- Applies ldflags, version injection
+- Output naming: `bin/<tool>-<os>-<arch>`
+
+**GitHub Actions pattern:**
+```yaml
+# Workflow calls tool's release task (DRY - logic in Taskfile)
+env:
+  GOOS: ${{ matrix.goos }}
+  GOARCH: ${{ matrix.goarch }}
+run: task ${{ inputs.tool }}:release:build
+```
+
+**Development Workflow Tools:**
+
+Process-Compose (`pc:*`) orchestrates local dev processes with health checks:
+
+| Command | Purpose |
+|---------|---------|
+| `task pc:up` | Start Hugo + tools with TUI dashboard |
+| `task pc:down` | Stop all processes |
+| `task pc:logs` | View combined logs |
+| `task pc:status` | Show process health |
+
+Processes defined in `process-compose.yaml`:
+- `hugo` - Dev server with HTTP health check
+- `translate` - Translation watcher (disabled by default)
+- `mailerlite` - Subscriber sync (disabled by default)
+
+Enable optional processes: `process-compose up --enable translate`
+
+Task-UI (`tui:*`) provides web dashboard for Taskfile tasks (requires Docker):
+
+| Command | Purpose |
+|---------|---------|
+| `task tui:up` | Start at http://localhost:3000 |
+| `task tui:down` | Stop Task-UI |
+
 ### Branding Assets
 
 **IMPORTANT:** Logo SVGs are generated from Go code, NOT edited directly!
@@ -237,20 +309,39 @@ Style: Hugo Plate grayscale line-art (white, `#f5f5f5`, `#ccc`, `#999`, `#666`)
 
 ### Translation Workflow
 
-**Status: ENGLISH ONLY for now.** Multi-language support exists but is deferred until content stabilizes. Non-English blog posts (German, Chinese, Japanese) contain placeholder content that should be ignored.
+Languages: de (German), zh (Chinese), ja (Japanese) - auto-loaded from `config/_default/languages.toml`.
 
-Tasks:
-- `task translate:status` - what English files changed since last translation
-- `task translate:missing` - which languages are missing content files
-- `task translate:done` - mark translations complete (updates checkpoint)
+**Architecture - Separation of Concerns:**
+- `internal/translator/hugo.go` - ALL Hugo-specific code (language parsing, menu parsing)
+- `internal/translator/checker.go` - Pure query functions (CheckStatus, CheckMissing, etc.)
+- `internal/translator/mutator.go` - Side-effect functions (DoClean, DoDone, etc.)
+- `internal/translator/presenter.go` - Terminal and Markdown output formatting
+- `taskfiles/Taskfile.translate.yml` - CLI interface (calls Go binary)
 
-Workflow:
-1. `task translate:status` → translate changed files to all languages
-2. `task translate:done` → update checkpoint
+**Taskfile Commands (all namespaced):**
 
-Languages: de (German), zh (Chinese), ja (Japanese)
+| Namespace | Commands | Purpose |
+|-----------|----------|---------|
+| `content:` | status, diff, changed, next, done | Track English source changes |
+| `content:` | missing, orphans, stale, clean | Find translation problems |
+| `menu:` | check, sync | Manage navigation menus |
+| `lang:` | list, add, remove, init, validate | Manage languages |
 
-Note: When adding/removing languages, also update Taskfile.yml
+**Common Commands:**
+- `task translate:content:status` - what English files changed since last translation?
+- `task translate:content:missing` - what's missing in target languages?
+- `task translate:content:next` - which file should I translate next?
+- `task translate:content:done` - mark translations complete
+- `task translate:menu:check` - validate menus for broken links
+- `task translate:lang:list` - show configured languages
+
+**Lifecycle:**
+1. Edit English file → `translate:content:status` shows it
+2. Run `translate:content:next` → get next file to translate
+3. Translate to all languages, commit translations
+4. Run `translate:content:done` → moves checkpoint, status is clean
+
+**CI:** `monitor-translate.yml` runs weekly, creates GitHub Issue if missing translations.
 
 ### Path Convention
 **ALWAYS use `joeblew999` (with three 9s), NEVER `joeblew99` (with two 9s)**

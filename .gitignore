@@ -10,7 +10,7 @@ bun.lockb
 package-lock.json
 
 # Go
-bin/
+.build/
 go.sum
 *.test
 *.out

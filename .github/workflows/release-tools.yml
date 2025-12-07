@@ -1,0 +1,99 @@
+# Binary Tools Release Trigger
+#
+# Minimal workflow that triggers tool releases.
+# Actual build logic is in release-tool-build.yml (reusable workflow).
+#
+# Supported tools: analytics, genlogo, mailerlite, process-compose, sitecheck, task-ui, translate
+# (xplat has its own workflow due to extensive platform tests)
+#
+# Usage:
+#   git tag analytics-v0.1.0 && git push origin analytics-v0.1.0
+#   git tag genlogo-v0.1.0 && git push origin genlogo-v0.1.0
+#   git tag mailerlite-v0.1.0 && git push origin mailerlite-v0.1.0
+#   git tag process-compose-v0.1.0 && git push origin process-compose-v0.1.0
+#   git tag sitecheck-v0.1.0 && git push origin sitecheck-v0.1.0
+#   git tag task-ui-v0.1.0 && git push origin task-ui-v0.1.0
+#   git tag translate-v0.2.0 && git push origin translate-v0.2.0
+
+name: "[Release] Tools"
+
+on:
+  push:
+    tags:
+      - 'analytics-v*'
+      - 'genlogo-v*'
+      - 'mailerlite-v*'
+      - 'process-compose-v*'
+      - 'sitecheck-v*'
+      - 'task-ui-v*'
+      - 'translate-v*'
+  workflow_dispatch:
+    inputs:
+      tool:
+        description: 'Tool to build'
+        required: true
+        type: choice
+        options:
+          - analytics
+          - genlogo
+          - mailerlite
+          - pc
+          - sitecheck
+          - translate
+          - tui
+      version:
+        description: 'Version (e.g., v0.1.0)'
+        required: true
+        default: 'dev'
+
+jobs:
+  # Parse tag to determine tool and version
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      tool: ${{ steps.parse.outputs.tool }}
+      version: ${{ steps.parse.outputs.version }}
+      is_release: ${{ steps.parse.outputs.is_release }}
+    steps:
+      - name: Parse tag or input
+        id: parse
+        run: |
+          # Map tag names to Taskfile namespaces
+          # Most tools use their name directly, but some have short aliases
+          map_tool() {
+            case "$1" in
+              process-compose) echo "pc" ;;
+              task-ui) echo "tui" ;;
+              *) echo "$1" ;;
+            esac
+          }
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tool=${{ github.event.inputs.tool }}" >> $GITHUB_OUTPUT
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          else
+            # Extract tool and version from tag (e.g., sitecheck-v0.1.0)
+            TAG="${GITHUB_REF_NAME}"
+            RAW_TOOL="${TAG%-v*}"
+            VERSION="${TAG#*-}"
+            TOOL=$(map_tool "$RAW_TOOL")
+            echo "tool=${TOOL}" >> $GITHUB_OUTPUT
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Show build info
+        run: |
+          echo "Tool: ${{ steps.parse.outputs.tool }}"
+          echo "Version: ${{ steps.parse.outputs.version }}"
+          echo "Is Release: ${{ steps.parse.outputs.is_release }}"
+
+  # Call reusable workflow with parsed inputs
+  build-and-release:
+    needs: setup
+    uses: ./.github/workflows/release-tool-build.yml
+    with:
+      tool: ${{ needs.setup.outputs.tool }}
+      version: ${{ needs.setup.outputs.version }}
+      is_release: ${{ needs.setup.outputs.is_release == 'true' }}

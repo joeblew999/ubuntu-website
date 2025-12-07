@@ -42,6 +42,9 @@ const (
 	defaultSiteTag    = "4c28a6bfb5514996914a603c999d5c79"
 )
 
+// version is set via ldflags at build time
+var version = "dev"
+
 // getConfig returns Cloudflare account and site tags from environment variables,
 // falling back to defaults for backward compatibility.
 func getConfig() (accountTag, siteTag string) {
@@ -131,7 +134,13 @@ func main() {
 	days := flag.Int("days", 7, "Number of days to analyze")
 	verbose := flag.Bool("v", false, "Verbose output")
 	githubIssue := flag.Bool("github-issue", false, "Output markdown for GitHub Issue (exits 1 if changes detected)")
+	ver := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
+
+	if *ver {
+		fmt.Printf("analytics %s\n", version)
+		os.Exit(0)
+	}
 
 	token := os.Getenv("CLOUDFLARE_API_TOKEN")
 	if token == "" {

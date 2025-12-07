@@ -79,14 +79,24 @@ const (
 	fontSans = "/System/Library/Fonts/Helvetica.ttc" // Sans-serif for company name - clean, professional
 )
 
+// version is set via ldflags at build time
+var version = "dev"
+
 func main() {
 	var (
 		outputDir string
 		asset     string
+		ver       bool
 	)
 	flag.StringVar(&outputDir, "dir", ".", "Output directory (project root)")
 	flag.StringVar(&asset, "asset", "all", "Asset to generate: avatar, banner, favicon, logo-svg, email, og, or all")
+	flag.BoolVar(&ver, "version", false, "Print version and exit")
 	flag.Parse()
+
+	if ver {
+		fmt.Printf("genlogo %s\n", version)
+		os.Exit(0)
+	}
 
 	switch asset {
 	case "avatar":

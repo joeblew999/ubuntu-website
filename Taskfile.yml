@@ -22,11 +22,15 @@ version: '3'
 #   analytics:* - Cloudflare Web Analytics (cmd/analytics)
 #   sitecheck:* - Site reachability checks (cmd/sitecheck)
 #   genlogo:*   - Logo/branding generation (cmd/genlogo)
+#   mailerlite:* - MailerLite subscriber management (cmd/mailerlite)
 #   env:*       - Environment management
 #   url:*       - URL shortcuts + SEO dashboards
 #   tools:*     - Cross-platform tools (xplat, gh, task)
 #   toolchain:* - Compilers/runtimes (golang, rust)
+#   release:*   - Release builds for binary tools
 #   ci:*        - CI interface tasks
+#   pc:*        - Process-Compose (dev process orchestration)
+#   tui:*       - Task-UI (web dashboard for tasks)
 #
 # =============================================================================
 
@@ -42,6 +46,7 @@ includes:
   analytics: ./taskfiles/Taskfile.analytics.yml
   sitecheck: ./taskfiles/Taskfile.sitecheck.yml
   genlogo: ./taskfiles/Taskfile.genlogo.yml
+  mailerlite: ./taskfiles/Taskfile.mailerlite.yml
   env: ./taskfiles/Taskfile.env.yml
   url: ./taskfiles/Taskfile.url.yml
 
@@ -53,6 +58,13 @@ includes:
   # Tools & Toolchains
   tools: ./taskfiles/Taskfile.tools.yml
   toolchain: ./taskfiles/Taskfile.toolchain.yml
+
+  # Release builds
+  release: ./taskfiles/Taskfile.release.yml
+
+  # Development workflow
+  pc: ./taskfiles/tools/Taskfile.process-compose.yml
+  tui: ./taskfiles/tools/Taskfile.task-ui.yml
 
 # =============================================================================
 # Environment
@@ -94,7 +106,7 @@ vars:
   DIR_PUBLIC: public
   DIR_RESOURCES: resources
   DIR_NODE_MODULES: node_modules
-  DIR_BIN: bin
+  DIR_BUILD: .build
   DIR_PLAYWRIGHT: .playwright-mcp
   DIR_VIA: .via
   DIR_LOGS: logs
@@ -296,8 +308,20 @@ tasks:
   ci:translate:
     desc: "[Monitor] Translate - Check translation status for CI"
     deps: [translate:check:deps]
+    vars:
+      TRANSLATE: '{{.HOME}}/.local/bin/translate{{exeExt}}'
     cmds:
-      - '{{.HOME}}/.local/bin/translate{{exeExt}} -github-issue missing'
+      # Run all checks, output markdown report
+      # Exits non-zero if ANY check finds issues
+      - |
+        echo "# Translation Status Report"
+        echo ""
+        FOUND=0
+        {{.TRANSLATE}} -github-issue content missing || FOUND=1
+        {{.TRANSLATE}} -github-issue content stale || FOUND=1
+        {{.TRANSLATE}} -github-issue content orphans || FOUND=1
+        {{.TRANSLATE}} -github-issue menu check || FOUND=1
+        [ $FOUND -eq 0 ]
 
   # ===========================================================================
   # Code Quality

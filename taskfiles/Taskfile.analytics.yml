@@ -17,6 +17,7 @@ vars:
   # BIN_INSTALL_DIR comes from root Taskfile.yml
   ANALYTICS_REPO: joeblew999/ubuntu-website
   ANALYTICS_BIN: 'analytics{{exeExt}}'
+  ANALYTICS_CGO: '0'  # No CGO needed - can cross-compile
 
 tasks:
   # ===========================================================================
@@ -53,3 +54,24 @@ tasks:
     deps: [check:deps]
     cmds:
       - '{{.BIN_INSTALL_DIR}}/analytics{{exeExt}} -webhook "$ANALYTICS_WEBHOOK_URL"'
+
+  # ===========================================================================
+  # Release (release:* - build for distribution)
+  # ===========================================================================
+
+  release:build:
+    desc: Build analytics for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.ANALYTICS_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .ANALYTICS_VERSION}}'
+          SOURCE: '{{.ROOT_DIR}}/cmd/analytics'
+          CGO: '{{.ANALYTICS_CGO}}'
+
+  release:test:
+    desc: Test built analytics release binary
+    cmds:
+      - task: :toolchain:golang:build:test
+        vars:
+          BIN: '{{.ANALYTICS_BIN}}'

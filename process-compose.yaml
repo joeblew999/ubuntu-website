@@ -1,0 +1,55 @@
+# Process-Compose Configuration
+#
+# Orchestrates local development processes with health checks and auto-restart.
+# https://github.com/F1bonacc1/process-compose
+#
+# Usage:
+#   task dev:up           Start all enabled processes
+#   task dev:down         Stop all processes
+#   task dev:logs         View combined logs
+#
+# Or directly:
+#   process-compose up                      Start with TUI dashboard
+#   process-compose up -t=false             Start without TUI (for scripts)
+#   process-compose up --enable translate   Enable disabled process
+
+version: "0.5"
+
+processes:
+  # Hugo development server - core process
+  hugo:
+    command: hugo server --buildDrafts --buildFuture --bind 0.0.0.0
+    working_dir: .
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: 1313
+        path: "/"
+      initial_delay_seconds: 3
+      period_seconds: 5
+      failure_threshold: 3
+    availability:
+      restart: on_failure
+      max_restarts: 3
+
+  # Translation status watcher (disabled by default)
+  # Enable with: process-compose up --enable translate
+  translate:
+    command: task translate:status
+    depends_on:
+      hugo:
+        condition: process_healthy
+    disabled: true
+    availability:
+      restart: "no"
+
+  # MailerLite stats check (disabled by default)
+  # Enable with: process-compose up --enable mailerlite
+  mailerlite:
+    command: task mailerlite:stats
+    depends_on:
+      hugo:
+        condition: process_healthy
+    disabled: true
+    availability:
+      restart: "no"
