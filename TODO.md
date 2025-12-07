@@ -1,6 +1,12 @@
 # TODO
 
+github.com/go-task/task/v3/cmd/task
 
+Task has a PackageAPI, as they call it.
+
+this will means many things for the code and xpalt ? 
+
+---
 
 ## Completed
 
@@ -71,9 +77,14 @@ Users and VSCode devs call the same Go code, both modifying git repos.
 
 Could move reusable taskfiles to a dedicated repo so all repos can pull versioned taskfiles at runtime. Task supports this natively.
 
-### narun
+### other weird ideas
 
 https://github.com/akhenakh/narun - could help generalize cmd/* tools
+
+https://github.com/akhenakh/nats2sse for feed off 
+
+https://github.com/infogulch/xtemplate/tree/next
+
 
 ### gh CLI - Future Enhancements
 

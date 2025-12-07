@@ -19,8 +19,8 @@ hasCJKLanguage = false #  If hasCJKLanguage true, auto-detect Chinese/Japanese/K
 defaultContentLanguage = 'en'
 # defaultContentLanguageInSubdir need to be true if you want to use the language code as a subdirectory and language specific 404 page
 defaultContentLanguageInSubdir = false
-# Enable missing translation placeholders during development
-enableMissingTranslationPlaceholders = true
+# Disable placeholder pages - language switcher will fall back to home instead of empty pages
+enableMissingTranslationPlaceholders = false
 
 ########################### Services #############################
 [services]

@@ -19,6 +19,7 @@ vars:
   # BIN_INSTALL_DIR comes from root Taskfile.yml
   SITECHECK_REPO: joeblew999/ubuntu-website
   SITECHECK_BIN: 'sitecheck{{exeExt}}'
+  SITECHECK_CGO: '0'  # No CGO needed - can cross-compile
 
 tasks:
   # ===========================================================================
@@ -83,3 +84,24 @@ tasks:
       - task: tcp
       - task: redirect
       - task: http
+
+  # ===========================================================================
+  # Release (release:* - build for distribution)
+  # ===========================================================================
+
+  release:build:
+    desc: Build sitecheck for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.SITECHECK_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .SITECHECK_VERSION}}'
+          SOURCE: '{{.ROOT_DIR}}/cmd/sitecheck'
+          CGO: '{{.SITECHECK_CGO}}'
+
+  release:test:
+    desc: Test built sitecheck release binary
+    cmds:
+      - task: :toolchain:golang:build:test
+        vars:
+          BIN: '{{.SITECHECK_BIN}}'

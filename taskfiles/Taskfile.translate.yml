@@ -55,6 +55,7 @@ version: '3'
 vars:
   TRANSLATE_REPO: joeblew999/ubuntu-website
   TRANSLATE_BIN: 'translate{{exeExt}}'
+  TRANSLATE_CGO: '0'  # No CGO needed - can cross-compile
   TRANSLATE_CMD: '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}}'
 
 tasks:
@@ -203,3 +204,24 @@ tasks:
       vars: [CODE]
     cmds:
       - '{{.TRANSLATE_CMD}} lang init {{.CODE}}'
+
+  # ===========================================================================
+  # Release (release:* - build for distribution)
+  # ===========================================================================
+
+  release:build:
+    desc: Build translate for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.TRANSLATE_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .TRANSLATE_VERSION}}'
+          SOURCE: '{{.ROOT_DIR}}/cmd/translate'
+          CGO: '{{.TRANSLATE_CGO}}'
+
+  release:test:
+    desc: Test built translate release binary
+    cmds:
+      - task: :toolchain:golang:build:test
+        vars:
+          BIN: '{{.TRANSLATE_BIN}}'

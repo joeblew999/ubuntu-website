@@ -27,3 +27,4 @@ languageCode = "ja"
 contentDir = "content/japanese"
 weight = 4
 hasCJKLanguage = true
+

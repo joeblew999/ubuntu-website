@@ -183,6 +183,78 @@ ci:analytics:
     - analytics -github-issue
 ```
 
+**Release Build Pattern (DRY via Toolchain):**
+
+Each tool Taskfile defines its own release tasks that call the shared `:toolchain:golang:build`:
+
+```yaml
+# In each tool's Taskfile (e.g., Taskfile.sitecheck.yml)
+vars:
+  SITECHECK_BIN: 'sitecheck{{exeExt}}'
+  SITECHECK_CGO: '0'  # No CGO - can cross-compile
+
+tasks:
+  release:build:
+    desc: Build for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.SITECHECK_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .SITECHECK_VERSION}}'
+          SOURCE: '{{.ROOT_DIR}}/cmd/sitecheck'
+          CGO: '{{.SITECHECK_CGO}}'
+
+  release:test:
+    desc: Test built release binary
+    cmds:
+      - task: :toolchain:golang:build:test
+        vars:
+          BIN: '{{.SITECHECK_BIN}}'
+```
+
+**CGO as source of truth:**
+- `*_CGO: '0'` = No CGO, can cross-compile from any platform
+- `*_CGO: '1'` = Needs CGO, must build on native platform
+
+**Shared build logic** in `taskfiles/toolchain/Taskfile.golang.yml`:
+- Handles GOOS/GOARCH from env vars
+- Applies ldflags, version injection
+- Output naming: `bin/<tool>-<os>-<arch>`
+
+**GitHub Actions pattern:**
+```yaml
+# Workflow calls tool's release task (DRY - logic in Taskfile)
+env:
+  GOOS: ${{ matrix.goos }}
+  GOARCH: ${{ matrix.goarch }}
+run: task ${{ inputs.tool }}:release:build
+```
+
+**Development Workflow Tools:**
+
+Process-Compose (`pc:*`) orchestrates local dev processes with health checks:
+
+| Command | Purpose |
+|---------|---------|
+| `task pc:up` | Start Hugo + tools with TUI dashboard |
+| `task pc:down` | Stop all processes |
+| `task pc:logs` | View combined logs |
+| `task pc:status` | Show process health |
+
+Processes defined in `process-compose.yaml`:
+- `hugo` - Dev server with HTTP health check
+- `translate` - Translation watcher (disabled by default)
+- `mailerlite` - Subscriber sync (disabled by default)
+
+Enable optional processes: `process-compose up --enable translate`
+
+Task-UI (`tui:*`) provides web dashboard for Taskfile tasks (requires Docker):
+
+| Command | Purpose |
+|---------|---------|
+| `task tui:up` | Start at http://localhost:3000 |
+| `task tui:down` | Stop Task-UI |
+
 ### Branding Assets
 
 **IMPORTANT:** Logo SVGs are generated from Go code, NOT edited directly!

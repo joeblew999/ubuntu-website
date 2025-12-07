@@ -8,13 +8,38 @@
 #   - GO_VERSION_STRICT controls flexible vs strict mode
 #   - Use `task toolchain:golang:bootstrap` to install exact version
 #
+# Build Tasks:
+#   - build:       Build binary for current/specified platform
+#   - build:all:   Build for all release platforms
+#   - build:test:  Test built binary
+#
 # Other modules that need Go should:
 #   1. Add `# REQUIRES: golang` to their header
-#   2. Call `task: :golang:check:deps` before using Go
+#   2. Call `task: :toolchain:golang:check:deps` before using Go
+#
+# Tool modules should call build tasks like:
+#   - task: :toolchain:golang:build
+#     vars: {BIN: '{{.MY_BIN}}', VERSION: '{{.MY_VERSION}}', SOURCE: '{{.ROOT_DIR}}/cmd/mytool'}
 
 version: '3'
 
 # REQUIRES: golang
+
+vars:
+  # Build output directory (can override via RELEASE_DIR env)
+  GO_BUILD_DIR: '{{if env "RELEASE_DIR"}}{{env "RELEASE_DIR"}}{{else}}{{.ROOT_DIR}}/bin{{end}}'
+
+  # Release platforms (matches GitHub Actions matrix)
+  GO_BUILD_PLATFORMS: 'linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 windows-amd64'
+
+  # Build flags for release binaries
+  GO_BUILD_LDFLAGS: '-s -w'
+
+  # CGO setting - defaults to 0 for static binaries
+  GO_BUILD_CGO: '{{if env "RELEASE_CGO"}}{{env "RELEASE_CGO"}}{{else}}0{{end}}'
+
+  # Go workspace mode - defaults to off for reproducible builds
+  GO_BUILD_GOWORK: '{{if env "RELEASE_GOWORK"}}{{env "RELEASE_GOWORK"}}{{else}}off{{end}}'
 
 tasks:
   # ===========================================================================
@@ -163,3 +188,49 @@ tasks:
         echo ""
         echo "  Option 3: Add ~/sdk/go${EXPECTED}/bin to PATH"
         echo "========================================"
+
+  # ===========================================================================
+  # Build (build:* - compile Go binaries)
+  # ===========================================================================
+
+  build:
+    desc: Build Go binary for current or specified platform
+    # Caller must provide: BIN, VERSION, SOURCE
+    # Caller can optionally provide: CGO (defaults to env RELEASE_CGO or 0)
+    vars:
+      TARGET_OS: '{{if env "GOOS"}}{{env "GOOS"}}{{else}}{{OS}}{{end}}'
+      TARGET_ARCH: '{{if env "GOARCH"}}{{env "GOARCH"}}{{else}}{{ARCH}}{{end}}'
+      EXT: '{{if eq .TARGET_OS "windows"}}.exe{{end}}'
+      BIN_BASE: '{{trimSuffix ".exe" .BIN}}'
+      OUTPUT: '{{.GO_BUILD_DIR}}/{{.BIN_BASE}}-{{.TARGET_OS}}-{{.TARGET_ARCH}}{{.EXT}}'
+      # Use caller's CGO if provided, else env var, else default 0
+      BUILD_CGO: '{{.CGO | default .GO_BUILD_CGO}}'
+    cmds:
+      - mkdir -p "{{.GO_BUILD_DIR}}"
+      - |
+        echo "Building {{.BIN_BASE}} {{.VERSION}} for {{.TARGET_OS}}/{{.TARGET_ARCH}} (CGO={{.BUILD_CGO}})..."
+        CGO_ENABLED={{.BUILD_CGO}} GOWORK={{.GO_BUILD_GOWORK}} \
+        GOOS={{.TARGET_OS}} GOARCH={{.TARGET_ARCH}} \
+        go build -ldflags="{{.GO_BUILD_LDFLAGS}} -X main.version={{.VERSION}}" \
+        -o "{{.OUTPUT}}" "{{.SOURCE}}"
+        echo "Output: {{.OUTPUT}}"
+
+  build:test:
+    desc: Test built Go binary
+    # Caller must provide: BIN
+    vars:
+      TARGET_OS: '{{if env "GOOS"}}{{env "GOOS"}}{{else}}{{OS}}{{end}}'
+      TARGET_ARCH: '{{if env "GOARCH"}}{{env "GOARCH"}}{{else}}{{ARCH}}{{end}}'
+      EXT: '{{if eq .TARGET_OS "windows"}}.exe{{end}}'
+      BIN_BASE: '{{trimSuffix ".exe" .BIN}}'
+      BINARY: '{{.GO_BUILD_DIR}}/{{.BIN_BASE}}-{{.TARGET_OS}}-{{.TARGET_ARCH}}{{.EXT}}'
+    cmds:
+      - |
+        echo "Testing {{.BIN_BASE}}..."
+        if [ ! -f "{{.BINARY}}" ]; then
+          echo "ERROR: Binary not found: {{.BINARY}}"
+          exit 1
+        fi
+        chmod +x "{{.BINARY}}" 2>/dev/null || true
+        "{{.BINARY}}" -version
+        echo "OK: {{.BIN_BASE}} binary works"
