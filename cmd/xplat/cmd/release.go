@@ -338,23 +338,23 @@ func runReleaseBuild(cmd *cobra.Command, args []string) error {
 	} else {
 		// All platforms
 		if matrix.CGO {
-			// CGO=1: Build for current OS, both arches (macOS/Windows toolchains support this)
-			// Exception: Linux in CI typically lacks arm64 cross-compiler
-			if runtime.GOOS == "linux" && inCI {
-				// Linux CI: only build native arch (no arm64 cross-compiler by default)
-				fmt.Printf("CGO=1: Building for %s/%s only (Linux CI lacks arm64 cross-compiler)\n", runtime.GOOS, runtime.GOARCH)
-				targetPlatforms = []Platform{{
-					OS:   runtime.GOOS,
-					Arch: runtime.GOARCH,
-				}}
-			} else {
-				// macOS/Windows: toolchain supports both arches
-				fmt.Printf("CGO=1: Building %s platforms for %s\n", runtime.GOOS, tool)
+			// CGO=1: Only macOS has a universal toolchain for both arches
+			// Linux/Windows CI runners lack arm64 cross-compilers
+			if runtime.GOOS == "darwin" {
+				// macOS: Apple toolchain supports both amd64 and arm64
+				fmt.Printf("CGO=1: Building %s platforms for %s (Apple universal toolchain)\n", runtime.GOOS, tool)
 				for _, p := range matrix.Platforms {
 					if p.OS == runtime.GOOS {
 						targetPlatforms = append(targetPlatforms, p)
 					}
 				}
+			} else {
+				// Linux/Windows: only native arch (no cross-compiler in CI)
+				fmt.Printf("CGO=1: Building for %s/%s only (no arm64 cross-compiler)\n", runtime.GOOS, runtime.GOARCH)
+				targetPlatforms = []Platform{{
+					OS:   runtime.GOOS,
+					Arch: runtime.GOARCH,
+				}}
 			}
 		} else {
 			// CGO=0: Can cross-compile all platforms
