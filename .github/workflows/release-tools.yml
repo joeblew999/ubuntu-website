@@ -1,19 +1,17 @@
 # Binary Tools Release Workflow
 #
 # Builds, tests, and releases Go binary tools.
-# All build logic lives in each tool's Taskfile (via :toolchain:golang:build).
+# Uses xplat to orchestrate cross-platform builds based on tool's CGO setting.
 #
-# Supported tools: analytics, genlogo, mailerlite, process-compose, sitecheck, task-ui, translate
-# (xplat has its own workflow due to extensive platform tests)
+# For CGO=0 tools: Cross-compiles all platforms from single Linux runner (fast!)
+# For CGO=1 tools: Builds on native runners for each platform
+#
+# Supported tools: analytics, genlogo, mailerlite, pc, sitecheck, translate, tui
+# (xplat has its own workflow due to bootstrapping requirements)
 #
 # Usage:
 #   git tag analytics-v0.1.0 && git push origin analytics-v0.1.0
-#   git tag genlogo-v0.1.0 && git push origin genlogo-v0.1.0
-#   git tag mailerlite-v0.1.0 && git push origin mailerlite-v0.1.0
 #   git tag process-compose-v0.1.0 && git push origin process-compose-v0.1.0
-#   git tag sitecheck-v0.1.0 && git push origin sitecheck-v0.1.0
-#   git tag task-ui-v0.1.0 && git push origin task-ui-v0.1.0
-#   git tag translate-v0.2.0 && git push origin translate-v0.2.0
 
 name: "[Release] Tools"
 
@@ -59,7 +57,6 @@ jobs:
         id: parse
         run: |
           # Map tag names to Taskfile namespaces
-          # Most tools use their name directly, but some have short aliases
           map_tool() {
             case "$1" in
               process-compose) echo "pc" ;;
@@ -73,7 +70,6 @@ jobs:
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
             echo "is_release=false" >> $GITHUB_OUTPUT
           else
-            # Extract tool and version from tag (e.g., sitecheck-v0.1.0)
             TAG="${GITHUB_REF_NAME}"
             RAW_TOOL="${TAG%-v*}"
             VERSION="${TAG#*-}"
@@ -89,27 +85,10 @@ jobs:
           echo "Version: ${{ steps.parse.outputs.version }}"
           echo "Is Release: ${{ steps.parse.outputs.is_release }}"
 
+  # Build all platforms from single Linux runner (CGO=0 enables cross-compile)
   build:
     needs: setup
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            goos: linux
-            goarch: amd64
-          - os: ubuntu-latest
-            goos: linux
-            goarch: arm64
-          - os: macos-latest
-            goos: darwin
-            goarch: amd64
-          - os: macos-latest
-            goos: darwin
-            goarch: arm64
-          - os: windows-latest
-            goos: windows
-            goarch: amd64
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     env:
       TOOL: ${{ needs.setup.outputs.tool }}
       RELEASE_VERSION: ${{ needs.setup.outputs.version }}
@@ -127,19 +106,25 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Single command - all logic in Taskfile
-      - name: Build binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: task ${{ needs.setup.outputs.tool }}:release:build
+      # Build xplat first (needed for orchestration)
+      - name: Build xplat
+        run: go build -o /tmp/xplat ./cmd/xplat
 
-      - name: Upload artifact
+      # Use xplat to build all platforms
+      - name: Build all platforms
+        run: /tmp/xplat release build ${{ needs.setup.outputs.tool }}
+
+      - name: List built artifacts
+        run: ls -la .build/
+
+      # Upload all artifacts in one step
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.setup.outputs.tool }}-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: .build/${{ needs.setup.outputs.tool }}-${{ matrix.goos }}-${{ matrix.goarch }}*
+          name: ${{ needs.setup.outputs.tool }}-binaries
+          path: .build/${{ needs.setup.outputs.tool }}-*
 
+  # Test on native platforms to verify binaries work
   test:
     needs: [setup, build]
     strategy:
@@ -166,13 +151,16 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download artifact
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup.outputs.tool }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: ${{ needs.setup.outputs.tool }}-binaries
           path: .build
 
-      # Single command - all logic in Taskfile
+      - name: List downloaded files
+        run: ls -la .build/
+
+      # Test the binary for this platform
       - name: Test binary
         env:
           GOOS: ${{ matrix.goos }}
@@ -191,17 +179,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          name: ${{ needs.setup.outputs.tool }}-binaries
+          path: release
 
-      - name: Prepare release files
-        run: |
-          mkdir -p release
-          find artifacts -type f -name "${TOOL}-*" -exec mv {} release/ \;
-          echo "=== Release files ==="
-          ls -la release/
+      - name: List release files
+        run: ls -la release/
 
       - name: Generate release notes
         run: |

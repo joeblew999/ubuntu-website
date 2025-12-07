@@ -46,6 +46,9 @@ Designed to fill gaps in Task's built-in shell interpreter.`,
 	// P3 (binary management)
 	rootCmd.AddCommand(cmd.BinaryCmd)
 
+	// P4 (release orchestration)
+	rootCmd.AddCommand(cmd.ReleaseCmd)
+
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
