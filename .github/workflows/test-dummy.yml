@@ -1,11 +1,16 @@
-# Test workflow for dummy tools round-trip
+# Test workflow for dummy tools FULL round-trip
 # Tests BOTH CGO=0 and CGO=1 to validate xplat smart build:
 #
 # CGO=0 (dummy):     Linux builds ALL 6 platforms, macOS/Windows skip
-# CGO=1 (dummy-cgo): Each platform builds its own 2 binaries
+# CGO=1 (dummy-cgo): macOS builds 2, Linux/Windows build 1 each (4 total)
+#
+# Full round-trip tested:
+# 1. Build binaries (per platform matrix)
+# 2. Upload artifacts
+# 3. Create GitHub release (aggregated)
+# 4. Download from release and verify
 #
 # Bootstrap: xplat embeds Task, so we only need to build xplat from source.
-# No separate Task installation required!
 #
 name: "Test: Dummy Round-Trip"
 
@@ -20,6 +25,11 @@ on:
       - 'taskfiles/toolchain/Taskfile.golang.yml'
       - 'taskfiles/tools/Taskfile.xplat.yml'
       - '.github/workflows/test-dummy.yml'
+
+env:
+  # Test release tag - includes run ID to avoid conflicts
+  DUMMY_TEST_VERSION: v0.0.0-test-${{ github.run_id }}
+  DUMMY_CGO_TEST_VERSION: v0.0.0-cgo-test-${{ github.run_id }}
 
 jobs:
   # ===========================================================================
@@ -98,6 +108,94 @@ jobs:
       - name: Run dummy
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml run
+
+      # Upload artifacts (Linux only - it built all 6)
+      - name: Upload CGO=0 artifacts
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dummy-binaries
+          path: .build/dummy-*
+          retention-days: 1
+
+  # ===========================================================================
+  # CGO=0 Release: Create test release from Linux artifacts
+  # ===========================================================================
+  release-cgo0:
+    name: "CGO=0 Release"
+    needs: test-cgo0
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download CGO=0 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dummy-binaries
+          path: .build/
+
+      - name: List artifacts
+        run: ls -la .build/
+
+      - name: Create test release
+        run: |
+          # Delete if exists from previous run
+          gh release delete "dummy-${{ env.DUMMY_TEST_VERSION }}" --yes 2>/dev/null || true
+
+          # Create release
+          gh release create "dummy-${{ env.DUMMY_TEST_VERSION }}" \
+            --title "Dummy Test Release ${{ env.DUMMY_TEST_VERSION }}" \
+            --notes "Test release for CI validation. Will be deleted." \
+            --prerelease \
+            .build/dummy-*
+
+  # ===========================================================================
+  # CGO=0 Verify: Download from release and verify on each platform
+  # ===========================================================================
+  verify-cgo0:
+    name: "CGO=0 Verify (${{ matrix.os }})"
+    needs: release-cgo0
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            binary: dummy-linux-amd64
+          - os: macos-latest
+            binary: dummy-darwin-arm64
+          - os: windows-latest
+            binary: dummy-windows-amd64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Download and verify binary
+        shell: bash
+        run: |
+          URL="https://github.com/${{ github.repository }}/releases/download/dummy-${{ env.DUMMY_TEST_VERSION }}/${{ matrix.binary }}"
+          echo "Downloading: $URL"
+          curl -sL "$URL" -o dummy
+          chmod +x dummy 2>/dev/null || true
+          ./dummy
+          echo "OK: Downloaded binary works!"
+
+  # ===========================================================================
+  # CGO=0 Cleanup: Delete test release
+  # ===========================================================================
+  cleanup-cgo0:
+    name: "CGO=0 Cleanup"
+    needs: verify-cgo0
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete test release
+        run: gh release delete "dummy-${{ env.DUMMY_TEST_VERSION }}" --yes --cleanup-tag 2>/dev/null || true
 
   # ===========================================================================
   # Test CGO=1 tool (dummy-cgo) - Each platform builds its own binaries
@@ -201,3 +299,107 @@ jobs:
       - name: Run dummy-cgo
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml run
+
+      # Upload platform-specific artifacts
+      - name: Upload CGO=1 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dummy-cgo-${{ runner.os }}
+          path: .build/dummy-cgo-*
+          retention-days: 1
+
+  # ===========================================================================
+  # CGO=1 Release: Aggregate artifacts from all platforms, create release
+  # ===========================================================================
+  release-cgo1:
+    name: "CGO=1 Release"
+    needs: test-cgo1
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Download artifacts from all platforms
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dummy-cgo-Linux
+          path: .build/
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dummy-cgo-macOS
+          path: .build/
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dummy-cgo-Windows
+          path: .build/
+
+      - name: List all artifacts
+        run: |
+          echo "Aggregated binaries from all platforms:"
+          ls -la .build/
+          echo ""
+          echo "Expected: linux-amd64, darwin-amd64, darwin-arm64, windows-amd64"
+
+      - name: Create test release
+        run: |
+          # Delete if exists from previous run
+          gh release delete "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" --yes 2>/dev/null || true
+
+          # Create release with all platform binaries
+          gh release create "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" \
+            --title "Dummy-CGO Test Release ${{ env.DUMMY_CGO_TEST_VERSION }}" \
+            --notes "CGO=1 test release for CI validation. Aggregated from 3 platforms. Will be deleted." \
+            --prerelease \
+            .build/dummy-cgo-*
+
+  # ===========================================================================
+  # CGO=1 Verify: Download from release and verify on each platform
+  # ===========================================================================
+  verify-cgo1:
+    name: "CGO=1 Verify (${{ matrix.os }})"
+    needs: release-cgo1
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            binary: dummy-cgo-linux-amd64
+          - os: macos-latest
+            binary: dummy-cgo-darwin-arm64
+          - os: windows-latest
+            binary: dummy-cgo-windows-amd64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Download and verify binary
+        shell: bash
+        run: |
+          URL="https://github.com/${{ github.repository }}/releases/download/dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}/${{ matrix.binary }}"
+          echo "Downloading: $URL"
+          curl -sL "$URL" -o dummy-cgo
+          chmod +x dummy-cgo 2>/dev/null || true
+          ./dummy-cgo
+          echo "OK: Downloaded CGO=1 binary works!"
+
+  # ===========================================================================
+  # CGO=1 Cleanup: Delete test release
+  # ===========================================================================
+  cleanup-cgo1:
+    name: "CGO=1 Cleanup"
+    needs: verify-cgo1
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete test release
+        run: gh release delete "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" --yes --cleanup-tag 2>/dev/null || true
