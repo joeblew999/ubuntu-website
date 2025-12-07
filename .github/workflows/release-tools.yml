@@ -4,7 +4,7 @@
 # Uses xplat to orchestrate cross-platform builds based on tool's CGO setting.
 #
 # For CGO=0 tools: Cross-compiles all platforms from single Linux runner (fast!)
-# For CGO=1 tools: Builds on native runners for each platform
+# For CGO=1 tools: Builds on native runners for each platform (not yet implemented)
 #
 # Supported tools: analytics, genlogo, mailerlite, pc, sitecheck, translate, tui
 # (xplat has its own workflow due to bootstrapping requirements)
@@ -45,55 +45,14 @@ on:
         default: 'dev'
 
 jobs:
-  # Parse tag to determine tool and version
-  setup:
+  # Single job: build all platforms, test locally, release via gh CLI
+  # No third-party artifact actions - uses gh CLI for everything
+  build-and-release:
     runs-on: ubuntu-latest
-    outputs:
-      tool: ${{ steps.parse.outputs.tool }}
-      version: ${{ steps.parse.outputs.version }}
-      is_release: ${{ steps.parse.outputs.is_release }}
-    steps:
-      - name: Parse tag or input
-        id: parse
-        run: |
-          # Map tag names to Taskfile namespaces
-          map_tool() {
-            case "$1" in
-              process-compose) echo "pc" ;;
-              task-ui) echo "tui" ;;
-              *) echo "$1" ;;
-            esac
-          }
-
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tool=${{ github.event.inputs.tool }}" >> $GITHUB_OUTPUT
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-            echo "is_release=false" >> $GITHUB_OUTPUT
-          else
-            TAG="${GITHUB_REF_NAME}"
-            RAW_TOOL="${TAG%-v*}"
-            VERSION="${TAG#*-}"
-            TOOL=$(map_tool "$RAW_TOOL")
-            echo "tool=${TOOL}" >> $GITHUB_OUTPUT
-            echo "version=${VERSION}" >> $GITHUB_OUTPUT
-            echo "is_release=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Show build info
-        run: |
-          echo "Tool: ${{ steps.parse.outputs.tool }}"
-          echo "Version: ${{ steps.parse.outputs.version }}"
-          echo "Is Release: ${{ steps.parse.outputs.is_release }}"
-
-  # Build all platforms from single Linux runner (CGO=0 enables cross-compile)
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    outputs:
-      bin_name: ${{ steps.config.outputs.bin_name }}
+    permissions:
+      contents: write
     env:
-      TOOL: ${{ needs.setup.outputs.tool }}
-      RELEASE_VERSION: ${{ needs.setup.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
 
@@ -108,6 +67,36 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Parse tag or input to get tool and version
+      - name: Parse build info
+        id: parse
+        run: |
+          # Map tag names to Taskfile namespaces
+          map_tool() {
+            case "$1" in
+              process-compose) echo "pc" ;;
+              task-ui) echo "tui" ;;
+              *) echo "$1" ;;
+            esac
+          }
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TOOL="${{ github.event.inputs.tool }}"
+            VERSION="${{ github.event.inputs.version }}"
+            IS_RELEASE="false"
+          else
+            TAG="${GITHUB_REF_NAME}"
+            RAW_TOOL="${TAG%-v*}"
+            VERSION="${TAG#*-}"
+            TOOL=$(map_tool "$RAW_TOOL")
+            IS_RELEASE="true"
+          fi
+
+          echo "tool=${TOOL}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "is_release=${IS_RELEASE}" >> $GITHUB_OUTPUT
+          echo "Tool: ${TOOL}, Version: ${VERSION}, Release: ${IS_RELEASE}"
+
       # Build xplat first (needed for orchestration)
       - name: Build xplat
         run: go build -o /tmp/xplat ./cmd/xplat
@@ -116,138 +105,73 @@ jobs:
       - name: Get tool config
         id: config
         run: |
-          BIN_NAME=$(/tmp/xplat release matrix ${{ needs.setup.outputs.tool }} | jq -r '.bin_name')
+          BIN_NAME=$(/tmp/xplat release matrix ${{ steps.parse.outputs.tool }} | jq -r '.bin_name')
           echo "bin_name=${BIN_NAME}" >> $GITHUB_OUTPUT
           echo "Binary name: ${BIN_NAME}"
 
-      # Use xplat to build all platforms
+      # Build all platforms using xplat (CGO=0 enables cross-compile)
       - name: Build all platforms
-        run: /tmp/xplat release build ${{ needs.setup.outputs.tool }}
+        env:
+          RELEASE_VERSION: ${{ steps.parse.outputs.version }}
+        run: /tmp/xplat release build ${{ steps.parse.outputs.tool }}
 
       - name: List built artifacts
-        run: |
-          ls -la .build/
-          echo "Full path: ${{ github.workspace }}/.build/"
-          ls -la ${{ github.workspace }}/.build/
-
-      # Upload all artifacts in one step
-      # Note: .build starts with dot, so include-hidden-files is needed
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.config.outputs.bin_name }}-binaries
-          path: ${{ github.workspace }}/.build/
-          include-hidden-files: true
-
-  # Test on native platforms to verify binaries work
-  test:
-    needs: [setup, build]
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            goos: linux
-            goarch: amd64
-          - os: macos-latest
-            goos: darwin
-            goarch: arm64
-          - os: windows-latest
-            goos: windows
-            goarch: amd64
-    runs-on: ${{ matrix.os }}
-    env:
-      TOOL: ${{ needs.setup.outputs.tool }}
-      BIN_NAME: ${{ needs.build.outputs.bin_name }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Task
-        uses: arduino/setup-task@v2
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build.outputs.bin_name }}-binaries
-          path: .build
-
-      - name: List downloaded files
         run: ls -la .build/
 
-      # Test the binary for this platform
-      - name: Test binary
+      # Test Linux binary locally (we're on Linux runner)
+      - name: Test Linux binary
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: task ${{ needs.setup.outputs.tool }}:release:test
+          GOOS: linux
+          GOARCH: amd64
+        run: task ${{ steps.parse.outputs.tool }}:release:test
 
-  release:
-    needs: [setup, build, test]
-    runs-on: ubuntu-latest
-    if: ${{ needs.setup.outputs.is_release == 'true' }}
-    permissions:
-      contents: write
-    env:
-      TOOL: ${{ needs.setup.outputs.tool }}
-      BIN_NAME: ${{ needs.build.outputs.bin_name }}
-      RELEASE_VERSION: ${{ needs.setup.outputs.version }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build.outputs.bin_name }}-binaries
-          path: release
-
-      - name: List release files
-        run: ls -la release/
-
-      - name: Generate release notes
+      # Create release using gh CLI (only for tag pushes)
+      - name: Create Release
+        if: ${{ steps.parse.outputs.is_release == 'true' }}
+        env:
+          TOOL: ${{ steps.parse.outputs.tool }}
+          BIN_NAME: ${{ steps.config.outputs.bin_name }}
+          VERSION: ${{ steps.parse.outputs.version }}
         run: |
+          # Generate release notes
           cat > /tmp/release-notes.md << EOF
-          ## ${TOOL} ${RELEASE_VERSION}
+          ## ${BIN_NAME} ${VERSION}
 
           ### Installation
 
           Via xplat (recommended):
           \`\`\`bash
-          xplat binary install ${TOOL} ${RELEASE_VERSION} ${{ github.repository }}
+          xplat binary install ${TOOL} ${VERSION} ${{ github.repository }}
           \`\`\`
 
           Or download directly:
           \`\`\`bash
           # macOS (Apple Silicon)
-          curl -sL https://github.com/${{ github.repository }}/releases/download/${TOOL}-${RELEASE_VERSION}/${TOOL}-darwin-arm64 -o ~/.local/bin/${TOOL}
-          chmod +x ~/.local/bin/${TOOL}
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${BIN_NAME}-${VERSION}/${BIN_NAME}-darwin-arm64 -o ~/.local/bin/${BIN_NAME}
+          chmod +x ~/.local/bin/${BIN_NAME}
 
           # macOS (Intel)
-          curl -sL https://github.com/${{ github.repository }}/releases/download/${TOOL}-${RELEASE_VERSION}/${TOOL}-darwin-amd64 -o ~/.local/bin/${TOOL}
-          chmod +x ~/.local/bin/${TOOL}
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${BIN_NAME}-${VERSION}/${BIN_NAME}-darwin-amd64 -o ~/.local/bin/${BIN_NAME}
+          chmod +x ~/.local/bin/${BIN_NAME}
 
           # Linux (x86_64)
-          curl -sL https://github.com/${{ github.repository }}/releases/download/${TOOL}-${RELEASE_VERSION}/${TOOL}-linux-amd64 -o ~/.local/bin/${TOOL}
-          chmod +x ~/.local/bin/${TOOL}
+          curl -sL https://github.com/${{ github.repository }}/releases/download/${BIN_NAME}-${VERSION}/${BIN_NAME}-linux-amd64 -o ~/.local/bin/${BIN_NAME}
+          chmod +x ~/.local/bin/${BIN_NAME}
           \`\`\`
 
           ### Usage
 
           \`\`\`
-          ${TOOL} -version    # Print version
-          ${TOOL} -help       # Show help
+          ${BIN_NAME} -version    # Print version
+          ${BIN_NAME} -help       # Show help
           \`\`\`
 
           See [README](https://github.com/${{ github.repository }}/tree/main/cmd/${TOOL}) for full documentation.
           EOF
 
-      - name: Create Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${TOOL}-${RELEASE_VERSION}" \
+          # Create release with all binaries
+          gh release create "${BIN_NAME}-${VERSION}" \
             --repo "${{ github.repository }}" \
-            --title "${TOOL} ${RELEASE_VERSION}" \
+            --title "${BIN_NAME} ${VERSION}" \
             --notes-file /tmp/release-notes.md \
-            release/*
+            .build/*
