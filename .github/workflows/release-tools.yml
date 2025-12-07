@@ -1,12 +1,19 @@
-# Binary Tools Release
+# Binary Tools Release Trigger
 #
-# Builds and releases Go binary tools.
+# Minimal workflow that triggers tool releases.
+# Actual build logic is in release-tool-build.yml (reusable workflow).
+#
+# Supported tools: analytics, genlogo, mailerlite, process-compose, sitecheck, task-ui, translate
+# (xplat has its own workflow due to extensive platform tests)
 #
 # Usage:
+#   git tag analytics-v0.1.0 && git push origin analytics-v0.1.0
+#   git tag genlogo-v0.1.0 && git push origin genlogo-v0.1.0
+#   git tag mailerlite-v0.1.0 && git push origin mailerlite-v0.1.0
+#   git tag process-compose-v0.1.0 && git push origin process-compose-v0.1.0
 #   git tag sitecheck-v0.1.0 && git push origin sitecheck-v0.1.0
-#
-# Workflow dispatch for testing (no release created):
-#   gh workflow run "[Release] Tools" -f tool=pc -f version=dev
+#   git tag task-ui-v0.1.0 && git push origin task-ui-v0.1.0
+#   git tag translate-v0.2.0 && git push origin translate-v0.2.0
 
 name: "[Release] Tools"
 
@@ -23,7 +30,7 @@ on:
   workflow_dispatch:
     inputs:
       tool:
-        description: 'Tool to build (Taskfile namespace)'
+        description: 'Tool to build'
         required: true
         type: choice
         options:
@@ -39,10 +46,8 @@ on:
         required: true
         default: 'dev'
 
-env:
-  GO_VERSION: '1.23'
-
 jobs:
+  # Parse tag to determine tool and version
   setup:
     runs-on: ubuntu-latest
     outputs:
@@ -53,20 +58,26 @@ jobs:
       - name: Parse tag or input
         id: parse
         run: |
+          # Map tag names to Taskfile namespaces
+          # Most tools use their name directly, but some have short aliases
+          map_tool() {
+            case "$1" in
+              process-compose) echo "pc" ;;
+              task-ui) echo "tui" ;;
+              *) echo "$1" ;;
+            esac
+          }
+
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "tool=${{ github.event.inputs.tool }}" >> $GITHUB_OUTPUT
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
             echo "is_release=false" >> $GITHUB_OUTPUT
           else
+            # Extract tool and version from tag (e.g., sitecheck-v0.1.0)
             TAG="${GITHUB_REF_NAME}"
             RAW_TOOL="${TAG%-v*}"
             VERSION="${TAG#*-}"
-            # Map tag names to Taskfile namespaces
-            case "$RAW_TOOL" in
-              process-compose) TOOL="pc" ;;
-              task-ui) TOOL="tui" ;;
-              *) TOOL="$RAW_TOOL" ;;
-            esac
+            TOOL=$(map_tool "$RAW_TOOL")
             echo "tool=${TOOL}" >> $GITHUB_OUTPUT
             echo "version=${VERSION}" >> $GITHUB_OUTPUT
             echo "is_release=true" >> $GITHUB_OUTPUT
@@ -78,123 +89,11 @@ jobs:
           echo "Version: ${{ steps.parse.outputs.version }}"
           echo "Is Release: ${{ steps.parse.outputs.is_release }}"
 
-  build:
+  # Call reusable workflow with parsed inputs
+  build-and-release:
     needs: setup
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            goos: linux
-            goarch: amd64
-          - os: ubuntu-latest
-            goos: linux
-            goarch: arm64
-          - os: macos-latest
-            goos: darwin
-            goarch: amd64
-          - os: macos-latest
-            goos: darwin
-            goarch: arm64
-          - os: windows-latest
-            goos: windows
-            goarch: amd64
-    runs-on: ${{ matrix.os }}
-    env:
-      TOOL: ${{ needs.setup.outputs.tool }}
-      RELEASE_VERSION: ${{ needs.setup.outputs.version }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Install Task
-        uses: arduino/setup-task@v2
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: task ${{ env.TOOL }}:release:build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.TOOL }}-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: .build/${{ env.TOOL }}-${{ matrix.goos }}-${{ matrix.goarch }}*
-
-  test:
-    needs: [setup, build]
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            goos: linux
-            goarch: amd64
-          - os: macos-latest
-            goos: darwin
-            goarch: arm64
-          - os: windows-latest
-            goos: windows
-            goarch: amd64
-    runs-on: ${{ matrix.os }}
-    env:
-      TOOL: ${{ needs.setup.outputs.tool }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Task
-        uses: arduino/setup-task@v2
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ env.TOOL }}-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: .build
-
-      - name: Test binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: task ${{ env.TOOL }}:release:test
-
-  release:
-    needs: [setup, build, test]
-    runs-on: ubuntu-latest
-    if: ${{ needs.setup.outputs.is_release == 'true' }}
-    permissions:
-      contents: write
-    env:
-      TOOL: ${{ needs.setup.outputs.tool }}
-      RELEASE_VERSION: ${{ needs.setup.outputs.version }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Prepare release files
-        run: |
-          mkdir -p release
-          find artifacts -type f -name "${TOOL}-*" -exec mv {} release/ \;
-          ls -la release/
-
-      - name: Create Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${TOOL}-${RELEASE_VERSION}" \
-            --repo "${{ github.repository }}" \
-            --title "${TOOL} ${RELEASE_VERSION}" \
-            --generate-notes \
-            release/*
+    uses: ./.github/workflows/release-tool-build.yml
+    with:
+      tool: ${{ needs.setup.outputs.tool }}
+      version: ${{ needs.setup.outputs.version }}
+      is_release: ${{ needs.setup.outputs.is_release == 'true' }}
