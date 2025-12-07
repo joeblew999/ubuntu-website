@@ -11,12 +11,6 @@
 #
 version: '3'
 
-includes:
-  toolchain:golang:
-    taskfile: ./toolchain/Taskfile.golang.yml
-  tools:xplat:
-    taskfile: ./tools/Taskfile.xplat.yml
-
 vars:
   # Core paths - always use absolute HOME-based paths
   BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
@@ -30,13 +24,19 @@ vars:
 
 tasks:
   # ===========================================================================
-  # Setup - Build xplat first
+  # Setup - Build xplat first (self-contained, doesn't use includes)
   # ===========================================================================
 
   setup:
-    desc: Build xplat and add to PATH (run first)
+    desc: Build xplat from source and add to PATH (run first)
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/xplat{{exeExt}}"
     cmds:
-      - task: tools:xplat:check:deps
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - |
+        echo "Building xplat from source..."
+        go build -o "{{.BIN_INSTALL_DIR}}/xplat{{exeExt}}" "{{toSlash .USER_WORKING_DIR}}/cmd/xplat"
+        echo "OK: xplat built from source"
 
   # ===========================================================================
   # Dummy tasks

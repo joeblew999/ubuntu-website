@@ -111,6 +111,28 @@ type TaskfileVars struct {
 	Vars map[string]interface{} `yaml:"vars"`
 }
 
+// findRepoRoot walks up from cwd to find the repo root (contains Taskfile.yml or .git)
+func findRepoRoot(startDir string) (string, error) {
+	dir := startDir
+	for {
+		// Check for Taskfile.yml (primary indicator)
+		if _, err := os.Stat(filepath.Join(dir, "Taskfile.yml")); err == nil {
+			return dir, nil
+		}
+		// Check for .git as fallback
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			return dir, nil
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			// Reached filesystem root
+			return "", fmt.Errorf("could not find repo root from %s", startDir)
+		}
+		dir = parent
+	}
+}
+
 // findTaskfile locates the Taskfile for a given tool
 func findTaskfile(tool string) (string, error) {
 	// Map short names to taskfile locations
@@ -121,21 +143,33 @@ func findTaskfile(tool string) (string, error) {
 		return "", err
 	}
 
-	// Try multiple locations
-	candidates := []string{
-		filepath.Join(cwd, "taskfiles", "tools", fmt.Sprintf("Taskfile.%s.yml", tool)),
-		filepath.Join(cwd, "taskfiles", fmt.Sprintf("Taskfile.%s.yml", tool)),
+	// Find repo root (handles case where cwd is a subdirectory like taskfiles/)
+	repoRoot, err := findRepoRoot(cwd)
+	if err != nil {
+		// Fall back to cwd if can't find repo root
+		repoRoot = cwd
 	}
 
-	// Also try with common name mappings
+	// Common name mappings
 	nameMap := map[string]string{
 		"tui": "task-ui",
 		"pc":  "process-compose",
 	}
+
+	// Build candidate list using repo root
+	var candidates []string
+
+	// Primary tool name candidates
+	candidates = append(candidates,
+		filepath.Join(repoRoot, "taskfiles", "tools", fmt.Sprintf("Taskfile.%s.yml", tool)),
+		filepath.Join(repoRoot, "taskfiles", fmt.Sprintf("Taskfile.%s.yml", tool)),
+	)
+
+	// Also try with mapped name if applicable
 	if fullName, ok := nameMap[tool]; ok {
 		candidates = append(candidates,
-			filepath.Join(cwd, "taskfiles", "tools", fmt.Sprintf("Taskfile.%s.yml", fullName)),
-			filepath.Join(cwd, "taskfiles", fmt.Sprintf("Taskfile.%s.yml", fullName)),
+			filepath.Join(repoRoot, "taskfiles", "tools", fmt.Sprintf("Taskfile.%s.yml", fullName)),
+			filepath.Join(repoRoot, "taskfiles", fmt.Sprintf("Taskfile.%s.yml", fullName)),
 		)
 	}
 
