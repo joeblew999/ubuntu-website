@@ -169,9 +169,29 @@ func init() {
 // runTask is the main entry point for the embedded Task runner.
 // It replicates the logic from github.com/go-task/task/v3/cmd/task/task.go
 func runTask(cmd *cobra.Command, osArgs []string) error {
+	// Extract CLI_ARGS (everything after "--") BEFORE parsing flags
+	// This is critical because pflag.Parse() consumes the "--" separator,
+	// making it impossible to distinguish CLI_ARGS from task names afterward.
+	//
+	// Example: xplat task build -- --some-arg
+	//   osArgs = ["build", "--", "--some-arg"]
+	//   After pflag.Parse(), remainingArgs = ["build", "--some-arg"]
+	//   We lose the ability to know "--some-arg" was meant for CLI_ARGS!
+	var cliArgs string
+	argsForParsing := osArgs
+	for i, arg := range osArgs {
+		if arg == "--" {
+			argsForParsing = osArgs[:i]
+			if i+1 < len(osArgs) {
+				cliArgs = strings.Join(osArgs[i+1:], " ")
+			}
+			break
+		}
+	}
+
 	// Re-parse args since we disabled flag parsing in Cobra
 	// This is necessary because we want to handle flags like Task does
-	if err := cmd.Flags().Parse(osArgs); err != nil {
+	if err := cmd.Flags().Parse(argsForParsing); err != nil {
 		return err
 	}
 	remainingArgs := cmd.Flags().Args()
@@ -286,21 +306,13 @@ func runTask(cmd *cobra.Command, osArgs []string) error {
 
 	// Parse remaining arguments into task calls
 	// args.Parse handles "task:name VAR=value" syntax
+	// Note: CLI_ARGS (everything after "--") was already extracted at the top
+	// of this function BEFORE pflag.Parse() consumed the "--" separator.
 	calls, globals := args.Parse(remainingArgs...)
 
 	// If no tasks specified, run "default" task
 	if len(calls) == 0 {
 		calls = append(calls, &task.Call{Task: "default"})
-	}
-
-	// Set CLI global variables (accessible in Taskfiles as .CLI_ARGS, etc.)
-	// Find CLI_ARGS: everything after "--" is passed through
-	cliArgs := ""
-	for i, arg := range osArgs {
-		if arg == "--" && i+1 < len(osArgs) {
-			cliArgs = strings.Join(osArgs[i+1:], " ")
-			break
-		}
 	}
 
 	globals.Set("CLI_ARGS", ast.Var{Value: cliArgs})
