@@ -69,3 +69,14 @@ tasks:
       - task: :toolchain:golang:build:test
         vars:
           BIN: '{{.TUI_BIN}}'
+
+  release:publish:
+    desc: Build all platforms and create GitHub release
+    requires:
+      vars: [VERSION]
+    cmds:
+      - '{{.XPLAT_BIN}} release build tui'
+      - task: :tools:gh:release:publish
+        vars:
+          NAME: 'task-ui'
+          VERSION: '{{.VERSION}}'

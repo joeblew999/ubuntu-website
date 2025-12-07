@@ -88,6 +88,19 @@ tasks:
 
         {{.GH_BIN}} release create "$TAG" --generate-notes $FILES
 
+  release:publish:
+    desc: Create release with binaries from .build/ (requires NAME, VERSION vars)
+    requires:
+      vars: [NAME, VERSION]
+    cmds:
+      - |
+        TAG="{{.NAME}}-{{.VERSION}}"
+        echo "Creating release: $TAG"
+        echo "Assets: .build/*"
+        {{.GH_BIN}} release create "$TAG" --generate-notes .build/*
+        echo ""
+        echo "Release created: https://github.com/$({{.GH_BIN}} repo view --json nameWithOwner -q .nameWithOwner)/releases/tag/$TAG"
+
   release:upload:
     desc: Upload assets to existing release (usage - task gh:release:upload -- TAG FILE1 FILE2...)
     cmds:
