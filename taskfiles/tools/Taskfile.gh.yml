@@ -118,9 +118,10 @@ tasks:
         echo "Creating release: $TAG"
         echo "Assets:"
         # Use xplat glob for cross-platform file listing
-        {{.XPLAT_BIN}} glob ".build/*"
+        # Pattern: {NAME}-{os}-* ensures exact tool name match (e.g., dummy-linux-* not dummy-cgo-linux-*)
+        {{.XPLAT_BIN}} glob ".build/{{.NAME}}-{linux,darwin,windows}-*"
         # Get files as space-separated list
-        FILES=$({{.XPLAT_BIN}} glob ".build/*" | tr '\n' ' ')
+        FILES=$({{.XPLAT_BIN}} glob ".build/{{.NAME}}-{linux,darwin,windows}-*" | tr '\n' ' ')
         echo ""
         echo "Uploading to GitHub..."
         {{.GH_BIN}} release create "$TAG" --generate-notes $FILES
