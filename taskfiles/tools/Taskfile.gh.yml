@@ -92,12 +92,19 @@ tasks:
     desc: Create release with binaries from .build/ (requires NAME, VERSION vars)
     requires:
       vars: [NAME, VERSION]
+    dir: '{{.ROOT_DIR}}'
     cmds:
       - |
         TAG="{{.NAME}}-{{.VERSION}}"
         echo "Creating release: $TAG"
-        echo "Assets: .build/*"
-        {{.GH_BIN}} release create "$TAG" --generate-notes .build/*
+        echo "Assets:"
+        # Use xplat glob for cross-platform file listing
+        {{.XPLAT_BIN}} glob ".build/*"
+        # Get files as space-separated list
+        FILES=$({{.XPLAT_BIN}} glob ".build/*" | tr '\n' ' ')
+        echo ""
+        echo "Uploading to GitHub..."
+        {{.GH_BIN}} release create "$TAG" --generate-notes $FILES
         echo ""
         echo "Release created: https://github.com/$({{.GH_BIN}} repo view --json nameWithOwner -q .nameWithOwner)/releases/tag/$TAG"
 
