@@ -125,21 +125,19 @@ jobs:
         run: /tmp/xplat release build ${{ needs.setup.outputs.tool }}
 
       - name: List built artifacts
-        id: list_artifacts
         run: |
           ls -la .build/
-          # Create artifact list for upload
-          echo "files<<EOF" >> $GITHUB_OUTPUT
-          for f in .build/*; do echo "$f"; done >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "Full path: ${{ github.workspace }}/.build/"
+          ls -la ${{ github.workspace }}/.build/
 
       # Upload all artifacts in one step
+      # Note: .build starts with dot, so include-hidden-files is needed
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.config.outputs.bin_name }}-binaries
-          path: |
-            .build/*
+          path: ${{ github.workspace }}/.build/
+          include-hidden-files: true
 
   # Test on native platforms to verify binaries work
   test:
