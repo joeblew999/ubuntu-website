@@ -6,11 +6,12 @@
 # For CGO=0 tools: Cross-compiles all platforms from single Linux runner (fast!)
 # For CGO=1 tools: Builds on native runners for each platform (not yet implemented)
 #
-# Supported tools: analytics, genlogo, mailerlite, pc, sitecheck, translate, tui
+# Supported tools: analytics, dummy, genlogo, mailerlite, pc, sitecheck, translate, tui
 # (xplat has its own workflow due to bootstrapping requirements)
 #
 # Usage:
 #   git tag analytics-v0.1.0 && git push origin analytics-v0.1.0
+#   git tag dummy-v0.0.1 && git push origin dummy-v0.0.1
 #   git tag process-compose-v0.1.0 && git push origin process-compose-v0.1.0
 
 name: "[Release] Tools"

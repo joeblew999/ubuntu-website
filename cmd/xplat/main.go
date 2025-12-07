@@ -54,6 +54,9 @@ Designed to fill gaps in Task's built-in shell interpreter.`,
 	// P4 (release orchestration)
 	rootCmd.AddCommand(cmd.ReleaseCmd)
 
+	// P5 (embedded Task runner)
+	rootCmd.AddCommand(cmd.TaskCmd)
+
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}

@@ -3,7 +3,7 @@
 # Wraps gh CLI for common GitHub operations.
 # Works both locally and in CI (gh is pre-installed in GitHub Actions).
 #
-# REQUIRES: gh (GitHub CLI)
+# Auto-downloads from https://github.com/cli/cli/releases if not found.
 #
 # Pattern: All tool taskfiles define TOOL_BIN with {{exeExt}} for Windows support
 
@@ -11,9 +11,13 @@ version: '3'
 
 vars:
   # GH_VERSION comes from versions.env (loaded by root Taskfile dotenv)
-  # Binary name with platform-specific extension (.exe on Windows)
+  GH_REPO: cli/cli
   GH_BIN: 'gh{{exeExt}}'
   GH_CGO: '0'  # No CGO needed - for consistency with other tools
+  # Platform mapping for gh release assets (gh uses macOS not darwin)
+  GH_OS_MAP: '{{if eq OS "darwin"}}macOS{{else if eq OS "windows"}}windows{{else}}linux{{end}}'
+  GH_ARCH_MAP: '{{if eq ARCH "amd64"}}amd64{{else if eq ARCH "arm64"}}arm64{{else}}{{ARCH}}{{end}}'
+  GH_EXT: '{{if eq OS "darwin"}}zip{{else if eq OS "windows"}}zip{{else}}tar.gz{{end}}'
 
 tasks:
   # ===========================================================================
@@ -21,20 +25,25 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure gh CLI is installed
-    # status: skips if gh exists in PATH (works locally and in CI)
+    desc: Ensure gh CLI is installed (downloads if missing)
     status:
       - '{{.GH_BIN}} --version'
     cmds:
-      - |
-        echo "ERROR: gh CLI not found"
-        echo ""
-        echo "Install options:"
-        echo "  macOS:   brew install gh"
-        echo "  Linux:   https://github.com/cli/cli/blob/trunk/docs/install_linux.md"
-        echo "  Windows: winget install GitHub.cli"
-        echo "  Manual:  https://cli.github.com/"
-        exit 1
+      - task: install
+
+  install:
+    desc: Download and install gh CLI from GitHub releases
+    internal: true
+    vars:
+      # Strip 'v' prefix for gh asset naming (v2.83.1 -> 2.83.1)
+      GH_VER_NUM: '{{trimPrefix "v" .GH_VERSION}}'
+      ASSET_NAME: 'gh_{{.GH_VER_NUM}}_{{.GH_OS_MAP}}_{{.GH_ARCH_MAP}}.{{.GH_EXT}}'
+      DOWNLOAD_URL: 'https://github.com/{{.GH_REPO}}/releases/download/{{.GH_VERSION}}/{{.ASSET_NAME}}'
+    cmds:
+      - 'echo "Downloading gh {{.GH_VERSION}} for {{OS}}/{{ARCH}}..."'
+      - '{{.XPLAT_BIN}} fetch --extract --strip 2 --include "*/bin/gh*" "{{.DOWNLOAD_URL}}" --output "{{.BIN_INSTALL_DIR}}"'
+      - 'echo "OK: gh {{.GH_VERSION}} installed to {{.BIN_INSTALL_DIR}}"'
+      - '"{{.BIN_INSTALL_DIR}}/{{.GH_BIN}}" --version'
 
   check:validate:
     desc: Validate gh CLI works and show auth status

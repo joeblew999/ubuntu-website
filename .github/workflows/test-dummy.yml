@@ -6,6 +6,9 @@
 # Uses self-contained CI Taskfile for isolation
 # IMPORTANT: Run from repo root so ROOT_DIR is correct
 #
+# Bootstrap: xplat embeds Task, so we only need to build xplat from source.
+# No separate Task installation required!
+#
 name: "Test: Dummy Round-Trip"
 
 on:
@@ -34,33 +37,23 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Add Go bin to PATH
-        shell: bash
-        run: echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-      # Cache Go bin directory (where go install puts compiled binaries)
-      - name: Cache Go bin
-        id: cache-go-bin
-        uses: actions/cache@v4
-        with:
-          path: ~/go/bin
-          key: go-bin-task-${{ runner.os }}-v3.43.3
-
-      # Install Task via go install (only if not cached)
-      - name: Install Task
-        if: steps.cache-go-bin.outputs.cache-hit != 'true'
-        run: go install github.com/go-task/task/v3/cmd/task@v3.43.3
-
       # Windows: Set HOME from USERPROFILE (Task's .HOME builtin needs it)
       - name: Set HOME on Windows
         if: runner.os == 'Windows'
         shell: bash
         run: echo "HOME=$USERPROFILE" >> $GITHUB_ENV
 
-      # Use self-contained CI Taskfile for isolation
-      # Run from repo root so ROOT_DIR points to actual repo root
-      - name: Setup xplat
-        run: task -t taskfiles/Taskfile.dummy-ci.yml setup
+      # Build xplat with embedded Task - this is the only bootstrap step needed!
+      # xplat includes Task, so no separate Task installation required.
+      - name: Build xplat (with embedded Task)
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            go build -o "$HOME/bin/xplat.exe" ./cmd/xplat
+          else
+            go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
+          fi
 
       - name: Add bin to PATH
         shell: bash
@@ -68,18 +61,23 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           echo "$HOME/bin" >> $GITHUB_PATH
 
+      # Verify xplat task works
+      - name: Verify xplat task
+        run: xplat task --version
+
+      # All subsequent steps use "xplat task" instead of "task"
       - name: Build dummy
-        run: task -t taskfiles/Taskfile.dummy-ci.yml build
+        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml build
 
       - name: Release build
-        run: task -t taskfiles/Taskfile.dummy-ci.yml release:build
+        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:build
 
       - name: Test release binary
-        run: task -t taskfiles/Taskfile.dummy-ci.yml release:test
+        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:test
 
       # xplat smart build - skips on non-Linux for CGO=0
       - name: Cross-compile (xplat smart build)
-        run: task -t taskfiles/Taskfile.dummy-ci.yml release:cross
+        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:cross
 
       # Verify all binaries built (Linux only)
       - name: Verify cross-compile output
@@ -101,15 +99,15 @@ jobs:
         run: |
           rm -f ~/.local/bin/dummy 2>/dev/null || true
           rm -f ~/bin/dummy.exe 2>/dev/null || true
-          task -t taskfiles/Taskfile.dummy-ci.yml check:deps
+          xplat task -t taskfiles/Taskfile.dummy-ci.yml check:deps
 
       - name: Run dummy
-        run: task -t taskfiles/Taskfile.dummy-ci.yml run
+        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml run
 
       - name: Verify output
         shell: bash
         run: |
-          OUTPUT=$(task -t taskfiles/Taskfile.dummy-ci.yml run 2>&1 | tail -1)
+          OUTPUT=$(xplat task -t taskfiles/Taskfile.dummy-ci.yml run 2>&1 | tail -1)
           echo "Output: $OUTPUT"
           if [ "$OUTPUT" != "dev" ]; then
             echo "ERROR: Expected 'dev', got '$OUTPUT'"

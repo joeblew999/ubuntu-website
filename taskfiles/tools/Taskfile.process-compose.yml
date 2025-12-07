@@ -122,3 +122,14 @@ tasks:
       - task: :toolchain:golang:build:test
         vars:
           BIN: '{{.PC_BIN}}'
+
+  release:publish:
+    desc: Build all platforms and create GitHub release
+    requires:
+      vars: [VERSION]
+    cmds:
+      - '{{.XPLAT_BIN}} release build pc'
+      - task: :tools:gh:release:publish
+        vars:
+          NAME: 'process-compose'
+          VERSION: '{{.VERSION}}'

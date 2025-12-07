@@ -8,6 +8,8 @@
 #   task  - Task version checker (ensures local matches CI)
 #   xplat - Cross-platform shell utilities (which, glob, etc.)
 #   gh    - GitHub CLI for releases, workflows, PRs, issues
+#   pc    - Process-Compose for local dev orchestration
+#   tui   - Task-UI web dashboard for task execution
 
 version: '3'
 
@@ -21,6 +23,12 @@ includes:
   gh:
     taskfile: ./tools/Taskfile.gh.yml
     optional: true  # gh not required for basic operations
+  pc:
+    taskfile: ./tools/Taskfile.process-compose.yml
+    optional: true  # Optional local dev tool
+  tui:
+    taskfile: ./tools/Taskfile.task-ui.yml
+    optional: true  # Optional web dashboard
   idempotency-test:
     taskfile: ./tools/Taskfile.idempotency-test.yml
     optional: true  # Only used for CI testing

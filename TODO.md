@@ -6,6 +6,15 @@ Task has a PackageAPI, as they call it.
 
 this will means many things for the code and xpalt ? 
 
+
+https://github.com/Infomaniak/terraform-provider-infomaniak/blob/main/go.mod seems to also be doing task embedding ? just wanted to ask because mayeb they have a smarter way than us ? 
+
+---
+
+Once oyu get the NON CGO FULLY working for the FULL lifecyle, Make sure that dummy cmd main.go can also require CGO. What i mean is that then you can test for both CGO and non CGO with the same binary for all the round tripping permutations. Its really easy. you just need to focus .  you could also make a 2nd main.go too of how ever you want to do it.   
+
+
+
 ---
 
 ## Completed

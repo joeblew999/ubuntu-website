@@ -183,6 +183,44 @@ ci:analytics:
     - analytics -github-issue
 ```
 
+**xplat Embedded Task Runner:**
+
+xplat embeds Task (go-task) as a subcommand, enabling single-binary bootstrap:
+
+```bash
+# Instead of:
+task dummy:build
+
+# Use:
+xplat task dummy:build
+```
+
+| Environment | Bootstrap Method |
+|-------------|------------------|
+| Local development | Use existing `task` binary (already installed) |
+| CI | Build xplat from source: `go build ./cmd/xplat` |
+| Post-release | Download xplat binary (includes Task) |
+
+**CI workflow pattern (no Task installation needed):**
+```yaml
+- uses: actions/setup-go@v5
+  with:
+    go-version-file: go.mod
+
+- name: Build xplat (with embedded Task)
+  run: go build -o ~/.local/bin/xplat ./cmd/xplat
+
+- name: Run task
+  run: xplat task dummy:build
+```
+
+**Compatibility:** `xplat task` supports all Task flags (`-t`, `-l`, `-f`, etc.) and provides ~99% CLI compatibility. See `cmd/xplat/cmd/task.go` for implementation details.
+
+**Why embed Task?**
+- Eliminates `go install task` step (33s+ on first run)
+- No `arduino/setup-task` dependency (avoids GitHub API rate limits)
+- Single binary to manage - xplat is the universal tool
+
 **Release Build Pattern (DRY via Toolchain):**
 
 Each tool Taskfile defines its own release tasks that call the shared `:toolchain:golang:build`:
@@ -230,17 +268,21 @@ env:
 run: task ${{ inputs.tool }}:release:build
 ```
 
-**Development Workflow Tools:**
+**Development Workflow:**
 
-Process-Compose (`pc:*`) orchestrates local dev processes with health checks:
+The `dev:*` namespace provides a unified interface to development tools:
 
 | Command | Purpose |
 |---------|---------|
-| `task pc:up` | Start Hugo + tools with TUI dashboard |
-| `task pc:down` | Stop all processes |
-| `task pc:logs` | View combined logs |
-| `task pc:status` | Show process health |
+| `task dev:up` | Start Hugo + tools with TUI dashboard |
+| `task dev:down` | Stop all processes |
+| `task dev:ui` | Start Task-UI web dashboard at http://localhost:3000 |
+| `task dev:logs` | View combined logs |
+| `task dev:status` | Show process health |
 
+You can also access the tools directly via `pc:*` and `tui:*` namespaces.
+
+**Process-Compose** (`pc:*`) orchestrates local processes with health checks.
 Processes defined in `process-compose.yaml`:
 - `hugo` - Dev server with HTTP health check
 - `translate` - Translation watcher (disabled by default)
@@ -248,12 +290,8 @@ Processes defined in `process-compose.yaml`:
 
 Enable optional processes: `process-compose up --enable translate`
 
-Task-UI (`tui:*`) provides web dashboard for Taskfile tasks (requires Docker):
-
-| Command | Purpose |
-|---------|---------|
-| `task tui:up` | Start at http://localhost:3000 |
-| `task tui:down` | Stop Task-UI |
+**Task-UI** (`tui:*`) provides a web dashboard for executing Taskfile tasks.
+Binary auto-installs via `xplat binary:install` on first use.
 
 ### Branding Assets
 
