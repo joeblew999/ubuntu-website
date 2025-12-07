@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.tool }}-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: bin/${{ inputs.tool }}-${{ matrix.goos }}-${{ matrix.goarch }}*
+          path: .build/${{ inputs.tool }}-${{ matrix.goos }}-${{ matrix.goarch }}*
 
   test:
     needs: build
@@ -113,7 +113,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.TOOL }}-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: bin
+          path: .build
 
       # Single command - all logic in Taskfile
       - name: Test binary

@@ -106,7 +106,7 @@ vars:
   DIR_PUBLIC: public
   DIR_RESOURCES: resources
   DIR_NODE_MODULES: node_modules
-  DIR_BIN: bin
+  DIR_BUILD: .build
   DIR_PLAYWRIGHT: .playwright-mcp
   DIR_VIA: .via
   DIR_LOGS: logs

@@ -26,8 +26,9 @@ version: '3'
 # REQUIRES: golang
 
 vars:
-  # Build output directory (can override via RELEASE_DIR env)
-  GO_BUILD_DIR: '{{if env "RELEASE_DIR"}}{{env "RELEASE_DIR"}}{{else}}{{.ROOT_DIR}}/bin{{end}}'
+  # Build output directory - uses hidden .build folder to avoid accidental commits
+  # Can override via RELEASE_DIR env
+  GO_BUILD_DIR: '{{if env "RELEASE_DIR"}}{{env "RELEASE_DIR"}}{{else}}{{.ROOT_DIR}}/.build{{end}}'
 
   # Release platforms (matches GitHub Actions matrix)
   GO_BUILD_PLATFORMS: 'linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 windows-amd64'
