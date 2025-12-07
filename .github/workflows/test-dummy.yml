@@ -4,6 +4,7 @@
 # - CGO=1: Each platform builds its own binaries
 #
 # Uses self-contained CI Taskfile for isolation
+# IMPORTANT: Run from repo root so ROOT_DIR is correct
 #
 name: "Test: Dummy Round-Trip"
 
@@ -38,9 +39,9 @@ jobs:
           version: 3.x
 
       # Use self-contained CI Taskfile for isolation
+      # Run from repo root so ROOT_DIR points to actual repo root
       - name: Setup xplat
-        working-directory: taskfiles
-        run: task -t Taskfile.dummy-ci.yml setup
+        run: task -t taskfiles/Taskfile.dummy-ci.yml setup
 
       - name: Add bin to PATH
         shell: bash
@@ -49,21 +50,17 @@ jobs:
           echo "$HOME/bin" >> $GITHUB_PATH
 
       - name: Build dummy
-        working-directory: taskfiles
-        run: task -t Taskfile.dummy-ci.yml build
+        run: task -t taskfiles/Taskfile.dummy-ci.yml build
 
       - name: Release build
-        working-directory: taskfiles
-        run: task -t Taskfile.dummy-ci.yml release:build
+        run: task -t taskfiles/Taskfile.dummy-ci.yml release:build
 
       - name: Test release binary
-        working-directory: taskfiles
-        run: task -t Taskfile.dummy-ci.yml release:test
+        run: task -t taskfiles/Taskfile.dummy-ci.yml release:test
 
       # xplat smart build - skips on non-Linux for CGO=0
       - name: Cross-compile (xplat smart build)
-        working-directory: taskfiles
-        run: task -t Taskfile.dummy-ci.yml release:cross
+        run: task -t taskfiles/Taskfile.dummy-ci.yml release:cross
 
       # Verify all binaries built (Linux only)
       - name: Verify cross-compile output
@@ -82,21 +79,18 @@ jobs:
 
       - name: Clean and test check:deps
         shell: bash
-        working-directory: taskfiles
         run: |
           rm -f ~/.local/bin/dummy 2>/dev/null || true
           rm -f ~/bin/dummy.exe 2>/dev/null || true
-          task -t Taskfile.dummy-ci.yml check:deps
+          task -t taskfiles/Taskfile.dummy-ci.yml check:deps
 
       - name: Run dummy
-        working-directory: taskfiles
-        run: task -t Taskfile.dummy-ci.yml run
+        run: task -t taskfiles/Taskfile.dummy-ci.yml run
 
       - name: Verify output
         shell: bash
-        working-directory: taskfiles
         run: |
-          OUTPUT=$(task -t Taskfile.dummy-ci.yml run 2>&1 | tail -1)
+          OUTPUT=$(task -t taskfiles/Taskfile.dummy-ci.yml run 2>&1 | tail -1)
           echo "Output: $OUTPUT"
           if [ "$OUTPUT" != "dev" ]; then
             echo "ERROR: Expected 'dev', got '$OUTPUT'"
