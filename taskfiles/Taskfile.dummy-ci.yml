@@ -13,7 +13,8 @@ version: '3'
 
 vars:
   # Core paths - always use absolute HOME-based paths
-  BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+  # Use toSlash to normalize path separators (Windows HOME has backslashes)
+  BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{toSlash .HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
   XPLAT_BIN: '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}}'
 
   # Dummy tool config
