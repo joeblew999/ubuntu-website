@@ -38,6 +38,12 @@ jobs:
         with:
           version: 3.x
 
+      # Windows: Set HOME from USERPROFILE (Task's .HOME builtin needs it)
+      - name: Set HOME on Windows
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "HOME=$USERPROFILE" >> $GITHUB_ENV
+
       # Use self-contained CI Taskfile for isolation
       # Run from repo root so ROOT_DIR points to actual repo root
       - name: Setup xplat
