@@ -115,7 +115,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dummy-binaries
-          path: .build/dummy-*
+          path: |
+            .build/dummy-linux-amd64
+            .build/dummy-linux-arm64
+            .build/dummy-darwin-amd64
+            .build/dummy-darwin-arm64
+            .build/dummy-windows-amd64.exe
+            .build/dummy-windows-arm64.exe
           retention-days: 1
 
   # ===========================================================================
@@ -300,12 +306,33 @@ jobs:
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml run
 
-      # Upload platform-specific artifacts
-      - name: Upload CGO=1 artifacts
+      # Upload platform-specific artifacts (Linux)
+      - name: Upload CGO=1 artifacts (Linux)
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: dummy-cgo-${{ runner.os }}
-          path: .build/dummy-cgo-*
+          name: dummy-cgo-Linux
+          path: .build/dummy-cgo-linux-amd64
+          retention-days: 1
+
+      # Upload platform-specific artifacts (macOS - both arches)
+      - name: Upload CGO=1 artifacts (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dummy-cgo-macOS
+          path: |
+            .build/dummy-cgo-darwin-amd64
+            .build/dummy-cgo-darwin-arm64
+          retention-days: 1
+
+      # Upload platform-specific artifacts (Windows)
+      - name: Upload CGO=1 artifacts (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dummy-cgo-Windows
+          path: .build/dummy-cgo-windows-amd64.exe
           retention-days: 1
 
   # ===========================================================================
