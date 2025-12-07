@@ -1,0 +1,89 @@
+# Dummy-CGO tool for testing CGO=1 release workflows
+# This tests that xplat correctly builds CGO=1 tools on each platform
+#
+# Expected behavior:
+#   - Linux: builds linux-amd64, linux-arm64 only
+#   - macOS: builds darwin-amd64, darwin-arm64 only
+#   - Windows: builds windows-amd64, windows-arm64 only
+#
+version: '3'
+
+vars:
+  DUMMY_CGO_VERSION: v0.0.1
+  DUMMY_CGO_REPO: joeblew999/ubuntu-website
+  DUMMY_CGO_BIN: 'dummy-cgo{{exeExt}}'
+  DUMMY_CGO_CGO: '1'  # KEY DIFFERENCE: CGO enabled
+
+tasks:
+  # ===========================================================================
+  # Check (downloads from release if missing)
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure dummy-cgo binary is available (builds from source or downloads)
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.DUMMY_CGO_BIN}}"
+    cmds:
+      - '{{.XPLAT_BIN}} binary install dummy-cgo {{.DUMMY_CGO_VERSION}} {{.DUMMY_CGO_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/dummy-cgo"'
+
+  check:validate:
+    desc: Verify dummy-cgo works
+    deps: [check:deps]
+    cmds:
+      - '"{{.BIN_INSTALL_DIR}}/{{.DUMMY_CGO_BIN}}"'
+
+  # ===========================================================================
+  # Run
+  # ===========================================================================
+
+  run:
+    desc: Run the dummy-cgo binary
+    deps: [check:deps]
+    cmds:
+      - '"{{.BIN_INSTALL_DIR}}/{{.DUMMY_CGO_BIN}}"'
+
+  # ===========================================================================
+  # Build (local development)
+  # ===========================================================================
+
+  build:
+    desc: Build dummy-cgo binary locally
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.DUMMY_CGO_BIN}}'
+          VERSION: dev
+          SOURCE: '{{.ROOT_DIR}}/cmd/dummy-cgo'
+          CGO: '{{.DUMMY_CGO_CGO}}'
+
+  # ===========================================================================
+  # Release
+  # ===========================================================================
+
+  release:build:
+    desc: Build dummy-cgo for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.DUMMY_CGO_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .DUMMY_CGO_VERSION}}'
+          SOURCE: '{{.ROOT_DIR}}/cmd/dummy-cgo'
+          CGO: '{{.DUMMY_CGO_CGO}}'
+
+  release:test:
+    desc: Test built dummy-cgo binary
+    cmds:
+      - task: :toolchain:golang:build:test
+        vars:
+          BIN: '{{.DUMMY_CGO_BIN}}'
+
+  release:publish:
+    desc: Build all platforms and create GitHub release
+    requires:
+      vars: [VERSION]
+    cmds:
+      - '{{.XPLAT_BIN}} release build dummy-cgo'
+      - task: :tools:gh:release:publish
+        vars:
+          NAME: 'dummy-cgo'
+          VERSION: '{{.VERSION}}'

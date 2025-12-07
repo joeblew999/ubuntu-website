@@ -65,6 +65,7 @@ includes:
 
   # Test tools (minimal binaries for fast workflow testing)
   dummy: ./taskfiles/Taskfile.dummy.yml
+  dummy-cgo: ./taskfiles/Taskfile.dummy-cgo.yml
 
   # Development workflow
   dev: ./taskfiles/Taskfile.dev.yml

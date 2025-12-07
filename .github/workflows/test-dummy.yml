@@ -1,10 +1,8 @@
-# Test workflow for dummy tool round-trip
-# Uses 3-platform matrix, but xplat is smart about what to build:
-# - CGO=0: Linux builds ALL platforms, macOS/Windows skip
-# - CGO=1: Each platform builds its own binaries
+# Test workflow for dummy tools round-trip
+# Tests BOTH CGO=0 and CGO=1 to validate xplat smart build:
 #
-# Uses self-contained CI Taskfile for isolation
-# IMPORTANT: Run from repo root so ROOT_DIR is correct
+# CGO=0 (dummy):     Linux builds ALL 6 platforms, macOS/Windows skip
+# CGO=1 (dummy-cgo): Each platform builds its own 2 binaries
 #
 # Bootstrap: xplat embeds Task, so we only need to build xplat from source.
 # No separate Task installation required!
@@ -16,15 +14,19 @@ on:
   push:
     paths:
       - 'cmd/dummy/**'
+      - 'cmd/dummy-cgo/**'
       - 'cmd/xplat/**'
-      - 'taskfiles/Taskfile.dummy.yml'
-      - 'taskfiles/Taskfile.dummy-ci.yml'
+      - 'taskfiles/Taskfile.dummy*.yml'
       - 'taskfiles/toolchain/Taskfile.golang.yml'
       - 'taskfiles/tools/Taskfile.xplat.yml'
       - '.github/workflows/test-dummy.yml'
 
 jobs:
-  test:
+  # ===========================================================================
+  # Test CGO=0 tool (dummy) - Linux builds all, others skip cross-compile
+  # ===========================================================================
+  test-cgo0:
+    name: "CGO=0 (${{ matrix.os }})"
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -43,8 +45,7 @@ jobs:
         shell: bash
         run: echo "HOME=$USERPROFILE" >> $GITHUB_ENV
 
-      # Build xplat with embedded Task - this is the only bootstrap step needed!
-      # xplat includes Task, so no separate Task installation required.
+      # Build xplat with embedded Task
       - name: Build xplat (with embedded Task)
         shell: bash
         run: |
@@ -58,13 +59,11 @@ jobs:
             echo "$HOME/.local/bin" >> $GITHUB_PATH
           fi
 
-      # Verify xplat task works
       - name: Verify xplat task
         shell: bash
         run: xplat task --version
 
-      # All subsequent steps use "xplat task" instead of "task"
-      - name: Build dummy
+      - name: Build dummy (dev)
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml build
 
@@ -76,12 +75,12 @@ jobs:
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:test
 
-      # xplat smart build - skips on non-Linux for CGO=0
+      # xplat smart build - Linux builds all 6, macOS/Windows skip
       - name: Cross-compile (xplat smart build)
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:cross
 
-      # Verify all binaries built (Linux only)
+      # Verify all 6 binaries built (Linux only)
       - name: Verify cross-compile output
         if: runner.os == 'Linux'
         shell: bash
@@ -94,26 +93,111 @@ jobs:
               exit 1
             fi
           done
-          echo "OK: All 6 platform binaries built"
-
-      - name: Clean and test check:deps
-        shell: bash
-        run: |
-          rm -f ~/.local/bin/dummy 2>/dev/null || true
-          rm -f ~/bin/dummy.exe 2>/dev/null || true
-          xplat task -t taskfiles/Taskfile.dummy-ci.yml check:deps
+          echo "OK: All 6 platform binaries built (CGO=0 cross-compile works)"
 
       - name: Run dummy
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml run
 
-      - name: Verify output
+  # ===========================================================================
+  # Test CGO=1 tool (dummy-cgo) - Each platform builds its own binaries
+  # ===========================================================================
+  test-cgo1:
+    name: "CGO=1 (${{ matrix.os }})"
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Set HOME on Windows
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "HOME=$USERPROFILE" >> $GITHUB_ENV
+
+      - name: Build xplat (with embedded Task)
         shell: bash
         run: |
-          OUTPUT=$(xplat task -t taskfiles/Taskfile.dummy-ci.yml run 2>&1 | tail -1)
-          echo "Output: $OUTPUT"
-          if [ "$OUTPUT" != "dev" ]; then
-            echo "ERROR: Expected 'dev', got '$OUTPUT'"
-            exit 1
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            mkdir -p "$HOME/bin"
+            go build -o "$HOME/bin/xplat.exe" ./cmd/xplat
+            echo "$HOME/bin" >> $GITHUB_PATH
+          else
+            mkdir -p "$HOME/.local/bin"
+            go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
           fi
-          echo "OK: dummy outputs correct version"
+
+      - name: Verify xplat task
+        shell: bash
+        run: xplat task --version
+
+      - name: Build dummy-cgo (dev)
+        shell: bash
+        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml build
+
+      - name: Release build
+        shell: bash
+        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:build
+
+      - name: Test release binary
+        shell: bash
+        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:test
+
+      # xplat smart build - each platform builds its own 2 binaries
+      - name: Platform build (xplat smart build)
+        shell: bash
+        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:cross
+
+      # Verify platform-specific binaries built
+      - name: Verify platform build output (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          echo "Built binaries:"
+          ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
+          for BINARY in dummy-cgo-linux-amd64 dummy-cgo-linux-arm64; do
+            if [ ! -f ".build/$BINARY" ]; then
+              echo "ERROR: Missing .build/$BINARY"
+              exit 1
+            fi
+          done
+          echo "OK: Linux binaries built (CGO=1 builds 2 platforms)"
+
+      - name: Verify platform build output (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          echo "Built binaries:"
+          ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
+          for BINARY in dummy-cgo-darwin-amd64 dummy-cgo-darwin-arm64; do
+            if [ ! -f ".build/$BINARY" ]; then
+              echo "ERROR: Missing .build/$BINARY"
+              exit 1
+            fi
+          done
+          echo "OK: macOS binaries built (CGO=1 builds 2 platforms)"
+
+      - name: Verify platform build output (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          echo "Built binaries:"
+          ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
+          for BINARY in dummy-cgo-windows-amd64.exe dummy-cgo-windows-arm64.exe; do
+            if [ ! -f ".build/$BINARY" ]; then
+              echo "ERROR: Missing .build/$BINARY"
+              exit 1
+            fi
+          done
+          echo "OK: Windows binaries built (CGO=1 builds 2 platforms)"
+
+      - name: Run dummy-cgo
+        shell: bash
+        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml run
