@@ -92,7 +92,7 @@ jobs:
   # Call reusable workflow with parsed inputs
   build-and-release:
     needs: setup
-    uses: ./.github/workflows/release-tool-build.yml
+    uses: joeblew999/ubuntu-website/.github/workflows/release-tool-build.yml@main
     with:
       tool: ${{ needs.setup.outputs.tool }}
       version: ${{ needs.setup.outputs.version }}
