@@ -92,6 +92,7 @@ tasks:
 
   release:create-with-assets:
     desc: Create release with assets (usage - task gh:release:create-with-assets -- TAG FILE1 FILE2...)
+    dir: '{{.ROOT_DIR}}'
     cmds:
       - |
         ARGS="{{.CLI_ARGS}}"
@@ -128,6 +129,7 @@ tasks:
 
   release:upload:
     desc: Upload assets to existing release (usage - task gh:release:upload -- TAG FILE1 FILE2...)
+    dir: '{{.ROOT_DIR}}'
     cmds:
       - |
         ARGS="{{.CLI_ARGS}}"
