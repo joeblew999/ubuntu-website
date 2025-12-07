@@ -53,6 +53,7 @@ var allPlatforms = []Platform{
 	{OS: "darwin", Arch: "amd64", Runner: "macos-latest", CrossCompile: true},
 	{OS: "darwin", Arch: "arm64", Runner: "macos-latest", CrossCompile: true},
 	{OS: "windows", Arch: "amd64", Runner: "windows-latest", CrossCompile: true},
+	{OS: "windows", Arch: "arm64", Runner: "windows-latest", CrossCompile: true},
 }
 
 // ReleaseMatrixCmd outputs the build matrix for a tool

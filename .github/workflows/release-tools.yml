@@ -128,11 +128,13 @@ jobs:
         run: ls -la .build/
 
       # Upload all artifacts in one step
+      # Note: upload-artifact uses @actions/glob which handles wildcards differently
+      # Using the .build/ directory directly since all files there are for this tool
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.config.outputs.bin_name }}-binaries
-          path: .build/${{ steps.config.outputs.bin_name }}-*
+          path: .build/
 
   # Test on native platforms to verify binaries work
   test:
