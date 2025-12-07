@@ -355,10 +355,14 @@ func runReleaseBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	// Build each platform
+	// Note: We use os.Args[0] to call ourselves with "task" subcommand.
+	// This solves the 2-stage bootstrap problem: xplat embeds Task, so
+	// we don't need a standalone "task" binary in PATH.
+	xplatBin := os.Args[0]
 	for _, p := range targetPlatforms {
 		fmt.Printf("Building %s for %s/%s...\n", tool, p.OS, p.Arch)
 
-		taskCmd := exec.Command("task", fmt.Sprintf("%s:release:build", tool))
+		taskCmd := exec.Command(xplatBin, "task", fmt.Sprintf("%s:release:build", tool))
 		taskCmd.Env = append(os.Environ(),
 			fmt.Sprintf("GOOS=%s", p.OS),
 			fmt.Sprintf("GOARCH=%s", p.Arch),
