@@ -82,8 +82,8 @@ jobs:
 
       - name: Create test release
         run: |
-          xplat task gh:release:delete -- "dummy-${{ env.DUMMY_TEST_VERSION }}" || true
-          xplat task gh:release:create-with-assets -- "dummy-${{ env.DUMMY_TEST_VERSION }}" .build/dummy-linux-amd64 .build/dummy-linux-arm64 .build/dummy-darwin-amd64 .build/dummy-darwin-arm64 .build/dummy-windows-amd64.exe .build/dummy-windows-arm64.exe
+          xplat task tools:gh:release:delete -- "dummy-${{ env.DUMMY_TEST_VERSION }}" || true
+          xplat task tools:gh:release:create-with-assets -- "dummy-${{ env.DUMMY_TEST_VERSION }}" .build/dummy-linux-amd64 .build/dummy-linux-arm64 .build/dummy-darwin-amd64 .build/dummy-darwin-arm64 .build/dummy-windows-amd64.exe .build/dummy-windows-arm64.exe
 
   # ===========================================================================
   # CGO=0: Verify downloaded binary works on each platform
@@ -136,7 +136,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Delete test release
-        run: xplat task gh:release:delete -- "dummy-${{ env.DUMMY_TEST_VERSION }}" || true
+        run: xplat task tools:gh:release:delete -- "dummy-${{ env.DUMMY_TEST_VERSION }}" || true
 
   # ===========================================================================
   # CGO=1: Create empty release first
@@ -161,8 +161,8 @@ jobs:
 
       - name: Create empty release
         run: |
-          xplat task gh:release:delete -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" || true
-          xplat task gh:release:create -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}"
+          xplat task tools:gh:release:delete -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" || true
+          xplat task tools:gh:release:create -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}"
 
   # ===========================================================================
   # CGO=1: Each platform builds + uploads to the shared release
@@ -227,7 +227,7 @@ jobs:
         run: |
           echo "Uploading Linux binary..."
           ls -la .build/dummy-cgo-*
-          xplat task gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-linux-amd64
+          xplat task tools:gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-linux-amd64
 
       - name: Upload binaries to release (macOS)
         if: runner.os == 'macOS'
@@ -235,7 +235,7 @@ jobs:
         run: |
           echo "Uploading macOS binaries..."
           ls -la .build/dummy-cgo-*
-          xplat task gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-darwin-amd64 .build/dummy-cgo-darwin-arm64
+          xplat task tools:gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-darwin-amd64 .build/dummy-cgo-darwin-arm64
 
       - name: Upload binaries to release (Windows)
         if: runner.os == 'Windows'
@@ -243,7 +243,7 @@ jobs:
         run: |
           echo "Uploading Windows binary..."
           ls -la .build/dummy-cgo-*
-          xplat task gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-windows-amd64.exe
+          xplat task tools:gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-windows-amd64.exe
 
       - name: Run dummy-cgo
         shell: bash
@@ -300,4 +300,4 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Delete test release
-        run: xplat task gh:release:delete -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" || true
+        run: xplat task tools:gh:release:delete -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" || true
