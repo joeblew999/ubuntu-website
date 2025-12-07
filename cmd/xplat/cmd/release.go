@@ -40,6 +40,7 @@ type Platform struct {
 // BuildMatrix represents the full build configuration
 type BuildMatrix struct {
 	Tool      string     `json:"tool"`
+	BinName   string     `json:"bin_name"`  // Actual binary name (e.g., task-ui vs tui)
 	Lang      string     `json:"lang"`
 	CGO       bool       `json:"cgo"`
 	Platforms []Platform `json:"platforms"`
@@ -186,12 +187,18 @@ func getToolConfig(tool string) (*BuildMatrix, error) {
 		return nil, fmt.Errorf("failed to parse taskfile: %w", err)
 	}
 
-	// Find CGO var (convention: <TOOL>_CGO or uppercase variant)
+	// Find CGO var and BIN var (convention: <TOOL>_CGO, <TOOL>_BIN)
 	cgo := false
+	binName := tool // Default to tool name
 	for k, v := range vars {
-		if strings.HasSuffix(strings.ToUpper(k), "_CGO") {
+		upperK := strings.ToUpper(k)
+		if strings.HasSuffix(upperK, "_CGO") {
 			cgo = v == "1" || strings.ToLower(v) == "true"
-			break
+		}
+		if strings.HasSuffix(upperK, "_BIN") {
+			// Extract binary name, removing {{exeExt}} template
+			binName = strings.TrimSuffix(v, "{{exeExt}}")
+			binName = strings.TrimSuffix(binName, ".exe")
 		}
 	}
 
@@ -208,6 +215,7 @@ func getToolConfig(tool string) (*BuildMatrix, error) {
 
 	return &BuildMatrix{
 		Tool:      tool,
+		BinName:   binName,
 		Lang:      "go", // For now, assume Go. Could detect from source later
 		CGO:       cgo,
 		Platforms: platforms,
@@ -242,6 +250,7 @@ func runReleaseMatrix(cmd *cobra.Command, args []string) error {
 		}
 		output := map[string]interface{}{
 			"include":        includes,
+			"bin_name":       matrix.BinName,
 			"cgo":            matrix.CGO,
 			"cross_compile":  !matrix.CGO,
 		}

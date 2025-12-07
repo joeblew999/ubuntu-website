@@ -89,6 +89,8 @@ jobs:
   build:
     needs: setup
     runs-on: ubuntu-latest
+    outputs:
+      bin_name: ${{ steps.config.outputs.bin_name }}
     env:
       TOOL: ${{ needs.setup.outputs.tool }}
       RELEASE_VERSION: ${{ needs.setup.outputs.version }}
@@ -110,6 +112,14 @@ jobs:
       - name: Build xplat
         run: go build -o /tmp/xplat ./cmd/xplat
 
+      # Get tool config (bin_name differs from tool namespace for some tools)
+      - name: Get tool config
+        id: config
+        run: |
+          BIN_NAME=$(/tmp/xplat release matrix ${{ needs.setup.outputs.tool }} | jq -r '.bin_name')
+          echo "bin_name=${BIN_NAME}" >> $GITHUB_OUTPUT
+          echo "Binary name: ${BIN_NAME}"
+
       # Use xplat to build all platforms
       - name: Build all platforms
         run: /tmp/xplat release build ${{ needs.setup.outputs.tool }}
@@ -121,8 +131,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.setup.outputs.tool }}-binaries
-          path: .build/${{ needs.setup.outputs.tool }}-*
+          name: ${{ steps.config.outputs.bin_name }}-binaries
+          path: .build/${{ steps.config.outputs.bin_name }}-*
 
   # Test on native platforms to verify binaries work
   test:
@@ -142,6 +152,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       TOOL: ${{ needs.setup.outputs.tool }}
+      BIN_NAME: ${{ needs.build.outputs.bin_name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -154,7 +165,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup.outputs.tool }}-binaries
+          name: ${{ needs.build.outputs.bin_name }}-binaries
           path: .build
 
       - name: List downloaded files
@@ -175,6 +186,7 @@ jobs:
       contents: write
     env:
       TOOL: ${{ needs.setup.outputs.tool }}
+      BIN_NAME: ${{ needs.build.outputs.bin_name }}
       RELEASE_VERSION: ${{ needs.setup.outputs.version }}
     steps:
       - uses: actions/checkout@v4
@@ -182,7 +194,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup.outputs.tool }}-binaries
+          name: ${{ needs.build.outputs.bin_name }}-binaries
           path: release
 
       - name: List release files
