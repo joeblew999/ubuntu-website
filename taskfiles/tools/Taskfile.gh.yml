@@ -10,8 +10,10 @@
 version: '3'
 
 vars:
+  # GH_VERSION comes from versions.env (loaded by root Taskfile dotenv)
   # Binary name with platform-specific extension (.exe on Windows)
   GH_BIN: 'gh{{exeExt}}'
+  GH_CGO: '0'  # No CGO needed - for consistency with other tools
 
 tasks:
   # ===========================================================================
@@ -19,25 +21,32 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure gh CLI is installed and authenticated
-    # status: provides true idempotency - skips entirely if gh exists
+    desc: Ensure gh CLI is installed
+    # status: skips if gh exists in PATH (works locally and in CI)
     status:
-      - command -v gh
+      - '{{.GH_BIN}} --version'
     cmds:
       - |
-        echo "ERROR: gh not found"
-        echo "Install: https://cli.github.com/"
+        echo "ERROR: gh CLI not found"
+        echo ""
+        echo "Install options:"
+        echo "  macOS:   brew install gh"
+        echo "  Linux:   https://github.com/cli/cli/blob/trunk/docs/install_linux.md"
+        echo "  Windows: winget install GitHub.cli"
+        echo "  Manual:  https://cli.github.com/"
         exit 1
 
   check:validate:
     desc: Validate gh CLI works and show auth status
+    deps: [check:deps]
     cmds:
       - |
-        echo "OK: gh $(gh --version | head -1 | cut -d' ' -f3)"
+        VERSION=$({{.GH_BIN}} --version | head -1 | cut -d' ' -f3)
+        echo "OK: gh $VERSION"
 
         # Check auth (skip in CI - uses GITHUB_TOKEN automatically)
         if [ -z "$GITHUB_ACTIONS" ]; then
-          if ! gh auth status >/dev/null 2>&1; then
+          if ! {{.GH_BIN}} auth status >/dev/null 2>&1; then
             echo "WARN: gh not authenticated. Run: gh auth login"
           else
             echo "OK: gh authenticated"
