@@ -214,7 +214,15 @@ xplat task dummy:build
   run: xplat task dummy:build
 ```
 
-**Compatibility:** `xplat task` supports all Task flags (`-t`, `-l`, `-f`, etc.) and provides ~99% CLI compatibility. See `cmd/xplat/cmd/task.go` for implementation details.
+**Compatibility - GOLDEN RULE:** `xplat task` MUST behave EXACTLY like standalone `task`. This is critical for DRY - the same Taskfile commands must work identically whether run with `task` or `xplat task`.
+
+Key compatibility requirements:
+- All flags (`-t`, `-l`, `-f`, `-v`, etc.) work identically
+- CLI_ARGS (`-- args`) are passed through correctly to tasks
+- Exit codes match Task's behavior
+- Output format matches Task's format
+
+If you find ANY difference between `task` and `xplat task` behavior, it's a bug that must be fixed. Test locally with both commands to verify. See `cmd/xplat/cmd/task.go` for implementation details.
 
 **Why embed Task?**
 - Eliminates `go install task` step (33s+ on first run)
