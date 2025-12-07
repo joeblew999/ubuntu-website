@@ -1,0 +1,81 @@
+# Test workflow for dummy tool round-trip
+# This validates the full build/release/install cycle works in CI
+#
+# Tests:
+#   1. Build from source (task dummy:build)
+#   2. Release build with version injection (task dummy:release:build)
+#   3. Install via xplat binary install (task dummy:check:deps)
+#   4. Run and verify output (task dummy:run)
+#
+name: "Test: Dummy Round-Trip"
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'cmd/dummy/**'
+      - 'cmd/xplat/**'
+      - 'taskfiles/Taskfile.dummy.yml'
+      - 'taskfiles/toolchain/Taskfile.golang.yml'
+      - '.github/workflows/test-dummy.yml'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
+      # Step 1: Build xplat first (needed by other tasks)
+      - name: Build xplat
+        run: task tools:xplat:check:deps
+
+      # Step 2: Test dummy:build (local dev build)
+      - name: Test dummy:build
+        run: task dummy:build
+
+      # Step 3: Test dummy:release:build (release build with version)
+      - name: Test dummy:release:build
+        run: task dummy:release:build
+
+      # Step 4: Test dummy:release:test (verify built binary)
+      - name: Test dummy:release:test
+        run: task dummy:release:test
+
+      # Step 5: Remove any installed dummy, then test check:deps
+      - name: Clean installed dummy
+        run: |
+          rm -f ~/.local/bin/dummy 2>/dev/null || true
+          rm -f ~/bin/dummy.exe 2>/dev/null || true
+        shell: bash
+
+      # Step 6: Test dummy:check:deps (should build from source)
+      - name: Test dummy:check:deps
+        run: task dummy:check:deps
+
+      # Step 7: Test dummy:run
+      - name: Test dummy:run
+        run: task dummy:run
+
+      # Step 8: Verify version output
+      - name: Verify output
+        run: |
+          OUTPUT=$(task dummy:run 2>&1 | tail -1)
+          echo "Output: $OUTPUT"
+          if [ "$OUTPUT" != "dev" ]; then
+            echo "ERROR: Expected 'dev', got '$OUTPUT'"
+            exit 1
+          fi
+          echo "OK: dummy outputs correct version"
+        shell: bash

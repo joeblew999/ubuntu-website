@@ -42,9 +42,14 @@ Designed to fill gaps in Task's built-in shell interpreter.`,
 	rootCmd.AddCommand(cmd.CatCmd)
 	rootCmd.AddCommand(cmd.TouchCmd)
 	rootCmd.AddCommand(cmd.EnvCmd)
+	rootCmd.AddCommand(cmd.JqCmd)
 
 	// P3 (binary management)
 	rootCmd.AddCommand(cmd.BinaryCmd)
+
+	// P4 (archive operations)
+	rootCmd.AddCommand(cmd.ExtractCmd)
+	rootCmd.AddCommand(cmd.FetchCmd)
 
 	// P4 (release orchestration)
 	rootCmd.AddCommand(cmd.ReleaseCmd)

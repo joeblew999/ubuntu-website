@@ -29,6 +29,7 @@ version: '3'
 #   toolchain:* - Compilers/runtimes (golang, rust)
 #   release:*   - Release builds for binary tools
 #   ci:*        - CI interface tasks
+#   dev:*       - Development workflow (wraps pc + tui)
 #   pc:*        - Process-Compose (dev process orchestration)
 #   tui:*       - Task-UI (web dashboard for tasks)
 #
@@ -62,7 +63,11 @@ includes:
   # Release builds
   release: ./taskfiles/Taskfile.release.yml
 
+  # Test tools (minimal binaries for fast workflow testing)
+  dummy: ./taskfiles/Taskfile.dummy.yml
+
   # Development workflow
+  dev: ./taskfiles/Taskfile.dev.yml
   pc: ./taskfiles/tools/Taskfile.process-compose.yml
   tui: ./taskfiles/tools/Taskfile.task-ui.yml
 

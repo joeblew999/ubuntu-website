@@ -1,0 +1,90 @@
+# Dummy tool for testing release workflows quickly
+# Minimal binary - just prints version
+#
+# Full round-trip test:
+#   1. task dummy:release:publish VERSION=v0.0.1  # Build all platforms, publish to GitHub
+#   2. rm ~/.local/bin/dummy                      # Remove local binary
+#   3. task dummy:check:deps                      # Downloads from GitHub release
+#   4. task dummy:run                             # Should print v0.0.1
+#
+version: '3'
+
+vars:
+  DUMMY_VERSION: v0.0.1
+  DUMMY_REPO: joeblew999/ubuntu-website
+  DUMMY_BIN: 'dummy{{exeExt}}'
+  DUMMY_CGO: '0'
+
+tasks:
+  # ===========================================================================
+  # Check (downloads from release if missing)
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure dummy binary is available (builds from source or downloads)
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.DUMMY_BIN}}"
+    cmds:
+      - '{{.XPLAT_BIN}} binary install dummy {{.DUMMY_VERSION}} {{.DUMMY_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/dummy"'
+
+  check:validate:
+    desc: Verify dummy works
+    deps: [check:deps]
+    cmds:
+      - '"{{.BIN_INSTALL_DIR}}/{{.DUMMY_BIN}}"'
+
+  # ===========================================================================
+  # Run
+  # ===========================================================================
+
+  run:
+    desc: Run the dummy binary
+    deps: [check:deps]
+    cmds:
+      - '"{{.BIN_INSTALL_DIR}}/{{.DUMMY_BIN}}"'
+
+  # ===========================================================================
+  # Build (local development)
+  # ===========================================================================
+
+  build:
+    desc: Build dummy binary locally
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.DUMMY_BIN}}'
+          VERSION: dev
+          SOURCE: '{{.ROOT_DIR}}/cmd/dummy'
+          CGO: '{{.DUMMY_CGO}}'
+
+  # ===========================================================================
+  # Release
+  # ===========================================================================
+
+  release:build:
+    desc: Build dummy for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: :toolchain:golang:build
+        vars:
+          BIN: '{{.DUMMY_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .DUMMY_VERSION}}'
+          SOURCE: '{{.ROOT_DIR}}/cmd/dummy'
+          CGO: '{{.DUMMY_CGO}}'
+
+  release:test:
+    desc: Test built dummy binary
+    cmds:
+      - task: :toolchain:golang:build:test
+        vars:
+          BIN: '{{.DUMMY_BIN}}'
+
+  release:publish:
+    desc: Build all platforms and create GitHub release
+    requires:
+      vars: [VERSION]
+    cmds:
+      - '{{.XPLAT_BIN}} release build dummy'
+      - task: :tools:gh:release:publish
+        vars:
+          NAME: 'dummy'
+          VERSION: '{{.VERSION}}'
