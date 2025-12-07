@@ -34,13 +34,22 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # Install Task via go install (avoids arduino/setup-task rate limits)
-      - name: Install Task
-        run: go install github.com/go-task/task/v3/cmd/task@latest
-
       - name: Add Go bin to PATH
         shell: bash
         run: echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      # Cache Go bin directory (where go install puts compiled binaries)
+      - name: Cache Go bin
+        id: cache-go-bin
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin
+          key: go-bin-task-${{ runner.os }}-v3.43.3
+
+      # Install Task via go install (only if not cached)
+      - name: Install Task
+        if: steps.cache-go-bin.outputs.cache-hit != 'true'
+        run: go install github.com/go-task/task/v3/cmd/task@v3.43.3
 
       # Windows: Set HOME from USERPROFILE (Task's .HOME builtin needs it)
       - name: Set HOME on Windows
