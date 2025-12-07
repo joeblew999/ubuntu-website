@@ -48,35 +48,37 @@ jobs:
       - name: Build xplat (with embedded Task)
         shell: bash
         run: |
-          mkdir -p "$HOME/.local/bin"
           if [ "$RUNNER_OS" == "Windows" ]; then
+            mkdir -p "$HOME/bin"
             go build -o "$HOME/bin/xplat.exe" ./cmd/xplat
+            echo "$HOME/bin" >> $GITHUB_PATH
           else
+            mkdir -p "$HOME/.local/bin"
             go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
           fi
-
-      - name: Add bin to PATH
-        shell: bash
-        run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          echo "$HOME/bin" >> $GITHUB_PATH
 
       # Verify xplat task works
       - name: Verify xplat task
+        shell: bash
         run: xplat task --version
 
       # All subsequent steps use "xplat task" instead of "task"
       - name: Build dummy
+        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml build
 
       - name: Release build
+        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:build
 
       - name: Test release binary
+        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:test
 
       # xplat smart build - skips on non-Linux for CGO=0
       - name: Cross-compile (xplat smart build)
+        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:cross
 
       # Verify all binaries built (Linux only)
@@ -102,6 +104,7 @@ jobs:
           xplat task -t taskfiles/Taskfile.dummy-ci.yml check:deps
 
       - name: Run dummy
+        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml run
 
       - name: Verify output
