@@ -56,6 +56,17 @@ var allPlatforms = []Platform{
 	{OS: "windows", Arch: "arm64", Runner: "windows-latest", CrossCompile: true},
 }
 
+// binaryFilename generates the standard binary filename for a platform.
+// Pattern: {name}-{os}-{arch}{ext}
+// This is the single source of truth for binary naming convention.
+func binaryFilename(name string, goos, goarch string) string {
+	ext := ""
+	if goos == "windows" {
+		ext = ".exe"
+	}
+	return fmt.Sprintf("%s-%s-%s%s", name, goos, goarch, ext)
+}
+
 // ReleaseMatrixCmd outputs the build matrix for a tool
 var ReleaseMatrixCmd = &cobra.Command{
 	Use:   "matrix <tool>",
@@ -91,19 +102,55 @@ Examples:
 	RunE: runReleaseBuild,
 }
 
+// ReleaseListCmd lists built release binaries for a tool
+var ReleaseListCmd = &cobra.Command{
+	Use:   "list <tool>",
+	Short: "List built release binaries for a tool",
+	Long: `Lists all built release binaries for a tool in the build directory.
+
+Uses the allPlatforms list to check for expected binary files.
+Only outputs files that actually exist.
+
+Examples:
+  xplat release list dummy
+  xplat release list dummy --dir .build
+  xplat release list analytics --dir /custom/path`,
+	Args: cobra.ExactArgs(1),
+	RunE: runReleaseList,
+}
+
+// ReleaseBinaryNameCmd prints the binary filename for current platform
+var ReleaseBinaryNameCmd = &cobra.Command{
+	Use:   "binary-name <tool>",
+	Short: "Print binary filename for current platform",
+	Long: `Prints the standard binary filename for the current platform.
+
+Uses the same naming convention as release builds: {name}-{os}-{arch}{ext}
+
+Examples:
+  xplat release binary-name dummy     # on macOS ARM: dummy-darwin-arm64
+  xplat release binary-name analytics # on Linux: analytics-linux-amd64`,
+	Args: cobra.ExactArgs(1),
+	RunE: runReleaseBinaryName,
+}
+
 var (
 	matrixFormat   string
 	buildCurrent   bool
 	buildPlatform  string
+	listBuildDir   string
 )
 
 func init() {
 	ReleaseMatrixCmd.Flags().StringVar(&matrixFormat, "format", "json", "Output format: json, github")
 	ReleaseBuildCmd.Flags().BoolVar(&buildCurrent, "current", false, "Only build for current platform")
 	ReleaseBuildCmd.Flags().StringVar(&buildPlatform, "platform", "", "Build for specific platform (e.g., linux/amd64)")
+	ReleaseListCmd.Flags().StringVar(&listBuildDir, "dir", ".build", "Build directory to search for binaries")
 
 	ReleaseCmd.AddCommand(ReleaseMatrixCmd)
 	ReleaseCmd.AddCommand(ReleaseBuildCmd)
+	ReleaseCmd.AddCommand(ReleaseListCmd)
+	ReleaseCmd.AddCommand(ReleaseBinaryNameCmd)
 }
 
 // TaskfileVars represents the vars section of a Taskfile
@@ -384,5 +431,30 @@ func runReleaseBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Printf("\nOK: Built %s for %d platform(s)\n", tool, len(targetPlatforms))
+	return nil
+}
+
+func runReleaseList(cmd *cobra.Command, args []string) error {
+	tool := args[0]
+
+	found := 0
+	for _, p := range allPlatforms {
+		filename := filepath.Join(listBuildDir, binaryFilename(tool, p.OS, p.Arch))
+		if _, err := os.Stat(filename); err == nil {
+			fmt.Println(filename)
+			found++
+		}
+	}
+
+	if found == 0 {
+		return fmt.Errorf("no binaries found for %s in %s", tool, listBuildDir)
+	}
+
+	return nil
+}
+
+func runReleaseBinaryName(cmd *cobra.Command, args []string) error {
+	tool := args[0]
+	fmt.Println(binaryFilename(tool, runtime.GOOS, runtime.GOARCH))
 	return nil
 }

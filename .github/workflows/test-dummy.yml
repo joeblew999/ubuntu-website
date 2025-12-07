@@ -1,8 +1,8 @@
 # Test workflow for dummy tools FULL round-trip
 # Tests BOTH CGO=0 and CGO=1 to validate xplat smart build:
 #
-# CGO=0 (dummy):     Linux builds ALL 6 platforms, creates release, verify on 3 platforms
-# CGO=1 (dummy-cgo): Each platform builds native + uploads to shared release, verify on 3 platforms
+# CGO=0 (dummy):     Single ci:test task does full round-trip
+# CGO=1 (dummy-cgo): Each platform builds native + uploads to shared release
 #
 # Uses gh taskfile for release operations (no upload-artifact)
 #
@@ -23,17 +23,17 @@ on:
       - '.github/workflows/test-dummy.yml'
 
 env:
-  # Test release tag - includes run ID to avoid conflicts
+  # Test release tags - include run ID to avoid conflicts
   DUMMY_TEST_VERSION: v0.0.0-test-${{ github.run_id }}
   DUMMY_CGO_TEST_VERSION: v0.0.0-cgo-test-${{ github.run_id }}
   GH_TOKEN: ${{ github.token }}
 
 jobs:
   # ===========================================================================
-  # CGO=0: Linux builds all 6, creates release
+  # CGO=0: Single ci:test does full round-trip
   # ===========================================================================
-  build-cgo0:
-    name: "CGO=0 Build & Release"
+  test-cgo0:
+    name: "CGO=0 Test"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -43,54 +43,33 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache: true
+
+      - name: Cache xplat binary
+        id: cache-xplat
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/xplat
+          key: xplat-linux-${{ hashFiles('cmd/xplat/**', 'go.mod', 'go.sum') }}
 
       - name: Build xplat (with embedded Task)
+        if: steps.cache-xplat.outputs.cache-hit != 'true'
         run: |
           mkdir -p "$HOME/.local/bin"
           go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Verify xplat task
-        run: xplat task --version
+      - name: Add xplat to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Build dummy (dev)
-        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml build
-
-      - name: Release build
-        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:build
-
-      - name: Test release binary
-        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:test
-
-      - name: Cross-compile all 6 platforms
-        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:cross
-
-      - name: Verify all 6 binaries
-        run: |
-          echo "Built binaries:"
-          ls -la .build/dummy-*
-          for BINARY in dummy-linux-amd64 dummy-linux-arm64 dummy-darwin-amd64 dummy-darwin-arm64 dummy-windows-amd64.exe dummy-windows-arm64.exe; do
-            if [ ! -f ".build/$BINARY" ]; then
-              echo "ERROR: Missing .build/$BINARY"
-              exit 1
-            fi
-          done
-          echo "OK: All 6 platform binaries built"
-
-      - name: Run dummy
-        run: xplat task -t taskfiles/Taskfile.dummy-ci.yml run
-
-      - name: Create test release
-        run: |
-          xplat task tools:gh:release:delete -- "dummy-${{ env.DUMMY_TEST_VERSION }}" || true
-          xplat task tools:gh:release:create-with-assets -- "dummy-${{ env.DUMMY_TEST_VERSION }}" .build/dummy-linux-amd64 .build/dummy-linux-arm64 .build/dummy-darwin-amd64 .build/dummy-darwin-arm64 .build/dummy-windows-amd64.exe .build/dummy-windows-arm64.exe
+      - name: Run ci:test (full round-trip, skip cleanup for verify jobs)
+        run: xplat task dummy:ci:test VERSION=${{ env.DUMMY_TEST_VERSION }} SKIP_CLEANUP=true
 
   # ===========================================================================
   # CGO=0: Verify downloaded binary works on each platform
   # ===========================================================================
   verify-cgo0:
     name: "CGO=0 Verify (${{ matrix.os }})"
-    needs: build-cgo0
+    needs: test-cgo0
     strategy:
       matrix:
         include:
@@ -123,20 +102,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Build xplat
-        run: |
-          mkdir -p "$HOME/.local/bin"
-          go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
       - name: Delete test release
-        run: xplat task tools:gh:release:delete -- "dummy-${{ env.DUMMY_TEST_VERSION }}" || true
+        run: gh release delete "dummy-${{ env.DUMMY_TEST_VERSION }}" --repo "${{ github.repository }}" --yes --cleanup-tag || true
 
   # ===========================================================================
   # CGO=1: Create empty release first
@@ -147,22 +114,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Build xplat
-        run: |
-          mkdir -p "$HOME/.local/bin"
-          go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
       - name: Create empty release
         run: |
-          xplat task tools:gh:release:delete -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" || true
-          xplat task tools:gh:release:create -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}"
+          gh release delete "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" --repo "${{ github.repository }}" --yes --cleanup-tag || true
+          gh release create "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" --repo "${{ github.repository }}" --title "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" --notes "CGO=1 test release"
 
   # ===========================================================================
   # CGO=1: Each platform builds + uploads to the shared release
@@ -182,22 +137,40 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache: true
 
       - name: Set HOME on Windows
         if: runner.os == 'Windows'
         shell: bash
         run: echo "HOME=$USERPROFILE" >> $GITHUB_ENV
 
+      - name: Cache xplat binary
+        id: cache-xplat
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/bin/xplat
+            ~/bin/xplat.exe
+          key: xplat-${{ runner.os }}-${{ hashFiles('cmd/xplat/**', 'go.mod', 'go.sum') }}
+
       - name: Build xplat (with embedded Task)
+        if: steps.cache-xplat.outputs.cache-hit != 'true'
         shell: bash
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
             mkdir -p "$HOME/bin"
             go build -o "$HOME/bin/xplat.exe" ./cmd/xplat
-            echo "$HOME/bin" >> $GITHUB_PATH
           else
             mkdir -p "$HOME/.local/bin"
             go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
+          fi
+
+      - name: Add xplat to PATH
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            echo "$HOME/bin" >> $GITHUB_PATH
+          else
             echo "$HOME/.local/bin" >> $GITHUB_PATH
           fi
 
@@ -207,47 +180,34 @@ jobs:
 
       - name: Build dummy-cgo (dev)
         shell: bash
-        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml build
+        run: xplat task dummy-cgo:build
 
       - name: Release build
         shell: bash
-        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:build
+        run: xplat task dummy-cgo:release:build
 
       - name: Test release binary
         shell: bash
-        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:test
+        run: xplat task dummy-cgo:release:test
 
       - name: Platform build (xplat smart build)
         shell: bash
-        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:cross
+        run: xplat release build dummy-cgo
 
-      - name: Upload binaries to release (Linux)
-        if: runner.os == 'Linux'
+      - name: Verify binaries built
+        shell: bash
+        run: xplat task dummy-cgo:release:verify
+
+      - name: Upload binaries to release
         shell: bash
         run: |
-          echo "Uploading Linux binary..."
-          ls -la .build/dummy-cgo-*
-          xplat task tools:gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-linux-amd64
-
-      - name: Upload binaries to release (macOS)
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          echo "Uploading macOS binaries..."
-          ls -la .build/dummy-cgo-*
-          xplat task tools:gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-darwin-amd64 .build/dummy-cgo-darwin-arm64
-
-      - name: Upload binaries to release (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          echo "Uploading Windows binary..."
-          ls -la .build/dummy-cgo-*
-          xplat task tools:gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-windows-amd64.exe
+          echo "Uploading binaries..."
+          FILES=$(xplat release list dummy-cgo | tr '\n' ' ')
+          xplat task tools:gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" $FILES
 
       - name: Run dummy-cgo
         shell: bash
-        run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml run
+        run: xplat task dummy-cgo:run
 
   # ===========================================================================
   # CGO=1: Verify downloaded binary works on each platform
@@ -287,17 +247,5 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Build xplat
-        run: |
-          mkdir -p "$HOME/.local/bin"
-          go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
       - name: Delete test release
-        run: xplat task tools:gh:release:delete -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" || true
+        run: gh release delete "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" --repo "${{ github.repository }}" --yes --cleanup-tag || true

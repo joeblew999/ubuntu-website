@@ -9,11 +9,11 @@ package main
 import "C"
 import "fmt"
 
-// Version is set at build time via ldflags
-var Version = "dev"
+// version is set at build time via ldflags (-X main.version=xxx)
+var version = "dev"
 
 func main() {
 	// Use C to force CGO requirement
 	_ = C.rand()
-	fmt.Println(Version)
+	fmt.Println(version)
 }
