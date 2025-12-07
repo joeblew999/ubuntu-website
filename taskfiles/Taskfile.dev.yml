@@ -1,0 +1,72 @@
+# Development Workflow Tasks
+#
+# Unified local development experience combining:
+#   - Process-Compose (process orchestration with TUI)
+#   - Task-UI (web dashboard for task execution)
+#
+# Usage:
+#   task dev:up           Start Hugo + dev tools with TUI dashboard
+#   task dev:down         Stop all dev processes
+#   task dev:ui           Start Task-UI web dashboard at http://localhost:3000
+#
+# This is a convenience wrapper - you can also use the tools directly:
+#   task pc:up            Process-Compose directly
+#   task tui:up           Task-UI directly
+#
+# See: process-compose.yaml for process definitions
+
+version: '3'
+
+tasks:
+  # ===========================================================================
+  # Quick Start (dev:up/down)
+  # ===========================================================================
+
+  up:
+    desc: Start all dev processes with TUI dashboard (Hugo + tools)
+    cmds:
+      - task: :tools:pc:up
+
+  down:
+    desc: Stop all dev processes
+    cmds:
+      - task: :tools:pc:down
+
+  logs:
+    desc: View combined process logs
+    cmds:
+      - task: :tools:pc:logs
+
+  status:
+    desc: Show process status
+    cmds:
+      - task: :tools:pc:status
+
+  # ===========================================================================
+  # Task-UI Web Dashboard
+  # ===========================================================================
+
+  ui:
+    desc: Start Task-UI web dashboard at http://localhost:3000
+    cmds:
+      - task: :tools:tui:up
+
+  # ===========================================================================
+  # Process Control (individual processes)
+  # ===========================================================================
+
+  restart:
+    desc: Restart a specific process (PROCESS=hugo)
+    requires:
+      vars: [PROCESS]
+    cmds:
+      - task: :tools:pc:restart
+        vars:
+          PROCESS: '{{.PROCESS}}'
+
+  hugo:
+    desc: Restart Hugo dev server
+    cmds:
+      - task: :tools:pc:restart
+        vars:
+          PROCESS: hugo
