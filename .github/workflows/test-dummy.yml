@@ -3,7 +3,7 @@
 # - CGO=0: Linux builds ALL platforms, macOS/Windows skip
 # - CGO=1: Each platform builds its own binaries
 #
-# This pattern allows ONE workflow for ALL tools
+# Uses self-contained CI Taskfile for isolation
 #
 name: "Test: Dummy Round-Trip"
 
@@ -14,7 +14,9 @@ on:
       - 'cmd/dummy/**'
       - 'cmd/xplat/**'
       - 'taskfiles/Taskfile.dummy.yml'
+      - 'taskfiles/Taskfile.dummy-ci.yml'
       - 'taskfiles/toolchain/Taskfile.golang.yml'
+      - 'taskfiles/tools/Taskfile.xplat.yml'
       - '.github/workflows/test-dummy.yml'
 
 jobs:
@@ -35,48 +37,41 @@ jobs:
         with:
           version: 3.x
 
-      # Step 1: Build xplat first (needed by other tasks)
-      # Build directly to avoid nested taskfile path issues on Windows
-      - name: Build xplat
+      # Use self-contained CI Taskfile for isolation
+      - name: Setup xplat
+        working-directory: taskfiles
+        run: task -t Taskfile.dummy-ci.yml setup
+
+      - name: Add bin to PATH
         shell: bash
         run: |
-          mkdir -p ~/.local/bin ~/bin
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            go build -o ~/bin/xplat.exe ./cmd/xplat
-            echo "$HOME/bin" >> $GITHUB_PATH
-          else
-            go build -o ~/.local/bin/xplat ./cmd/xplat
-            echo "$HOME/.local/bin" >> $GITHUB_PATH
-          fi
-          echo "xplat built successfully"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/bin" >> $GITHUB_PATH
 
-      # Step 2: Test dummy:build (local dev build)
-      - name: Build dummy (current platform)
-        run: task dummy:build
+      - name: Build dummy
+        working-directory: taskfiles
+        run: task -t Taskfile.dummy-ci.yml build
 
-      # Step 3: Test release build for current platform
-      - name: Release build (current platform)
-        run: task dummy:release:build
+      - name: Release build
+        working-directory: taskfiles
+        run: task -t Taskfile.dummy-ci.yml release:build
 
-      # Step 4: Test built binary
-      - name: Test built binary
-        run: task dummy:release:test
+      - name: Test release binary
+        working-directory: taskfiles
+        run: task -t Taskfile.dummy-ci.yml release:test
 
-      # Step 5: xplat release build - smart based on CGO and OS
-      # CGO=0 on Linux: builds ALL platforms
-      # CGO=0 on macOS/Windows: skips (Linux already built)
-      # CGO=1 on any OS: builds that OS's platforms
+      # xplat smart build - skips on non-Linux for CGO=0
       - name: Cross-compile (xplat smart build)
-        run: xplat release build dummy
+        working-directory: taskfiles
+        run: task -t Taskfile.dummy-ci.yml release:cross
 
-      # Step 6: Verify binaries (Linux only for CGO=0)
+      # Verify all binaries built (Linux only)
       - name: Verify cross-compile output
         if: runner.os == 'Linux'
+        shell: bash
         run: |
           echo "Built binaries:"
           ls -la .build/dummy-* || echo "No binaries in .build/"
-
-          # Check all 6 expected binaries exist
           for BINARY in dummy-linux-amd64 dummy-linux-arm64 dummy-darwin-amd64 dummy-darwin-arm64 dummy-windows-amd64.exe dummy-windows-arm64.exe; do
             if [ ! -f ".build/$BINARY" ]; then
               echo "ERROR: Missing .build/$BINARY"
@@ -85,23 +80,23 @@ jobs:
           done
           echo "OK: All 6 platform binaries built"
 
-      # Step 7: Clean installed dummy, then test check:deps
       - name: Clean and test check:deps
         shell: bash
+        working-directory: taskfiles
         run: |
           rm -f ~/.local/bin/dummy 2>/dev/null || true
           rm -f ~/bin/dummy.exe 2>/dev/null || true
-          task dummy:check:deps
+          task -t Taskfile.dummy-ci.yml check:deps
 
-      # Step 8: Test dummy:run
       - name: Run dummy
-        run: task dummy:run
+        working-directory: taskfiles
+        run: task -t Taskfile.dummy-ci.yml run
 
-      # Step 9: Verify version output
       - name: Verify output
         shell: bash
+        working-directory: taskfiles
         run: |
-          OUTPUT=$(task dummy:run 2>&1 | tail -1)
+          OUTPUT=$(task -t Taskfile.dummy-ci.yml run 2>&1 | tail -1)
           echo "Output: $OUTPUT"
           if [ "$OUTPUT" != "dev" ]; then
             echo "ERROR: Expected 'dev', got '$OUTPUT'"

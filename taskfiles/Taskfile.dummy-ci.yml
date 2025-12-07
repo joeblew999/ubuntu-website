@@ -1,0 +1,82 @@
+# Dummy Tool CI Taskfile
+# Self-contained taskfile for CI testing - includes only what's needed
+#
+# Usage in workflow: task -t taskfiles/Taskfile.dummy-ci.yml <task>
+#
+version: '3'
+
+includes:
+  toolchain:golang:
+    taskfile: ./toolchain/Taskfile.golang.yml
+  tools:xplat:
+    taskfile: ./tools/Taskfile.xplat.yml
+
+vars:
+  # Core paths - always use absolute HOME-based paths
+  BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+  XPLAT_BIN: '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}}'
+
+  # Dummy tool config
+  DUMMY_VERSION: v0.0.1
+  DUMMY_REPO: joeblew999/ubuntu-website
+  DUMMY_BIN: 'dummy{{exeExt}}'
+  DUMMY_CGO: '0'
+
+tasks:
+  # ===========================================================================
+  # Setup - Build xplat first
+  # ===========================================================================
+
+  setup:
+    desc: Build xplat and add to PATH (run first)
+    cmds:
+      - task: tools:xplat:check:deps
+
+  # ===========================================================================
+  # Dummy tasks (copied from Taskfile.dummy.yml with explicit paths)
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure dummy binary is available
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.DUMMY_BIN}}"
+    cmds:
+      - '{{.XPLAT_BIN}} binary install dummy {{.DUMMY_VERSION}} {{.DUMMY_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/dummy"'
+
+  run:
+    desc: Run the dummy binary
+    deps: [check:deps]
+    cmds:
+      - '"{{.BIN_INSTALL_DIR}}/{{.DUMMY_BIN}}"'
+
+  build:
+    desc: Build dummy binary locally
+    cmds:
+      - task: toolchain:golang:build
+        vars:
+          BIN: '{{.DUMMY_BIN}}'
+          VERSION: dev
+          SOURCE: '{{toSlash .ROOT_DIR}}/cmd/dummy'
+          CGO: '{{.DUMMY_CGO}}'
+
+  release:build:
+    desc: Build dummy for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - task: toolchain:golang:build
+        vars:
+          BIN: '{{.DUMMY_BIN}}'
+          VERSION: '{{.RELEASE_VERSION | default .DUMMY_VERSION}}'
+          SOURCE: '{{toSlash .ROOT_DIR}}/cmd/dummy'
+          CGO: '{{.DUMMY_CGO}}'
+
+  release:test:
+    desc: Test built dummy binary
+    cmds:
+      - task: toolchain:golang:build:test
+        vars:
+          BIN: '{{.DUMMY_BIN}}'
+
+  release:cross:
+    desc: Cross-compile for all platforms (CGO=0 only)
+    cmds:
+      - '{{.XPLAT_BIN}} release build dummy'

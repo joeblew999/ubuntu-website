@@ -17,9 +17,8 @@ vars:
   # Binary name with platform-specific extension (.exe on Windows)
   XPLAT_BIN: 'xplat{{exeExt}}'
   # BIN_INSTALL_DIR: Where to install binaries
-  # - Local projects: Override in root Taskfile.yml
-  # - Remote consumers: Uses this default (~/.local/bin on Unix, ~/bin on Windows)
-  BIN_INSTALL_DIR: '{{if .BIN_INSTALL_DIR}}{{.BIN_INSTALL_DIR}}{{else if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+  # Always use absolute HOME-based path to avoid nested taskfile resolution issues
+  BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
 
 tasks:
   # ===========================================================================
