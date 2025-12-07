@@ -1,14 +1,10 @@
 # Test workflow for dummy tools FULL round-trip
 # Tests BOTH CGO=0 and CGO=1 to validate xplat smart build:
 #
-# CGO=0 (dummy):     Linux builds ALL 6 platforms, macOS/Windows skip
-# CGO=1 (dummy-cgo): macOS builds 2, Linux/Windows build 1 each (4 total)
+# CGO=0 (dummy):     Linux builds ALL 6 platforms, creates release, verify on 3 platforms
+# CGO=1 (dummy-cgo): Each platform builds native + uploads to shared release, verify on 3 platforms
 #
-# Full round-trip tested:
-# 1. Build binaries (per platform matrix)
-# 2. Upload artifacts
-# 3. Create GitHub release (aggregated)
-# 4. Download from release and verify
+# Uses gh taskfile for release operations (no upload-artifact)
 #
 # Bootstrap: xplat embeds Task, so we only need to build xplat from source.
 #
@@ -30,18 +26,17 @@ env:
   # Test release tag - includes run ID to avoid conflicts
   DUMMY_TEST_VERSION: v0.0.0-test-${{ github.run_id }}
   DUMMY_CGO_TEST_VERSION: v0.0.0-cgo-test-${{ github.run_id }}
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   # ===========================================================================
-  # Test CGO=0 tool (dummy) - Linux builds all, others skip cross-compile
+  # CGO=0: Linux builds all 6, creates release
   # ===========================================================================
-  test-cgo0:
-    name: "CGO=0 (${{ matrix.os }})"
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-
+  build-cgo0:
+    name: "CGO=0 Build & Release"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -49,122 +44,53 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # Windows: Set HOME from USERPROFILE (Task's .HOME builtin needs it)
-      - name: Set HOME on Windows
-        if: runner.os == 'Windows'
-        shell: bash
-        run: echo "HOME=$USERPROFILE" >> $GITHUB_ENV
-
-      # Build xplat with embedded Task
       - name: Build xplat (with embedded Task)
-        shell: bash
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            mkdir -p "$HOME/bin"
-            go build -o "$HOME/bin/xplat.exe" ./cmd/xplat
-            echo "$HOME/bin" >> $GITHUB_PATH
-          else
-            mkdir -p "$HOME/.local/bin"
-            go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
-            echo "$HOME/.local/bin" >> $GITHUB_PATH
-          fi
+          mkdir -p "$HOME/.local/bin"
+          go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Verify xplat task
-        shell: bash
         run: xplat task --version
 
       - name: Build dummy (dev)
-        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml build
 
       - name: Release build
-        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:build
 
       - name: Test release binary
-        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:test
 
-      # xplat smart build - Linux builds all 6, macOS/Windows skip
-      - name: Cross-compile (xplat smart build)
-        shell: bash
+      - name: Cross-compile all 6 platforms
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml release:cross
 
-      # Verify all 6 binaries built (Linux only)
-      - name: Verify cross-compile output
-        if: runner.os == 'Linux'
-        shell: bash
+      - name: Verify all 6 binaries
         run: |
           echo "Built binaries:"
-          ls -la .build/dummy-* || echo "No binaries in .build/"
+          ls -la .build/dummy-*
           for BINARY in dummy-linux-amd64 dummy-linux-arm64 dummy-darwin-amd64 dummy-darwin-arm64 dummy-windows-amd64.exe dummy-windows-arm64.exe; do
             if [ ! -f ".build/$BINARY" ]; then
               echo "ERROR: Missing .build/$BINARY"
               exit 1
             fi
           done
-          echo "OK: All 6 platform binaries built (CGO=0 cross-compile works)"
+          echo "OK: All 6 platform binaries built"
 
       - name: Run dummy
-        shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-ci.yml run
-
-      # Upload artifacts (Linux only - it built all 6)
-      - name: Upload CGO=0 artifacts
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dummy-binaries
-          path: |
-            .build/dummy-linux-amd64
-            .build/dummy-linux-arm64
-            .build/dummy-darwin-amd64
-            .build/dummy-darwin-arm64
-            .build/dummy-windows-amd64.exe
-            .build/dummy-windows-arm64.exe
-          retention-days: 1
-
-  # ===========================================================================
-  # CGO=0 Release: Create test release from Linux artifacts
-  # ===========================================================================
-  release-cgo0:
-    name: "CGO=0 Release"
-    needs: test-cgo0
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download CGO=0 artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dummy-binaries
-          path: .build/
-
-      - name: List artifacts
-        run: ls -la .build/
 
       - name: Create test release
         run: |
-          # Delete if exists from previous run
-          gh release delete "dummy-${{ env.DUMMY_TEST_VERSION }}" --yes 2>/dev/null || true
-
-          # Create release
-          gh release create "dummy-${{ env.DUMMY_TEST_VERSION }}" \
-            --title "Dummy Test Release ${{ env.DUMMY_TEST_VERSION }}" \
-            --notes "Test release for CI validation. Will be deleted." \
-            --prerelease \
-            .build/dummy-*
+          xplat task gh:release:delete -- "dummy-${{ env.DUMMY_TEST_VERSION }}" || true
+          xplat task gh:release:create-with-assets -- "dummy-${{ env.DUMMY_TEST_VERSION }}" .build/dummy-linux-amd64 .build/dummy-linux-arm64 .build/dummy-darwin-amd64 .build/dummy-darwin-arm64 .build/dummy-windows-amd64.exe .build/dummy-windows-arm64.exe
 
   # ===========================================================================
-  # CGO=0 Verify: Download from release and verify on each platform
+  # CGO=0: Verify downloaded binary works on each platform
   # ===========================================================================
   verify-cgo0:
     name: "CGO=0 Verify (${{ matrix.os }})"
-    needs: release-cgo0
+    needs: build-cgo0
     strategy:
       matrix:
         include:
@@ -187,7 +113,7 @@ jobs:
           echo "OK: Downloaded binary works!"
 
   # ===========================================================================
-  # CGO=0 Cleanup: Delete test release
+  # CGO=0: Cleanup test release
   # ===========================================================================
   cleanup-cgo0:
     name: "CGO=0 Cleanup"
@@ -196,23 +122,60 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build xplat
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Delete test release
-        run: gh release delete "dummy-${{ env.DUMMY_TEST_VERSION }}" --yes --cleanup-tag 2>/dev/null || true
+        run: xplat task gh:release:delete -- "dummy-${{ env.DUMMY_TEST_VERSION }}" || true
 
   # ===========================================================================
-  # Test CGO=1 tool (dummy-cgo) - Each platform builds its own binaries
+  # CGO=1: Create empty release first
   # ===========================================================================
-  test-cgo1:
-    name: "CGO=1 (${{ matrix.os }})"
+  create-release-cgo1:
+    name: "CGO=1 Create Release"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build xplat
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Create empty release
+        run: |
+          xplat task gh:release:delete -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" || true
+          xplat task gh:release:create -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}"
+
+  # ===========================================================================
+  # CGO=1: Each platform builds + uploads to the shared release
+  # ===========================================================================
+  build-cgo1:
+    name: "CGO=1 Build (${{ matrix.os }})"
+    needs: create-release-cgo1
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -254,145 +217,44 @@ jobs:
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:test
 
-      # xplat smart build - each platform builds its own 2 binaries
       - name: Platform build (xplat smart build)
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml release:cross
 
-      # Verify platform-specific binaries built
-      # CGO=1: Only macOS has universal toolchain, Linux/Windows CI lack arm64 cross-compiler
-      - name: Verify platform build output (Linux)
+      - name: Upload binaries to release (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          echo "Built binaries:"
-          ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
-          # Linux CI lacks arm64 cross-compiler, so only linux-amd64 is built
-          if [ ! -f ".build/dummy-cgo-linux-amd64" ]; then
-            echo "ERROR: Missing .build/dummy-cgo-linux-amd64"
-            exit 1
-          fi
-          echo "OK: linux-amd64 binary built (CGO=1, native only)"
+          echo "Uploading Linux binary..."
+          ls -la .build/dummy-cgo-*
+          xplat task gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-linux-amd64
 
-      - name: Verify platform build output (macOS)
+      - name: Upload binaries to release (macOS)
         if: runner.os == 'macOS'
         shell: bash
         run: |
-          echo "Built binaries:"
-          ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
-          # Apple universal toolchain supports both arches
-          for BINARY in dummy-cgo-darwin-amd64 dummy-cgo-darwin-arm64; do
-            if [ ! -f ".build/$BINARY" ]; then
-              echo "ERROR: Missing .build/$BINARY"
-              exit 1
-            fi
-          done
-          echo "OK: Both darwin binaries built (CGO=1, Apple universal toolchain)"
+          echo "Uploading macOS binaries..."
+          ls -la .build/dummy-cgo-*
+          xplat task gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-darwin-amd64 .build/dummy-cgo-darwin-arm64
 
-      - name: Verify platform build output (Windows)
+      - name: Upload binaries to release (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          echo "Built binaries:"
-          ls -la .build/dummy-cgo-* || echo "No binaries in .build/"
-          # Windows CI lacks arm64 cross-compiler, so only windows-amd64 is built
-          if [ ! -f ".build/dummy-cgo-windows-amd64.exe" ]; then
-            echo "ERROR: Missing .build/dummy-cgo-windows-amd64.exe"
-            exit 1
-          fi
-          echo "OK: windows-amd64 binary built (CGO=1, native only)"
+          echo "Uploading Windows binary..."
+          ls -la .build/dummy-cgo-*
+          xplat task gh:release:upload -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" .build/dummy-cgo-windows-amd64.exe
 
       - name: Run dummy-cgo
         shell: bash
         run: xplat task -t taskfiles/Taskfile.dummy-cgo-ci.yml run
 
-      # Upload platform-specific artifacts (Linux)
-      - name: Upload CGO=1 artifacts (Linux)
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dummy-cgo-Linux
-          path: .build/dummy-cgo-linux-amd64
-          retention-days: 1
-
-      # Upload platform-specific artifacts (macOS - both arches)
-      - name: Upload CGO=1 artifacts (macOS)
-        if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dummy-cgo-macOS
-          path: |
-            .build/dummy-cgo-darwin-amd64
-            .build/dummy-cgo-darwin-arm64
-          retention-days: 1
-
-      # Upload platform-specific artifacts (Windows)
-      - name: Upload CGO=1 artifacts (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dummy-cgo-Windows
-          path: .build/dummy-cgo-windows-amd64.exe
-          retention-days: 1
-
   # ===========================================================================
-  # CGO=1 Release: Aggregate artifacts from all platforms, create release
-  # ===========================================================================
-  release-cgo1:
-    name: "CGO=1 Release"
-    needs: test-cgo1
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - uses: actions/checkout@v4
-
-      # Download artifacts from all platforms
-      - name: Download Linux artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dummy-cgo-Linux
-          path: .build/
-
-      - name: Download macOS artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dummy-cgo-macOS
-          path: .build/
-
-      - name: Download Windows artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dummy-cgo-Windows
-          path: .build/
-
-      - name: List all artifacts
-        run: |
-          echo "Aggregated binaries from all platforms:"
-          ls -la .build/
-          echo ""
-          echo "Expected: linux-amd64, darwin-amd64, darwin-arm64, windows-amd64"
-
-      - name: Create test release
-        run: |
-          # Delete if exists from previous run
-          gh release delete "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" --yes 2>/dev/null || true
-
-          # Create release with all platform binaries
-          gh release create "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" \
-            --title "Dummy-CGO Test Release ${{ env.DUMMY_CGO_TEST_VERSION }}" \
-            --notes "CGO=1 test release for CI validation. Aggregated from 3 platforms. Will be deleted." \
-            --prerelease \
-            .build/dummy-cgo-*
-
-  # ===========================================================================
-  # CGO=1 Verify: Download from release and verify on each platform
+  # CGO=1: Verify downloaded binary works on each platform
   # ===========================================================================
   verify-cgo1:
     name: "CGO=1 Verify (${{ matrix.os }})"
-    needs: release-cgo1
+    needs: build-cgo1
     strategy:
       matrix:
         include:
@@ -415,7 +277,7 @@ jobs:
           echo "OK: Downloaded CGO=1 binary works!"
 
   # ===========================================================================
-  # CGO=1 Cleanup: Delete test release
+  # CGO=1: Cleanup test release
   # ===========================================================================
   cleanup-cgo1:
     name: "CGO=1 Cleanup"
@@ -424,9 +286,18 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build xplat
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          go build -o "$HOME/.local/bin/xplat" ./cmd/xplat
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Delete test release
-        run: gh release delete "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" --yes --cleanup-tag 2>/dev/null || true
+        run: xplat task gh:release:delete -- "dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}" || true
