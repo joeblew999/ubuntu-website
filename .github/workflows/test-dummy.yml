@@ -86,7 +86,19 @@ jobs:
         run: |
           URL="https://github.com/${{ github.repository }}/releases/download/dummy-${{ env.DUMMY_TEST_VERSION }}/${{ matrix.binary }}"
           echo "Downloading: $URL"
-          curl -sL "$URL" -o dummy
+          # Retry up to 3 times with 5s delay (release assets may take a moment to propagate)
+          for i in 1 2 3; do
+            if curl -sfL "$URL" -o dummy; then
+              echo "Download succeeded on attempt $i"
+              break
+            fi
+            if [ $i -eq 3 ]; then
+              echo "ERROR: Failed to download after 3 attempts"
+              exit 1
+            fi
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
           chmod +x dummy 2>/dev/null || true
           ./dummy
           echo "OK: Downloaded binary works!"
@@ -231,7 +243,19 @@ jobs:
         run: |
           URL="https://github.com/${{ github.repository }}/releases/download/dummy-cgo-${{ env.DUMMY_CGO_TEST_VERSION }}/${{ matrix.binary }}"
           echo "Downloading: $URL"
-          curl -sL "$URL" -o dummy-cgo
+          # Retry up to 3 times with 5s delay (release assets may take a moment to propagate)
+          for i in 1 2 3; do
+            if curl -sfL "$URL" -o dummy-cgo; then
+              echo "Download succeeded on attempt $i"
+              break
+            fi
+            if [ $i -eq 3 ]; then
+              echo "ERROR: Failed to download after 3 attempts"
+              exit 1
+            fi
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
           chmod +x dummy-cgo 2>/dev/null || true
           ./dummy-cgo
           echo "OK: Downloaded CGO=1 binary works!"
