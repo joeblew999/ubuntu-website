@@ -322,7 +322,14 @@ func execTask(namespace, task string) error {
 	fullTask := fmt.Sprintf("%s:%s", namespace, task)
 	fmt.Printf(">>> Running: task %s\n", fullTask)
 
-	cmd := exec.Command("task", fullTask)
+	// Use xplat's embedded Task via os.Args[0] to ensure it works in CI
+	// where standalone Task may not be installed
+	xplatBin, err := os.Executable()
+	if err != nil {
+		xplatBin = os.Args[0]
+	}
+
+	cmd := exec.Command(xplatBin, "task", fullTask)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -338,8 +345,13 @@ func execTask(namespace, task string) error {
 func execTaskIfExists(namespace, task string) error {
 	fullTask := fmt.Sprintf("%s:%s", namespace, task)
 
-	// Check if task exists by running task --list
-	listCmd := exec.Command("task", "--list", "--json")
+	// Use xplat's embedded Task to check if task exists
+	xplatBin, err := os.Executable()
+	if err != nil {
+		xplatBin = os.Args[0]
+	}
+
+	listCmd := exec.Command(xplatBin, "task", "--list", "--json")
 	output, err := listCmd.Output()
 	if err != nil {
 		// If task list fails, try running anyway
