@@ -52,11 +52,12 @@ includes:
   url: ./taskfiles/Taskfile.url.yml
 
   # Infrastructure modules
-  git: ./taskfiles/Taskfile.git.yml
   lanip: ./taskfiles/Taskfile.lanip.yml
   ci: ./taskfiles/Taskfile.ci.yml
 
-  # Tools & Toolchains
+  # Tools & Toolchains (git exposed at top-level for convenience: git:deploy, git:status)
+  git:
+    taskfile: ./taskfiles/tools/Taskfile.git.yml
   tools: ./taskfiles/Taskfile.tools.yml
   toolchain: ./taskfiles/Taskfile.toolchain.yml
 
