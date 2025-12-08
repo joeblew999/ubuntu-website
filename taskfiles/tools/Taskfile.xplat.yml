@@ -16,6 +16,8 @@ vars:
   XPLAT_REPO: joeblew999/ubuntu-website
   # Binary name with platform-specific extension (.exe on Windows)
   XPLAT_BIN: 'xplat{{exeExt}}'
+  XPLAT_CGO: '0'  # No CGO needed - can cross-compile
+  XPLAT_AFFINITY: cross  # Can cross-compile from any platform
   # BIN_INSTALL_DIR: Where to install binaries
   # Always use absolute HOME-based path to avoid nested taskfile resolution issues
   BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
@@ -400,3 +402,28 @@ tasks:
         # Force reinstall
         rm -f "{{.BIN_INSTALL_DIR}}/xplat"
         XPLAT_VERSION="$LATEST" task tools:xplat:check:deps
+
+  # ===========================================================================
+  # Wrapper Tasks (API isolation layer)
+  # ===========================================================================
+  # These tasks wrap xplat commands to provide API isolation.
+  # If xplat CLI changes, only these wrappers need updating.
+  # Other taskfiles call these wrappers instead of xplat directly.
+
+  binary:install:
+    desc: Install a binary (wrapper for xplat binary install)
+    # Usage: task tools:xplat:binary:install -- <name> <version> <repo> [--source <path>]
+    cmds:
+      - '{{.XPLAT_BIN}} binary install {{.CLI_ARGS}}'
+
+  release:build:
+    desc: Build release binaries for all platforms (wrapper for xplat release build)
+    # Usage: task tools:xplat:release:build -- <tool>
+    cmds:
+      - '{{.XPLAT_BIN}} release build {{.CLI_ARGS}}'
+
+  release:list:
+    desc: List built release binaries (wrapper for xplat release list)
+    # Usage: task tools:xplat:release:list -- <tool>
+    cmds:
+      - '{{.XPLAT_BIN}} release list {{.CLI_ARGS}}'

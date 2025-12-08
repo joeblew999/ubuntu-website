@@ -10,10 +10,13 @@
 version: '3'
 
 vars:
-  # GH_VERSION comes from versions.env (loaded by root Taskfile dotenv)
-  GH_REPO: cli/cli
+  # Archetype: external - we install gh CLI from cli/cli repo, we don't build it
+  XPLAT_ARCHETYPE: external
+  # GH_VERSION comes from xplat.env (loaded by root Taskfile dotenv)
+  GH_VERSION: '{{.GH_VERSION}}'
   GH_BIN: 'gh{{exeExt}}'
-  GH_CGO: '0'  # No CGO needed - for consistency with other tools
+  # Source repo for downloads (not _REPO pattern - we don't release this)
+  GH_DOWNLOAD_REPO: cli/cli
   # Platform mapping for gh release assets (gh uses macOS not darwin)
   GH_OS_MAP: '{{if eq OS "darwin"}}macOS{{else if eq OS "windows"}}windows{{else}}linux{{end}}'
   GH_ARCH_MAP: '{{if eq ARCH "amd64"}}amd64{{else if eq ARCH "arm64"}}arm64{{else}}{{ARCH}}{{end}}'
@@ -38,7 +41,7 @@ tasks:
       # Strip 'v' prefix for gh asset naming (v2.83.1 -> 2.83.1)
       GH_VER_NUM: '{{trimPrefix "v" .GH_VERSION}}'
       ASSET_NAME: 'gh_{{.GH_VER_NUM}}_{{.GH_OS_MAP}}_{{.GH_ARCH_MAP}}.{{.GH_EXT}}'
-      DOWNLOAD_URL: 'https://github.com/{{.GH_REPO}}/releases/download/{{.GH_VERSION}}/{{.ASSET_NAME}}'
+      DOWNLOAD_URL: 'https://github.com/{{.GH_DOWNLOAD_REPO}}/releases/download/{{.GH_VERSION}}/{{.ASSET_NAME}}'
     cmds:
       - 'echo "Downloading gh {{.GH_VERSION}} for {{OS}}/{{ARCH}}..."'
       - '{{.XPLAT_BIN}} fetch --extract --strip 2 --include "*/bin/gh*" "{{.DOWNLOAD_URL}}" --output "{{.BIN_INSTALL_DIR}}"'

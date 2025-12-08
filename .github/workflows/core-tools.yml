@@ -17,7 +17,7 @@ on:
       - 'taskfiles/Taskfile.analytics.yml'
       - 'taskfiles/Taskfile.sitecheck.yml'
       - 'taskfiles/Taskfile.genlogo.yml'
-      - 'versions.env'
+      - 'xplat.env'
       - '.github/workflows/core-tools.yml'
   pull_request:
     paths:

@@ -3,6 +3,8 @@
 # Cloudflare Pages management, cache purging, and dashboard shortcuts.
 # NOTE: Deployments now happen automatically via Git integration.
 #
+# REQUIRES: wrangler (installed via Bun)
+#
 # Usage:
 #   task cf:status      - Check deployment status
 #   task cf:logs        - View deployment logs
@@ -13,11 +15,33 @@ version: '3'
 
 tasks:
   # ===========================================================================
+  # Checks
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure wrangler CLI is available
+    cmds:
+      - task: :wrangler:check:deps
+
+  check:validate:
+    desc: Validate wrangler can access Cloudflare
+    deps: [check:deps]
+    cmds:
+      - |
+        # Quick validation that wrangler can list projects
+        if {{.WRANGLER_CMD}} pages project list --json 2>/dev/null | head -1 >/dev/null; then
+          echo "OK: wrangler can access Cloudflare"
+        else
+          echo "WARN: Could not validate Cloudflare access (may need login)"
+        fi
+
+  # ===========================================================================
   # Status & Logs
   # ===========================================================================
 
   status:
     desc: Check deployment status
+    deps: [check:deps]
     cmds:
       - |
         echo "========================================"
@@ -39,6 +63,7 @@ tasks:
 
   logs:
     desc: View deployment logs
+    deps: [check:deps]
     cmds:
       - |
         echo "========================================"
@@ -50,6 +75,7 @@ tasks:
 
   tail:
     desc: Tail latest deployment logs
+    deps: [check:deps]
     cmds:
       - |
         echo "========================================"
@@ -61,6 +87,7 @@ tasks:
 
   preview-url:
     desc: Get and open the latest preview deployment URL
+    deps: [check:deps]
     cmds:
       - |
         echo "========================================"
@@ -108,12 +135,14 @@ tasks:
 
   secret:set:
     desc: Set a secret for Cloudflare Pages (e.g., HUGO_VERSION)
+    deps: [check:deps]
     cmds:
       - 'echo "Setting secret for Pages project..."'
       - '{{.WRANGLER_CMD}} pages secret put {{.CLI_ARGS}} --project-name={{.PROJECT_NAME}}'
 
   secret:list:
     desc: List secrets for Cloudflare Pages
+    deps: [check:deps]
     cmds:
       - '{{.WRANGLER_CMD}} pages secret list --project-name={{.PROJECT_NAME}}'
 
@@ -147,12 +176,14 @@ tasks:
 
   login:
     desc: "[DEPRECATED] Login to Cloudflare"
+    deps: [check:deps]
     cmds:
       - 'echo "DEPRECATED: This task is no longer needed with Git integration"'
       - '{{.WRANGLER_CMD}} login'
 
   init:
     desc: "[DEPRECATED] Initialize Cloudflare Pages project"
+    deps: [check:deps]
     cmds:
       - 'echo "DEPRECATED: Project is configured via Cloudflare dashboard"'
       - '{{.WRANGLER_CMD}} pages project create {{.PROJECT_NAME}} --production-branch=main'
@@ -166,6 +197,7 @@ tasks:
 
   delete:
     desc: "[DANGEROUS] Delete Cloudflare Pages project"
+    deps: [check:deps]
     cmds:
       - |
         echo "========================================"

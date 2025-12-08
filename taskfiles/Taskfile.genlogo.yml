@@ -13,11 +13,12 @@
 version: '3'
 
 vars:
-  # GENLOGO_VERSION comes from versions.env (loaded by root Taskfile dotenv)
-  # BIN_INSTALL_DIR comes from root Taskfile.yml
+  # Version from xplat.env (loaded by root Taskfile dotenv)
+  GENLOGO_VERSION: '{{.GENLOGO_VERSION}}'
   GENLOGO_REPO: joeblew999/ubuntu-website
   GENLOGO_BIN: 'genlogo{{exeExt}}'
   GENLOGO_CGO: '0'  # No CGO needed - can cross-compile
+  XPLAT_AFFINITY: cross  # Can cross-compile from any platform
 
 tasks:
   # ===========================================================================
@@ -55,10 +56,10 @@ tasks:
       # toSlash converts backslashes to forward slashes for shell compatibility on Windows
       - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset all -dir "{{toSlash .ROOT_DIR}}"'
       - echo ""
-      - echo "Assets generated. Next steps:"
+      - 'echo "Assets generated. Next steps:"'
       - echo "  1. Deploy website (git push) - updates Hugo site with new favicon, logos, og-image"
-      - echo "  2. Gmail signature - re-upload email-logo.png at https://mail.google.com/mail/u/0/#settings/general"
-      - echo "  3. Bluesky profile - re-upload avatar & banner at https://bsky.app/profile/ubuntusoftware.net"
+      - 'echo "  2. Gmail signature - re-upload email-logo.png at https://mail.google.com/mail/u/0/#settings/general"'
+      - 'echo "  3. Bluesky profile - re-upload avatar & banner at https://bsky.app/profile/ubuntusoftware.net"'
 
   generate:favicon:
     desc: Generate favicon only

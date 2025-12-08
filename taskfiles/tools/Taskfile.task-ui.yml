@@ -15,8 +15,8 @@
 version: '3'
 
 vars:
-  # TASK_UI_VERSION comes from versions.env (loaded by root Taskfile dotenv)
-  # BIN_INSTALL_DIR comes from root Taskfile.yml
+  # Version from xplat.env (loaded by root Taskfile dotenv)
+  TUI_VERSION: '{{.TASK_UI_VERSION}}'
   TUI_REPO: joeblew999/ubuntu-website
   TUI_BIN: 'task-ui{{exeExt}}'
   TUI_CGO: '0'  # No CGO needed
@@ -34,7 +34,9 @@ tasks:
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.TUI_BIN}}"
     cmds:
-      - '{{.XPLAT_BIN}} binary install task-ui {{.TASK_UI_VERSION}} {{.TUI_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/task-ui"'
+      - task: :tools:xplat:binary:install
+        vars:
+          CLI_ARGS: 'task-ui {{.TASK_UI_VERSION}} {{.TUI_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/task-ui"'
 
   # ===========================================================================
   # Core Commands (up/down)
@@ -75,7 +77,9 @@ tasks:
     requires:
       vars: [VERSION]
     cmds:
-      - '{{.XPLAT_BIN}} release build tui'
+      - task: :tools:xplat:release:build
+        vars:
+          CLI_ARGS: 'tui'
       - task: :tools:gh:release:publish
         vars:
           NAME: 'task-ui'

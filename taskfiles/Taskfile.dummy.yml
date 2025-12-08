@@ -14,6 +14,7 @@ vars:
   DUMMY_REPO: joeblew999/ubuntu-website
   DUMMY_BIN: 'dummy{{exeExt}}'
   DUMMY_CGO: '0'
+  XPLAT_AFFINITY: cross  # Can cross-compile from any platform
 
 tasks:
   # ===========================================================================
@@ -25,7 +26,9 @@ tasks:
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.DUMMY_BIN}}"
     cmds:
-      - '{{.XPLAT_BIN}} binary install dummy {{.DUMMY_VERSION}} {{.DUMMY_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/dummy"'
+      - task: :tools:xplat:binary:install
+        vars:
+          CLI_ARGS: 'dummy {{.DUMMY_VERSION}} {{.DUMMY_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/dummy"'
 
   check:validate:
     desc: Verify dummy works
@@ -108,7 +111,9 @@ tasks:
     requires:
       vars: [VERSION]
     cmds:
-      - '{{.XPLAT_BIN}} release build dummy'
+      - task: :tools:xplat:release:build
+        vars:
+          CLI_ARGS: 'dummy'
       - task: :tools:gh:release:publish
         vars:
           NAME: 'dummy'

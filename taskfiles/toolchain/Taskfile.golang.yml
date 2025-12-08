@@ -4,7 +4,7 @@
 # Works on macOS, Linux, Windows.
 #
 # Version Management:
-#   - GO_VERSION from versions.env (loaded by root Taskfile dotenv)
+#   - GO_VERSION from xplat.env (loaded by root Taskfile dotenv)
 #   - GO_VERSION_STRICT controls flexible vs strict mode
 #   - Use `task toolchain:golang:bootstrap` to install exact version
 #
@@ -26,6 +26,8 @@ version: '3'
 # REQUIRES: golang
 
 vars:
+  # Archetype: builder - Go is a compiler toolchain
+  XPLAT_ARCHETYPE: builder
   # Build output directory - uses hidden .build folder to avoid accidental commits
   # Can override via RELEASE_DIR env
   GO_BUILD_DIR: '{{if env "RELEASE_DIR"}}{{env "RELEASE_DIR"}}{{else}}{{.ROOT_DIR}}/.build{{end}}'
@@ -52,7 +54,7 @@ tasks:
     run: once
     cmds:
       - |
-        # GO_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+        # GO_VERSION comes from xplat.env (loaded by root Taskfile dotenv)
         EXPECTED="${GO_VERSION:-1.25}"
         STRICT="${GO_VERSION_STRICT:-false}"
 
@@ -100,14 +102,14 @@ tasks:
           echo "  task toolchain:golang:bootstrap"
           echo ""
           echo "Or disable strict mode:"
-          echo "  Set GO_VERSION_STRICT=false in versions.env"
+          echo "  Set GO_VERSION_STRICT=false in xplat.env"
           exit 1
         else
           echo "WARN: Go version mismatch"
-          echo "  Expected: $EXPECTED (from versions.env)"
+          echo "  Expected: $EXPECTED (from xplat.env)"
           echo "  Installed: $INSTALLED"
           echo ""
-          echo "To enforce exact version, set GO_VERSION_STRICT=true in versions.env"
+          echo "To enforce exact version, set GO_VERSION_STRICT=true in xplat.env"
           echo "To install exact version: task toolchain:golang:bootstrap"
         fi
 
@@ -134,10 +136,10 @@ tasks:
   # ===========================================================================
 
   bootstrap:
-    desc: Install exact Go version from versions.env using golang.org/dl
+    desc: Install exact Go version from xplat.env using golang.org/dl
     cmds:
       - |
-        # GO_VERSION comes from versions.env
+        # GO_VERSION comes from xplat.env
         EXPECTED="${GO_VERSION:-1.25}"
 
         echo "========================================"

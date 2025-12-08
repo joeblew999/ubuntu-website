@@ -1,65 +1,41 @@
+# Development Workflow
+#
+# Unified interface to dev tools (wraps pc and tui namespaces).
+#
+# Usage:
+#   task dev:up      Start all dev processes
+#   task dev:down    Stop all processes
+#   task dev:logs    View combined logs
+#   task dev:status  Show process status
+#   task dev:ui      Start Task-UI web dashboard
+#
+# REQUIRES: xplat (for binary management)
+
 version: '3'
 
-# Development workflow orchestration
-# Uses process-compose for local dev, task-ui for optional web dashboard
-
-vars:
-  PC_VERSION: v1.43.0
-  PC_REPO: F1bonacc1/process-compose
-  PC_BIN: 'process-compose{{exeExt}}'
-
 tasks:
-  check:deps:
-    desc: Ensure process-compose is installed
-    silent: true
-    status:
-      - command -v process-compose
-    cmds:
-      - |
-        echo "process-compose not found. Install via:"
-        echo "  brew install f1bonacc1/tap/process-compose"
-        echo "  or: curl -sSL https://raw.githubusercontent.com/F1bonacc1/process-compose/main/scripts/get-pc.sh | sh"
-        exit 1
-
   up:
     desc: Start all dev processes (Hugo + tools)
-    deps: [check:deps]
     cmds:
-      - process-compose up
+      - task: :pc:up
 
   down:
     desc: Stop all dev processes
-    deps: [check:deps]
     cmds:
-      - process-compose down
+      - task: :pc:down
 
   logs:
     desc: View combined process logs
-    deps: [check:deps]
     cmds:
-      - process-compose logs
+      - task: :pc:logs
 
   status:
     desc: Show process status
-    deps: [check:deps]
     cmds:
-      - process-compose ps
+      - task: :pc:status
 
-  # Task-UI (optional web dashboard)
+  # Task-UI (web dashboard)
   ui:
-    desc: Start Task-UI web dashboard (Docker)
+    desc: Start Task-UI web dashboard
     cmds:
-      - |
-        docker run -d --name task-ui \
-          -p 3000:3000 \
-          -v "{{.ROOT_DIR}}:/app" \
-          -w /app \
-          titpetric/task-ui:latest \
-          task-ui --history-enable
-      - 'echo "Task UI: http://localhost:3000"'
-
-  ui:stop:
-    desc: Stop Task-UI
-    cmds:
-      - docker stop task-ui 2>/dev/null || true
-      - docker rm task-ui 2>/dev/null || true
+      - task: :tui:up

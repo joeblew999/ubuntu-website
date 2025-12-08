@@ -10,87 +10,22 @@ USE TASKFILE - it makes conventions for development.
 
 ### Taskfile Conventions
 
-**Environment Variables:**
-- Taskfile loads `.env` automatically via `dotenv: ['.env']`
-- All secrets/config should be in `.env` (gitignored)
-- `.env.test` provides template with placeholder values
+**For detailed Taskfile GOLDEN RULES and patterns, see [taskfiles/CLAUDE.md](taskfiles/CLAUDE.md).**
 
-**Naming Convention (everything aligned):**
-
-| Component | Pattern | Example |
-|-----------|---------|---------|
-| cmd/ tool | `cmd/<name>` | `cmd/analytics` |
-| Taskfile tasks | `<name>:*` | `analytics:report` |
-| CI task | `ci:<name>` | `ci:analytics` |
+Key points:
+- NEVER use bare `xplat` - always `{{.XPLAT_BIN}}`
+- Use wrapper tasks: `:tools:xplat:binary:install`, `:tools:xplat:release:build`
+- Use `status:` for idempotent `check:deps` tasks
+- Use `deps:` for declarative dependencies
 
 **Workflow Naming:** `{category}-{name}.yml`
 
 | Category | Purpose | Examples |
 |----------|---------|----------|
-| `core-` | P0 - must pass for merge | `core-taskfile.yml`, `core-xplat.yml`, `core-tools.yml` |
+| `core-` | P0 - must pass for merge | `core-taskfile.yml`, `core-xplat.yml` |
 | `monitor-` | Scheduled health checks | `monitor-analytics.yml`, `monitor-sitecheck.yml` |
 | `syndication-` | Content distribution | `syndication-bluesky.yml` |
 | `release-` | Build & release pipelines | `release-xplat.yml` |
-
-**Task Suffixes:**
-- `namespace:action` - Leaf task (`sitecheck:dns`)
-- `namespace:all` - Calls other tasks in namespace (`sitecheck:all`)
-- `namespace` (bare) - Default action (`sitecheck`)
-
-**No Emojis in Taskfiles:**
-- NEVER use emojis in Taskfile echo/output statements
-- Emojis cause encoding issues and break cross-platform compatibility
-- Use plain text: `echo "Done"` not `echo "✓ Done"`
-
-**Quote Echo Statements with Colons:**
-- YAML interprets colons specially - quote echo statements containing `:`
-- Wrong: `- echo "OK: done"` (YAML error)
-- Right: `- 'echo "OK: done"'`
-- Inside `|` multiline blocks, quoting is not needed
-
-**Lifecycle Phases (within each namespace):**
-
-Each module can define standard lifecycle tasks:
-
-| Phase | Pattern | Purpose |
-|-------|---------|---------|
-| `check:deps` | `<ns>:check:deps` | Ensure required tools/deps available |
-| `check:validate` | `<ns>:check:validate` | Smoke test the module works |
-| `check:health` | `<ns>:check:health` | External connectivity check |
-| `generate:*` | `<ns>:generate:<asset>` | Generate code/assets (idempotent) |
-
-**Idempotent Generation:**
-Generation tasks use Task's `sources:` and `generates:` for automatic caching:
-```yaml
-generate:gitignore:
-  sources:
-    - '{{.ROOT_DIR}}/Taskfile.yml'
-  generates:
-    - '{{.ROOT_DIR}}/.gitignore'
-  cmds:
-    - cat > {{.ROOT_DIR}}/.gitignore << 'EOF'
-      ...
-```
-Second run shows "Task is up to date" if inputs unchanged.
-
-**CI Auto-Discovery:**
-CI discovers and runs lifecycle tasks automatically:
-- `ci:check:module-deps` - runs all `*:check:deps`
-- `ci:check:module-validate` - runs all `*:check:validate`
-- `ci:check:module-health` - runs all `*:check:health`
-- `ci:check:module-generate` - runs all `*:generate:*`
-
-**Task Dependencies** (see Taskfile header for full list)
-
-**DRY Principle - GitHub Actions:**
-- GitHub Actions call Taskfile tasks, not run commands directly
-- This ensures local `task X` runs the same as CI
-- Pattern: `run: task ci:<name>` in workflows
-
-**CI Tasks:**
-- `ci:*` namespace is the interface for GitHub Actions
-- These tasks output markdown and use exit codes for workflow control
-- Task descriptions include `[Category]` prefix matching the workflow
 
 **Workflow → Task Mapping:**
 
@@ -99,207 +34,25 @@ CI discovers and runs lifecycle tasks automatically:
 | `core-taskfile.yml` | `ci:taskfile` | Validate Taskfile across platforms |
 | `monitor-analytics.yml` | `ci:analytics` | Weekly analytics check |
 | `monitor-sitecheck.yml` | `ci:sitecheck` | Site reachability check |
-| `monitor-health.yml` | `ci:health` | Health checks for external deps |
 | `core-xplat.yml` | *(direct)* | xplat cross-platform build tests |
-| `core-tools.yml` | *(direct)* | Binary tools build tests |
-| `release-xplat.yml` | *(direct)* | xplat release automation |
-| `syndication-bluesky.yml` | *(direct)* | Blog post syndication |
-
-**BIN Variable Pattern (cross-platform):**
-
-All tool taskfiles define `<TOOLNAME>_BIN` with `{{exeExt}}` for Windows support:
-
-| Variable | Pattern | Example |
-|----------|---------|---------|
-| `<TOOL>_BIN` | `'<tool>{{exeExt}}'` | `XPLAT_BIN: 'xplat{{exeExt}}'` |
-| `<TOOL>_INSTALL_DIR` | Platform-specific | `'{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'` |
-
-Full binary path: `{{.TOOL_INSTALL_DIR}}/{{.TOOL_BIN}}`
-
-**Binary Pattern (using xplat binary:install):**
-
-Binary tools use `xplat binary:install` for cross-platform installation. This command:
-1. Checks if binary exists in PATH or install dir (skip if found)
-2. Builds from local source if Go is available
-3. Downloads from GitHub release as fallback
-
-| Category | Tools | Installation |
-|----------|-------|--------------|
-| With releases | xplat, analytics, sitecheck, genlogo, translate | `xplat binary:install` |
-| Local-only | lanip, env | `go run` (simple) |
-
-Version management:
-- Versions defined in `versions.env` (single source of truth)
-- Taskfiles reference `{{.TOOL_VERSION}}` from dotenv
-- Release tag format: `<tool>-v<version>` (e.g., `analytics-v0.1.0`)
-- Install location: `~/.local/bin/` (unix) or `~/bin/` (windows)
-
-Example taskfile:
-```yaml
-vars:
-  # ANALYTICS_VERSION comes from versions.env
-  # XPLAT_BIN comes from root Taskfile.yml (handles .exe on Windows)
-  ANALYTICS_REPO: joeblew999/ubuntu-website
-  ANALYTICS_BIN: 'analytics{{exeExt}}'
-  ANALYTICS_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
-
-tasks:
-  check:deps:
-    # status: provides TRUE idempotency - skips entirely if binary exists
-    status:
-      - test -f "{{.ANALYTICS_INSTALL_DIR}}/{{.ANALYTICS_BIN}}"
-    cmds:
-      - '{{.XPLAT_BIN}} binary install analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source {{.ROOT_DIR}}/cmd/analytics'
-
-  report:
-    deps: [check:deps]  # Use deps: for declarative dependencies
-    cmds:
-      - '{{.ANALYTICS_INSTALL_DIR}}/{{.ANALYTICS_BIN}}'
-```
-
-**Idempotency Pattern (status: vs run: once):**
-
-| Mechanism | Behavior | When to Use |
-|-----------|----------|-------------|
-| `run: once` | Runs once per `task` invocation | Deduplication within same run |
-| `status:` | Skips entirely if checks pass | **True idempotency** across runs |
-
-Always use `status:` for binary installation - it provides zero overhead when binary already exists:
-- First run: `status:` check fails → runs install
-- Second run: `status:` check passes → prints "Task is up to date", skips entirely
-
-Use `deps:` (not `- task:`) for callers to declare dependencies declaratively:
-```yaml
-# Good: declarative dependency
-ci:analytics:
-  deps: [analytics:check:deps]
-  cmds:
-    - analytics -github-issue
-
-# Avoid: imperative call
-ci:analytics:
-  cmds:
-    - task: analytics:check:deps  # Less efficient
-    - analytics -github-issue
-```
 
 **xplat Embedded Task Runner:**
 
-xplat embeds Task (go-task) as a subcommand, enabling single-binary bootstrap:
+xplat embeds Task (go-task), enabling single-binary bootstrap in CI:
 
 ```bash
-# Instead of:
-task dummy:build
-
-# Use:
+# CI uses xplat task (no Task installation needed)
+go build -o xplat ./cmd/xplat
 xplat task dummy:build
 ```
 
-| Environment | Bootstrap Method |
-|-------------|------------------|
-| Local development | Use existing `task` binary (already installed) |
-| CI | Build xplat from source: `go build ./cmd/xplat` |
-| Post-release | Download xplat binary (includes Task) |
-
-**CI workflow pattern (no Task installation needed):**
-```yaml
-- uses: actions/setup-go@v5
-  with:
-    go-version-file: go.mod
-
-- name: Build xplat (with embedded Task)
-  run: go build -o ~/.local/bin/xplat ./cmd/xplat
-
-- name: Run task
-  run: xplat task dummy:build
-```
-
-**Compatibility - GOLDEN RULE:** `xplat task` MUST behave EXACTLY like standalone `task`. This is critical for DRY - the same Taskfile commands must work identically whether run with `task` or `xplat task`.
-
-Key compatibility requirements:
-- All flags (`-t`, `-l`, `-f`, `-v`, etc.) work identically
-- CLI_ARGS (`-- args`) are passed through correctly to tasks
-- Exit codes match Task's behavior
-- Output format matches Task's format
-
-If you find ANY difference between `task` and `xplat task` behavior, it's a bug that must be fixed. Test locally with both commands to verify. See `cmd/xplat/cmd/task.go` for implementation details.
-
-**Why embed Task?**
-- Eliminates `go install task` step (33s+ on first run)
-- No `arduino/setup-task` dependency (avoids GitHub API rate limits)
-- Single binary to manage - xplat is the universal tool
-
-**Release Build Pattern (DRY via Toolchain):**
-
-Each tool Taskfile defines its own release tasks that call the shared `:toolchain:golang:build`:
-
-```yaml
-# In each tool's Taskfile (e.g., Taskfile.sitecheck.yml)
-vars:
-  SITECHECK_BIN: 'sitecheck{{exeExt}}'
-  SITECHECK_CGO: '0'  # No CGO - can cross-compile
-
-tasks:
-  release:build:
-    desc: Build for release (current platform, or set GOOS/GOARCH)
-    cmds:
-      - task: :toolchain:golang:build
-        vars:
-          BIN: '{{.SITECHECK_BIN}}'
-          VERSION: '{{.RELEASE_VERSION | default .SITECHECK_VERSION}}'
-          SOURCE: '{{.ROOT_DIR}}/cmd/sitecheck'
-          CGO: '{{.SITECHECK_CGO}}'
-
-  release:test:
-    desc: Test built release binary
-    cmds:
-      - task: :toolchain:golang:build:test
-        vars:
-          BIN: '{{.SITECHECK_BIN}}'
-```
-
-**CGO as source of truth:**
-- `*_CGO: '0'` = No CGO, can cross-compile from any platform
-- `*_CGO: '1'` = Needs CGO, must build on native platform
-
-**Shared build logic** in `taskfiles/toolchain/Taskfile.golang.yml`:
-- Handles GOOS/GOARCH from env vars
-- Applies ldflags, version injection
-- Output naming: `bin/<tool>-<os>-<arch>`
-
-**GitHub Actions pattern:**
-```yaml
-# Workflow calls tool's release task (DRY - logic in Taskfile)
-env:
-  GOOS: ${{ matrix.goos }}
-  GOARCH: ${{ matrix.goarch }}
-run: task ${{ inputs.tool }}:release:build
-```
-
 **Development Workflow:**
-
-The `dev:*` namespace provides a unified interface to development tools:
 
 | Command | Purpose |
 |---------|---------|
 | `task dev:up` | Start Hugo + tools with TUI dashboard |
 | `task dev:down` | Stop all processes |
-| `task dev:ui` | Start Task-UI web dashboard at http://localhost:3000 |
-| `task dev:logs` | View combined logs |
-| `task dev:status` | Show process health |
-
-You can also access the tools directly via `pc:*` and `tui:*` namespaces.
-
-**Process-Compose** (`pc:*`) orchestrates local processes with health checks.
-Processes defined in `process-compose.yaml`:
-- `hugo` - Dev server with HTTP health check
-- `translate` - Translation watcher (disabled by default)
-- `mailerlite` - Subscriber sync (disabled by default)
-
-Enable optional processes: `process-compose up --enable translate`
-
-**Task-UI** (`tui:*`) provides a web dashboard for executing Taskfile tasks.
-Binary auto-installs via `xplat binary:install` on first use.
+| `task dev:ui` | Start Task-UI web dashboard |
 
 ### Branding Assets
 

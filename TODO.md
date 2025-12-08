@@ -1,13 +1,22 @@
 # TODO
 
-github.com/go-task/task/v3/cmd/task
+Currently honing our testing of task files, archtype classification and task files conformance system.
 
-Task has a PackageAPI, as they call it.
+Getting single task file testing locally and in CI, will allow Me, other devs and claude to QUICKLY get things properly validated !!
 
-this will means many things for the code and xpalt ? 
+--
 
 
-https://github.com/Infomaniak/terraform-provider-infomaniak/blob/main/go.mod seems to also be doing task embedding ? just wanted to ask because mayeb they have a smarter way than us ? 
+
+xplat is nearing prime time.
+
+We have "release" that does the release into github.
+
+But we want to release via winget and homebrew. Dont bother with linux yet.
+
+To make it such that we and any user can use xplat to release we want a smat way. We have the gh cli task file, and winget and homebew are github Repos, so maybe we can have a template inside xplat and push to these repos ?
+
+I am SURE i have left out a few aspects though, so i need help.
 
 ---
 
@@ -29,13 +38,13 @@ Once oyu get the NON CGO FULLY working for the FULL lifecyle, Make sure that dum
 - [x] Task version check taskfile added (tools:task:check:deps)
 - [x] Taskfile Registry validated via .github/workflows/remote-taskfile-test.yml
 - [x] Deprecated deploy.yml.old workflow deleted
-- [x] Centralized versions.env - single source of truth for Task/Go versions
+- [x] Centralized xplat.env - single source of truth for Task/Go versions
 - [x] Go version standardized to 1.25 across all workflows (matches go.mod)
 - [x] Version consistency check added (ci:check:versions)
-- [x] DRY version management - versions.env loaded via root Taskfile dotenv
-  - Taskfile tasks read $GO_VERSION, $TASK_VERSION from versions.env
+- [x] DRY version management - xplat.env loaded via root Taskfile dotenv
+  - Taskfile tasks read $GO_VERSION, $TASK_VERSION from xplat.env
   - Workflow YAML still has hardcoded values (GitHub Actions limitation)
-  - ci:check:versions validates workflow values match versions.env
+  - ci:check:versions validates workflow values match xplat.env
 - [x] Go toolchain version management (rustup-style parity)
   - Flexible mode (default): warns on version mismatch
   - Strict mode: fails on version mismatch (GO_VERSION_STRICT=true)

@@ -20,22 +20,22 @@ tasks:
   list:
     desc: "[STUB] List available templates"
     cmds:
-      - echo "TODO: coder templates list"
+      - 'echo "TODO: coder templates list"'
 
   create:
     desc: "[STUB] Scaffold a new template"
     cmds:
-      - echo "TODO: coder templates create"
+      - 'echo "TODO: coder templates create"'
 
   push:
     desc: "[STUB] Push template to Coder server"
     cmds:
-      - echo "TODO: coder templates push"
+      - 'echo "TODO: coder templates push"'
 
   pull:
     desc: "[STUB] Pull template from Coder server"
     cmds:
-      - echo "TODO: coder templates pull"
+      - 'echo "TODO: coder templates pull"'
 
   # ===========================================================================
   # Template Development
@@ -44,17 +44,17 @@ tasks:
   init:
     desc: "[STUB] Initialize a new template from starter"
     cmds:
-      - echo "TODO: coder templates init"
+      - 'echo "TODO: coder templates init"'
 
   validate:
     desc: "[STUB] Validate template Terraform"
     cmds:
-      - echo "TODO: terraform validate"
+      - 'echo "TODO: terraform validate"'
 
   plan:
     desc: "[STUB] Plan template changes"
     cmds:
-      - echo "TODO: terraform plan"
+      - 'echo "TODO: terraform plan"'
 
   # ===========================================================================
   # Starters
@@ -63,7 +63,7 @@ tasks:
   starters:
     desc: "[STUB] List available template starters"
     cmds:
-      - echo "TODO: List Coder template starters"
+      - 'echo "TODO: List Coder template starters"'
       - echo "  - docker"
       - echo "  - kubernetes"
       - echo "  - aws-linux"

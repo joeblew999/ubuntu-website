@@ -4,7 +4,7 @@
 # Works on macOS, Linux, Windows.
 #
 # Version Management:
-#   - BUN_VERSION from versions.env (loaded by root Taskfile dotenv)
+#   - BUN_VERSION from xplat.env (loaded by root Taskfile dotenv)
 #
 # Pattern: All tool taskfiles define TOOL_BIN with {{exeExt}} for Windows support
 #
@@ -17,7 +17,10 @@ version: '3'
 # REQUIRES: none
 
 vars:
-  # BUN_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+  # Archetype: builder - Bun is a compiler/runtime toolchain
+  XPLAT_ARCHETYPE: builder
+  # BUN_VERSION comes from xplat.env (loaded by root Taskfile dotenv)
+  BUN_VERSION: '{{.BUN_VERSION}}'
   BUN_BIN: 'bun{{exeExt}}'
 
 tasks:
@@ -30,7 +33,7 @@ tasks:
     run: once
     cmds:
       - |
-        # BUN_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+        # BUN_VERSION comes from xplat.env (loaded by root Taskfile dotenv)
         EXPECTED="${BUN_VERSION:-1.3}"
 
         # Check if bun exists
@@ -55,7 +58,7 @@ tasks:
 
         # Version mismatch - just warn for bun (unlike Go, bun versions are generally compatible)
         echo "WARN: Bun version mismatch"
-        echo "  Expected: $EXPECTED.x (from versions.env)"
+        echo "  Expected: $EXPECTED.x (from xplat.env)"
         echo "  Installed: $(bun --version)"
         echo ""
         echo "This is usually fine - bun versions are generally compatible."
@@ -107,3 +110,19 @@ tasks:
           echo "npm registry reachable"
         fi
         echo "bun:check:health passed"
+
+  # ===========================================================================
+  # Build (build:* - compile binaries using Bun)
+  # ===========================================================================
+
+  build:
+    desc: Build a Bun project (requires BIN, SOURCE vars)
+    deps: [check:require]
+    requires:
+      vars: [BIN, SOURCE]
+    cmds:
+      - |
+        echo "Building {{.BIN}} from {{.SOURCE}}..."
+        cd "{{.SOURCE}}"
+        bun build ./index.ts --compile --outfile "{{.BIN}}"
+        echo "OK: Built {{.BIN}}"

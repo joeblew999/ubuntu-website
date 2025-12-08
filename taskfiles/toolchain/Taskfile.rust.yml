@@ -10,6 +10,11 @@
 version: '3'
 
 vars:
+  # Archetype: builder - Rust is a compiler toolchain
+  XPLAT_ARCHETYPE: builder
+  # RUST_VERSION - rustup uses toolchain names (stable, nightly, 1.70.0)
+  RUST_VERSION: '{{.RUST_VERSION | default "stable"}}'
+  RUST_BIN: 'rustc{{exeExt}}'
   RUST_TOOLCHAIN: stable
 
 tasks:
@@ -98,6 +103,22 @@ tasks:
         echo "Checking crates.io..."
         cargo search --limit 1 serde >/dev/null 2>&1 || true
         echo "rust:check:health passed"
+
+  # ===========================================================================
+  # Build (build:* - compile binaries using Rust)
+  # ===========================================================================
+
+  build:
+    desc: Build a Rust project (requires BIN, SOURCE vars)
+    deps: [check:deps]
+    requires:
+      vars: [BIN, SOURCE]
+    cmds:
+      - |
+        echo "Building {{.BIN}} from {{.SOURCE}}..."
+        cd "{{.SOURCE}}"
+        cargo build --release
+        echo "OK: Built {{.BIN}}"
 
   # ===========================================================================
   # Tasks

@@ -39,9 +39,21 @@ jobs:
           version: 3.45.5
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build xplat
+        shell: bash
+        run: go build -o xplat ./cmd/xplat
+
       - name: Validate Taskfile syntax
         shell: bash
         run: task --list
+
+      - name: Lint Taskfiles
+        shell: bash
+        run: ./xplat lint
+
+      - name: Check Taskfile formatting
+        shell: bash
+        run: ./xplat fmt --check
 
       - name: Run ci:taskfile task
         shell: bash

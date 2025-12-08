@@ -20,8 +20,8 @@
 version: '3'
 
 vars:
-  # PROCESS_COMPOSE_VERSION comes from versions.env (loaded by root Taskfile dotenv)
-  # BIN_INSTALL_DIR comes from root Taskfile.yml
+  # Version from xplat.env (loaded by root Taskfile dotenv)
+  PC_VERSION: '{{.PC_VERSION}}'
   PC_REPO: joeblew999/ubuntu-website
   PC_BIN: 'process-compose{{exeExt}}'
   PC_CGO: '0'  # No CGO needed
@@ -38,7 +38,9 @@ tasks:
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.PC_BIN}}"
     cmds:
-      - '{{.XPLAT_BIN}} binary install process-compose {{.PROCESS_COMPOSE_VERSION}} {{.PC_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/process-compose"'
+      - task: :tools:xplat:binary:install
+        vars:
+          CLI_ARGS: 'process-compose {{.PROCESS_COMPOSE_VERSION}} {{.PC_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/process-compose"'
 
   # ===========================================================================
   # Core Commands (up/down/logs/status)
@@ -128,7 +130,9 @@ tasks:
     requires:
       vars: [VERSION]
     cmds:
-      - '{{.XPLAT_BIN}} release build pc'
+      - task: :tools:xplat:release:build
+        vars:
+          CLI_ARGS: 'pc'
       - task: :tools:gh:release:publish
         vars:
           NAME: 'process-compose'

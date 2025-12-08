@@ -24,13 +24,13 @@ tasks:
   deploy:
     desc: "[STUB] Deploy Coder server to Fly.io"
     cmds:
-      - echo "TODO: Deploy Coder to Fly.io"
+      - 'echo "TODO: Deploy Coder to Fly.io"'
       - echo "  fly launch --name {{.CODER_FLY_APP}}"
 
   destroy:
     desc: "[STUB] Destroy Coder deployment on Fly.io"
     cmds:
-      - echo "TODO: fly apps destroy {{.CODER_FLY_APP}}"
+      - 'echo "TODO: fly apps destroy {{.CODER_FLY_APP}}"'
 
   # ===========================================================================
   # Status & Monitoring
@@ -39,17 +39,17 @@ tasks:
   status:
     desc: "[STUB] Check Coder deployment status"
     cmds:
-      - echo "TODO: fly status -a {{.CODER_FLY_APP}}"
+      - 'echo "TODO: fly status -a {{.CODER_FLY_APP}}"'
 
   logs:
     desc: "[STUB] View Coder server logs"
     cmds:
-      - echo "TODO: fly logs -a {{.CODER_FLY_APP}}"
+      - 'echo "TODO: fly logs -a {{.CODER_FLY_APP}}"'
 
   ssh:
     desc: "[STUB] SSH into Coder server"
     cmds:
-      - echo "TODO: fly ssh console -a {{.CODER_FLY_APP}}"
+      - 'echo "TODO: fly ssh console -a {{.CODER_FLY_APP}}"'
 
   # ===========================================================================
   # Scaling
@@ -58,7 +58,7 @@ tasks:
   scale:
     desc: "[STUB] Scale Coder server"
     cmds:
-      - echo "TODO: fly scale count 1 -a {{.CODER_FLY_APP}}"
+      - 'echo "TODO: fly scale count 1 -a {{.CODER_FLY_APP}}"'
 
   # ===========================================================================
   # Secrets
@@ -67,12 +67,12 @@ tasks:
   secrets:list:
     desc: "[STUB] List Fly.io secrets for Coder"
     cmds:
-      - echo "TODO: fly secrets list -a {{.CODER_FLY_APP}}"
+      - 'echo "TODO: fly secrets list -a {{.CODER_FLY_APP}}"'
 
   secrets:set:
     desc: "[STUB] Set a Fly.io secret for Coder"
     cmds:
-      - echo "TODO: fly secrets set KEY=value -a {{.CODER_FLY_APP}}"
+      - 'echo "TODO: fly secrets set KEY=value -a {{.CODER_FLY_APP}}"'
 
   # ===========================================================================
   # Database
@@ -81,9 +81,9 @@ tasks:
   db:create:
     desc: "[STUB] Create Postgres database for Coder on Fly.io"
     cmds:
-      - echo "TODO: fly postgres create --name {{.CODER_FLY_APP}}-db"
+      - 'echo "TODO: fly postgres create --name {{.CODER_FLY_APP}}-db"'
 
   db:attach:
     desc: "[STUB] Attach database to Coder app"
     cmds:
-      - echo "TODO: fly postgres attach {{.CODER_FLY_APP}}-db -a {{.CODER_FLY_APP}}"
+      - 'echo "TODO: fly postgres attach {{.CODER_FLY_APP}}-db -a {{.CODER_FLY_APP}}"'

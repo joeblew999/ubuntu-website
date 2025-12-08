@@ -411,18 +411,18 @@ tasks:
         echo "Version Consistency Check"
         echo "========================================"
         echo ""
-        echo "Source of truth: versions.env"
+        echo "Source of truth: xplat.env"
         echo "----------------------------------------"
         ERRORS=0
 
-        # Read expected versions from versions.env
-        if [ ! -f "versions.env" ]; then
-          echo "ERROR: versions.env not found"
+        # Read expected versions from xplat.env
+        if [ ! -f "xplat.env" ]; then
+          echo "ERROR: xplat.env not found"
           exit 1
         fi
 
-        TASK_EXPECTED=$(grep "^TASK_VERSION=" versions.env | cut -d= -f2)
-        GO_EXPECTED=$(grep "^GO_VERSION=" versions.env | cut -d= -f2)
+        TASK_EXPECTED=$(grep "^TASK_VERSION=" xplat.env | cut -d= -f2)
+        GO_EXPECTED=$(grep "^GO_VERSION=" xplat.env | cut -d= -f2)
 
         echo "TASK_VERSION=$TASK_EXPECTED"
         echo "GO_VERSION=$GO_EXPECTED"

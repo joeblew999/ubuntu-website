@@ -63,7 +63,7 @@ tasks:
       - echo "Opening Cloudflare Web Analytics..."
       - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/web-analytics/overview?siteTag~in={{.CF_WEB_ANALYTICS_SITE_TAG}}"
       - echo ""
-      - echo "Setup steps:"
+      - 'echo "Setup steps:"'
       - echo "1. Google Search Console - Add property, Domain, ubuntusoftware.net"
       - echo "2. Copy verification TXT record to Cloudflare DNS"
       - echo "3. Cloudflare Analytics - Enable Web Analytics (one click)"

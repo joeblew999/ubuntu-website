@@ -87,4 +87,4 @@ tasks:
   clean:
     desc: Clean build artifacts
     cmds:
-      - xplat rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}
+      - '{{.XPLAT_BIN}} rm -rf {{.DIR_PUBLIC}} {{.DIR_RESOURCES}} {{.FILE_HUGO_LOCK}}'

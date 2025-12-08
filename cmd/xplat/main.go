@@ -57,6 +57,14 @@ Designed to fill gaps in Task's built-in shell interpreter.`,
 	// P5 (embedded Task runner)
 	rootCmd.AddCommand(cmd.TaskCmd)
 
+	// P6 (Taskfile validation)
+	rootCmd.AddCommand(cmd.FmtCmd)
+	rootCmd.AddCommand(cmd.LintCmd)
+	rootCmd.AddCommand(cmd.ArchetypeCmd)
+
+	// P7 (Taskfile testing)
+	rootCmd.AddCommand(cmd.TestCmd)
+
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}

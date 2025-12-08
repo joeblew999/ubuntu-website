@@ -72,6 +72,7 @@ includes:
   dev: ./taskfiles/Taskfile.dev.yml
   pc: ./taskfiles/tools/Taskfile.process-compose.yml
   tui: ./taskfiles/tools/Taskfile.task-ui.yml
+  wrangler: ./taskfiles/tools/Taskfile.wrangler.yml
 
 # =============================================================================
 # Environment
@@ -79,7 +80,7 @@ includes:
 
 dotenv:
   - '.env'
-  - 'versions.env'
+  - 'xplat.env'
 
 # =============================================================================
 # Variables
@@ -137,8 +138,9 @@ vars:
   GO_VERSION: "1.25"
   CGO_ENABLED: "1"
 
-  # Wrangler
-  WRANGLER_CMD: bunx wrangler
+  # Wrangler (installed via wrangler:check:deps)
+  # Full path since ~/.bun/bin may not be in PATH
+  WRANGLER_CMD: '{{.HOME}}/.bun/bin/wrangler'
 
   # Global binary install directory - all tools use this
   # Unix: ~/.local/bin (standard for user binaries)

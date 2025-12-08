@@ -5,12 +5,13 @@
 # tools are standalone binaries that fill gaps in Task's shell.
 #
 # Included tools:
-#   git   - Git version control (check, generate .gitignore)
-#   task  - Task version checker (ensures local matches CI)
-#   xplat - Cross-platform shell utilities (which, glob, etc.)
-#   gh    - GitHub CLI for releases, workflows, PRs, issues
-#   pc    - Process-Compose for local dev orchestration
-#   tui   - Task-UI web dashboard for task execution
+#   git      - Git version control (check, generate .gitignore)
+#   task     - Task version checker (ensures local matches CI)
+#   xplat    - Cross-platform shell utilities (which, glob, etc.)
+#   gh       - GitHub CLI for releases, workflows, PRs, issues
+#   wrangler - Cloudflare CLI for Pages, Workers, KV (installed via Bun)
+#   pc       - Process-Compose for local dev orchestration
+#   tui      - Task-UI web dashboard for task execution
 
 version: '3'
 
@@ -27,6 +28,9 @@ includes:
   gh:
     taskfile: ./tools/Taskfile.gh.yml
     optional: true  # gh not required for basic operations
+  wrangler:
+    taskfile: ./tools/Taskfile.wrangler.yml
+    optional: true  # Only needed for Cloudflare operations
   pc:
     taskfile: ./tools/Taskfile.process-compose.yml
     optional: true  # Optional local dev tool

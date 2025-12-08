@@ -13,11 +13,12 @@
 version: '3'
 
 vars:
-  # ANALYTICS_VERSION comes from versions.env (loaded by root Taskfile dotenv)
-  # BIN_INSTALL_DIR comes from root Taskfile.yml
+  # Version from xplat.env (loaded by root Taskfile dotenv)
+  ANALYTICS_VERSION: '{{.ANALYTICS_VERSION}}'
   ANALYTICS_REPO: joeblew999/ubuntu-website
   ANALYTICS_BIN: 'analytics{{exeExt}}'
   ANALYTICS_CGO: '0'  # No CGO needed - can cross-compile
+  XPLAT_AFFINITY: cross  # Can cross-compile from any platform
 
 tasks:
   # ===========================================================================
@@ -31,7 +32,9 @@ tasks:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.ANALYTICS_BIN}}"
     cmds:
       # toSlash converts backslashes to forward slashes for shell compatibility on Windows
-      - '{{.XPLAT_BIN}} binary install analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/analytics"'
+      - task: :tools:xplat:binary:install
+        vars:
+          CLI_ARGS: 'analytics {{.ANALYTICS_VERSION}} {{.ANALYTICS_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/analytics"'
 
   # ===========================================================================
   # Reports

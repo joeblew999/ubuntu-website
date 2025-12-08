@@ -7,11 +7,15 @@
 #   task tools:task:check:deps   - Verify Task version matches expected
 #
 # Pattern: All tool taskfiles define TOOL_BIN with {{exeExt}} for Windows support
-# Version: Reads TASK_VERSION from root versions.env (loaded by root Taskfile)
+# Version: Reads TASK_VERSION from root xplat.env (loaded by root Taskfile)
 
 version: '3'
 
 vars:
+  # Archetype: external - we install go-task from go-task/task, we don't build it
+  XPLAT_ARCHETYPE: external
+  # TASK_VERSION comes from xplat.env (loaded by root Taskfile dotenv)
+  TASK_VERSION: '{{.TASK_VERSION}}'
   # Binary name with platform-specific extension (.exe on Windows)
   TASK_BIN: 'task{{exeExt}}'
 
@@ -25,7 +29,7 @@ tasks:
     run: once
     cmds:
       - |
-        # TASK_VERSION comes from versions.env (loaded by root Taskfile dotenv)
+        # TASK_VERSION comes from xplat.env (loaded by root Taskfile dotenv)
         EXPECTED="${TASK_VERSION:-3.45.5}"
 
         # Get installed version

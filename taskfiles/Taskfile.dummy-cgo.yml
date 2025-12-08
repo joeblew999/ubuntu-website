@@ -13,6 +13,7 @@ vars:
   DUMMY_CGO_REPO: joeblew999/ubuntu-website
   DUMMY_CGO_BIN: 'dummy-cgo{{exeExt}}'
   DUMMY_CGO_CGO: '1'  # KEY DIFFERENCE: CGO enabled
+  XPLAT_AFFINITY: native  # Must build on each platform (CGO=1)
 
 tasks:
   # ===========================================================================
@@ -24,7 +25,9 @@ tasks:
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.DUMMY_CGO_BIN}}"
     cmds:
-      - '{{.XPLAT_BIN}} binary install dummy-cgo {{.DUMMY_CGO_VERSION}} {{.DUMMY_CGO_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/dummy-cgo"'
+      - task: :tools:xplat:binary:install
+        vars:
+          CLI_ARGS: 'dummy-cgo {{.DUMMY_CGO_VERSION}} {{.DUMMY_CGO_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/dummy-cgo"'
 
   check:validate:
     desc: Verify dummy-cgo works
@@ -106,7 +109,9 @@ tasks:
     requires:
       vars: [VERSION]
     cmds:
-      - '{{.XPLAT_BIN}} release build dummy-cgo'
+      - task: :tools:xplat:release:build
+        vars:
+          CLI_ARGS: 'dummy-cgo'
       - task: :tools:gh:release:publish
         vars:
           NAME: 'dummy-cgo'
