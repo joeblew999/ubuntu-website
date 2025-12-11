@@ -25,8 +25,7 @@ version: '3'
 #   mailerlite:* - MailerLite subscriber management (cmd/mailerlite)
 #   env:*       - Environment management
 #   url:*       - URL shortcuts + SEO dashboards
-#   tools:*     - Cross-platform tools (xplat, gh, task)
-#   toolchain:* - Compilers/runtimes (golang, rust)
+#   tools:*     - Tools (gh, task, etc.)
 #   release:*   - Release builds for binary tools
 #   ci:*        - CI interface tasks
 #   dev:*       - Development workflow (wraps pc + tui)
@@ -53,20 +52,14 @@ includes:
 
   # Infrastructure modules
   lanip: ./taskfiles/Taskfile.lanip.yml
-  ci: ./taskfiles/Taskfile.ci.yml
 
-  # Tools & Toolchains (git exposed at top-level for convenience: git:deploy, git:status)
+  # Tools (git exposed at top-level for convenience: git:deploy, git:status)
   git:
     taskfile: ./taskfiles/tools/Taskfile.git.yml
   tools: ./taskfiles/Taskfile.tools.yml
-  toolchain: ./taskfiles/Taskfile.toolchain.yml
 
   # Release builds
   release: ./taskfiles/Taskfile.release.yml
-
-  # Test tools (minimal binaries for fast workflow testing)
-  dummy: ./taskfiles/Taskfile.dummy.yml
-  dummy-cgo: ./taskfiles/Taskfile.dummy-cgo.yml
 
   # Development workflow
   dev: ./taskfiles/Taskfile.dev.yml
@@ -80,7 +73,6 @@ includes:
 
 dotenv:
   - '.env'
-  - 'xplat.env'
 
 # =============================================================================
 # Variables
@@ -146,9 +138,6 @@ vars:
   # Unix: ~/.local/bin (standard for user binaries)
   # Windows: ~/bin (simpler path)
   BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
-
-  # xplat - cross-platform binary (uses global BIN_INSTALL_DIR)
-  XPLAT_BIN: '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}}'
 
 # =============================================================================
 # Tasks

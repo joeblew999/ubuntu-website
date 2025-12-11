@@ -10,11 +10,7 @@ USE TASKFILE - it makes conventions for development.
 
 ### Taskfile Conventions
 
-**For detailed Taskfile GOLDEN RULES and patterns, see [taskfiles/CLAUDE.md](taskfiles/CLAUDE.md).**
-
 Key points:
-- NEVER use bare `xplat` - always `{{.XPLAT_BIN}}`
-- Use wrapper tasks: `:tools:xplat:binary:install`, `:tools:xplat:release:build`
 - Use `status:` for idempotent `check:deps` tasks
 - Use `deps:` for declarative dependencies
 
@@ -22,29 +18,10 @@ Key points:
 
 | Category | Purpose | Examples |
 |----------|---------|----------|
-| `core-` | P0 - must pass for merge | `core-taskfile.yml`, `core-xplat.yml` |
+| `core-` | P0 - must pass for merge | `core-taskfile.yml`, `core-tools.yml` |
 | `monitor-` | Scheduled health checks | `monitor-analytics.yml`, `monitor-sitecheck.yml` |
 | `syndication-` | Content distribution | `syndication-bluesky.yml` |
-| `release-` | Build & release pipelines | `release-xplat.yml` |
-
-**Workflow → Task Mapping:**
-
-| Workflow | Task | Purpose |
-|----------|------|---------|
-| `core-taskfile.yml` | `ci:taskfile` | Validate Taskfile across platforms |
-| `monitor-analytics.yml` | `ci:analytics` | Weekly analytics check |
-| `monitor-sitecheck.yml` | `ci:sitecheck` | Site reachability check |
-| `core-xplat.yml` | *(direct)* | xplat cross-platform build tests |
-
-**xplat Embedded Task Runner:**
-
-xplat embeds Task (go-task), enabling single-binary bootstrap in CI:
-
-```bash
-# CI uses xplat task (no Task installation needed)
-go build -o xplat ./cmd/xplat
-xplat task dummy:build
-```
+| `release-` | Build & release pipelines | `release-tools.yml` |
 
 **Development Workflow:**
 

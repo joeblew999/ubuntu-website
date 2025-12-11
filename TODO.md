@@ -1,5 +1,11 @@
 # TODO
 
+BTW i noticed that your broke an GOLDNE run in the wrangler taskfile. I see "bun" used in it. We agreed thats NOT ok. I dont know how this was missed, but its vital you dont so this !!!!   I am not sure how your going to validate this, but now that your have Archetypes and fmt and lint, i think it will be pretty easy, and you know what task includes what task  ? 
+
+I need you to keep watch on where you see patterns or mistakes when you modify task file, and screw up, and then look at the xplat lint and fmt etc code to be updated. We dont want to go overboard and boil the ocean.
+
+---
+
 Currently honing our testing of task files, archtype classification and task files conformance system.
 
 Getting single task file testing locally and in CI, will allow Me, other devs and claude to QUICKLY get things properly validated !!

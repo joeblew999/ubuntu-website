@@ -1,13 +1,10 @@
 # Tools Module
 #
-# Cross-platform development tools that bootstrap themselves.
-# Unlike toolchain modules (which manage compilers/runtimes),
-# tools are standalone binaries that fill gaps in Task's shell.
+# Development tools for the website.
 #
 # Included tools:
 #   git      - Git version control (check, generate .gitignore)
 #   task     - Task version checker (ensures local matches CI)
-#   xplat    - Cross-platform shell utilities (which, glob, etc.)
 #   gh       - GitHub CLI for releases, workflows, PRs, issues
 #   wrangler - Cloudflare CLI for Pages, Workers, KV (installed via Bun)
 #   pc       - Process-Compose for local dev orchestration
@@ -22,9 +19,6 @@ includes:
   task:
     taskfile: ./tools/Taskfile.task.yml
     optional: false
-  xplat:
-    taskfile: ./tools/Taskfile.xplat.yml
-    optional: false
   gh:
     taskfile: ./tools/Taskfile.gh.yml
     optional: true  # gh not required for basic operations
@@ -37,9 +31,6 @@ includes:
   tui:
     taskfile: ./tools/Taskfile.task-ui.yml
     optional: true  # Optional web dashboard
-  idempotency-test:
-    taskfile: ./tools/Taskfile.idempotency-test.yml
-    optional: true  # Only used for CI testing
 
 tasks:
   # ===========================================================================
@@ -51,16 +42,13 @@ tasks:
     cmds:
       - task: git:check:deps
       - task: task:check:deps
-      - task: xplat:check:deps
 
   check:validate:
     desc: Validate all tools work
     cmds:
       - task: git:check:validate
-      - task: xplat:check:validate
 
   check:health:
     desc: Health check all tools
     cmds:
       - task: git:check:health
-      - task: xplat:check:health
