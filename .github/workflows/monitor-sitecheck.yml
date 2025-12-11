@@ -80,11 +80,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          echo "Current directory: $(pwd)"
+          ls -la report.md || echo "report.md not found in working dir"
           if [ -s report.md ]; then
-            task tools:gh:issue:create-from-file \
-              TITLE="Site Alert: Reachability issue detected" \
-              FILE="report.md" \
-              LABELS="site-monitor,automated"
+            gh issue create \
+              --title "Site Alert: Reachability issue detected" \
+              --body-file report.md \
+              --label "site-monitor,automated"
           else
             echo "No report content to create issue with"
           fi
