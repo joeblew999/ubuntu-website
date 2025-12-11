@@ -55,11 +55,14 @@ jobs:
         env:
           SITE_URL: ${{ vars.SITE_URL }}
         run: |
-          task ci:sitecheck | tee report.md
-          exit_code=${PIPESTATUS[0]}
+          set +e  # Disable exit on error to capture exit code
+          task ci:sitecheck > report.md 2>&1
+          exit_code=$?
+          cat report.md
           if [ $exit_code -ne 0 ]; then
             echo "SITECHECK_FAILED=true" >> $GITHUB_OUTPUT
           fi
+          exit 0  # Always succeed so workflow continues
 
       # Save state for next run
       - name: Upload state
@@ -73,7 +76,7 @@ jobs:
 
       # Create issue if issues detected
       - name: Create Issue
-        if: steps.check.outputs.SITECHECK_FAILED == 'true' && hashFiles('report.md') != ''
+        if: steps.check.outputs.SITECHECK_FAILED == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

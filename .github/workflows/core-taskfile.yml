@@ -42,6 +42,14 @@ jobs:
           hugo-version: '0.152.2'
           extended: true
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install TailwindCSS CLI
+        run: npm install -g tailwindcss @tailwindcss/cli
+
       - name: Validate Taskfile syntax
         run: task --list
 
