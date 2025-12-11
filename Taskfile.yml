@@ -288,8 +288,18 @@ tasks:
   # CI Interface (called by GitHub Actions workflows)
   # ===========================================================================
   # Workflows call these tasks - all logic stays in Taskfile.
-  # Most ci:* tasks are in taskfiles/Taskfile.ci.yml
   # Note: ci:analytics and ci:sitecheck use binaries via their respective taskfiles
+
+  ci:health:
+    desc: "[Monitor] Health - Run health checks for CI"
+    cmds:
+      - task: git:check:health
+
+  ci:health:test-fail:
+    desc: "[Monitor] Health - Force failure to test notifications"
+    cmds:
+      - echo "Simulating health check failure..."
+      - exit 1
 
   ci:analytics:
     desc: "[Monitor] Analytics - Run analytics check for CI"

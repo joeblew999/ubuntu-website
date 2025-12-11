@@ -13,10 +13,6 @@
 version: '3'
 
 vars:
-  # Archetype: external - we install Coder CLI from coder/coder, we don't build it
-  XPLAT_ARCHETYPE: external
-  # CODER_VERSION comes from xplat.env (loaded by root Taskfile dotenv)
-  CODER_VERSION: '{{.CODER_VERSION}}'
   CODER_BIN: 'coder{{exeExt}}'
 
 tasks:

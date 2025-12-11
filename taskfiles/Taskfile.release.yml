@@ -1,8 +1,7 @@
 # Release Utilities
 #
 # Utility tasks for managing release builds.
-# Actual build tasks are in each tool's Taskfile (sitecheck, analytics, etc.)
-# and use :toolchain:golang:build for the shared build logic.
+# Each tool Taskfile (sitecheck, analytics, etc.) has release:build tasks.
 #
 # Usage:
 #   task release:clean  - Remove all built binaries

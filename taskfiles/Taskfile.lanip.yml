@@ -2,8 +2,6 @@
 #
 # Cross-platform LAN IP detection using Go.
 # Works on macOS, Linux, Windows.
-#
-# REQUIRES: golang
 
 version: '3'
 
@@ -11,14 +9,14 @@ tasks:
   # ===========================================================================
   # Checks (check:* - diagnostics for this module)
   # ===========================================================================
-  # deps     - ensure required tools are installed (delegates to golang)
+  # deps     - ensure required tools are installed
   # validate - smoke test, runs in CI on change
   # health   - external system check (network reachability)
 
   check:deps:
-    desc: Ensure dependencies are installed (delegates to toolchain:golang)
+    desc: Ensure Go is installed
     cmds:
-      - task: :toolchain:golang:check:deps
+      - 'command -v go >/dev/null 2>&1 || (echo "ERROR: Go not installed" && exit 1)'
 
   check:validate:
     desc: Smoke test lanip module works

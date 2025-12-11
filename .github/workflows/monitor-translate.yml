@@ -37,10 +37,11 @@ jobs:
         with:
           version: 3.45.5
 
-      # Bootstrap xplat (required for binary:install)
-      - name: Install xplat
+      # Build translate binary
+      - name: Build translate
         run: |
-          task tools:xplat:check:deps
+          mkdir -p $HOME/.local/bin
+          go build -o $HOME/.local/bin/translate ./cmd/translate
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       # Run translation check via Taskfile (DRY - same as local)

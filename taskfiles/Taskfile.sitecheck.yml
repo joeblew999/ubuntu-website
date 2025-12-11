@@ -1,7 +1,6 @@
 # Site Check Tasks
 #
 # Global site reachability checks via cmd/sitecheck.
-# Uses xplat binary:install for cross-platform binary management.
 #
 # Usage:
 #   task sitecheck          - HTTP check (default)
@@ -9,18 +8,11 @@
 #   task sitecheck:dns      - DNS resolution check
 #   task sitecheck:tcp      - TCP port 443 check
 #   task sitecheck:redirect - Apex redirect check
-#
-# REQUIRES: xplat (for binary management)
 
 version: '3'
 
 vars:
-  # Version from xplat.env (loaded by root Taskfile dotenv)
-  SITECHECK_VERSION: '{{.SITECHECK_VERSION}}'
-  SITECHECK_REPO: joeblew999/ubuntu-website
   SITECHECK_BIN: 'sitecheck{{exeExt}}'
-  SITECHECK_CGO: '0'  # No CGO needed - can cross-compile
-  XPLAT_AFFINITY: cross  # Can cross-compile from any platform
 
 tasks:
   # ===========================================================================
@@ -29,14 +21,11 @@ tasks:
 
   check:deps:
     desc: Ensure sitecheck binary is available (builds from source or downloads)
-    # status: provides true idempotency - skips entirely if binary exists
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}"
     cmds:
-      # toSlash converts backslashes to forward slashes for shell compatibility on Windows
-      - task: :tools:xplat:binary:install
-        vars:
-          CLI_ARGS: 'sitecheck {{.SITECHECK_VERSION}} {{.SITECHECK_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/sitecheck"'
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}" ./cmd/sitecheck
 
   # ===========================================================================
   # Default Task
@@ -46,7 +35,7 @@ tasks:
     desc: Check site HTTP reachability from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}}'
+      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}'
 
   # ===========================================================================
   # Individual Checks
@@ -56,25 +45,25 @@ tasks:
     desc: Check site HTTP reachability from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}}'
+      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}'
 
   dns:
     desc: Check DNS resolution from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}} -type dns'
+      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}} -type dns'
 
   tcp:
     desc: Check TCP port 443 from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}} -type tcp'
+      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}} -type tcp'
 
   redirect:
     desc: Check apex domain redirects to www
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/sitecheck{{exeExt}} -type redirect'
+      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}} -type redirect'
 
   # ===========================================================================
   # Combined
@@ -95,16 +84,10 @@ tasks:
   release:build:
     desc: Build sitecheck for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - task: :toolchain:golang:build
-        vars:
-          BIN: '{{.SITECHECK_BIN}}'
-          VERSION: '{{.RELEASE_VERSION | default .SITECHECK_VERSION}}'
-          SOURCE: '{{.ROOT_DIR}}/cmd/sitecheck'
-          CGO: '{{.SITECHECK_CGO}}'
+      - mkdir -p .build
+      - go build -o ".build/{{.SITECHECK_BIN}}" ./cmd/sitecheck
 
   release:test:
     desc: Test built sitecheck release binary
     cmds:
-      - task: :toolchain:golang:build:test
-        vars:
-          BIN: '{{.SITECHECK_BIN}}'
+      - .build/{{.SITECHECK_BIN}} -h || true

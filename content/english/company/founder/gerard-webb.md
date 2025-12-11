@@ -1,7 +1,7 @@
 ---
 title: "Gerard Webb"
 role: "Founder"
-image: "/images/team/gerard-passport.jpg"
+image: "/images/team/gerard-webb.jpg"
 description: "Founder of Ubuntu Software"
 aliases:
   - "/company/team/gerard-webb/"

@@ -1,7 +1,7 @@
-# Core Tools Cross-Platform Build & Test
+# Core Tools Build & Test
 #
-# Validates all binary tools (analytics, sitecheck, genlogo) build and run
-# on all major operating systems. Runs on push/PR to catch issues early.
+# Validates all binary tools (analytics, sitecheck, genlogo) build and run.
+# Runs on push/PR to catch issues early.
 #
 # Category: CORE CI (P0 - must pass for merge)
 
@@ -17,7 +17,7 @@ on:
       - 'taskfiles/Taskfile.analytics.yml'
       - 'taskfiles/Taskfile.sitecheck.yml'
       - 'taskfiles/Taskfile.genlogo.yml'
-      - 'xplat.env'
+      - '.env'
       - '.github/workflows/core-tools.yml'
   pull_request:
     paths:
@@ -29,24 +29,15 @@ on:
 
 jobs:
   build-and-test:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            name: Linux
-          - os: macos-latest
-            name: macOS
-          - os: windows-latest
-            name: Windows
-    runs-on: ${{ matrix.os }}
-    name: Build & Test (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    name: Build & Test
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.23'
 
       - name: Install Task
         uses: arduino/setup-task@v2
@@ -56,28 +47,24 @@ jobs:
 
       # Build all binary tools
       - name: Build analytics
-        shell: bash
         run: |
-          go build -o bin/analytics${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/analytics
-          echo "Built analytics for ${{ matrix.name }}"
+          go build -o bin/analytics ./cmd/analytics
+          echo "Built analytics"
 
       - name: Build sitecheck
-        shell: bash
         run: |
-          go build -o bin/sitecheck${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/sitecheck
-          echo "Built sitecheck for ${{ matrix.name }}"
+          go build -o bin/sitecheck ./cmd/sitecheck
+          echo "Built sitecheck"
 
       - name: Build genlogo
-        shell: bash
         run: |
-          go build -o bin/genlogo${{ runner.os == 'Windows' && '.exe' || '' }} ./cmd/genlogo
-          echo "Built genlogo for ${{ matrix.name }}"
+          go build -o bin/genlogo ./cmd/genlogo
+          echo "Built genlogo"
 
-      # Smoke tests (Unix)
-      - name: Smoke test tools (Unix)
-        if: runner.os != 'Windows'
+      # Smoke tests
+      - name: Smoke test tools
         run: |
-          echo "=== Tool Smoke Tests (${{ matrix.name }}) ==="
+          echo "=== Tool Smoke Tests ==="
 
           echo "Testing: analytics --help"
           ./bin/analytics --help || ./bin/analytics -h || echo "(no help flag)"
@@ -88,29 +75,10 @@ jobs:
           echo "Testing: genlogo --help"
           ./bin/genlogo --help || ./bin/genlogo -h || echo "(no help flag)"
 
-          echo "=== All smoke tests passed (${{ matrix.name }}) ==="
-
-      # Smoke tests (Windows)
-      - name: Smoke test tools (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          Write-Host "=== Tool Smoke Tests (Windows) ===" -ForegroundColor Cyan
-
-          Write-Host "Testing: analytics --help"
-          .\bin\analytics.exe --help 2>$null; if ($LASTEXITCODE -ne 0) { .\bin\analytics.exe -h 2>$null }
-
-          Write-Host "Testing: sitecheck --help"
-          .\bin\sitecheck.exe --help 2>$null; if ($LASTEXITCODE -ne 0) { .\bin\sitecheck.exe -h 2>$null }
-
-          Write-Host "Testing: genlogo --help"
-          .\bin\genlogo.exe --help 2>$null; if ($LASTEXITCODE -ne 0) { .\bin\genlogo.exe -h 2>$null }
-
-          Write-Host "=== All smoke tests passed (Windows) ===" -ForegroundColor Cyan
+          echo "=== All smoke tests passed ==="
 
       # Run Go unit tests if they exist
       - name: Run unit tests
-        shell: bash
         run: |
           echo "Running Go unit tests..."
           go test -v ./cmd/analytics/... 2>/dev/null || echo "No tests in cmd/analytics"

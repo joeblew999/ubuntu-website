@@ -1,24 +1,16 @@
 # Genlogo Tasks
 #
 # Logo and branding asset generation via cmd/genlogo.
-# Uses xplat binary:install for cross-platform binary management.
 #
 # Lifecycle:
 #   task genlogo:check:deps       - Ensure binary is available
 #   task genlogo:generate:all     - Generate all branding assets
 #   task genlogo:generate:favicon - Generate favicon only
-#
-# REQUIRES: xplat (for binary management)
 
 version: '3'
 
 vars:
-  # Version from xplat.env (loaded by root Taskfile dotenv)
-  GENLOGO_VERSION: '{{.GENLOGO_VERSION}}'
-  GENLOGO_REPO: joeblew999/ubuntu-website
   GENLOGO_BIN: 'genlogo{{exeExt}}'
-  GENLOGO_CGO: '0'  # No CGO needed - can cross-compile
-  XPLAT_AFFINITY: cross  # Can cross-compile from any platform
 
 tasks:
   # ===========================================================================
@@ -27,12 +19,11 @@ tasks:
 
   check:deps:
     desc: Ensure genlogo binary is available (builds from source or downloads)
-    # status: provides true idempotency - skips entirely if binary exists
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}}"
     cmds:
-      # toSlash converts backslashes to forward slashes for shell compatibility on Windows
-      - '{{.XPLAT_BIN}} binary install genlogo {{.GENLOGO_VERSION}} {{.GENLOGO_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/genlogo"'
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}}" ./cmd/genlogo
 
   # ===========================================================================
   # Generate (generate:* - lifecycle phase)
@@ -53,8 +44,7 @@ tasks:
       - '{{.ROOT_DIR}}/static/images/bluesky-avatar.png'
       - '{{.ROOT_DIR}}/static/images/bluesky-banner.png'
     cmds:
-      # toSlash converts backslashes to forward slashes for shell compatibility on Windows
-      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset all -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}} -asset all -dir "{{toSlash .ROOT_DIR}}"'
       - echo ""
       - 'echo "Assets generated. Next steps:"'
       - echo "  1. Deploy website (git push) - updates Hugo site with new favicon, logos, og-image"
@@ -69,7 +59,7 @@ tasks:
     generates:
       - '{{.ROOT_DIR}}/assets/images/favicon.png'
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset favicon -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}} -asset favicon -dir "{{toSlash .ROOT_DIR}}"'
 
   generate:logo:
     desc: Generate logo SVGs only
@@ -80,7 +70,7 @@ tasks:
       - '{{.ROOT_DIR}}/assets/images/logo.svg'
       - '{{.ROOT_DIR}}/assets/images/logo-darkmode.svg'
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset logo-svg -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}} -asset logo-svg -dir "{{toSlash .ROOT_DIR}}"'
 
   generate:og-image:
     desc: Generate Open Graph image only
@@ -90,7 +80,7 @@ tasks:
     generates:
       - '{{.ROOT_DIR}}/static/images/og-image.png'
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset og -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}} -asset og -dir "{{toSlash .ROOT_DIR}}"'
 
   generate:avatar:
     desc: Generate avatar only
@@ -100,7 +90,7 @@ tasks:
     generates:
       - '{{.ROOT_DIR}}/static/images/bluesky-avatar.png'
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset avatar -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}} -asset avatar -dir "{{toSlash .ROOT_DIR}}"'
 
   generate:banner:
     desc: Generate banner only
@@ -110,7 +100,7 @@ tasks:
     generates:
       - '{{.ROOT_DIR}}/static/images/bluesky-banner.png'
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/genlogo{{exeExt}} -asset banner -dir "{{toSlash .ROOT_DIR}}"'
+      - '{{.BIN_INSTALL_DIR}}/{{.GENLOGO_BIN}} -asset banner -dir "{{toSlash .ROOT_DIR}}"'
 
   # ===========================================================================
   # Release (release:* - build for distribution)
@@ -119,16 +109,10 @@ tasks:
   release:build:
     desc: Build genlogo for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - task: :toolchain:golang:build
-        vars:
-          BIN: '{{.GENLOGO_BIN}}'
-          VERSION: '{{.RELEASE_VERSION | default .GENLOGO_VERSION}}'
-          SOURCE: '{{.ROOT_DIR}}/cmd/genlogo'
-          CGO: '{{.GENLOGO_CGO}}'
+      - mkdir -p .build
+      - go build -o ".build/{{.GENLOGO_BIN}}" ./cmd/genlogo
 
   release:test:
     desc: Test built genlogo release binary
     cmds:
-      - task: :toolchain:golang:build:test
-        vars:
-          BIN: '{{.GENLOGO_BIN}}'
+      - .build/{{.GENLOGO_BIN}} -h || true

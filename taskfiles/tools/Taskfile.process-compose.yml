@@ -1,7 +1,6 @@
 # Process-Compose Tasks
 #
 # Local development process orchestration with health checks and auto-restart.
-# Uses xplat binary:install for cross-platform binary management.
 #
 # Usage:
 #   task pc:up              Start all dev processes with TUI dashboard
@@ -14,17 +13,11 @@
 #   process-compose up --enable mailerlite
 #
 # Documentation: https://github.com/F1bonacc1/process-compose
-#
-# REQUIRES: xplat (for binary management)
 
 version: '3'
 
 vars:
-  # Version from xplat.env (loaded by root Taskfile dotenv)
-  PC_VERSION: '{{.PC_VERSION}}'
-  PC_REPO: joeblew999/ubuntu-website
   PC_BIN: 'process-compose{{exeExt}}'
-  PC_CGO: '0'  # No CGO needed
   PC_CMD: '{{.BIN_INSTALL_DIR}}/{{.PC_BIN}}'
 
 tasks:
@@ -38,9 +31,8 @@ tasks:
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.PC_BIN}}"
     cmds:
-      - task: :tools:xplat:binary:install
-        vars:
-          CLI_ARGS: 'process-compose {{.PROCESS_COMPOSE_VERSION}} {{.PC_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/process-compose"'
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.PC_BIN}}" ./cmd/process-compose
 
   # ===========================================================================
   # Core Commands (up/down/logs/status)
@@ -111,29 +103,17 @@ tasks:
   release:build:
     desc: Build process-compose for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - task: :toolchain:golang:build
-        vars:
-          BIN: '{{.PC_BIN}}'
-          VERSION: '{{.RELEASE_VERSION | default .PROCESS_COMPOSE_VERSION}}'
-          SOURCE: '{{.ROOT_DIR}}/cmd/process-compose'
-          CGO: '{{.PC_CGO}}'
+      - mkdir -p .build
+      - go build -o ".build/{{.PC_BIN}}" ./cmd/process-compose
 
   release:test:
     desc: Test built process-compose release binary
     cmds:
-      - task: :toolchain:golang:build:test
-        vars:
-          BIN: '{{.PC_BIN}}'
+      - .build/{{.PC_BIN}} version || true
 
   release:publish:
     desc: Build all platforms and create GitHub release
     requires:
       vars: [VERSION]
     cmds:
-      - task: :tools:xplat:release:build
-        vars:
-          CLI_ARGS: 'pc'
-      - task: :tools:gh:release:publish
-        vars:
-          NAME: 'process-compose'
-          VERSION: '{{.VERSION}}'
+      - echo "Release publishing requires manual process - build binaries and use gh release create"

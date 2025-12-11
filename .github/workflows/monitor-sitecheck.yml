@@ -32,10 +32,11 @@ jobs:
         with:
           version: 3.45.5
 
-      # Bootstrap xplat (required by sitecheck:check:deps)
-      - name: Install xplat
+      # Build sitecheck binary
+      - name: Build sitecheck
         run: |
-          task tools:xplat:check:deps
+          mkdir -p $HOME/.local/bin
+          go build -o $HOME/.local/bin/sitecheck ./cmd/sitecheck
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       # Download previous state from artifact (if exists)

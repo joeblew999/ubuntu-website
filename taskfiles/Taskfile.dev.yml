@@ -8,8 +8,6 @@
 #   task dev:logs    View combined logs
 #   task dev:status  Show process status
 #   task dev:ui      Start Task-UI web dashboard
-#
-# REQUIRES: xplat (for binary management)
 
 version: '3'
 

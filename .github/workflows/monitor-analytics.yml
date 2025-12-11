@@ -33,10 +33,11 @@ jobs:
         with:
           version: 3.45.5
 
-      # Bootstrap xplat (required by analytics:check:deps)
-      - name: Install xplat
+      # Build analytics binary
+      - name: Build analytics
         run: |
-          task tools:xplat:check:deps
+          mkdir -p $HOME/.local/bin
+          go build -o $HOME/.local/bin/analytics ./cmd/analytics
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       # Download previous state from artifact (if exists)

@@ -4,18 +4,12 @@
 # Works both locally and in CI (gh is pre-installed in GitHub Actions).
 #
 # Auto-downloads from https://github.com/cli/cli/releases if not found.
-#
-# Pattern: All tool taskfiles define TOOL_BIN with {{exeExt}} for Windows support
 
 version: '3'
 
 vars:
-  # Archetype: external - we install gh CLI from cli/cli repo, we don't build it
-  XPLAT_ARCHETYPE: external
-  # GH_VERSION comes from xplat.env (loaded by root Taskfile dotenv)
-  GH_VERSION: '{{.GH_VERSION}}'
   GH_BIN: 'gh{{exeExt}}'
-  # Source repo for downloads (not _REPO pattern - we don't release this)
+  # Source repo for downloads
   GH_DOWNLOAD_REPO: cli/cli
   # Platform mapping for gh release assets (gh uses macOS not darwin)
   GH_OS_MAP: '{{if eq OS "darwin"}}macOS{{else if eq OS "windows"}}windows{{else}}linux{{end}}'
@@ -35,18 +29,15 @@ tasks:
       - task: install
 
   install:
-    desc: Download and install gh CLI from GitHub releases
+    desc: Download and install gh CLI
     internal: true
-    vars:
-      # Strip 'v' prefix for gh asset naming (v2.83.1 -> 2.83.1)
-      GH_VER_NUM: '{{trimPrefix "v" .GH_VERSION}}'
-      ASSET_NAME: 'gh_{{.GH_VER_NUM}}_{{.GH_OS_MAP}}_{{.GH_ARCH_MAP}}.{{.GH_EXT}}'
-      DOWNLOAD_URL: 'https://github.com/{{.GH_DOWNLOAD_REPO}}/releases/download/{{.GH_VERSION}}/{{.ASSET_NAME}}'
     cmds:
-      - 'echo "Downloading gh {{.GH_VERSION}} for {{OS}}/{{ARCH}}..."'
-      - '{{.XPLAT_BIN}} fetch --extract --strip 2 --include "*/bin/gh*" "{{.DOWNLOAD_URL}}" --output "{{.BIN_INSTALL_DIR}}"'
-      - 'echo "OK: gh {{.GH_VERSION}} installed to {{.BIN_INSTALL_DIR}}"'
-      - '"{{.BIN_INSTALL_DIR}}/{{.GH_BIN}}" --version'
+      - |
+        echo "gh CLI not found. Install options:"
+        echo "  macOS:   brew install gh"
+        echo "  Linux:   https://github.com/cli/cli#installation"
+        echo "  Windows: winget install GitHub.cli"
+        exit 1
 
   check:validate:
     desc: Validate gh CLI works and show auth status
@@ -119,14 +110,11 @@ tasks:
       - |
         TAG="{{.NAME}}-{{.VERSION}}"
         echo "Creating release: $TAG"
-        echo "Assets:"
-        # Use xplat release list - single source of truth for platform/naming conventions
-        {{.XPLAT_BIN}} release list "{{.NAME}}"
-        # Get files as space-separated list
-        FILES=$({{.XPLAT_BIN}} release list "{{.NAME}}" | tr '\n' ' ')
+        echo "Assets from .build/:"
+        ls -la .build/ 2>/dev/null || echo "  (no files in .build/)"
         echo ""
         echo "Uploading to GitHub..."
-        {{.GH_BIN}} release create "$TAG" --generate-notes $FILES
+        {{.GH_BIN}} release create "$TAG" --generate-notes .build/*
         echo ""
         echo "Release created: https://github.com/$({{.GH_BIN}} repo view --json nameWithOwner -q .nameWithOwner)/releases/tag/$TAG"
 
@@ -173,7 +161,7 @@ tasks:
         WORKFLOW="{{.CLI_ARGS}}"
         if [ -z "$WORKFLOW" ]; then
           echo "Usage: task gh:workflow:run -- WORKFLOW"
-          echo "Example: task gh:workflow:run -- xplat.yml"
+          echo "Example: task gh:workflow:run -- core-taskfile.yml"
           exit 1
         fi
         {{.GH_BIN}} workflow run "$WORKFLOW"

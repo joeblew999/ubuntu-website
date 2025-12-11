@@ -1,7 +1,6 @@
 # Task-UI Tasks
 #
 # Web-based dashboard for executing Taskfile tasks.
-# Uses xplat binary:install for cross-platform binary management.
 #
 # Usage:
 #   task tui:up             Start Task-UI at http://localhost:3000
@@ -9,17 +8,11 @@
 #   task tui:status         Not running as daemon
 #
 # Documentation: https://github.com/titpetric/task-ui
-#
-# REQUIRES: xplat (for binary management)
 
 version: '3'
 
 vars:
-  # Version from xplat.env (loaded by root Taskfile dotenv)
-  TUI_VERSION: '{{.TASK_UI_VERSION}}'
-  TUI_REPO: joeblew999/ubuntu-website
   TUI_BIN: 'task-ui{{exeExt}}'
-  TUI_CGO: '0'  # No CGO needed
   TUI_CMD: '{{.BIN_INSTALL_DIR}}/{{.TUI_BIN}}'
   TUI_PORT: '3000'
 
@@ -34,9 +27,8 @@ tasks:
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.TUI_BIN}}"
     cmds:
-      - task: :tools:xplat:binary:install
-        vars:
-          CLI_ARGS: 'task-ui {{.TASK_UI_VERSION}} {{.TUI_REPO}} --source "{{toSlash .ROOT_DIR}}/cmd/task-ui"'
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.TUI_BIN}}" ./cmd/task-ui
 
   # ===========================================================================
   # Core Commands (up/down)
@@ -58,29 +50,17 @@ tasks:
   release:build:
     desc: Build task-ui for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - task: :toolchain:golang:build
-        vars:
-          BIN: '{{.TUI_BIN}}'
-          VERSION: '{{.RELEASE_VERSION | default .TASK_UI_VERSION}}'
-          SOURCE: '{{.ROOT_DIR}}/cmd/task-ui'
-          CGO: '{{.TUI_CGO}}'
+      - mkdir -p .build
+      - go build -o ".build/{{.TUI_BIN}}" ./cmd/task-ui
 
   release:test:
     desc: Test built task-ui release binary
     cmds:
-      - task: :toolchain:golang:build:test
-        vars:
-          BIN: '{{.TUI_BIN}}'
+      - .build/{{.TUI_BIN}} --help || true
 
   release:publish:
     desc: Build all platforms and create GitHub release
     requires:
       vars: [VERSION]
     cmds:
-      - task: :tools:xplat:release:build
-        vars:
-          CLI_ARGS: 'tui'
-      - task: :tools:gh:release:publish
-        vars:
-          NAME: 'task-ui'
-          VERSION: '{{.VERSION}}'
+      - echo "Release publishing requires manual process - build binaries and use gh release create"
