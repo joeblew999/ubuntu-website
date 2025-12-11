@@ -42,13 +42,11 @@ jobs:
           hugo-version: '0.152.2'
           extended: true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
-      - name: Install Node dependencies
-        run: npm install
+      - name: Install dependencies
+        run: bun install
 
       - name: Validate Taskfile syntax
         run: task --list
