@@ -25,7 +25,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.23'
 
       - name: Install Task
         uses: arduino/setup-task@v2
@@ -54,8 +54,12 @@ jobs:
         id: check
         env:
           SITE_URL: ${{ vars.SITE_URL }}
-        run: task ci:sitecheck > report.md
-        continue-on-error: true
+        run: |
+          task ci:sitecheck | tee report.md
+          exit_code=${PIPESTATUS[0]}
+          if [ $exit_code -ne 0 ]; then
+            echo "SITECHECK_FAILED=true" >> $GITHUB_OUTPUT
+          fi
 
       # Save state for next run
       - name: Upload state
@@ -67,13 +71,17 @@ jobs:
           overwrite: true
           include-hidden-files: true
 
-      # Create issue if issues detected (exit code 1)
+      # Create issue if issues detected
       - name: Create Issue
-        if: steps.check.outcome == 'failure'
+        if: steps.check.outputs.SITECHECK_FAILED == 'true' && hashFiles('report.md') != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          task tools:gh:issue:create-from-file \
-            TITLE="Site Alert: Reachability issue detected" \
-            FILE="report.md" \
-            LABELS="site-monitor,automated"
+          if [ -s report.md ]; then
+            task tools:gh:issue:create-from-file \
+              TITLE="Site Alert: Reachability issue detected" \
+              FILE="report.md" \
+              LABELS="site-monitor,automated"
+          else
+            echo "No report content to create issue with"
+          fi
