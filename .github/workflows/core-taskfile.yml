@@ -36,6 +36,12 @@ jobs:
           version: 3.45.5
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.152.2'
+          extended: true
+
       - name: Validate Taskfile syntax
         run: task --list
 
