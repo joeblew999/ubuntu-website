@@ -354,6 +354,107 @@ tasks:
         echo ""
         echo "Run 'task google-mcp:claude:remove' to remove from Claude MCP config"
 
+  reset:
+    desc: "Full reset - remove ALL local config and guide through Google Console cleanup"
+    summary: |
+      Completely resets Google MCP setup:
+      - Removes MCP config (.vscode/mcp.json)
+      - Removes Claude permissions (.claude/settings.json)
+      - Removes authenticated accounts (~/.google-mcp-accounts/)
+      - Removes credentials from .env
+      - Opens Google Console to delete OAuth credentials
+
+      Usage:
+        task google-mcp:reset           # Dry run (shows what will be removed)
+        task google-mcp:reset CONFIRM=y # Actually remove everything
+    vars:
+      CONFIRM: '{{.CONFIRM | default ""}}'
+      ENV_FILE: '{{.PWD}}/.env'
+    cmds:
+      - |
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║         Google MCP - Full Reset                              ║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "This will remove:"
+        echo ""
+        echo "LOCAL FILES:"
+        echo "  • .vscode/mcp.json (MCP server config)"
+        echo "  • .claude/settings.json (permissions)"
+        echo "  • {{.ACCOUNTS_DIR}}/ (authenticated accounts)"
+        echo "  • GOOGLE_CLIENT_ID/SECRET from .env"
+        echo ""
+        echo "GOOGLE CLOUD (manual):"
+        echo "  • OAuth credentials (will open browser)"
+        echo ""
+
+        if [ "{{.CONFIRM}}" != "y" ]; then
+          echo "────────────────────────────────────────────────────────────────"
+          echo "DRY RUN - nothing removed yet"
+          echo ""
+          echo "To actually reset, run:"
+          echo "  task google-mcp:reset CONFIRM=y"
+          echo "────────────────────────────────────────────────────────────────"
+          exit 0
+        fi
+
+        echo "────────────────────────────────────────────────────────────────"
+        echo "Removing local files..."
+        echo "────────────────────────────────────────────────────────────────"
+
+        # Remove MCP config
+        if [ -f ".vscode/mcp.json" ]; then
+          rm -f ".vscode/mcp.json"
+          echo "✅ Removed .vscode/mcp.json"
+        else
+          echo "⏭️  .vscode/mcp.json (not found)"
+        fi
+
+        # Remove Claude permissions
+        if [ -f ".claude/settings.json" ]; then
+          rm -f ".claude/settings.json"
+          echo "✅ Removed .claude/settings.json"
+        else
+          echo "⏭️  .claude/settings.json (not found)"
+        fi
+
+        # Remove authenticated accounts
+        if [ -d "{{.ACCOUNTS_DIR}}" ]; then
+          rm -rf "{{.ACCOUNTS_DIR}}"
+          echo "✅ Removed {{.ACCOUNTS_DIR}}/"
+        else
+          echo "⏭️  {{.ACCOUNTS_DIR}}/ (not found)"
+        fi
+
+        # Remove credentials from .env
+        if [ -f "{{.ENV_FILE}}" ] && grep -q "GOOGLE_CLIENT" "{{.ENV_FILE}}" 2>/dev/null; then
+          grep -v "^GOOGLE_CLIENT_ID=" "{{.ENV_FILE}}" | grep -v "^GOOGLE_CLIENT_SECRET=" | grep -v "^# Google MCP" > "{{.ENV_FILE}}.tmp" || true
+          mv "{{.ENV_FILE}}.tmp" "{{.ENV_FILE}}"
+          echo "✅ Removed Google credentials from .env"
+        else
+          echo "⏭️  .env Google credentials (not found)"
+        fi
+
+        echo ""
+        echo "────────────────────────────────────────────────────────────────"
+        echo "Opening Google Cloud Console..."
+        echo "────────────────────────────────────────────────────────────────"
+        echo ""
+        echo "To complete the reset, delete your OAuth credentials:"
+        echo "  1. Find your OAuth 2.0 Client ID"
+        echo "  2. Click the trash icon to delete it"
+        echo "  3. (Optional) Delete the entire project if not used elsewhere"
+        echo ""
+        open "https://console.cloud.google.com/apis/credentials"
+
+        echo ""
+        echo "════════════════════════════════════════════════════════════════"
+        echo "✅ LOCAL RESET COMPLETE"
+        echo ""
+        echo "To set up again from scratch:"
+        echo "  task google-mcp:guide"
+        echo "════════════════════════════════════════════════════════════════"
+
   open:project:
     desc: "Step 1: Create or select a Google Cloud project"
     cmds:
