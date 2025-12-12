@@ -5,7 +5,7 @@
 #
 # Architecture:
 #   Taskfile          - Orchestration, setup, status checks
-#   cmd/google-auth   - Go binary for manual OAuth (fallback/debug)
+#   cmd/google-auth   - Go binary for .mcp.json management (add/remove/status)
 #   google-mcp-server - External binary (handles auth + MCP protocol)
 #
 # Source: https://github.com/ngs/google-mcp-server
@@ -16,10 +16,11 @@
 #   3. APIs enabled: Gmail, Calendar, Drive, Sheets, Docs, Slides
 #
 # Usage:
-#   task google-mcp:install       # Install via Homebrew
+#   task google-mcp:install       # Install google-mcp-server via Homebrew
 #   task google-mcp:setup         # Full guided setup
-#   task google-mcp:auth          # Authenticate (uses google-mcp-server)
-#   task google-mcp:auth:manual   # Authenticate (uses local Go binary)
+#   task google-mcp:auth          # Authenticate with Google
+#   task google-mcp:claude:add    # Add to project .mcp.json
+#   task google-mcp:claude:remove # Remove from project .mcp.json
 #   task google-mcp:status        # Check configuration
 
 version: '3'
@@ -68,16 +69,17 @@ tasks:
           echo "❌ Accounts: {{.ACCOUNTS_DIR}} not found"
         fi
 
-        # Check Claude config
-        if [ -f "{{.CLAUDE_CONFIG}}" ]; then
-          if grep -q "google-mcp-server\|google" "{{.CLAUDE_CONFIG}}" 2>/dev/null; then
-            echo "✅ Claude: MCP server configured"
+        # Check project .mcp.json
+        if [ -f ".mcp.json" ]; then
+          if grep -q '"google"' ".mcp.json" 2>/dev/null; then
+            echo "✅ Project: .mcp.json has google server"
           else
-            echo "❌ Claude: MCP server not in config"
-            echo "   Run: task google-mcp:setup:claude"
+            echo "⚠️  Project: .mcp.json exists but no google server"
+            echo "   Run: task google-mcp:claude:add"
           fi
         else
-          echo "⚠️  Claude: Config file not found (may use defaults)"
+          echo "❌ Project: No .mcp.json found"
+          echo "   Run: task google-mcp:claude:add"
         fi
 
         echo ""
@@ -283,35 +285,27 @@ tasks:
       - "{{.GOOGLE_AUTH_BIN}}"
 
   setup:claude:
-    desc: "Step 3: Configure Claude Code"
+    desc: "Step 3: Configure Claude Code (alias for claude:add)"
     cmds:
-      - |
-        echo "Configuring Claude Code..."
-        echo ""
+      - task: claude:add
 
-        # Determine binary path
-        if command -v google-mcp-server &>/dev/null; then
-          BIN_PATH=$(which google-mcp-server)
-        else
-          BIN_PATH="{{.GOOGLE_MCP_BIN}}"
-        fi
+  claude:add:
+    desc: "Add Google MCP to project .mcp.json"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} add"
 
-        echo "Run this command to add the MCP server to Claude:"
-        echo ""
-        echo "  claude mcp add google $BIN_PATH"
-        echo ""
-        echo "Or manually add to ~/.claude.json:"
-        echo ""
-        cat << EOF
-        {
-          "mcpServers": {
-            "google": {
-              "command": "$BIN_PATH"
-            }
-          }
-        }
-        EOF
-        echo ""
+  claude:remove:
+    desc: "Remove Google MCP from project .mcp.json"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} remove"
+
+  claude:status:
+    desc: "Show project .mcp.json config"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} status"
 
   check:installed:
     desc: Verify Google MCP Server is installed

@@ -1,155 +1,293 @@
-// Standalone Google OAuth helper for google-mcp-server
-// This tool authenticates and saves the token file that google-mcp-server expects.
+// Google MCP configuration tool for Claude Code
+//
+// Manages the .mcp.json file in the project root to add/remove
+// the Google MCP server configuration.
+//
+// Usage:
+//
+//	google-auth add      # Add google server to .mcp.json
+//	google-auth remove   # Remove google server from .mcp.json
+//	google-auth status   # Show current .mcp.json config
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
-	"time"
+)
 
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
+// MCPConfig represents the .mcp.json file structure
+type MCPConfig struct {
+	MCPServers map[string]MCPServer `json:"mcpServers"`
+}
+
+// MCPServer represents an MCP server configuration
+type MCPServer struct {
+	Command string            `json:"command"`
+	Args    []string          `json:"args,omitempty"`
+	Env     map[string]string `json:"env,omitempty"`
+}
+
+const (
+	mcpFileName  = ".mcp.json"
+	serverName   = "google"
+	serverCmd    = "google-mcp-server"
+	envClientID  = "${GOOGLE_CLIENT_ID}"
+	envSecretID  = "${GOOGLE_CLIENT_SECRET}"
 )
 
 func main() {
-	clientID := os.Getenv("GOOGLE_CLIENT_ID")
-	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
-
-	if clientID == "" || clientSecret == "" {
-		fmt.Println("Error: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set")
-		fmt.Println("")
-		fmt.Println("Run: source .env")
+	if len(os.Args) < 2 {
+		printUsage()
 		os.Exit(1)
 	}
 
-	scopes := []string{
-		"https://www.googleapis.com/auth/calendar",
-		"https://www.googleapis.com/auth/drive",
-		"https://www.googleapis.com/auth/gmail.modify",
-		"https://www.googleapis.com/auth/spreadsheets",
-		"https://www.googleapis.com/auth/documents",
-		"https://www.googleapis.com/auth/presentations",
-		"https://www.googleapis.com/auth/userinfo.email",
-		"https://www.googleapis.com/auth/userinfo.profile",
-	}
+	cmd := os.Args[1]
 
-	config := &oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		RedirectURL:  "http://localhost:8080/callback",
-		Scopes:       scopes,
-		Endpoint:     google.Endpoint,
-	}
-
-	// Generate auth URL
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-
-	fmt.Println("Opening browser for Google authentication...")
-	fmt.Println("")
-	fmt.Println("If browser doesn't open, visit:")
-	fmt.Println(authURL)
-	fmt.Println("")
-
-	// Open browser
-	openBrowser(authURL)
-
-	// Start callback server
-	codeChan := make(chan string, 1)
-	errChan := make(chan error, 1)
-
-	server := &http.Server{
-		Addr:              ":8080",
-		ReadHeaderTimeout: 10 * time.Second,
-	}
-
-	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
-		code := r.URL.Query().Get("code")
-		if code == "" {
-			errChan <- fmt.Errorf("no authorization code received")
-			http.Error(w, "No authorization code", http.StatusBadRequest)
-			return
-		}
-		codeChan <- code
-		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprintf(w, `<html><body>
-			<h1>✅ Authentication successful!</h1>
-			<p>You can close this window and return to the terminal.</p>
-		</body></html>`)
-	})
-
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			errChan <- err
-		}
-	}()
-
-	fmt.Println("Waiting for authorization (timeout: 5 minutes)...")
-
-	// Wait for code
-	var code string
-	select {
-	case code = <-codeChan:
-		fmt.Println("Authorization code received!")
-	case err := <-errChan:
-		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)
-	case <-time.After(5 * time.Minute):
-		fmt.Println("Timeout waiting for authorization")
-		os.Exit(1)
-	}
-
-	// Shutdown server
-	ctx := context.Background()
-	server.Shutdown(ctx)
-
-	// Exchange code for token
-	fmt.Println("Exchanging code for token...")
-	token, err := config.Exchange(ctx, code)
+	// Find project root (where .mcp.json should live)
+	projectRoot, err := findProjectRoot()
 	if err != nil {
-		fmt.Printf("Failed to exchange code: %v\n", err)
+		fmt.Printf("Error finding project root: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Save token to file
-	homeDir, _ := os.UserHomeDir()
-	tokenFile := filepath.Join(homeDir, ".google-mcp-token.json")
+	mcpFile := filepath.Join(projectRoot, mcpFileName)
 
-	file, err := os.OpenFile(tokenFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
-	if err != nil {
-		fmt.Printf("Failed to create token file: %v\n", err)
+	switch cmd {
+	case "add":
+		if err := addServer(mcpFile); err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+	case "remove":
+		if err := removeServer(mcpFile); err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+	case "status":
+		if err := showStatus(mcpFile); err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+	default:
+		fmt.Printf("Unknown command: %s\n", cmd)
+		printUsage()
 		os.Exit(1)
 	}
-	defer file.Close()
-
-	if err := json.NewEncoder(file).Encode(token); err != nil {
-		fmt.Printf("Failed to save token: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("")
-	fmt.Println("✅ Authentication successful!")
-	fmt.Printf("Token saved to: %s\n", tokenFile)
-	fmt.Println("")
-	fmt.Println("Next: Run 'task google-mcp:setup:claude' to configure Claude Code")
 }
 
-func openBrowser(url string) {
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "darwin":
-		cmd = exec.Command("open", url)
-	case "linux":
-		cmd = exec.Command("xdg-open", url)
-	case "windows":
-		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
+func printUsage() {
+	fmt.Println("Google MCP Configuration Tool")
+	fmt.Println("")
+	fmt.Println("Manages the .mcp.json file for Claude Code project-level MCP servers.")
+	fmt.Println("")
+	fmt.Println("Usage:")
+	fmt.Println("  google-auth add      Add google server to .mcp.json")
+	fmt.Println("  google-auth remove   Remove google server from .mcp.json")
+	fmt.Println("  google-auth status   Show current .mcp.json config")
+	fmt.Println("")
+	fmt.Println("The tool writes to .mcp.json in the project root (safe, version-controlled).")
+	fmt.Println("Environment variables are referenced as ${VAR} - no secrets stored in file.")
+}
+
+// findProjectRoot looks for the project root by finding go.mod or .git
+func findProjectRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
 	}
-	if cmd != nil {
-		cmd.Start()
+
+	for {
+		// Check for go.mod or .git
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			return dir, nil
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			// Reached root, use current working directory
+			return os.Getwd()
+		}
+		dir = parent
 	}
+}
+
+// loadConfig loads the .mcp.json file, returning empty config if not exists
+func loadConfig(mcpFile string) (*MCPConfig, error) {
+	config := &MCPConfig{
+		MCPServers: make(map[string]MCPServer),
+	}
+
+	data, err := os.ReadFile(mcpFile)
+	if os.IsNotExist(err) {
+		return config, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to read %s: %w", mcpFile, err)
+	}
+
+	if err := json.Unmarshal(data, config); err != nil {
+		return nil, fmt.Errorf("failed to parse %s: %w", mcpFile, err)
+	}
+
+	if config.MCPServers == nil {
+		config.MCPServers = make(map[string]MCPServer)
+	}
+
+	return config, nil
+}
+
+// saveConfig saves the config to .mcp.json with pretty formatting
+func saveConfig(mcpFile string, config *MCPConfig) error {
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	// Add trailing newline
+	data = append(data, '\n')
+
+	if err := os.WriteFile(mcpFile, data, 0644); err != nil {
+		return fmt.Errorf("failed to write %s: %w", mcpFile, err)
+	}
+
+	return nil
+}
+
+// addServer adds the google MCP server to .mcp.json
+func addServer(mcpFile string) error {
+	config, err := loadConfig(mcpFile)
+	if err != nil {
+		return err
+	}
+
+	// Check if already exists
+	if _, exists := config.MCPServers[serverName]; exists {
+		fmt.Printf("✅ Google MCP server already configured in %s\n", mcpFile)
+		return nil
+	}
+
+	// Add the server
+	config.MCPServers[serverName] = MCPServer{
+		Command: serverCmd,
+		Args:    []string{},
+		Env: map[string]string{
+			"GOOGLE_CLIENT_ID":     envClientID,
+			"GOOGLE_CLIENT_SECRET": envSecretID,
+		},
+	}
+
+	if err := saveConfig(mcpFile, config); err != nil {
+		return err
+	}
+
+	fmt.Println("✅ Google MCP server added to .mcp.json")
+	fmt.Println("")
+	fmt.Printf("File: %s\n", mcpFile)
+	fmt.Println("")
+	fmt.Println("The config uses ${GOOGLE_CLIENT_ID} and ${GOOGLE_CLIENT_SECRET}")
+	fmt.Println("environment variables - no secrets stored in the file.")
+	fmt.Println("")
+	fmt.Println("Make sure your .env file has these variables set.")
+	fmt.Println("Restart Claude Code to pick up the new MCP server.")
+
+	return nil
+}
+
+// removeServer removes the google MCP server from .mcp.json
+func removeServer(mcpFile string) error {
+	config, err := loadConfig(mcpFile)
+	if err != nil {
+		return err
+	}
+
+	// Check if exists
+	if _, exists := config.MCPServers[serverName]; !exists {
+		fmt.Printf("ℹ️  Google MCP server not found in %s\n", mcpFile)
+		return nil
+	}
+
+	// Remove the server
+	delete(config.MCPServers, serverName)
+
+	// If no servers left, remove the file
+	if len(config.MCPServers) == 0 {
+		if err := os.Remove(mcpFile); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("failed to remove %s: %w", mcpFile, err)
+		}
+		fmt.Println("✅ Google MCP server removed")
+		fmt.Printf("   Deleted %s (no servers remaining)\n", mcpFile)
+		return nil
+	}
+
+	if err := saveConfig(mcpFile, config); err != nil {
+		return err
+	}
+
+	fmt.Println("✅ Google MCP server removed from .mcp.json")
+	fmt.Println("")
+	fmt.Println("Restart Claude Code to apply changes.")
+
+	return nil
+}
+
+// showStatus shows the current .mcp.json configuration
+func showStatus(mcpFile string) error {
+	fmt.Println("=== Google MCP Configuration Status ===")
+	fmt.Println("")
+
+	// Check if file exists
+	if _, err := os.Stat(mcpFile); os.IsNotExist(err) {
+		fmt.Printf("❌ No .mcp.json found at %s\n", mcpFile)
+		fmt.Println("")
+		fmt.Println("Run: google-auth add")
+		return nil
+	}
+
+	config, err := loadConfig(mcpFile)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("File: %s\n", mcpFile)
+	fmt.Println("")
+
+	// Check for google server
+	if server, exists := config.MCPServers[serverName]; exists {
+		fmt.Println("✅ Google MCP server configured:")
+		fmt.Printf("   Command: %s\n", server.Command)
+		if len(server.Env) > 0 {
+			fmt.Println("   Environment:")
+			for k, v := range server.Env {
+				fmt.Printf("     %s: %s\n", k, v)
+			}
+		}
+	} else {
+		fmt.Println("❌ Google MCP server not configured")
+		fmt.Println("")
+		fmt.Println("Run: google-auth add")
+	}
+
+	// Show other servers
+	otherCount := 0
+	for name := range config.MCPServers {
+		if name != serverName {
+			otherCount++
+		}
+	}
+	if otherCount > 0 {
+		fmt.Println("")
+		fmt.Printf("Other MCP servers in config: %d\n", otherCount)
+		for name := range config.MCPServers {
+			if name != serverName {
+				fmt.Printf("   - %s\n", name)
+			}
+		}
+	}
+
+	return nil
 }
