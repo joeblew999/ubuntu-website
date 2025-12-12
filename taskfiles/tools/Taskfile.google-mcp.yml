@@ -16,7 +16,7 @@
 #   3. APIs enabled: Gmail, Calendar, Drive, Sheets, Docs, Slides
 #
 # Usage:
-#   task google-mcp:install       # Install google-mcp-server via Homebrew
+#   task google-mcp:install       # Install google-mcp-server via go install
 #   task google-mcp:setup         # Full guided setup
 #   task google-mcp:auth          # Authenticate with Google
 #   task google-mcp:claude:add    # Add to project .mcp.json
@@ -26,10 +26,11 @@
 version: '3'
 
 vars:
-  GOOGLE_MCP_BIN: '{{if eq OS "darwin"}}/opt/homebrew/bin/google-mcp-server{{else}}{{.HOME}}/.local/bin/google-mcp-server{{end}}'
-  GOOGLE_AUTH_BIN: '{{.HOME}}/.local/bin/google-auth'
+  # google-mcp-server is an external binary, installed via go install
+  GOOGLE_MCP_BIN: '{{.GOPATH}}/bin/google-mcp-server'
+  # google-auth is our project tool, installed to project .build/ (already gitignored)
+  GOOGLE_AUTH_BIN: '{{.ROOT_DIR}}/.build/google-auth'
   ACCOUNTS_DIR: '{{.HOME}}/.google-mcp-accounts'
-  CLAUDE_CONFIG: '{{.HOME}}/.claude.json'
 
 tasks:
   default:
@@ -90,24 +91,9 @@ tasks:
       - |
         echo "Installing Google MCP Server..."
         echo ""
-
-        {{if eq OS "darwin"}}
-        # macOS - use Homebrew
-        if command -v brew &>/dev/null; then
-          brew tap ngs/tap
-          brew install google-mcp-server
-          echo ""
-          echo "✅ Installed via Homebrew"
-        else
-          echo "Homebrew not found, installing from source..."
-          go install go.ngs.io/google-mcp-server@latest
-        fi
-        {{else}}
-        # Linux - use go install
         go install go.ngs.io/google-mcp-server@latest
         echo ""
-        echo "✅ Installed via go install"
-        {{end}}
+        echo "✅ Installed to {{.GOOGLE_MCP_BIN}}"
     status:
       - command -v google-mcp-server
 
@@ -127,39 +113,17 @@ tasks:
         echo "  'List my recent Gmail messages'"
         echo "  'Show my Google Calendar events'"
 
-  setup:prereqs:
-    desc: "Step 1: Check prerequisites and guide through Google Cloud setup"
+  guide:
+    desc: "Show full setup guide"
+    deps: [auth:build]
     cmds:
-      - |
-        echo "=== Google MCP Server Setup ==="
-        echo ""
-        echo "This server provides access to:"
-        echo "  • Gmail - read messages"
-        echo "  • Calendar - list/create/update events"
-        echo "  • Drive - list/upload/download files"
-        echo "  • Sheets - read/update spreadsheets"
-        echo "  • Docs - create/update documents"
-        echo "  • Slides - create presentations"
-        echo ""
-        echo "Setup steps (run in order):"
-        echo ""
-        echo "  1. task google-mcp:open:apis"
-        echo "     → Enable all 6 Google APIs (Gmail, Calendar, Drive, Sheets, Docs, Slides)"
-        echo ""
-        echo "  2. task google-mcp:open:oauth-consent"
-        echo "     → Configure OAuth consent screen"
-        echo ""
-        echo "  3. task google-mcp:open:create-credentials"
-        echo "     → Create Desktop OAuth credentials"
-        echo ""
-        echo "  4. task google-mcp:credentials CLIENT_ID='xxx' CLIENT_SECRET='xxx'"
-        echo "     → Save credentials to .env"
-        echo ""
-        echo "  5. source .env && task google-mcp:auth"
-        echo "     → Authenticate with Google"
-        echo ""
-        echo "  6. task google-mcp:setup:claude"
-        echo "     → Add MCP server to Claude Code"
+      - "{{.GOOGLE_AUTH_BIN}} guide"
+
+  check:
+    desc: "Check setup status and show next step"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} check"
 
   credentials:
     desc: "Save Google OAuth credentials to .env"
@@ -384,13 +348,25 @@ tasks:
           exit 0
         fi
 
-        {{if eq OS "darwin"}}
-        brew uninstall google-mcp-server 2>/dev/null || true
-        {{end}}
+        rm -f "{{.GOOGLE_MCP_BIN}}"
         rm -rf "{{.ACCOUNTS_DIR}}"
         echo "✅ Removed"
         echo ""
-        echo "Manually remove 'google' from Claude MCP config"
+        echo "Run 'task google-mcp:claude:remove' to remove from Claude MCP config"
+
+  open:project:
+    desc: "Step 1: Create or select a Google Cloud project"
+    cmds:
+      - |
+        echo "Opening Google Cloud project creation page..."
+        echo ""
+        echo "Instructions:"
+        echo "  • Give your project any name (e.g., 'Claude MCP')"
+        echo "  • Click CREATE"
+        echo "  • Wait for project to be created"
+        echo ""
+        echo "Next: task google-mcp:open:oauth-consent"
+        open "https://console.cloud.google.com/projectcreate"
 
   open:console:
     desc: Open Google Cloud Console credentials page
