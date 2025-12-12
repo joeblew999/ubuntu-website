@@ -69,16 +69,16 @@ tasks:
           echo "❌ Accounts: {{.ACCOUNTS_DIR}} not found"
         fi
 
-        # Check project .mcp.json
-        if [ -f ".mcp.json" ]; then
-          if grep -q '"google"' ".mcp.json" 2>/dev/null; then
-            echo "✅ Project: .mcp.json has google server"
+        # Check .vscode/mcp.json (VSCode location)
+        if [ -f ".vscode/mcp.json" ]; then
+          if grep -q '"google"' ".vscode/mcp.json" 2>/dev/null; then
+            echo "✅ VSCode: .vscode/mcp.json has google server"
           else
-            echo "⚠️  Project: .mcp.json exists but no google server"
+            echo "⚠️  VSCode: .vscode/mcp.json exists but no google server"
             echo "   Run: task google-mcp:claude:add"
           fi
         else
-          echo "❌ Project: No .mcp.json found"
+          echo "❌ VSCode: No .vscode/mcp.json found"
           echo "   Run: task google-mcp:claude:add"
         fi
 
@@ -290,22 +290,40 @@ tasks:
       - task: claude:add
 
   claude:add:
-    desc: "Add Google MCP to project .mcp.json"
+    desc: "Add Google MCP to .vscode/mcp.json (default)"
     deps: [auth:build]
     cmds:
-      - "{{.GOOGLE_AUTH_BIN}} add"
+      - "{{.GOOGLE_AUTH_BIN}} -location=vscode add"
+
+  claude:add:project:
+    desc: "Add Google MCP to .mcp.json (project root)"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} -location=project add"
+
+  claude:add:claude:
+    desc: "Add Google MCP to .claude/mcp.json"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} -location=claude add"
 
   claude:remove:
-    desc: "Remove Google MCP from project .mcp.json"
+    desc: "Remove Google MCP from .vscode/mcp.json"
     deps: [auth:build]
     cmds:
-      - "{{.GOOGLE_AUTH_BIN}} remove"
+      - "{{.GOOGLE_AUTH_BIN}} -location=vscode remove"
 
   claude:status:
-    desc: "Show project .mcp.json config"
+    desc: "Show all MCP config locations"
     deps: [auth:build]
     cmds:
-      - "{{.GOOGLE_AUTH_BIN}} status"
+      - |
+        echo "=== Checking all MCP config locations ==="
+        echo ""
+        for loc in vscode project claude; do
+          "{{.GOOGLE_AUTH_BIN}}" -location=$loc status
+          echo ""
+        done
 
   check:installed:
     desc: Verify Google MCP Server is installed

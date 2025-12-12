@@ -1,24 +1,31 @@
 // Google MCP configuration tool for Claude Code
 //
-// Manages the .mcp.json file in the project root to add/remove
-// the Google MCP server configuration.
+// Manages MCP server configuration in various locations.
 //
 // Usage:
 //
-//	google-auth add      # Add google server to .mcp.json
-//	google-auth remove   # Remove google server from .mcp.json
-//	google-auth status   # Show current .mcp.json config
+//	google-auth add [-location=vscode|project|claude]
+//	google-auth remove [-location=vscode|project|claude]
+//	google-auth status [-location=vscode|project|claude]
+//
+// Locations:
+//
+//	vscode  - .vscode/mcp.json (default, VSCode extension)
+//	project - .mcp.json (CLI project-level)
+//	claude  - .claude/mcp.json (Claude folder)
 package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 )
 
-// MCPConfig represents the .mcp.json file structure
+// MCPConfig represents the mcp.json file structure
 type MCPConfig struct {
+	Schema     string               `json:"$schema,omitempty"`
 	MCPServers map[string]MCPServer `json:"mcpServers"`
 }
 
@@ -30,33 +37,64 @@ type MCPServer struct {
 }
 
 const (
-	mcpFileName  = ".mcp.json"
+	schemaURL    = "https://modelcontextprotocol.io/schema/config.json"
 	serverName   = "google"
 	serverCmd    = "google-mcp-server"
 	envClientID  = "${GOOGLE_CLIENT_ID}"
 	envSecretID  = "${GOOGLE_CLIENT_SECRET}"
 )
 
+// Location configs
+var locations = map[string]struct {
+	dir  string // subdirectory (empty = project root)
+	file string // filename
+}{
+	"vscode":  {dir: ".vscode", file: "mcp.json"},
+	"project": {dir: "", file: ".mcp.json"},
+	"claude":  {dir: ".claude", file: "mcp.json"},
+}
+
 func main() {
-	if len(os.Args) < 2 {
+	// Define flags
+	location := flag.String("location", "vscode", "Config location: vscode, project, or claude")
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) < 1 {
 		printUsage()
 		os.Exit(1)
 	}
 
-	cmd := os.Args[1]
+	cmd := args[0]
 
-	// Find project root (where .mcp.json should live)
+	// Validate location
+	loc, ok := locations[*location]
+	if !ok {
+		fmt.Printf("Unknown location: %s\n", *location)
+		fmt.Println("Valid locations: vscode, project, claude")
+		os.Exit(1)
+	}
+
+	// Find project root
 	projectRoot, err := findProjectRoot()
 	if err != nil {
 		fmt.Printf("Error finding project root: %v\n", err)
 		os.Exit(1)
 	}
 
-	mcpFile := filepath.Join(projectRoot, mcpFileName)
+	// Build paths
+	var targetDir, mcpFile string
+	if loc.dir != "" {
+		targetDir = filepath.Join(projectRoot, loc.dir)
+		mcpFile = filepath.Join(targetDir, loc.file)
+	} else {
+		targetDir = projectRoot
+		mcpFile = filepath.Join(projectRoot, loc.file)
+	}
 
 	switch cmd {
 	case "add":
-		if err := addServer(mcpFile); err != nil {
+		if err := addServer(targetDir, mcpFile, loc.dir != ""); err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -66,7 +104,7 @@ func main() {
 			os.Exit(1)
 		}
 	case "status":
-		if err := showStatus(mcpFile); err != nil {
+		if err := showStatus(mcpFile, *location); err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -80,15 +118,19 @@ func main() {
 func printUsage() {
 	fmt.Println("Google MCP Configuration Tool")
 	fmt.Println("")
-	fmt.Println("Manages the .mcp.json file for Claude Code project-level MCP servers.")
+	fmt.Println("Manages MCP server configuration for Claude Code.")
 	fmt.Println("")
 	fmt.Println("Usage:")
-	fmt.Println("  google-auth add      Add google server to .mcp.json")
-	fmt.Println("  google-auth remove   Remove google server from .mcp.json")
-	fmt.Println("  google-auth status   Show current .mcp.json config")
+	fmt.Println("  google-auth [-location=LOC] add      Add google server")
+	fmt.Println("  google-auth [-location=LOC] remove   Remove google server")
+	fmt.Println("  google-auth [-location=LOC] status   Show config status")
 	fmt.Println("")
-	fmt.Println("The tool writes to .mcp.json in the project root (safe, version-controlled).")
-	fmt.Println("Environment variables are referenced as ${VAR} - no secrets stored in file.")
+	fmt.Println("Locations (-location flag):")
+	fmt.Println("  vscode  - .vscode/mcp.json (default, VSCode extension)")
+	fmt.Println("  project - .mcp.json (CLI project-level)")
+	fmt.Println("  claude  - .claude/mcp.json (Claude folder)")
+	fmt.Println("")
+	fmt.Println("Environment variables are referenced as ${VAR} - no secrets stored.")
 }
 
 // findProjectRoot looks for the project root by finding go.mod or .git
@@ -116,9 +158,10 @@ func findProjectRoot() (string, error) {
 	}
 }
 
-// loadConfig loads the .mcp.json file, returning empty config if not exists
+// loadConfig loads the mcp.json file, returning empty config if not exists
 func loadConfig(mcpFile string) (*MCPConfig, error) {
 	config := &MCPConfig{
+		Schema:     schemaURL,
 		MCPServers: make(map[string]MCPServer),
 	}
 
@@ -138,10 +181,15 @@ func loadConfig(mcpFile string) (*MCPConfig, error) {
 		config.MCPServers = make(map[string]MCPServer)
 	}
 
+	// Ensure schema is set
+	if config.Schema == "" {
+		config.Schema = schemaURL
+	}
+
 	return config, nil
 }
 
-// saveConfig saves the config to .mcp.json with pretty formatting
+// saveConfig saves the config to mcp.json with pretty formatting
 func saveConfig(mcpFile string, config *MCPConfig) error {
 	data, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
@@ -158,8 +206,15 @@ func saveConfig(mcpFile string, config *MCPConfig) error {
 	return nil
 }
 
-// addServer adds the google MCP server to .mcp.json
-func addServer(mcpFile string) error {
+// addServer adds the google MCP server to mcp.json
+func addServer(targetDir, mcpFile string, createDir bool) error {
+	// Ensure target directory exists if needed
+	if createDir {
+		if err := os.MkdirAll(targetDir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory: %w", err)
+		}
+	}
+
 	config, err := loadConfig(mcpFile)
 	if err != nil {
 		return err
@@ -185,7 +240,7 @@ func addServer(mcpFile string) error {
 		return err
 	}
 
-	fmt.Println("✅ Google MCP server added to .mcp.json")
+	fmt.Println("✅ Google MCP server added")
 	fmt.Println("")
 	fmt.Printf("File: %s\n", mcpFile)
 	fmt.Println("")
@@ -198,7 +253,7 @@ func addServer(mcpFile string) error {
 	return nil
 }
 
-// removeServer removes the google MCP server from .mcp.json
+// removeServer removes the google MCP server from mcp.json
 func removeServer(mcpFile string) error {
 	config, err := loadConfig(mcpFile)
 	if err != nil {
@@ -228,23 +283,25 @@ func removeServer(mcpFile string) error {
 		return err
 	}
 
-	fmt.Println("✅ Google MCP server removed from .mcp.json")
+	fmt.Println("✅ Google MCP server removed")
+	fmt.Printf("File: %s\n", mcpFile)
 	fmt.Println("")
 	fmt.Println("Restart Claude Code to apply changes.")
 
 	return nil
 }
 
-// showStatus shows the current .mcp.json configuration
-func showStatus(mcpFile string) error {
+// showStatus shows the current mcp.json configuration
+func showStatus(mcpFile, location string) error {
 	fmt.Println("=== Google MCP Configuration Status ===")
+	fmt.Printf("Location: %s\n", location)
 	fmt.Println("")
 
 	// Check if file exists
 	if _, err := os.Stat(mcpFile); os.IsNotExist(err) {
-		fmt.Printf("❌ No .mcp.json found at %s\n", mcpFile)
+		fmt.Printf("❌ No config found at %s\n", mcpFile)
 		fmt.Println("")
-		fmt.Println("Run: google-auth add")
+		fmt.Printf("Run: google-auth -location=%s add\n", location)
 		return nil
 	}
 
@@ -269,7 +326,7 @@ func showStatus(mcpFile string) error {
 	} else {
 		fmt.Println("❌ Google MCP server not configured")
 		fmt.Println("")
-		fmt.Println("Run: google-auth add")
+		fmt.Printf("Run: google-auth -location=%s add\n", location)
 	}
 
 	// Show other servers
