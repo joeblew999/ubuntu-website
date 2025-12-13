@@ -36,3 +36,18 @@ processes:
       hugo:
         condition: process_healthy
     disabled: true
+
+  # Optional: Enable for webhook server (receives Web3Forms submissions)
+  mailerlite-webhook:
+    command: task mailerlite:server GROUP_ID=173641063022462964
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: 8086
+        path: "/health"
+      initial_delay_seconds: 2
+      period_seconds: 10
+    availability:
+      restart: on_failure
+      max_restarts: 3
+    disabled: true
