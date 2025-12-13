@@ -41,11 +41,8 @@ jobs:
             goarch: arm64
             nproc_cmd: "sysctl -n hw.ncpu"
             extra_flags: ""
-          - os: macos-15-large
-            goos: darwin
-            goarch: amd64
-            nproc_cmd: "sysctl -n hw.ncpu"
-            extra_flags: ""
+          # Note: Intel Mac (darwin-amd64) skipped - macos-13 deprecated and
+          # macos-15-large requires paid plan. Apple Silicon covers most users.
           - os: ubuntu-latest
             goos: linux
             goarch: amd64

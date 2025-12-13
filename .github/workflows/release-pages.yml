@@ -11,6 +11,19 @@ name: "[Release] Pages"
 on:
   push:
     branches: ["main"]
+    paths:
+      - 'content/**'
+      - 'config/**'
+      - 'layouts/**'
+      - 'assets/**'
+      - 'static/**'
+      - 'data/**'
+      - 'i18n/**'
+      - 'hugo.toml'
+      - 'go.mod'
+      - 'go.sum'
+      - 'package.json'
+      - 'bun.lockb'
   workflow_dispatch:
 
 permissions:
