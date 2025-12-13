@@ -1,0 +1,112 @@
+# Cloudflare Workers Tasks
+#
+# Deploy and manage Cloudflare Workers for serverless webhook handling.
+#
+# Usage:
+#   task workers:deploy                    - Deploy all workers
+#   task workers:mailerlite:deploy         - Deploy mailerlite webhook worker
+#   task workers:mailerlite:secret         - Set MAILERLITE_API_KEY secret
+#   task workers:mailerlite:dev            - Run worker locally
+#   task workers:mailerlite:tail           - Tail worker logs
+#
+# Prerequisites:
+#   - Cloudflare account
+#   - Wrangler CLI (task wrangler:check:deps)
+
+version: '3'
+
+vars:
+  WORKERS_DIR: ./workers
+
+tasks:
+  # ===========================================================================
+  # All Workers
+  # ===========================================================================
+
+  deploy:
+    desc: Deploy all Cloudflare Workers
+    cmds:
+      - task: mailerlite:deploy
+
+  # ===========================================================================
+  # MailerLite Webhook Worker
+  # ===========================================================================
+
+  mailerlite:deploy:
+    desc: Deploy mailerlite webhook worker to Cloudflare
+    dir: '{{.WORKERS_DIR}}'
+    deps: [wrangler:check:deps]
+    cmds:
+      - '{{.WRANGLER_CMD}} deploy'
+
+  mailerlite:secret:
+    desc: Set MAILERLITE_API_KEY secret for the worker
+    dir: '{{.WORKERS_DIR}}'
+    deps: [wrangler:check:deps]
+    cmds:
+      - |
+        echo "Setting MAILERLITE_API_KEY secret..."
+        echo "Paste your API key and press Enter:"
+        {{.WRANGLER_CMD}} secret put MAILERLITE_API_KEY
+
+  mailerlite:dev:
+    desc: Run mailerlite worker locally for development
+    dir: '{{.WORKERS_DIR}}'
+    deps: [wrangler:check:deps]
+    cmds:
+      - '{{.WRANGLER_CMD}} dev'
+
+  mailerlite:tail:
+    desc: Tail logs from deployed mailerlite worker
+    dir: '{{.WORKERS_DIR}}'
+    deps: [wrangler:check:deps]
+    cmds:
+      - '{{.WRANGLER_CMD}} tail'
+
+  mailerlite:test:
+    desc: Test the deployed worker with a sample webhook
+    summary: |
+      Sends a test webhook to the deployed worker.
+
+      Variables:
+        WORKER_URL - The deployed worker URL (required)
+
+      Example:
+        task workers:mailerlite:test WORKER_URL=https://mailerlite-webhook.your-subdomain.workers.dev
+    requires:
+      vars: [WORKER_URL]
+    cmds:
+      - |
+        echo "Testing webhook at {{.WORKER_URL}}/webhook..."
+        curl -X POST "{{.WORKER_URL}}/webhook" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "name=Test User&email=test-worker@example.com&company=Test Company&platform=macOS"
+        echo ""
+        echo "Check MailerLite dashboard or worker logs for the result."
+
+  # ===========================================================================
+  # Dependencies
+  # ===========================================================================
+
+  wrangler:check:deps:
+    desc: Ensure wrangler is available
+    internal: true
+    status:
+      - command -v {{.WRANGLER_CMD}} &>/dev/null
+    cmds:
+      - task: wrangler:install
+
+  wrangler:install:
+    desc: Install wrangler CLI
+    internal: true
+    cmds:
+      - |
+        echo "Installing wrangler..."
+        if command -v bun &>/dev/null; then
+          bun add -g wrangler
+        elif command -v npm &>/dev/null; then
+          npm install -g wrangler
+        else
+          echo "Error: Need bun or npm to install wrangler"
+          exit 1
+        fi

@@ -1,0 +1,2 @@
+# Copy this file to terraform.tfvars and set your project ID
+project_id = "your-project-id"

@@ -1,0 +1,827 @@
+# Google MCP Server Setup
+#
+# Integrates ngs/google-mcp-server - a Go-based MCP server for Google Workspace.
+# Provides: Gmail, Calendar, Drive, Sheets, Docs, Slides
+#
+# Architecture:
+#   Taskfile          - Orchestration, setup, status checks
+#   cmd/google-auth   - Go binary for .mcp.json management (add/remove/status)
+#   google-mcp-server - External binary (handles auth + MCP protocol)
+#
+# Source: https://github.com/ngs/google-mcp-server
+#
+# Prerequisites:
+#   1. Google Cloud account
+#   2. OAuth 2.0 credentials (Desktop app type)
+#   3. APIs enabled: Gmail, Calendar, Drive, Sheets, Docs, Slides
+#
+# Usage:
+#   task google-mcp:install       # Install google-mcp-server via go install
+#   task google-mcp:setup         # Full guided setup
+#   task google-mcp:auth          # Authenticate with Google
+#   task google-mcp:claude:add    # Add to project .mcp.json
+#   task google-mcp:claude:remove # Remove from project .mcp.json
+#   task google-mcp:status        # Check configuration
+
+version: '3'
+
+vars:
+  # google-mcp-server is an external binary, installed via go install
+  GOOGLE_MCP_BIN: '{{.GOPATH}}/bin/google-mcp-server'
+  # google-auth is our project tool, installed to project .build/ (already gitignored)
+  GOOGLE_AUTH_BIN: '{{.ROOT_DIR}}/.build/google-auth'
+  ACCOUNTS_DIR: '{{.HOME}}/.google-mcp-accounts'
+
+tasks:
+  default:
+    desc: Show Google MCP status
+    cmds:
+      - task: status
+
+  status:
+    desc: Check Google MCP configuration status
+    cmds:
+      - |
+        echo "=== Google MCP Server Status ==="
+        echo ""
+
+        # Check binary
+        if command -v google-mcp-server &>/dev/null; then
+          echo "✅ Binary: $(which google-mcp-server)"
+          google-mcp-server --version 2>/dev/null || echo "   (version check not supported)"
+        elif [ -f "{{.GOOGLE_MCP_BIN}}" ]; then
+          echo "✅ Binary: {{.GOOGLE_MCP_BIN}}"
+        else
+          echo "❌ Binary: NOT INSTALLED"
+          echo "   Run: task google-mcp:install"
+        fi
+
+        # Check accounts
+        if [ -d "{{.ACCOUNTS_DIR}}" ]; then
+          account_count=$(ls -1 "{{.ACCOUNTS_DIR}}"/*.json 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$account_count" -gt 0 ]; then
+            echo "✅ Accounts: $account_count authenticated"
+            ls -1 "{{.ACCOUNTS_DIR}}"/*.json 2>/dev/null | xargs -I{} basename {} .json | sed 's/^/   - /'
+          else
+            echo "❌ Accounts: None authenticated"
+            echo "   Run: task google-mcp:auth"
+          fi
+        else
+          echo "❌ Accounts: {{.ACCOUNTS_DIR}} not found"
+        fi
+
+        # Check .vscode/mcp.json (VSCode location)
+        if [ -f ".vscode/mcp.json" ]; then
+          if grep -q '"google"' ".vscode/mcp.json" 2>/dev/null; then
+            echo "✅ VSCode: .vscode/mcp.json has google server"
+          else
+            echo "⚠️  VSCode: .vscode/mcp.json exists but no google server"
+            echo "   Run: task google-mcp:claude:add"
+          fi
+        else
+          echo "❌ VSCode: No .vscode/mcp.json found"
+          echo "   Run: task google-mcp:claude:add"
+        fi
+
+        echo ""
+
+  install:
+    desc: Install Google MCP Server
+    cmds:
+      - |
+        echo "Installing Google MCP Server..."
+        echo ""
+        go install go.ngs.io/google-mcp-server@latest
+        echo ""
+        echo "✅ Installed to {{.GOOGLE_MCP_BIN}}"
+    status:
+      - command -v google-mcp-server
+
+  setup:
+    desc: Full Google MCP setup (interactive)
+    cmds:
+      - task: install
+      - task: setup:prereqs
+      - task: auth
+      - task: setup:claude
+      - task: status
+      - |
+        echo ""
+        echo "🎉 Setup complete! Restart Claude Code to use Google services."
+        echo ""
+        echo "Test by asking Claude:"
+        echo "  'List my recent Gmail messages'"
+        echo "  'Show my Google Calendar events'"
+
+  guide:
+    desc: "Show full setup guide"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} guide"
+
+  check:
+    desc: "Check setup status and show next step"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} check"
+
+  credentials:
+    desc: "Save Google OAuth credentials to .env"
+    summary: |
+      Save Google OAuth credentials to .env file.
+
+      Usage:
+        task google-mcp:credentials CLIENT_ID=xxx CLIENT_SECRET=xxx
+
+      Or run without arguments to see current status.
+    vars:
+      CLIENT_ID: '{{.CLIENT_ID | default ""}}'
+      CLIENT_SECRET: '{{.CLIENT_SECRET | default ""}}'
+      ENV_FILE: '{{.PWD}}/.env'
+    cmds:
+      - |
+        echo "=== Google OAuth Credentials ==="
+        echo ""
+
+        # Check if arguments provided
+        if [ -z "{{.CLIENT_ID}}" ] || [ -z "{{.CLIENT_SECRET}}" ]; then
+          # Show current status
+          if [ -n "$GOOGLE_CLIENT_ID" ]; then
+            echo "Current credentials in environment:"
+            echo "  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:0:30}..."
+            echo ""
+          elif [ -f "{{.ENV_FILE}}" ] && grep -q "^GOOGLE_CLIENT_ID=" "{{.ENV_FILE}}" 2>/dev/null; then
+            echo "Credentials found in .env file"
+            grep "^GOOGLE_CLIENT_ID=" "{{.ENV_FILE}}" | sed 's/=.*/=***/'
+            echo ""
+          else
+            echo "No credentials configured"
+            echo ""
+          fi
+          echo "To set credentials, run:"
+          echo "  task google-mcp:credentials CLIENT_ID='your-id' CLIENT_SECRET='your-secret'"
+          echo ""
+          echo "Get credentials from:"
+          echo "  https://console.cloud.google.com/apis/credentials"
+          exit 0
+        fi
+
+        # Save to .env
+        ENV_FILE="{{.ENV_FILE}}"
+
+        # Create .env if it doesn't exist
+        touch "$ENV_FILE"
+
+        # Remove old entries if they exist
+        if [ -f "$ENV_FILE" ]; then
+          grep -v "^GOOGLE_CLIENT_ID=" "$ENV_FILE" | grep -v "^GOOGLE_CLIENT_SECRET=" > "$ENV_FILE.tmp" || true
+          mv "$ENV_FILE.tmp" "$ENV_FILE"
+        fi
+
+        # Append new credentials
+        echo "" >> "$ENV_FILE"
+        echo "# Google MCP OAuth credentials" >> "$ENV_FILE"
+        echo "GOOGLE_CLIENT_ID='{{.CLIENT_ID}}'" >> "$ENV_FILE"
+        echo "GOOGLE_CLIENT_SECRET='{{.CLIENT_SECRET}}'" >> "$ENV_FILE"
+
+        echo "✅ Credentials saved to .env"
+        echo ""
+        echo "Next steps:"
+        echo "  1. Source the .env file: source .env"
+        echo "  2. Run authentication: task google-mcp:auth"
+
+  auth:
+    desc: "Authenticate with Google (uses google-mcp-server)"
+    deps: [check:installed]
+    cmds:
+      - |
+        # Check for credentials
+        if [ -z "$GOOGLE_CLIENT_ID" ] || [ -z "$GOOGLE_CLIENT_SECRET" ]; then
+          echo "❌ Google credentials not set"
+          echo ""
+          echo "Run: task google-mcp:credentials"
+          echo "Or set environment variables:"
+          echo "  export GOOGLE_CLIENT_ID='your-client-id'"
+          echo "  export GOOGLE_CLIENT_SECRET='your-client-secret'"
+          exit 1
+        fi
+
+        echo "Starting Google OAuth authentication..."
+        echo ""
+        echo "Using credentials from environment"
+        echo "A browser window will open for Google sign-in."
+        echo ""
+        google-mcp-server
+
+  auth:manual:
+    desc: "Authenticate with Google (uses local Go binary - fallback/debug)"
+    deps: [auth:build]
+    cmds:
+      - |
+        # Check for credentials
+        if [ -z "$GOOGLE_CLIENT_ID" ] || [ -z "$GOOGLE_CLIENT_SECRET" ]; then
+          echo "❌ Google credentials not set"
+          echo ""
+          echo "Run: task google-mcp:credentials"
+          echo "Then: source .env"
+          exit 1
+        fi
+
+        echo "Starting manual Google OAuth authentication..."
+        echo "Using local Go binary: {{.GOOGLE_AUTH_BIN}}"
+        echo ""
+        "{{.GOOGLE_AUTH_BIN}}"
+
+  auth:build:
+    desc: "Build the google-auth Go binary"
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - |
+        echo "Building google-auth binary..."
+        mkdir -p "$(dirname "{{.GOOGLE_AUTH_BIN}}")"
+        go build -o "{{.GOOGLE_AUTH_BIN}}" ./cmd/google-auth
+        echo "✅ Built: {{.GOOGLE_AUTH_BIN}}"
+    sources:
+      - cmd/google-auth/**/*.go
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.GOOGLE_AUTH_BIN}}"
+
+  setup:claude:
+    desc: "Step 3: Configure Claude Code (alias for claude:add)"
+    cmds:
+      - task: claude:add
+
+  claude:add:
+    desc: "Add Google MCP to .vscode/mcp.json (default)"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} -location=vscode add"
+
+  claude:add:project:
+    desc: "Add Google MCP to .mcp.json (project root)"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} -location=project add"
+
+  claude:add:claude:
+    desc: "Add Google MCP to .claude/mcp.json"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} -location=claude add"
+
+  claude:remove:
+    desc: "Remove Google MCP from .vscode/mcp.json"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} -location=vscode remove"
+
+  claude:status:
+    desc: "Show all MCP config locations"
+    deps: [auth:build]
+    cmds:
+      - |
+        echo "=== Checking all MCP config locations ==="
+        echo ""
+        for loc in vscode project claude; do
+          "{{.GOOGLE_AUTH_BIN}}" -location=$loc status
+          echo ""
+        done
+
+  check:installed:
+    desc: Verify Google MCP Server is installed
+    internal: true
+    preconditions:
+      - sh: command -v google-mcp-server || test -f "{{.GOOGLE_MCP_BIN}}"
+        msg: |
+          Google MCP Server not installed.
+          Run: task google-mcp:install
+
+  test:
+    desc: Test Google MCP connection
+    deps: [check:installed]
+    cmds:
+      - |
+        echo "Testing Google MCP Server..."
+        echo ""
+        google-mcp-server --version 2>/dev/null || echo "Version check not supported"
+        echo ""
+        echo "To test in Claude Code, restart and ask:"
+        echo "  'List my recent Gmail messages'"
+        echo "  'Show my Google Calendar for this week'"
+        echo "  'List files in my Google Drive'"
+
+  accounts:list:
+    desc: List authenticated Google accounts
+    cmds:
+      - |
+        if [ -d "{{.ACCOUNTS_DIR}}" ]; then
+          echo "Authenticated accounts:"
+          ls -1 "{{.ACCOUNTS_DIR}}"/*.json 2>/dev/null | xargs -I{} basename {} .json || echo "  (none)"
+        else
+          echo "No accounts directory found"
+        fi
+
+  uninstall:
+    desc: Remove Google MCP Server
+    summary: |
+      Remove Google MCP Server and authenticated accounts.
+
+      Usage:
+        task google-mcp:uninstall           # Dry run (shows what would be removed)
+        task google-mcp:uninstall CONFIRM=y # Actually remove
+    vars:
+      CONFIRM: '{{.CONFIRM | default ""}}'
+    cmds:
+      - |
+        echo "This will remove:"
+        echo "  - Google MCP Server binary"
+        echo "  - Authenticated accounts ({{.ACCOUNTS_DIR}})"
+        echo ""
+
+        if [ "{{.CONFIRM}}" != "y" ]; then
+          echo "Dry run - nothing removed."
+          echo ""
+          echo "To actually remove, run:"
+          echo "  task google-mcp:uninstall CONFIRM=y"
+          exit 0
+        fi
+
+        rm -f "{{.GOOGLE_MCP_BIN}}"
+        rm -rf "{{.ACCOUNTS_DIR}}"
+        echo "✅ Removed"
+        echo ""
+        echo "Run 'task google-mcp:claude:remove' to remove from Claude MCP config"
+
+  reset:
+    desc: "Full reset - remove ALL local config and guide through Google Console cleanup"
+    summary: |
+      Completely resets Google MCP setup:
+      - Removes MCP config (.vscode/mcp.json)
+      - Removes Claude permissions (.claude/settings.json)
+      - Removes authenticated accounts (~/.google-mcp-accounts/)
+      - Removes credentials from .env
+      - Opens Google Console to delete OAuth credentials
+
+      Usage:
+        task google-mcp:reset           # Dry run (shows what will be removed)
+        task google-mcp:reset CONFIRM=y # Actually remove everything
+    vars:
+      CONFIRM: '{{.CONFIRM | default ""}}'
+      ENV_FILE: '{{.PWD}}/.env'
+    cmds:
+      - |
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║         Google MCP - Full Reset                              ║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "This will remove:"
+        echo ""
+        echo "LOCAL FILES:"
+        echo "  • .vscode/mcp.json (MCP server config)"
+        echo "  • .claude/settings.json (permissions)"
+        echo "  • {{.ACCOUNTS_DIR}}/ (authenticated accounts)"
+        echo "  • GOOGLE_CLIENT_ID/SECRET from .env"
+        echo ""
+        echo "GOOGLE CLOUD (manual):"
+        echo "  • OAuth credentials (will open browser)"
+        echo ""
+
+        if [ "{{.CONFIRM}}" != "y" ]; then
+          echo "────────────────────────────────────────────────────────────────"
+          echo "DRY RUN - nothing removed yet"
+          echo ""
+          echo "To actually reset, run:"
+          echo "  task google-mcp:reset CONFIRM=y"
+          echo "────────────────────────────────────────────────────────────────"
+          exit 0
+        fi
+
+        echo "────────────────────────────────────────────────────────────────"
+        echo "Removing local files..."
+        echo "────────────────────────────────────────────────────────────────"
+
+        # Remove MCP config
+        if [ -f ".vscode/mcp.json" ]; then
+          rm -f ".vscode/mcp.json"
+          echo "✅ Removed .vscode/mcp.json"
+        else
+          echo "⏭️  .vscode/mcp.json (not found)"
+        fi
+
+        # Remove Claude permissions
+        if [ -f ".claude/settings.json" ]; then
+          rm -f ".claude/settings.json"
+          echo "✅ Removed .claude/settings.json"
+        else
+          echo "⏭️  .claude/settings.json (not found)"
+        fi
+
+        # Remove authenticated accounts
+        if [ -d "{{.ACCOUNTS_DIR}}" ]; then
+          rm -rf "{{.ACCOUNTS_DIR}}"
+          echo "✅ Removed {{.ACCOUNTS_DIR}}/"
+        else
+          echo "⏭️  {{.ACCOUNTS_DIR}}/ (not found)"
+        fi
+
+        # Remove credentials from .env
+        if [ -f "{{.ENV_FILE}}" ] && grep -q "GOOGLE_CLIENT" "{{.ENV_FILE}}" 2>/dev/null; then
+          grep -v "^GOOGLE_CLIENT_ID=" "{{.ENV_FILE}}" | grep -v "^GOOGLE_CLIENT_SECRET=" | grep -v "^# Google MCP" > "{{.ENV_FILE}}.tmp" || true
+          mv "{{.ENV_FILE}}.tmp" "{{.ENV_FILE}}"
+          echo "✅ Removed Google credentials from .env"
+        else
+          echo "⏭️  .env Google credentials (not found)"
+        fi
+
+        echo ""
+        echo "────────────────────────────────────────────────────────────────"
+        echo "Opening Google Cloud Console..."
+        echo "────────────────────────────────────────────────────────────────"
+        echo ""
+        echo "To complete the reset, delete your OAuth credentials:"
+        echo "  1. Find your OAuth 2.0 Client ID"
+        echo "  2. Click the trash icon to delete it"
+        echo "  3. (Optional) Delete the entire project if not used elsewhere"
+        echo ""
+        open "https://console.cloud.google.com/apis/credentials"
+
+        echo ""
+        echo "════════════════════════════════════════════════════════════════"
+        echo "✅ LOCAL RESET COMPLETE"
+        echo ""
+        echo "To set up again from scratch:"
+        echo "  task google-mcp:guide"
+        echo "════════════════════════════════════════════════════════════════"
+
+  # Open tasks - all call Go binary (single source of truth for URLs)
+  open:project:
+    desc: "Step 1: Create or select a Google Cloud project"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open project"
+
+  open:consent:
+    desc: "Step 2: Configure OAuth consent screen"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open consent"
+
+  open:apis:
+    desc: "Step 3: Enable all required Google APIs"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open apis"
+
+  open:credentials:
+    desc: "Step 4: Create OAuth credentials"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open credentials"
+
+  open:repo:
+    desc: "Open GitHub repository"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open repo"
+
+  # Aliases for backwards compatibility
+  open:console:
+    desc: "Open Google Cloud Console credentials page (alias for open:credentials)"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open credentials"
+
+  open:oauth-consent:
+    desc: "Open OAuth consent screen (alias for open:consent)"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open consent"
+
+  open:create-credentials:
+    desc: "Open credentials page (alias for open:credentials)"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open credentials"
+
+  # ============================================================================
+  # Terraform - API enablement (alternative to manual clicking)
+  # ============================================================================
+
+  tf:check:deps:
+    desc: "Check Terraform dependencies (terraform, gcloud)"
+    cmds:
+      - |
+        echo "Checking Terraform dependencies..."
+        missing=0
+
+        # Check terraform
+        if command -v terraform &>/dev/null; then
+          echo "✅ terraform: $(terraform version -json 2>/dev/null | grep -o '"terraform_version":"[^"]*"' | cut -d'"' -f4 || terraform version | head -1)"
+        else
+          echo "❌ terraform: not installed"
+          echo "   Install: brew install terraform"
+          missing=1
+        fi
+
+        # Check gcloud
+        if command -v gcloud &>/dev/null; then
+          echo "✅ gcloud: $(gcloud version 2>/dev/null | head -1 | awk '{print $4}')"
+        else
+          echo "❌ gcloud: not installed"
+          echo "   Install: brew install --cask google-cloud-sdk"
+          missing=1
+        fi
+
+        # Check gcloud auth
+        if gcloud auth application-default print-access-token &>/dev/null 2>&1; then
+          echo "✅ gcloud auth: authenticated"
+        else
+          echo "❌ gcloud auth: not authenticated"
+          echo "   Run: gcloud auth application-default login"
+          missing=1
+        fi
+
+        if [ $missing -eq 1 ]; then
+          exit 1
+        fi
+    status:
+      - command -v terraform
+      - command -v gcloud
+      - gcloud auth application-default print-access-token &>/dev/null
+
+  tf:install:deps:
+    desc: "Show instructions for installing Terraform dependencies"
+    cmds:
+      - |
+        echo "════════════════════════════════════════════════════════════════"
+        echo "  Terraform Dependencies Installation"
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+        echo "Required tools:"
+        echo "  • terraform - Infrastructure as Code tool"
+        echo "  • gcloud (optional) - Google Cloud CLI"
+        echo ""
+        echo "Installation options:"
+        echo ""
+        echo "macOS:"
+        echo "  brew install terraform"
+        echo "  brew install --cask google-cloud-sdk"
+        echo ""
+        echo "Linux (Debian/Ubuntu):"
+        echo "  # Terraform"
+        echo "  wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg"
+        echo "  echo \"deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com \$(lsb_release -cs) main\" | sudo tee /etc/apt/sources.list.d/hashicorp.list"
+        echo "  sudo apt update && sudo apt install terraform"
+        echo ""
+        echo "  # gcloud (optional - only needed for tf:auth:manual)"
+        echo "  curl https://sdk.cloud.google.com | bash"
+        echo ""
+        echo "Windows (winget):"
+        echo "  winget install Hashicorp.Terraform"
+        echo "  winget install Google.CloudSDK"
+        echo ""
+        echo "Or download directly:"
+        echo "  Terraform: https://developer.hashicorp.com/terraform/downloads"
+        echo "  gcloud:    https://cloud.google.com/sdk/docs/install"
+        echo ""
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+        echo "Note: gcloud CLI is OPTIONAL. You can authenticate using:"
+        echo ""
+        echo "  Passkey users (recommended):"
+        echo "    task google-mcp:tf:auth:passkey ACCOUNT=your@email.com"
+        echo ""
+        echo "  Other options:"
+        echo "    task google-mcp:tf:auth       # Opens browser"
+        echo "    task google-mcp:tf:auth:auto  # Fully automated (password accounts)"
+        echo ""
+
+  tf:auth:
+    desc: "Authenticate gcloud for Terraform (opens browser)"
+    deps: [auth:build]
+    cmds:
+      - |
+        if gcloud auth application-default print-access-token &>/dev/null 2>&1; then
+          echo "✅ Already authenticated with gcloud"
+          echo ""
+          echo "To re-authenticate, run:"
+          echo "  gcloud auth application-default revoke"
+          echo "  task google-mcp:tf:auth"
+        else
+          echo "Starting OAuth flow..."
+          "{{.GOOGLE_AUTH_BIN}}" gcloud-auth
+        fi
+
+  tf:auth:auto:
+    desc: "Authenticate with embedded Playwright (fully automated)"
+    deps: [auth:build]
+    cmds:
+      - '"{{.GOOGLE_AUTH_BIN}}" gcloud-auth -auto -timeout={{.TIMEOUT}}'
+    vars:
+      TIMEOUT: '{{.TIMEOUT | default "180"}}'
+
+  tf:auth:passkey:
+    desc: "Authenticate with passkey (opens default browser)"
+    summary: |
+      Best option for users who authenticate with passkeys.
+
+      Opens your default browser which has access to your system keychain
+      and passkey credentials. Specify ACCOUNT to pre-select your Google account.
+
+      Usage:
+        task google-mcp:tf:auth:passkey                          # Prompts for account
+        task google-mcp:tf:auth:passkey ACCOUNT=user@gmail.com   # Pre-selects account
+
+      Examples:
+        task google-mcp:tf:auth:passkey ACCOUNT=gedw99@gmail.com
+        task google-mcp:tf:auth:passkey ACCOUNT=gerard.webb@ubuntusoftware.net
+    deps: [auth:build]
+    cmds:
+      - '"{{.GOOGLE_AUTH_BIN}}" gcloud-auth -assisted -account={{.ACCOUNT}} -timeout={{.TIMEOUT}}'
+    vars:
+      ACCOUNT: '{{.ACCOUNT | default ""}}'
+      TIMEOUT: '{{.TIMEOUT | default "180"}}'
+
+  # Alias for backwards compatibility
+  tf:auth:assisted:
+    desc: "Alias for tf:auth:passkey"
+    deps: [tf:auth:passkey]
+
+  tf:auth:server:
+    desc: "Start OAuth callback server only (for external Playwright)"
+    deps: [auth:build]
+    cmds:
+      - '"{{.GOOGLE_AUTH_BIN}}" gcloud-auth -server-only -timeout={{.TIMEOUT}}'
+    vars:
+      TIMEOUT: '{{.TIMEOUT | default "180"}}'
+
+  tf:auth:manual:
+    desc: "Authenticate using gcloud CLI (manual code entry)"
+    cmds:
+      - |
+        if ! command -v gcloud &>/dev/null; then
+          echo "❌ gcloud CLI not installed"
+          echo ""
+          echo "Alternative authentication methods (no gcloud needed):"
+          echo "  task google-mcp:tf:auth       # Opens browser"
+          echo "  task google-mcp:tf:auth:auto  # Fully automated with Playwright"
+          echo ""
+          echo "To install gcloud CLI:"
+          echo "  task google-mcp:tf:install:deps"
+          exit 1
+        fi
+
+        if gcloud auth application-default print-access-token &>/dev/null 2>&1; then
+          echo "✅ Already authenticated with gcloud"
+          echo ""
+          echo "To re-authenticate, run:"
+          echo "  gcloud auth application-default revoke"
+          echo "  task google-mcp:tf:auth:manual"
+        else
+          echo "════════════════════════════════════════════════════════════════"
+          echo "  GCLOUD AUTHENTICATION (Manual Code Entry)"
+          echo "════════════════════════════════════════════════════════════════"
+          echo ""
+          echo "1. A URL will be shown below"
+          echo "2. Open it in your browser and sign in"
+          echo "3. Copy the authorization code"
+          echo "4. Paste it here when prompted"
+          echo ""
+          gcloud auth application-default login --no-launch-browser
+        fi
+    interactive: true
+
+  tf:init:
+    desc: "Initialize Terraform for Google API setup"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    deps: [tf:check:deps]
+    cmds:
+      - terraform init
+    status:
+      - test -d "{{.ROOT_DIR}}/terraform/google-mcp/.terraform"
+
+  tf:plan:
+    desc: "Plan Google API enablement"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    deps: [tf:init]
+    cmds:
+      - |
+        if [ ! -f terraform.tfvars ]; then
+          echo "Error: terraform.tfvars not found"
+          echo "Copy terraform.tfvars.example to terraform.tfvars and set your project ID"
+          exit 1
+        fi
+        terraform plan
+
+  tf:apply:
+    desc: "Enable all Google APIs via Terraform"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    deps: [tf:init]
+    cmds:
+      - |
+        if [ ! -f terraform.tfvars ]; then
+          echo "Error: terraform.tfvars not found"
+          echo "Run: task google-mcp:tf:setup"
+          exit 1
+        fi
+        terraform apply -auto-approve
+
+  tf:destroy:
+    desc: "Disable all Google APIs via Terraform (use with caution)"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    prompt: "This will disable APIs. Are you sure?"
+    cmds:
+      - terraform destroy
+
+  tf:status:
+    desc: "Show Terraform state for Google APIs"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    cmds:
+      - |
+        echo "=== Terraform State ==="
+        if [ -f terraform.tfstate ]; then
+          terraform output
+        else
+          echo "No Terraform state found."
+          echo "Run: task google-mcp:tf:apply"
+        fi
+        echo ""
+        echo "=== tfvars ==="
+        if [ -f terraform.tfvars ]; then
+          cat terraform.tfvars
+        else
+          echo "No terraform.tfvars found."
+        fi
+
+  tf:setup:
+    desc: "Full Terraform setup - install deps, configure, and apply"
+    cmds:
+      - |
+        echo "════════════════════════════════════════════════════════════════"
+        echo "  TERRAFORM SETUP - Enable Google APIs"
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+
+        # Step 1: Check/install dependencies
+        echo "Step 1: Checking dependencies..."
+        if ! command -v terraform &>/dev/null; then
+          echo "Installing terraform..."
+          brew install terraform
+        fi
+        echo "✅ terraform installed"
+
+        if ! command -v gcloud &>/dev/null; then
+          echo "Installing gcloud..."
+          brew install --cask google-cloud-sdk
+        fi
+        echo "✅ gcloud installed"
+
+        # Step 2: Check gcloud auth
+        echo ""
+        echo "Step 2: Checking gcloud authentication..."
+        if ! gcloud auth application-default print-access-token &>/dev/null 2>&1; then
+          echo ""
+          echo "You need to authenticate with gcloud."
+          echo "This will open a browser window."
+          echo ""
+          gcloud auth application-default login
+        fi
+        echo "✅ gcloud authenticated"
+
+        # Step 3: Configure project
+        echo ""
+        echo "Step 3: Configuring project..."
+        cd "{{.ROOT_DIR}}/terraform/google-mcp"
+
+        if [ ! -f terraform.tfvars ]; then
+          echo ""
+          echo "Enter your Google Cloud Project ID:"
+          read -r project_id
+          if [ -z "$project_id" ]; then
+            echo "❌ Project ID cannot be empty"
+            exit 1
+          fi
+          echo "project_id = \"$project_id\"" > terraform.tfvars
+          echo "✅ Created terraform.tfvars"
+        else
+          echo "✅ terraform.tfvars exists"
+          cat terraform.tfvars
+        fi
+
+        # Step 4: Initialize and apply
+        echo ""
+        echo "Step 4: Initializing Terraform..."
+        terraform init
+
+        echo ""
+        echo "Step 5: Applying (enabling APIs)..."
+        terraform apply -auto-approve
+
+        echo ""
+        echo "════════════════════════════════════════════════════════════════"
+        echo "  ✅ SETUP COMPLETE"
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+        terraform output

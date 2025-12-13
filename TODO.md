@@ -1,5 +1,10 @@
 # TODO
 
+
+We need to ensure we release this via github and that we then finish the ability for anyone sending in an email from "Get Started" can have the software sent to them via email. I think we need to finsih the mailerlite stuff in order to do that . Will be a sprint ...
+
+---
+
 BTW i noticed that your broke an GOLDNE run in the wrangler taskfile. I see "bun" used in it. We agreed thats NOT ok. I dont know how this was missed, but its vital you dont so this !!!!   I am not sure how your going to validate this, but now that your have Archetypes and fmt and lint, i think it will be pretty easy, and you know what task includes what task  ? 
 
 I need you to keep watch on where you see patterns or mistakes when you modify task file, and screw up, and then look at the xplat lint and fmt etc code to be updated. We dont want to go overboard and boil the ocean.
@@ -59,6 +64,13 @@ Once oyu get the NON CGO FULLY working for the FULL lifecyle, Make sure that dum
   - New modules: hugo, cf, translate, seo, sitecheck, env, url
   - gh:secret/var tasks merged into tools:gh
   - All 146 tasks tested and working
+- [x] Google MCP server integration with turnkey OAuth
+  - Terraform creates GCP project with 6 Google APIs enabled
+  - cmd/google-auth binary handles OAuth with PKCE
+  - Three auth modes: manual (default), passkey (-assisted), auto (-auto with Playwright)
+  - Account pre-selection via -account=EMAIL flag (uses login_hint)
+  - Tasks: `google-mcp:tf:auth:passkey`, `google-mcp:tf:auth:auto`, `google-mcp:tf:plan/apply`
+  - No brew dependencies - cross-platform compatible
 
 ## In Progress
 

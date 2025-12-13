@@ -1,0 +1,208 @@
+# Playwright Tasks
+#
+# Reusable browser automation TOOL for OAuth flows, screenshots, and testing.
+# This is designed to be included by other taskfiles to build custom auth flows.
+#
+# Usage (standalone):
+#   task playwright:oauth URL=https://...       - Start OAuth flow with callback
+#   task playwright:open URL=https://...        - Open URL in Playwright browser
+#   task playwright:screenshot URL=x FILE=y    - Take screenshot
+#   task playwright:install                     - Install Playwright browsers
+#
+# Usage (as included tool):
+#   # In your Taskfile.yml:
+#   includes:
+#     playwright: ./taskfiles/tools/Taskfile.playwright.yml
+#
+#   # Then call playwright tasks from your custom tasks:
+#   tasks:
+#     my-oauth-flow:
+#       cmds:
+#         - task: playwright:oauth
+#           vars:
+#             URL: "https://accounts.google.com/o/oauth2/v2/auth?..."
+#             PORT: "8085"
+#             TIMEOUT: "120"
+#
+# OAuth Flow:
+#   The oauth command starts a local callback server and opens the auth URL
+#   in a Playwright browser. When the callback receives a response, it extracts
+#   the code/token and outputs JSON to stdout:
+#
+#   {
+#     "code": "authorization_code_here",
+#     "token": "access_token_if_present",
+#     "query": { "all": "query", "params": "here" }
+#   }
+#
+# This allows other tools to:
+#   1. Call playwright oauth with their auth URL
+#   2. Parse the JSON output to get the code/token
+#   3. Exchange the code for tokens using their own token endpoint
+#   4. Save credentials to their own location
+#
+# Examples:
+#   - google-auth uses this for gcloud application-default credentials
+#   - mailerlite could use this for MailerLite OAuth (if needed)
+#   - Any service with OAuth can build on top of this
+
+version: '3'
+
+vars:
+  PLAYWRIGHT_BIN: 'playwright{{exeExt}}'
+  PLAYWRIGHT_CMD: '{{.BIN_INSTALL_DIR}}/{{.PLAYWRIGHT_BIN}}'
+
+tasks:
+  # ===========================================================================
+  # Checks (check:* - lifecycle phase)
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure playwright binary is available
+    internal: true
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.PLAYWRIGHT_BIN}}"
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.PLAYWRIGHT_BIN}}" ./cmd/playwright
+
+  # ===========================================================================
+  # Core Commands - The main tool interface
+  # ===========================================================================
+
+  install:
+    desc: Install Playwright browsers (chromium)
+    deps: [check:deps]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} install'
+
+  oauth:
+    desc: 'Start OAuth flow with callback server (URL=https://... PORT=8085 TIMEOUT=120)'
+    summary: |
+      Starts a local HTTP callback server and opens the given OAuth URL in a
+      Playwright-controlled browser. When the OAuth provider redirects back
+      to localhost, the callback extracts the code/token and outputs JSON.
+
+      Variables:
+        URL      - The OAuth authorization URL (required)
+        PORT     - Callback server port (default: 8085)
+        TIMEOUT  - Timeout in seconds (default: 120)
+        HEADLESS - Run browser in headless mode (default: false)
+
+      Output (JSON to stdout):
+        {"code": "...", "token": "...", "query": {...}}
+    deps: [check:deps]
+    requires:
+      vars: [URL]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} {{if .HEADLESS}}-headless{{end}} -port={{.PORT}} -timeout={{.TIMEOUT}} oauth "{{.URL}}"'
+    vars:
+      PORT: '{{.PORT | default "8085"}}'
+      TIMEOUT: '{{.TIMEOUT | default "120"}}'
+      HEADLESS: '{{.HEADLESS | default ""}}'
+
+  open:
+    desc: 'Open URL in Playwright browser (URL=https://... TIMEOUT=120)'
+    summary: |
+      Opens the given URL in a Playwright-controlled browser for debugging
+      or manual interaction. The browser stays open until timeout or Ctrl+C.
+
+      Variables:
+        URL      - The URL to open (required)
+        TIMEOUT  - Timeout in seconds (default: 120)
+        HEADLESS - Run browser in headless mode (default: false)
+    deps: [check:deps]
+    requires:
+      vars: [URL]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} {{if .HEADLESS}}-headless{{end}} -timeout={{.TIMEOUT}} open "{{.URL}}"'
+    vars:
+      TIMEOUT: '{{.TIMEOUT | default "120"}}'
+      HEADLESS: '{{.HEADLESS | default ""}}'
+
+  screenshot:
+    desc: 'Take screenshot of URL (URL=https://... FILE=output.png)'
+    summary: |
+      Takes a full-page screenshot of the given URL and saves it to a file.
+      Always runs in headless mode.
+
+      Variables:
+        URL  - The URL to screenshot (required)
+        FILE - Output filename (required, .png or .jpg)
+    deps: [check:deps]
+    requires:
+      vars: [URL, FILE]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} screenshot "{{.URL}}" "{{.FILE}}"'
+
+  # ===========================================================================
+  # Build & Release
+  # ===========================================================================
+
+  build:
+    desc: Build playwright binary
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.PLAYWRIGHT_BIN}}" ./cmd/playwright
+
+  release:build:
+    desc: Build playwright for release
+    cmds:
+      - mkdir -p .build
+      - go build -o ".build/{{.PLAYWRIGHT_BIN}}" ./cmd/playwright
+
+  # ===========================================================================
+  # Examples - Show how to use playwright tool
+  # ===========================================================================
+
+  example:google-oauth:
+    desc: 'Example: Google OAuth flow (demonstrates oauth command)'
+    deps: [check:deps]
+    cmds:
+      - |
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║         Playwright OAuth Example - Google                    ║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "This example shows how to use playwright for Google OAuth."
+        echo ""
+        echo "In a real implementation, you would:"
+        echo "  1. Generate PKCE code_verifier and code_challenge"
+        echo "  2. Build the OAuth URL with your client_id and scopes"
+        echo "  3. Call: task playwright:oauth URL='your-oauth-url'"
+        echo "  4. Parse the JSON output to get the authorization code"
+        echo "  5. Exchange the code for tokens via POST to token endpoint"
+        echo ""
+        echo "Example URL structure:"
+        echo "  https://accounts.google.com/o/oauth2/v2/auth?"
+        echo "    client_id=YOUR_CLIENT_ID&"
+        echo "    redirect_uri=http://localhost:8085/&"
+        echo "    response_type=code&"
+        echo "    scope=openid%20email&"
+        echo "    code_challenge=PKCE_CHALLENGE&"
+        echo "    code_challenge_method=S256"
+        echo ""
+        echo "See: cmd/google-auth/main.go for a working implementation"
+
+  example:screenshot:
+    desc: 'Example: Take screenshot of Ubuntu Software website'
+    deps: [check:deps]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} screenshot "https://www.ubuntusoftware.net" "homepage.png"'
+      - echo "Screenshot saved to homepage.png"
+
+  example:mailerlite-oauth:
+    desc: 'Example: MailerLite OAuth flow (if API key auth not sufficient)'
+    cmds:
+      - |
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║         Playwright OAuth Example - MailerLite                ║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "MailerLite typically uses API key authentication."
+        echo "Get your API key from: https://dashboard.mailerlite.com/integrations/api"
+        echo ""
+        echo "If OAuth is needed for certain integrations:"
+        echo "  task playwright:oauth URL='https://connect.mailerlite.com/oauth/authorize?...'"
+        echo ""
+        echo "Then parse the JSON output and exchange the code for tokens."

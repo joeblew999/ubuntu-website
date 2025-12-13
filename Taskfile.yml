@@ -67,6 +67,15 @@ includes:
   tui: ./taskfiles/tools/Taskfile.task-ui.yml
   wrangler: ./taskfiles/tools/Taskfile.wrangler.yml
 
+  # MCP servers
+  google-mcp: ./taskfiles/tools/Taskfile.google-mcp.yml
+
+  # Browser automation
+  playwright: ./taskfiles/tools/Taskfile.playwright.yml
+
+  # Cloudflare Workers (serverless webhooks)
+  workers: ./taskfiles/Taskfile.workers.yml
+
 # =============================================================================
 # Environment
 # =============================================================================
