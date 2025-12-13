@@ -69,11 +69,9 @@ Each Raspberry Pi gets an eSIM hardware attachment. This provides a cellular bac
 - **Fallback connectivity**: If the primary connection fails, eSIM takes over automatically
 - **Secure channel**: Cellular connection can be configured for encrypted backhauling
 
-I'm currently deep in the Go code for global eSIM provisioning integration. The goal is programmatic provisioning—deploy a device, it connects automatically.
+The goal is programmatic provisioning—deploy a device, it connects automatically.
 
-The logistics of getting hardware into countries is... educational. Thai customs in particular has been a masterclass in bureaucratic friction. Looking for good agents to help navigate this.
-
-But the technical architecture is solid: Raspberry Pi + eSIM module = always-connected publishing node.
+The technical architecture: Raspberry Pi + eSIM module = always-connected publishing node.
 
 ## Objective 3: Legacy Database Integration
 
