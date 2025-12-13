@@ -455,108 +455,373 @@ tasks:
         echo "  task google-mcp:guide"
         echo "════════════════════════════════════════════════════════════════"
 
+  # Open tasks - all call Go binary (single source of truth for URLs)
   open:project:
     desc: "Step 1: Create or select a Google Cloud project"
+    deps: [auth:build]
     cmds:
-      - |
-        echo "Opening Google Cloud project creation page..."
-        echo ""
-        echo "Instructions:"
-        echo "  • Give your project any name (e.g., 'Claude MCP')"
-        echo "  • Click CREATE"
-        echo "  • Wait for project to be created"
-        echo ""
-        echo "Next: task google-mcp:open:oauth-consent"
-        open "https://console.cloud.google.com/projectcreate"
+      - "{{.GOOGLE_AUTH_BIN}} open project"
 
-  open:console:
-    desc: Open Google Cloud Console credentials page
+  open:consent:
+    desc: "Step 2: Configure OAuth consent screen"
+    deps: [auth:build]
     cmds:
-      - open "https://console.cloud.google.com/apis/credentials"
-
-  open:repo:
-    desc: Open GitHub repository
-    cmds:
-      - open "https://github.com/ngs/google-mcp-server"
+      - "{{.GOOGLE_AUTH_BIN}} open consent"
 
   open:apis:
-    desc: Open and enable required Google APIs (run this first!)
-    summary: |
-      Opens each required Google API page for enabling.
-      Run this before creating OAuth credentials.
+    desc: "Step 3: Enable all required Google APIs"
+    deps: [auth:build]
     cmds:
-      - |
-        echo "Opening Google API pages to enable..."
-        echo ""
-        echo "For each page that opens:"
-        echo "  1. Click 'ENABLE' button"
-        echo "  2. Wait for it to complete"
-        echo "  3. Move to next tab"
-        echo ""
-        sleep 2
+      - "{{.GOOGLE_AUTH_BIN}} open apis"
 
-        # Gmail API
-        echo "Opening Gmail API..."
-        open "https://console.cloud.google.com/apis/library/gmail.googleapis.com"
-        sleep 1
+  open:credentials:
+    desc: "Step 4: Create OAuth credentials"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open credentials"
 
-        # Calendar API
-        echo "Opening Calendar API..."
-        open "https://console.cloud.google.com/apis/library/calendar-json.googleapis.com"
-        sleep 1
+  open:repo:
+    desc: "Open GitHub repository"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open repo"
 
-        # Drive API
-        echo "Opening Drive API..."
-        open "https://console.cloud.google.com/apis/library/drive.googleapis.com"
-        sleep 1
-
-        # Sheets API
-        echo "Opening Sheets API..."
-        open "https://console.cloud.google.com/apis/library/sheets.googleapis.com"
-        sleep 1
-
-        # Docs API
-        echo "Opening Docs API..."
-        open "https://console.cloud.google.com/apis/library/docs.googleapis.com"
-        sleep 1
-
-        # Slides API
-        echo "Opening Slides API..."
-        open "https://console.cloud.google.com/apis/library/slides.googleapis.com"
-
-        echo ""
-        echo "After enabling all APIs, run:"
-        echo "  task google-mcp:open:oauth-consent"
+  # Aliases for backwards compatibility
+  open:console:
+    desc: "Open Google Cloud Console credentials page (alias for open:credentials)"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open credentials"
 
   open:oauth-consent:
-    desc: Open OAuth consent screen setup
+    desc: "Open OAuth consent screen (alias for open:consent)"
+    deps: [auth:build]
     cmds:
-      - |
-        echo "Opening OAuth consent screen..."
-        echo ""
-        echo "Configure:"
-        echo "  1. User Type: External → Create"
-        echo "  2. App name: Google MCP (or any name)"
-        echo "  3. User support email: your email"
-        echo "  4. Developer contact: your email"
-        echo "  5. Save and Continue through remaining screens"
-        echo ""
-        open "https://console.cloud.google.com/apis/credentials/consent"
+      - "{{.GOOGLE_AUTH_BIN}} open consent"
 
   open:create-credentials:
-    desc: Open page to create OAuth credentials
+    desc: "Open credentials page (alias for open:credentials)"
+    deps: [auth:build]
+    cmds:
+      - "{{.GOOGLE_AUTH_BIN}} open credentials"
+
+  # ============================================================================
+  # Terraform - API enablement (alternative to manual clicking)
+  # ============================================================================
+
+  tf:check:deps:
+    desc: "Check Terraform dependencies (terraform, gcloud)"
     cmds:
       - |
-        echo "Opening OAuth credentials creation..."
+        echo "Checking Terraform dependencies..."
+        missing=0
+
+        # Check terraform
+        if command -v terraform &>/dev/null; then
+          echo "✅ terraform: $(terraform version -json 2>/dev/null | grep -o '"terraform_version":"[^"]*"' | cut -d'"' -f4 || terraform version | head -1)"
+        else
+          echo "❌ terraform: not installed"
+          echo "   Install: brew install terraform"
+          missing=1
+        fi
+
+        # Check gcloud
+        if command -v gcloud &>/dev/null; then
+          echo "✅ gcloud: $(gcloud version 2>/dev/null | head -1 | awk '{print $4}')"
+        else
+          echo "❌ gcloud: not installed"
+          echo "   Install: brew install --cask google-cloud-sdk"
+          missing=1
+        fi
+
+        # Check gcloud auth
+        if gcloud auth application-default print-access-token &>/dev/null 2>&1; then
+          echo "✅ gcloud auth: authenticated"
+        else
+          echo "❌ gcloud auth: not authenticated"
+          echo "   Run: gcloud auth application-default login"
+          missing=1
+        fi
+
+        if [ $missing -eq 1 ]; then
+          exit 1
+        fi
+    status:
+      - command -v terraform
+      - command -v gcloud
+      - gcloud auth application-default print-access-token &>/dev/null
+
+  tf:install:deps:
+    desc: "Show instructions for installing Terraform dependencies"
+    cmds:
+      - |
+        echo "════════════════════════════════════════════════════════════════"
+        echo "  Terraform Dependencies Installation"
+        echo "════════════════════════════════════════════════════════════════"
         echo ""
-        echo "Steps:"
-        echo "  1. Click 'CREATE CREDENTIALS' → 'OAuth client ID'"
-        echo "  2. Application type: Desktop app"
-        echo "  3. Name: Google MCP Client (or any name)"
-        echo "  4. Click CREATE"
-        echo "  5. Copy the Client ID and Client Secret"
+        echo "Required tools:"
+        echo "  • terraform - Infrastructure as Code tool"
+        echo "  • gcloud (optional) - Google Cloud CLI"
         echo ""
-        echo "Then run:"
-        echo "  task google-mcp:credentials CLIENT_ID='xxx' CLIENT_SECRET='xxx'"
+        echo "Installation options:"
         echo ""
-        open "https://console.cloud.google.com/apis/credentials"
+        echo "macOS:"
+        echo "  brew install terraform"
+        echo "  brew install --cask google-cloud-sdk"
+        echo ""
+        echo "Linux (Debian/Ubuntu):"
+        echo "  # Terraform"
+        echo "  wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg"
+        echo "  echo \"deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com \$(lsb_release -cs) main\" | sudo tee /etc/apt/sources.list.d/hashicorp.list"
+        echo "  sudo apt update && sudo apt install terraform"
+        echo ""
+        echo "  # gcloud (optional - only needed for tf:auth:manual)"
+        echo "  curl https://sdk.cloud.google.com | bash"
+        echo ""
+        echo "Windows (winget):"
+        echo "  winget install Hashicorp.Terraform"
+        echo "  winget install Google.CloudSDK"
+        echo ""
+        echo "Or download directly:"
+        echo "  Terraform: https://developer.hashicorp.com/terraform/downloads"
+        echo "  gcloud:    https://cloud.google.com/sdk/docs/install"
+        echo ""
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+        echo "Note: gcloud CLI is OPTIONAL. You can authenticate using:"
+        echo ""
+        echo "  Passkey users (recommended):"
+        echo "    task google-mcp:tf:auth:passkey ACCOUNT=your@email.com"
+        echo ""
+        echo "  Other options:"
+        echo "    task google-mcp:tf:auth       # Opens browser"
+        echo "    task google-mcp:tf:auth:auto  # Fully automated (password accounts)"
+        echo ""
+
+  tf:auth:
+    desc: "Authenticate gcloud for Terraform (opens browser)"
+    deps: [auth:build]
+    cmds:
+      - |
+        if gcloud auth application-default print-access-token &>/dev/null 2>&1; then
+          echo "✅ Already authenticated with gcloud"
+          echo ""
+          echo "To re-authenticate, run:"
+          echo "  gcloud auth application-default revoke"
+          echo "  task google-mcp:tf:auth"
+        else
+          echo "Starting OAuth flow..."
+          "{{.GOOGLE_AUTH_BIN}}" gcloud-auth
+        fi
+
+  tf:auth:auto:
+    desc: "Authenticate with embedded Playwright (fully automated)"
+    deps: [auth:build]
+    cmds:
+      - '"{{.GOOGLE_AUTH_BIN}}" gcloud-auth -auto -timeout={{.TIMEOUT}}'
+    vars:
+      TIMEOUT: '{{.TIMEOUT | default "180"}}'
+
+  tf:auth:passkey:
+    desc: "Authenticate with passkey (opens default browser)"
+    summary: |
+      Best option for users who authenticate with passkeys.
+
+      Opens your default browser which has access to your system keychain
+      and passkey credentials. Specify ACCOUNT to pre-select your Google account.
+
+      Usage:
+        task google-mcp:tf:auth:passkey                          # Prompts for account
+        task google-mcp:tf:auth:passkey ACCOUNT=user@gmail.com   # Pre-selects account
+
+      Examples:
+        task google-mcp:tf:auth:passkey ACCOUNT=gedw99@gmail.com
+        task google-mcp:tf:auth:passkey ACCOUNT=gerard.webb@ubuntusoftware.net
+    deps: [auth:build]
+    cmds:
+      - '"{{.GOOGLE_AUTH_BIN}}" gcloud-auth -assisted -account={{.ACCOUNT}} -timeout={{.TIMEOUT}}'
+    vars:
+      ACCOUNT: '{{.ACCOUNT | default ""}}'
+      TIMEOUT: '{{.TIMEOUT | default "180"}}'
+
+  # Alias for backwards compatibility
+  tf:auth:assisted:
+    desc: "Alias for tf:auth:passkey"
+    deps: [tf:auth:passkey]
+
+  tf:auth:server:
+    desc: "Start OAuth callback server only (for external Playwright)"
+    deps: [auth:build]
+    cmds:
+      - '"{{.GOOGLE_AUTH_BIN}}" gcloud-auth -server-only -timeout={{.TIMEOUT}}'
+    vars:
+      TIMEOUT: '{{.TIMEOUT | default "180"}}'
+
+  tf:auth:manual:
+    desc: "Authenticate using gcloud CLI (manual code entry)"
+    cmds:
+      - |
+        if ! command -v gcloud &>/dev/null; then
+          echo "❌ gcloud CLI not installed"
+          echo ""
+          echo "Alternative authentication methods (no gcloud needed):"
+          echo "  task google-mcp:tf:auth       # Opens browser"
+          echo "  task google-mcp:tf:auth:auto  # Fully automated with Playwright"
+          echo ""
+          echo "To install gcloud CLI:"
+          echo "  task google-mcp:tf:install:deps"
+          exit 1
+        fi
+
+        if gcloud auth application-default print-access-token &>/dev/null 2>&1; then
+          echo "✅ Already authenticated with gcloud"
+          echo ""
+          echo "To re-authenticate, run:"
+          echo "  gcloud auth application-default revoke"
+          echo "  task google-mcp:tf:auth:manual"
+        else
+          echo "════════════════════════════════════════════════════════════════"
+          echo "  GCLOUD AUTHENTICATION (Manual Code Entry)"
+          echo "════════════════════════════════════════════════════════════════"
+          echo ""
+          echo "1. A URL will be shown below"
+          echo "2. Open it in your browser and sign in"
+          echo "3. Copy the authorization code"
+          echo "4. Paste it here when prompted"
+          echo ""
+          gcloud auth application-default login --no-launch-browser
+        fi
+    interactive: true
+
+  tf:init:
+    desc: "Initialize Terraform for Google API setup"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    deps: [tf:check:deps]
+    cmds:
+      - terraform init
+    status:
+      - test -d "{{.ROOT_DIR}}/terraform/google-mcp/.terraform"
+
+  tf:plan:
+    desc: "Plan Google API enablement"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    deps: [tf:init]
+    cmds:
+      - |
+        if [ ! -f terraform.tfvars ]; then
+          echo "Error: terraform.tfvars not found"
+          echo "Copy terraform.tfvars.example to terraform.tfvars and set your project ID"
+          exit 1
+        fi
+        terraform plan
+
+  tf:apply:
+    desc: "Enable all Google APIs via Terraform"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    deps: [tf:init]
+    cmds:
+      - |
+        if [ ! -f terraform.tfvars ]; then
+          echo "Error: terraform.tfvars not found"
+          echo "Run: task google-mcp:tf:setup"
+          exit 1
+        fi
+        terraform apply -auto-approve
+
+  tf:destroy:
+    desc: "Disable all Google APIs via Terraform (use with caution)"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    prompt: "This will disable APIs. Are you sure?"
+    cmds:
+      - terraform destroy
+
+  tf:status:
+    desc: "Show Terraform state for Google APIs"
+    dir: "{{.ROOT_DIR}}/terraform/google-mcp"
+    cmds:
+      - |
+        echo "=== Terraform State ==="
+        if [ -f terraform.tfstate ]; then
+          terraform output
+        else
+          echo "No Terraform state found."
+          echo "Run: task google-mcp:tf:apply"
+        fi
+        echo ""
+        echo "=== tfvars ==="
+        if [ -f terraform.tfvars ]; then
+          cat terraform.tfvars
+        else
+          echo "No terraform.tfvars found."
+        fi
+
+  tf:setup:
+    desc: "Full Terraform setup - install deps, configure, and apply"
+    cmds:
+      - |
+        echo "════════════════════════════════════════════════════════════════"
+        echo "  TERRAFORM SETUP - Enable Google APIs"
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+
+        # Step 1: Check/install dependencies
+        echo "Step 1: Checking dependencies..."
+        if ! command -v terraform &>/dev/null; then
+          echo "Installing terraform..."
+          brew install terraform
+        fi
+        echo "✅ terraform installed"
+
+        if ! command -v gcloud &>/dev/null; then
+          echo "Installing gcloud..."
+          brew install --cask google-cloud-sdk
+        fi
+        echo "✅ gcloud installed"
+
+        # Step 2: Check gcloud auth
+        echo ""
+        echo "Step 2: Checking gcloud authentication..."
+        if ! gcloud auth application-default print-access-token &>/dev/null 2>&1; then
+          echo ""
+          echo "You need to authenticate with gcloud."
+          echo "This will open a browser window."
+          echo ""
+          gcloud auth application-default login
+        fi
+        echo "✅ gcloud authenticated"
+
+        # Step 3: Configure project
+        echo ""
+        echo "Step 3: Configuring project..."
+        cd "{{.ROOT_DIR}}/terraform/google-mcp"
+
+        if [ ! -f terraform.tfvars ]; then
+          echo ""
+          echo "Enter your Google Cloud Project ID:"
+          read -r project_id
+          if [ -z "$project_id" ]; then
+            echo "❌ Project ID cannot be empty"
+            exit 1
+          fi
+          echo "project_id = \"$project_id\"" > terraform.tfvars
+          echo "✅ Created terraform.tfvars"
+        else
+          echo "✅ terraform.tfvars exists"
+          cat terraform.tfvars
+        fi
+
+        # Step 4: Initialize and apply
+        echo ""
+        echo "Step 4: Initializing Terraform..."
+        terraform init
+
+        echo ""
+        echo "Step 5: Applying (enabling APIs)..."
+        terraform apply -auto-approve
+
+        echo ""
+        echo "════════════════════════════════════════════════════════════════"
+        echo "  ✅ SETUP COMPLETE"
+        echo "════════════════════════════════════════════════════════════════"
+        echo ""
+        terraform output
