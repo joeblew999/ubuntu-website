@@ -12,6 +12,9 @@
 #
 name: Build Codec Libraries
 
+permissions:
+  contents: write  # Required for creating releases
+
 on:
   workflow_dispatch:
     inputs:
