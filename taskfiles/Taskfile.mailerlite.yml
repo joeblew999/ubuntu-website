@@ -3,6 +3,7 @@
 # CLI tool for MailerLite subscriber management.
 #
 # Usage:
+#   task mailerlite:check                             - Run all verification checks
 #   task mailerlite:subscribers:list                  - List all subscribers
 #   task mailerlite:subscribers:count                 - Count total subscribers
 #   task mailerlite:subscribers:add EMAIL=x@y.com     - Add subscriber
@@ -15,6 +16,10 @@
 #   task mailerlite:webhooks:create URL=x             - Create a webhook
 #   task mailerlite:automations:list                  - List all automations
 #   task mailerlite:stats                             - Show account statistics
+#   task mailerlite:open [TARGET=dashboard]           - Open dashboard in browser
+#   task mailerlite:releases:latest                   - Show latest GitHub release
+#   task mailerlite:releases:list                     - List all GitHub releases
+#   task mailerlite:releases:urls                     - Show download URLs for emails
 #
 # Environment:
 #   MAILERLITE_API_KEY    API key (required, from .env)
@@ -31,6 +36,23 @@ tasks:
   # ===========================================================================
   # Checks (check:* - lifecycle phase)
   # ===========================================================================
+
+  check:
+    desc: Run all verification checks (API connection, groups, webhooks)
+    deps: [check:deps]
+    cmds:
+      - |
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║         MailerLite Verification                              ║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+      - '{{.MAILERLITE_CMD}} stats'
+      - echo ""
+      - '{{.MAILERLITE_CMD}} groups list'
+      - echo ""
+      - '{{.MAILERLITE_CMD}} webhooks list'
+      - echo ""
+      - '{{.MAILERLITE_CMD}} releases latest'
 
   check:deps:
     desc: Ensure mailerlite binary is available (builds from source or downloads)
@@ -206,6 +228,40 @@ tasks:
     deps: [check:deps]
     cmds:
       - '{{.MAILERLITE_CMD}} stats'
+
+  # ===========================================================================
+  # Open (open - browser shortcuts)
+  # ===========================================================================
+
+  open:
+    desc: Open MailerLite dashboard in browser (TARGET=dashboard|subscribers|groups|forms|automations|webhooks|api)
+    deps: [check:deps]
+    cmds:
+      - '{{.MAILERLITE_CMD}} open {{.TARGET | default "dashboard"}}'
+    vars:
+      TARGET: '{{.TARGET | default "dashboard"}}'
+
+  # ===========================================================================
+  # Releases (releases:* - GitHub release info)
+  # ===========================================================================
+
+  releases:latest:
+    desc: Show latest GitHub release with download URLs
+    deps: [check:deps]
+    cmds:
+      - '{{.MAILERLITE_CMD}} releases latest'
+
+  releases:list:
+    desc: List all GitHub releases
+    deps: [check:deps]
+    cmds:
+      - '{{.MAILERLITE_CMD}} releases list'
+
+  releases:urls:
+    desc: Show download URLs formatted for email templates
+    deps: [check:deps]
+    cmds:
+      - '{{.MAILERLITE_CMD}} releases urls'
 
   # ===========================================================================
   # Server (server:* - webhook receiver)
