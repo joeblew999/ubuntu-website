@@ -71,6 +71,8 @@ Each Raspberry Pi gets an eSIM hardware attachment. This provides a cellular bac
 
 The goal is programmatic provisioning—deploy a device, it connects automatically.
 
+We're currently in Laos working with NGOs and government organizations beta testing this across 52 countries. The system works particularly well for them because of the built-in real-time language translation that accounts for datetime formats, currency conventions, and other semantic knowledge specific to each organization. This is where a local AI adds tremendous value—understanding context that generic translation services miss.
+
 The technical architecture: Raspberry Pi + eSIM module = always-connected publishing node.
 
 ## Objective 3: Legacy Database Integration
