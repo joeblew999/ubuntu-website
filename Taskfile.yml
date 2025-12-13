@@ -23,6 +23,7 @@ version: '3'
 #   sitecheck:* - Site reachability checks (cmd/sitecheck)
 #   genlogo:*   - Logo/branding generation (cmd/genlogo)
 #   mailerlite:* - MailerLite subscriber management (cmd/mailerlite)
+#   google:*    - All Google services unified (cmd/google)
 #   env:*       - Environment management
 #   url:*       - URL shortcuts + SEO dashboards
 #   tools:*     - Tools (gh, task, etc.)
@@ -47,6 +48,7 @@ includes:
   sitecheck: ./taskfiles/Taskfile.sitecheck.yml
   genlogo: ./taskfiles/Taskfile.genlogo.yml
   mailerlite: ./taskfiles/Taskfile.mailerlite.yml
+  google: ./taskfiles/Taskfile.google.yml
   env: ./taskfiles/Taskfile.env.yml
   url: ./taskfiles/Taskfile.url.yml
 
@@ -75,6 +77,9 @@ includes:
 
   # Cloudflare Workers (serverless webhooks)
   workers: ./taskfiles/Taskfile.workers.yml
+
+  # Codec libraries (for pion/mediadevices)
+  codecs: ./taskfiles/Taskfile.codecs.yml
 
 # =============================================================================
 # Environment

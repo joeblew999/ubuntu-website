@@ -154,6 +154,218 @@ task playwright:open URL=https://...       # Open URL in browser
 
 Used by `cmd/google-auth` for automated Google OAuth flows.
 
+### Codec Libraries (for pion/mediadevices)
+
+Pre-built static libraries for video conferencing with pion/mediadevices.
+
+**CLI:** `cmd/codeccheck/main.go`
+**Taskfile:** `taskfiles/Taskfile.codecs.yml`
+**Workflow:** `.github/workflows/build-codecs.yml`
+
+**Commands:**
+```bash
+task codecs:status             # Check codec availability
+task codecs:install            # Download pre-built libraries
+task codecs:recommend          # Show zero-dependency option
+task codecs:build:trigger      # Trigger build workflow (maintainers)
+```
+
+**User Experience:**
+1. **RECOMMENDED** (zero install): Use openh264 instead of x264
+   ```go
+   // Change from: "github.com/pion/mediadevices/pkg/codec/x264"
+   // To:          "github.com/pion/mediadevices/pkg/codec/openh264"
+   ```
+2. **Pre-built download**: `task codecs:install` downloads from GitHub releases
+3. **Manual install**: `brew install x264 libvpx opus` (macOS)
+
+**Build Workflow:**
+GitHub Actions builds x264, libvpx, opus as static libraries for:
+- darwin-arm64, darwin-amd64
+- linux-amd64, linux-arm64
+- windows-amd64
+
+Releases are tagged `codecs-v1.0.0` and users download via `codeccheck -install`.
+
+### Google MCP Setup (Prerequisites for Gmail/Calendar)
+
+**Architecture:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        PROJECT FILES                             │
+├─────────────────────────────────────────────────────────────────┤
+│ cmd/google-auth/        - MCP config management (add/remove)    │
+│ cmd/gmail/              - Gmail CLI (uses internal/gmail)       │
+│ cmd/calendar/           - Calendar CLI (uses internal/calendar) │
+│ internal/googleauth/    - Shared token loading                  │
+│ internal/browser/       - Shared browser automation             │
+│ .vscode/mcp.json        - MCP server config (gitignored: NO)    │
+│ .env                    - OAuth credentials (gitignored: YES)   │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    USER-LEVEL FILES (outside project)           │
+├─────────────────────────────────────────────────────────────────┤
+│ ~/.google-mcp-accounts/ - OAuth tokens (MUST be outside git!)   │
+│ ~/go/bin/google-mcp-server - External MCP server binary         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Why tokens are at `~/.google-mcp-accounts/`:**
+- Security: Tokens contain access to Google account - NEVER commit to git
+- Sharing: Same tokens work across multiple projects
+- Standard: This is where `google-mcp-server` expects them
+
+**One-Command Setup:**
+```bash
+task google-mcp:setup    # Full guided setup (interactive)
+```
+
+**Manual Setup Steps:**
+```bash
+# 1. Install external MCP server
+task google-mcp:install
+
+# 2. Create Google Cloud OAuth credentials (opens browser)
+task google-mcp:guide
+
+# 3. Save credentials
+task google-mcp:credentials CLIENT_ID='xxx' CLIENT_SECRET='xxx'
+
+# 4. Authenticate (opens browser for Google sign-in)
+source .env && task google-mcp:auth
+
+# 5. Add to Claude Code
+task google-mcp:claude:add
+```
+
+**Status Check:**
+```bash
+task google-mcp:status   # Shows binary, accounts, config status
+task google-mcp:check    # Shows next step if incomplete
+```
+
+### Gmail CLI Tool
+
+Unified email sending via API or browser automation. **From address is always `gerard.webb@ubuntusoftware.net`** - hardcoded to prevent mistakes.
+
+**CLI:** `cmd/gmail/main.go`
+**Package:** `internal/gmail/`
+**Taskfile:** `taskfiles/Taskfile.gmail.yml`
+
+**Modes:**
+| Mode | Command | Use Case |
+|------|---------|----------|
+| API | `gmail send --mode=api` | Headless, most reliable (default) |
+| Browser | `gmail send --mode=browser` | Fallback when API unavailable |
+| Compose | `gmail compose` | Opens Gmail for user review before send |
+| Server | `gmail server` | HTTP webhook endpoint for external triggers |
+
+**TaskUI Quick Actions (no variables needed):**
+```bash
+task gmail:check        # Verify API connection
+task gmail:open         # Open Gmail inbox
+task gmail:server       # Start webhook server (port 8087)
+```
+
+**Send Commands:**
+```bash
+# Send via API (recommended)
+task gmail:send TO=user@example.com SUBJECT="Hello" BODY="Message"
+
+# Send via browser automation (fallback)
+task gmail:send:browser TO=user@example.com SUBJECT="Hello" BODY="Message"
+
+# Open compose for review (user clicks send)
+task gmail:compose TO=user@example.com SUBJECT="Review" BODY="Please check"
+```
+
+**Templates:**
+```bash
+# Pre-defined blog update email
+task gmail:templates:blog-update TO=contact@example.com
+```
+
+**Server Mode (HTTP API):**
+```bash
+# Start server
+task gmail:server PORT=8087
+
+# Send via HTTP
+curl -X POST http://localhost:8087/send \
+  -H "Content-Type: application/json" \
+  -d '{"to":"x@y.com","subject":"Test","body":"Hello"}'
+```
+
+**Process Compose:** Add `gmail-server` to dev workflow by enabling in `process-compose.yaml`.
+
+**⚠️ NEVER use Playwright MCP directly for email!** Always use `task gmail:*` commands - they guarantee correct From address.
+
+**Signature:** "Ubuntu Software Local AI" (not "Claude")
+
+### Calendar CLI Tool
+
+Unified Google Calendar management via API or browser automation.
+
+**CLI:** `cmd/calendar/main.go`
+**Package:** `internal/calendar/`
+**Taskfile:** `taskfiles/Taskfile.calendar.yml`
+
+**Modes:**
+| Mode | Command | Use Case |
+|------|---------|----------|
+| API | `calendar create --mode=api` | Headless, most reliable (default) |
+| Browser | `calendar create --mode=browser` | Fallback when API unavailable |
+| Compose | `calendar compose` | Opens calendar for user review before save |
+| Server | `calendar server` | HTTP webhook endpoint for external triggers |
+
+**TaskUI Quick Actions (no variables needed):**
+```bash
+task calendar:check        # Verify API connection
+task calendar:today        # List today's events
+task calendar:open         # Open Google Calendar in browser
+task calendar:server       # Start webhook server (port 8088)
+```
+
+**Create Commands:**
+```bash
+# Create via API (recommended)
+task calendar:create TITLE="Meeting" START="tomorrow 2pm" END="tomorrow 3pm"
+
+# Create via browser automation (fallback)
+task calendar:create:browser TITLE="Meeting" START="tomorrow 2pm" END="tomorrow 3pm"
+
+# Open calendar for review (user saves)
+task calendar:compose TITLE="Review" START="tomorrow 10am" END="tomorrow 11am"
+```
+
+**List Commands:**
+```bash
+task calendar:list              # List upcoming events (default 10)
+task calendar:list:week         # List this week's events
+task calendar:today             # List today's events
+```
+
+**Time Formats:**
+- RFC3339: `2024-12-13T14:00:00+07:00`
+- Relative: `"today 2pm"`, `"tomorrow 10am"`, `"+1h"`, `"+30m"`
+
+**Server Mode (HTTP API):**
+```bash
+# Start server
+task calendar:server PORT=8088
+
+# Create event via HTTP
+curl -X POST http://localhost:8088/create \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Meeting","start":"2024-12-15T14:00:00+07:00","end":"2024-12-15T15:00:00+07:00"}'
+
+# List today's events
+curl http://localhost:8088/today
+```
+
+**Process Compose:** Add `calendar-server` to dev workflow by enabling in `process-compose.yaml`.
+
 ### Page Images (banner, services, etc.)
 
 Location: `assets/images/`
