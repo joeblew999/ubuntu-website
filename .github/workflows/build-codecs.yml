@@ -1,7 +1,7 @@
 # Build Codec Static Libraries
 #
 # This workflow builds x264, libvpx, and opus as static libraries for each
-# OS/arch combination, following the yzma/kronk pattern.
+# OS/arch combination using a matrix strategy.
 #
 # The built libraries are uploaded as release artifacts, which the Go-level
 # installer (cmd/codeccheck) can download at runtime.
@@ -28,114 +28,45 @@ env:
   OPUS_VERSION: "v1.5.2"
 
 jobs:
-  # ===========================================================================
-  # macOS ARM64 (Apple Silicon)
-  # ===========================================================================
-  build-darwin-arm64:
-    runs-on: macos-14  # M1 runner
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            goos: darwin
+            goarch: arm64
+            nproc_cmd: "sysctl -n hw.ncpu"
+            extra_flags: ""
+          - os: macos-13
+            goos: darwin
+            goarch: amd64
+            nproc_cmd: "sysctl -n hw.ncpu"
+            extra_flags: ""
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            nproc_cmd: "nproc"
+            extra_flags: "--enable-pic"
+          - os: ubuntu-24.04-arm
+            goos: linux
+            goarch: arm64
+            nproc_cmd: "nproc"
+            extra_flags: "--enable-pic"
+
+    runs-on: ${{ matrix.os }}
+    name: build-${{ matrix.goos }}-${{ matrix.goarch }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install build dependencies
-        run: |
-          brew install nasm yasm automake autoconf libtool pkg-config
+      - name: Install build dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install nasm yasm automake autoconf libtool pkg-config
 
-      - name: Build x264 static library
-        run: |
-          git clone --depth 1 --branch ${{ env.X264_VERSION }} https://code.videolan.org/videolan/x264.git
-          cd x264
-          ./configure --enable-static --disable-cli --prefix=$GITHUB_WORKSPACE/out
-          make -j$(sysctl -n hw.ncpu)
-          make install
-
-      - name: Build libvpx static library
-        run: |
-          git clone --depth 1 --branch ${{ env.LIBVPX_VERSION }} https://chromium.googlesource.com/webm/libvpx
-          cd libvpx
-          ./configure --enable-static --disable-shared --disable-examples --disable-tools --prefix=$GITHUB_WORKSPACE/out
-          make -j$(sysctl -n hw.ncpu)
-          make install
-
-      - name: Build opus static library
-        run: |
-          git clone --depth 1 --branch ${{ env.OPUS_VERSION }} https://gitlab.xiph.org/xiph/opus.git
-          cd opus
-          ./autogen.sh
-          ./configure --enable-static --disable-shared --prefix=$GITHUB_WORKSPACE/out
-          make -j$(sysctl -n hw.ncpu)
-          make install
-
-      - name: Package libraries
-        run: |
-          mkdir -p dist
-          tar -czvf dist/codecs-darwin-arm64.tar.gz -C out .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codecs-darwin-arm64
-          path: dist/codecs-darwin-arm64.tar.gz
-
-  # ===========================================================================
-  # macOS x64 (Intel)
-  # ===========================================================================
-  build-darwin-amd64:
-    runs-on: macos-13  # Intel runner
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install build dependencies
-        run: |
-          brew install nasm yasm automake autoconf libtool pkg-config
-
-      - name: Build x264 static library
-        run: |
-          git clone --depth 1 --branch ${{ env.X264_VERSION }} https://code.videolan.org/videolan/x264.git
-          cd x264
-          ./configure --enable-static --disable-cli --prefix=$GITHUB_WORKSPACE/out
-          make -j$(sysctl -n hw.ncpu)
-          make install
-
-      - name: Build libvpx static library
-        run: |
-          git clone --depth 1 --branch ${{ env.LIBVPX_VERSION }} https://chromium.googlesource.com/webm/libvpx
-          cd libvpx
-          ./configure --enable-static --disable-shared --disable-examples --disable-tools --prefix=$GITHUB_WORKSPACE/out
-          make -j$(sysctl -n hw.ncpu)
-          make install
-
-      - name: Build opus static library
-        run: |
-          git clone --depth 1 --branch ${{ env.OPUS_VERSION }} https://gitlab.xiph.org/xiph/opus.git
-          cd opus
-          ./autogen.sh
-          ./configure --enable-static --disable-shared --prefix=$GITHUB_WORKSPACE/out
-          make -j$(sysctl -n hw.ncpu)
-          make install
-
-      - name: Package libraries
-        run: |
-          mkdir -p dist
-          tar -czvf dist/codecs-darwin-amd64.tar.gz -C out .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codecs-darwin-amd64
-          path: dist/codecs-darwin-amd64.tar.gz
-
-  # ===========================================================================
-  # Linux x64
-  # ===========================================================================
-  build-linux-amd64:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install build dependencies
+      - name: Install build dependencies (Linux)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y nasm yasm automake autoconf libtool pkg-config
@@ -144,16 +75,16 @@ jobs:
         run: |
           git clone --depth 1 --branch ${{ env.X264_VERSION }} https://code.videolan.org/videolan/x264.git
           cd x264
-          ./configure --enable-static --enable-pic --disable-cli --prefix=$GITHUB_WORKSPACE/out
-          make -j$(nproc)
+          ./configure --enable-static --disable-cli ${{ matrix.extra_flags }} --prefix=$GITHUB_WORKSPACE/out
+          make -j$(${{ matrix.nproc_cmd }})
           make install
 
       - name: Build libvpx static library
         run: |
           git clone --depth 1 --branch ${{ env.LIBVPX_VERSION }} https://chromium.googlesource.com/webm/libvpx
           cd libvpx
-          ./configure --enable-static --disable-shared --enable-pic --disable-examples --disable-tools --prefix=$GITHUB_WORKSPACE/out
-          make -j$(nproc)
+          ./configure --enable-static --disable-shared --disable-examples --disable-tools ${{ matrix.extra_flags }} --prefix=$GITHUB_WORKSPACE/out
+          make -j$(${{ matrix.nproc_cmd }})
           make install
 
       - name: Build opus static library
@@ -161,79 +92,35 @@ jobs:
           git clone --depth 1 --branch ${{ env.OPUS_VERSION }} https://gitlab.xiph.org/xiph/opus.git
           cd opus
           ./autogen.sh
-          ./configure --enable-static --disable-shared --with-pic --prefix=$GITHUB_WORKSPACE/out
-          make -j$(nproc)
+          PIC_FLAG=""
+          if [ -n "${{ matrix.extra_flags }}" ]; then
+            PIC_FLAG="--with-pic"
+          fi
+          ./configure --enable-static --disable-shared $PIC_FLAG --prefix=$GITHUB_WORKSPACE/out
+          make -j$(${{ matrix.nproc_cmd }})
           make install
 
       - name: Package libraries
         run: |
           mkdir -p dist
-          tar -czvf dist/codecs-linux-amd64.tar.gz -C out .
+          tar -czvf dist/codecs-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz -C out .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: codecs-linux-amd64
-          path: dist/codecs-linux-amd64.tar.gz
+          name: codecs-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/codecs-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
 
   # ===========================================================================
-  # Linux ARM64
+  # Windows x64 (separate job due to MSYS2 complexity)
   # ===========================================================================
-  build-linux-arm64:
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y nasm yasm automake autoconf libtool pkg-config
-
-      - name: Build x264 static library
-        run: |
-          git clone --depth 1 --branch ${{ env.X264_VERSION }} https://code.videolan.org/videolan/x264.git
-          cd x264
-          ./configure --enable-static --enable-pic --disable-cli --prefix=$GITHUB_WORKSPACE/out
-          make -j$(nproc)
-          make install
-
-      - name: Build libvpx static library
-        run: |
-          git clone --depth 1 --branch ${{ env.LIBVPX_VERSION }} https://chromium.googlesource.com/webm/libvpx
-          cd libvpx
-          ./configure --enable-static --disable-shared --enable-pic --disable-examples --disable-tools --prefix=$GITHUB_WORKSPACE/out
-          make -j$(nproc)
-          make install
-
-      - name: Build opus static library
-        run: |
-          git clone --depth 1 --branch ${{ env.OPUS_VERSION }} https://gitlab.xiph.org/xiph/opus.git
-          cd opus
-          ./autogen.sh
-          ./configure --enable-static --disable-shared --with-pic --prefix=$GITHUB_WORKSPACE/out
-          make -j$(nproc)
-          make install
-
-      - name: Package libraries
-        run: |
-          mkdir -p dist
-          tar -czvf dist/codecs-linux-arm64.tar.gz -C out .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codecs-linux-arm64
-          path: dist/codecs-linux-arm64.tar.gz
-
-  # ===========================================================================
-  # Windows x64 (using MSYS2)
-  # ===========================================================================
-  build-windows-amd64:
+  build-windows:
     runs-on: windows-latest
+    name: build-windows-amd64
     defaults:
       run:
         shell: msys2 {0}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -254,11 +141,18 @@ jobs:
             git
             pkg-config
 
+      - name: Set output directory
+        id: outdir
+        run: |
+          OUTDIR=$(cygpath -u "$GITHUB_WORKSPACE")/out
+          echo "path=$OUTDIR" >> $GITHUB_OUTPUT
+          mkdir -p "$OUTDIR"
+
       - name: Build x264 static library
         run: |
           git clone --depth 1 --branch ${{ env.X264_VERSION }} https://code.videolan.org/videolan/x264.git
           cd x264
-          ./configure --enable-static --disable-cli --prefix=$GITHUB_WORKSPACE/out --host=x86_64-w64-mingw32
+          ./configure --enable-static --disable-cli --prefix=${{ steps.outdir.outputs.path }} --host=x86_64-w64-mingw32
           make -j$(nproc)
           make install
 
@@ -266,7 +160,7 @@ jobs:
         run: |
           git clone --depth 1 --branch ${{ env.LIBVPX_VERSION }} https://chromium.googlesource.com/webm/libvpx
           cd libvpx
-          ./configure --enable-static --disable-shared --disable-examples --disable-tools --target=x86_64-win64-gcc --prefix=$GITHUB_WORKSPACE/out
+          ./configure --enable-static --disable-shared --disable-examples --disable-tools --target=x86_64-win64-gcc --prefix=${{ steps.outdir.outputs.path }}
           make -j$(nproc)
           make install
 
@@ -275,14 +169,14 @@ jobs:
           git clone --depth 1 --branch ${{ env.OPUS_VERSION }} https://gitlab.xiph.org/xiph/opus.git
           cd opus
           ./autogen.sh
-          ./configure --enable-static --disable-shared --prefix=$GITHUB_WORKSPACE/out --host=x86_64-w64-mingw32
+          ./configure --enable-static --disable-shared --prefix=${{ steps.outdir.outputs.path }} --host=x86_64-w64-mingw32
           make -j$(nproc)
           make install
 
       - name: Package libraries
         run: |
           mkdir -p dist
-          tar -czvf dist/codecs-windows-amd64.tar.gz -C out .
+          tar -czvf dist/codecs-windows-amd64.tar.gz -C ${{ steps.outdir.outputs.path }} .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -294,14 +188,10 @@ jobs:
   # Create Release with all artifacts
   # ===========================================================================
   release:
-    needs:
-      - build-darwin-arm64
-      - build-darwin-amd64
-      - build-linux-amd64
-      - build-linux-arm64
-      - build-windows-amd64
+    needs: [build, build-windows]
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+    if: always() && (github.event_name == 'workflow_dispatch' || github.event_name == 'release')
+
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -309,18 +199,25 @@ jobs:
           path: artifacts
 
       - name: List artifacts
-        run: find artifacts -type f
+        run: |
+          echo "Available artifacts:"
+          find artifacts -type f || echo "No artifacts found"
+
+      - name: Check we have at least some artifacts
+        run: |
+          COUNT=$(find artifacts -name "*.tar.gz" | wc -l)
+          echo "Found $COUNT artifact(s)"
+          if [ "$COUNT" -eq 0 ]; then
+            echo "ERROR: No artifacts were built successfully"
+            exit 1
+          fi
 
       - name: Upload to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            artifacts/codecs-darwin-arm64/codecs-darwin-arm64.tar.gz
-            artifacts/codecs-darwin-amd64/codecs-darwin-amd64.tar.gz
-            artifacts/codecs-linux-amd64/codecs-linux-amd64.tar.gz
-            artifacts/codecs-linux-arm64/codecs-linux-arm64.tar.gz
-            artifacts/codecs-windows-amd64/codecs-windows-amd64.tar.gz
+          files: artifacts/*/codecs-*.tar.gz
+          fail_on_unmatched_files: false
 
       - name: Create release from dispatch
         if: github.event_name == 'workflow_dispatch'
@@ -336,15 +233,18 @@ jobs:
             - libvpx (${{ env.LIBVPX_VERSION }})
             - opus (${{ env.OPUS_VERSION }})
 
+            ## Platforms
+            - darwin-arm64 (Apple Silicon)
+            - darwin-amd64 (Intel Mac)
+            - linux-amd64
+            - linux-arm64
+            - windows-amd64
+
             ## Usage
             ```bash
             go run ./cmd/codeccheck -install
             ```
 
             Or download manually and extract to your lib directory.
-          files: |
-            artifacts/codecs-darwin-arm64/codecs-darwin-arm64.tar.gz
-            artifacts/codecs-darwin-amd64/codecs-darwin-amd64.tar.gz
-            artifacts/codecs-linux-amd64/codecs-linux-amd64.tar.gz
-            artifacts/codecs-linux-arm64/codecs-linux-arm64.tar.gz
-            artifacts/codecs-windows-amd64/codecs-windows-amd64.tar.gz
+          files: artifacts/*/codecs-*.tar.gz
+          fail_on_unmatched_files: false
