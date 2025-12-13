@@ -31,8 +31,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/playwright-community/playwright-go"
 )
 
 // MCPConfig represents the mcp.json file structure
@@ -49,11 +47,11 @@ type MCPServer struct {
 }
 
 const (
-	schemaURL    = "https://modelcontextprotocol.io/schema/config.json"
-	serverName   = "google"
-	serverCmd    = "google-mcp-server"
-	envClientID  = "${GOOGLE_CLIENT_ID}"
-	envSecretID  = "${GOOGLE_CLIENT_SECRET}"
+	schemaURL   = "https://modelcontextprotocol.io/schema/config.json"
+	serverName  = "google"
+	serverCmd   = "google-mcp-server"
+	envClientID = "${GOOGLE_CLIENT_ID}"
+	envSecretID = "${GOOGLE_CLIENT_SECRET}"
 	// settings.json is used for project-level Claude permissions
 	// VSCode extension reads this file (settings.local.json didn't work)
 	settingsFile = "settings.json"
@@ -61,9 +59,9 @@ const (
 
 // ClaudeSettings represents the .claude/settings.json file structure
 type ClaudeSettings struct {
-	Permissions                 Permissions       `json:"permissions"`
-	EnableAllProjectMcpServers  bool              `json:"enableAllProjectMcpServers"`
-	Env                         map[string]string `json:"env,omitempty"`
+	Permissions                Permissions       `json:"permissions"`
+	EnableAllProjectMcpServers bool              `json:"enableAllProjectMcpServers"`
+	Env                        map[string]string `json:"env,omitempty"`
 }
 
 // Permissions represents the permissions block in settings.json
@@ -401,17 +399,17 @@ var openTargets = map[string]struct {
 	url  string
 	desc string
 }{
-	"project":      {urlProject, "Create or select a Google Cloud project"},
-	"consent":      {urlOAuthConsent, "Configure OAuth consent screen"},
-	"credentials":  {urlCredentials, "Create OAuth credentials"},
-	"apis":         {urlCredentials, "Enable required Google APIs"}, // special handling
-	"gmail":        {urlGmailAPI, "Gmail API"},
-	"calendar":     {urlCalendarAPI, "Calendar API"},
-	"drive":        {urlDriveAPI, "Drive API"},
-	"sheets":       {urlSheetsAPI, "Sheets API"},
-	"docs":         {urlDocsAPI, "Docs API"},
-	"slides":       {urlSlidesAPI, "Slides API"},
-	"repo":         {urlGitHubRepo, "GitHub repository"},
+	"project":     {urlProject, "Create or select a Google Cloud project"},
+	"consent":     {urlOAuthConsent, "Configure OAuth consent screen"},
+	"credentials": {urlCredentials, "Create OAuth credentials"},
+	"apis":        {urlCredentials, "Enable required Google APIs"}, // special handling
+	"gmail":       {urlGmailAPI, "Gmail API"},
+	"calendar":    {urlCalendarAPI, "Calendar API"},
+	"drive":       {urlDriveAPI, "Drive API"},
+	"sheets":      {urlSheetsAPI, "Sheets API"},
+	"docs":        {urlDocsAPI, "Docs API"},
+	"slides":      {urlSlidesAPI, "Slides API"},
+	"repo":        {urlGitHubRepo, "GitHub repository"},
 }
 
 // showSetupGuide prints the full setup guide
@@ -1587,12 +1585,53 @@ func runGcloudAuthAssisted(accountHint string, timeoutSecs int) error {
 	}
 }
 
-// runGcloudAuthAuto runs fully automated OAuth using embedded Playwright
+// PlaywrightOAuthResult represents the JSON output from the playwright oauth command
+type PlaywrightOAuthResult struct {
+	Code  string            `json:"code,omitempty"`
+	Token string            `json:"token,omitempty"`
+	Error string            `json:"error,omitempty"`
+	Query map[string]string `json:"query,omitempty"`
+}
+
+// findPlaywrightBinary finds the playwright binary in common locations
+func findPlaywrightBinary() (string, error) {
+	// Check if playwright is in PATH
+	if path, err := exec.LookPath("playwright"); err == nil {
+		return path, nil
+	}
+
+	// Check common build locations relative to this binary
+	execPath, err := os.Executable()
+	if err == nil {
+		dir := filepath.Dir(execPath)
+		candidates := []string{
+			filepath.Join(dir, "playwright"),
+			filepath.Join(dir, "..", "bin", "playwright"),
+		}
+		for _, candidate := range candidates {
+			if _, err := os.Stat(candidate); err == nil {
+				return candidate, nil
+			}
+		}
+	}
+
+	// Check if we can build it
+	return "", fmt.Errorf("playwright binary not found - run: go build -o $(go env GOPATH)/bin/playwright ./cmd/playwright")
+}
+
+// runGcloudAuthAuto runs fully automated OAuth using the playwright CLI tool
 func runGcloudAuthAuto(headless bool, timeoutSecs int) error {
 	fmt.Println("╔══════════════════════════════════════════════════════════════╗")
 	fmt.Println("║     gcloud Auth - Automated Mode (Playwright)                ║")
 	fmt.Println("╚══════════════════════════════════════════════════════════════╝")
 	fmt.Println("")
+
+	// Find playwright binary
+	playwrightBin, err := findPlaywrightBinary()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Using playwright: %s\n", playwrightBin)
 
 	// Generate PKCE values
 	codeVerifier, codeChallenge, err := generatePKCE()
@@ -1602,137 +1641,67 @@ func runGcloudAuthAuto(headless bool, timeoutSecs int) error {
 
 	authURL := buildAuthURL(codeChallenge)
 
-	// Channel to receive the auth code
-	codeChan := make(chan string, 1)
-	errChan := make(chan error, 1)
+	// Build playwright command args
+	args := []string{
+		fmt.Sprintf("-timeout=%d", timeoutSecs),
+		"-port=8085",
+	}
+	if headless {
+		args = append(args, "-headless")
+	}
+	args = append(args, "oauth", authURL)
 
-	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSecs)*time.Second)
-	defer cancel()
-
-	// Start the callback server
-	server := &http.Server{Addr: ":8085"}
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		code := r.URL.Query().Get("code")
-		if code != "" {
-			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, oauthSuccessHTML)
-			select {
-			case codeChan <- code:
-			default:
-			}
-		} else if errMsg := r.URL.Query().Get("error"); errMsg != "" {
-			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprintf(w, oauthErrorHTML, errMsg)
-			select {
-			case errChan <- fmt.Errorf("OAuth error: %s", errMsg):
-			default:
-			}
-		}
-	})
-	server.Handler = mux
-
-	go func() {
-		if err := server.ListenAndServe(); err != http.ErrServerClosed {
-			select {
-			case errChan <- fmt.Errorf("server error: %w", err):
-			default:
-			}
-		}
-	}()
-
-	fmt.Println("OAuth callback server started on http://localhost:8085")
 	fmt.Println("")
-
-	// Install Playwright browsers if needed
-	fmt.Println("Checking Playwright installation...")
-	if err := playwright.Install(&playwright.RunOptions{Browsers: []string{"chromium"}}); err != nil {
-		server.Shutdown(ctx)
-		return fmt.Errorf("failed to install Playwright: %w", err)
-	}
-
-	// Start Playwright
-	fmt.Println("Starting browser...")
-	pw, err := playwright.Run()
-	if err != nil {
-		server.Shutdown(ctx)
-		return fmt.Errorf("failed to start Playwright: %w", err)
-	}
-	defer pw.Stop()
-
-	// Launch browser
-	browserOpts := playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(headless),
-	}
-	browser, err := pw.Chromium.Launch(browserOpts)
-	if err != nil {
-		server.Shutdown(ctx)
-		return fmt.Errorf("failed to launch browser: %w", err)
-	}
-	defer browser.Close()
-
-	// Create page
-	page, err := browser.NewPage()
-	if err != nil {
-		server.Shutdown(ctx)
-		return fmt.Errorf("failed to create page: %w", err)
-	}
-
-	fmt.Println("Navigating to Google OAuth...")
-	fmt.Println("")
+	fmt.Println("Starting Playwright OAuth flow...")
 	fmt.Println("Please complete authentication in the browser window.")
-	fmt.Println("Select your Google account and grant permissions.")
 	fmt.Println("")
 
-	// Navigate to auth URL
-	if _, err := page.Goto(authURL); err != nil {
-		server.Shutdown(ctx)
-		return fmt.Errorf("failed to navigate: %w", err)
+	// Run playwright oauth command
+	cmd := exec.Command(playwrightBin, args...)
+	cmd.Stderr = os.Stderr
+	output, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("playwright oauth failed: %w", err)
 	}
 
-	// Wait for code, error, or timeout
-	select {
-	case code := <-codeChan:
-		fmt.Println("Received authorization code, exchanging for tokens...")
+	// Parse the JSON result
+	var result PlaywrightOAuthResult
+	if err := json.Unmarshal(output, &result); err != nil {
+		return fmt.Errorf("failed to parse playwright output: %w\nOutput: %s", err, string(output))
+	}
 
-		// Close browser and server
-		browser.Close()
-		server.Shutdown(ctx)
+	if result.Error != "" {
+		return fmt.Errorf("OAuth error: %s", result.Error)
+	}
 
-		// Exchange code for tokens
-		tokenResp, err := exchangeCodeForTokens(code, codeVerifier)
-		if err != nil {
-			return fmt.Errorf("token exchange failed: %w", err)
-		}
+	if result.Code == "" {
+		return fmt.Errorf("no authorization code received")
+	}
 
-		// Write credentials
-		if err := writeGcloudCredentials(tokenResp.RefreshToken); err != nil {
-			return err
-		}
+	fmt.Println("Received authorization code, exchanging for tokens...")
 
-		fmt.Println("")
-		fmt.Println("════════════════════════════════════════════════════════════════")
-		fmt.Println("✅ Credentials saved successfully!")
-		fmt.Println("")
-		homeDir, _ := os.UserHomeDir()
-		fmt.Printf("   File: %s/.config/gcloud/application_default_credentials.json\n", homeDir)
-		fmt.Println("")
-		fmt.Println("You can now use:")
-		fmt.Println("   gcloud auth application-default print-access-token")
-		fmt.Println("   terraform apply (with google provider)")
-		fmt.Println("════════════════════════════════════════════════════════════════")
+	// Exchange code for tokens
+	tokenResp, err := exchangeCodeForTokens(result.Code, codeVerifier)
+	if err != nil {
+		return fmt.Errorf("token exchange failed: %w", err)
+	}
 
-		return nil
-
-	case err := <-errChan:
-		browser.Close()
-		server.Shutdown(ctx)
+	// Write credentials
+	if err := writeGcloudCredentials(tokenResp.RefreshToken); err != nil {
 		return err
-
-	case <-ctx.Done():
-		browser.Close()
-		server.Shutdown(context.Background())
-		return fmt.Errorf("authentication timed out after %d seconds", timeoutSecs)
 	}
+
+	fmt.Println("")
+	fmt.Println("════════════════════════════════════════════════════════════════")
+	fmt.Println("✅ Credentials saved successfully!")
+	fmt.Println("")
+	homeDir, _ := os.UserHomeDir()
+	fmt.Printf("   File: %s/.config/gcloud/application_default_credentials.json\n", homeDir)
+	fmt.Println("")
+	fmt.Println("You can now use:")
+	fmt.Println("   gcloud auth application-default print-access-token")
+	fmt.Println("   terraform apply (with google provider)")
+	fmt.Println("════════════════════════════════════════════════════════════════")
+
+	return nil
 }

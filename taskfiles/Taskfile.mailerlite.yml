@@ -11,6 +11,9 @@
 #   task mailerlite:groups:create NAME="My Group"     - Create a group
 #   task mailerlite:groups:assign GROUP_ID=x EMAIL=y  - Assign subscriber to group
 #   task mailerlite:forms:list                        - List all forms
+#   task mailerlite:webhooks:list                     - List all webhooks
+#   task mailerlite:webhooks:create URL=x             - Create a webhook
+#   task mailerlite:automations:list                  - List all automations
 #   task mailerlite:stats                             - Show account statistics
 #
 # Environment:
@@ -139,6 +142,62 @@ tasks:
       - '{{.MAILERLITE_CMD}} forms subscribers {{.FORM_ID}}'
 
   # ===========================================================================
+  # Webhooks (webhooks:* - webhook management)
+  # ===========================================================================
+
+  webhooks:list:
+    desc: List all webhooks
+    deps: [check:deps]
+    cmds:
+      - '{{.MAILERLITE_CMD}} webhooks list'
+
+  webhooks:create:
+    desc: Create a webhook (URL=https://... EVENTS="subscriber.created" optional)
+    summary: |
+      Create a webhook to receive notifications when events occur.
+
+      Events (space-separated):
+        subscriber.created, subscriber.updated, subscriber.unsubscribed
+        subscriber.added_to_group, subscriber.removed_from_group
+        subscriber.bounced, subscriber.automation_triggered
+        campaign.sent, campaign.opened, campaign.clicked
+
+      Example:
+        task mailerlite:webhooks:create URL=https://example.com/webhook
+        task mailerlite:webhooks:create URL=https://example.com/webhook EVENTS="subscriber.created subscriber.updated"
+    deps: [check:deps]
+    requires:
+      vars: [URL]
+    cmds:
+      - '{{.MAILERLITE_CMD}} webhooks create {{.URL}} {{.EVENTS | default "subscriber.created"}}'
+
+  webhooks:delete:
+    desc: Delete a webhook (WEBHOOK_ID=xxx)
+    deps: [check:deps]
+    requires:
+      vars: [WEBHOOK_ID]
+    cmds:
+      - '{{.MAILERLITE_CMD}} webhooks delete {{.WEBHOOK_ID}}'
+
+  # ===========================================================================
+  # Automations (automations:* - automation management)
+  # ===========================================================================
+
+  automations:list:
+    desc: List all automations
+    deps: [check:deps]
+    cmds:
+      - '{{.MAILERLITE_CMD}} automations list'
+
+  automations:get:
+    desc: Get automation details (AUTOMATION_ID=xxx)
+    deps: [check:deps]
+    requires:
+      vars: [AUTOMATION_ID]
+    cmds:
+      - '{{.MAILERLITE_CMD}} automations get {{.AUTOMATION_ID}}'
+
+  # ===========================================================================
   # Statistics (stats - account overview)
   # ===========================================================================
 
@@ -147,6 +206,34 @@ tasks:
     deps: [check:deps]
     cmds:
       - '{{.MAILERLITE_CMD}} stats'
+
+  # ===========================================================================
+  # Server (server:* - webhook receiver)
+  # ===========================================================================
+
+  server:
+    desc: Start webhook server to receive Web3Forms submissions
+    summary: |
+      Starts an HTTP server that receives webhook POSTs from Web3Forms
+      and adds subscribers to MailerLite.
+
+      Variables:
+        PORT     - Server port (default: 8086)
+        GROUP_ID - Optional group ID to auto-assign subscribers
+
+      Endpoints:
+        POST /webhook - Receive Web3Forms submission
+        GET  /health  - Health check
+
+      For production use with a tunnel:
+        ngrok http 8086
+        cloudflared tunnel --url http://localhost:8086
+    deps: [check:deps]
+    cmds:
+      - '{{.MAILERLITE_CMD}} server PORT={{.PORT}} {{if .GROUP_ID}}GROUP_ID={{.GROUP_ID}}{{end}}'
+    vars:
+      PORT: '{{.PORT | default "8086"}}'
+      GROUP_ID: '{{.GROUP_ID | default ""}}'
 
   # ===========================================================================
   # CI Tasks (ci:* - for GitHub Actions)

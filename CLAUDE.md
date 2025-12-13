@@ -76,6 +76,84 @@ partnership: "Partnership Inquiry"
 
 Link with `?subject=<key>` (e.g., `/contact/?subject=security`) to auto-fill.
 
+### MailerLite Integration
+
+CLI tool for subscriber management and email automation.
+
+**CLI:** `cmd/mailerlite/main.go`
+**Taskfile:** `taskfiles/Taskfile.mailerlite.yml`
+
+**Key Commands:**
+```bash
+task mailerlite:subscribers:list          # List subscribers
+task mailerlite:subscribers:add EMAIL=x   # Add subscriber
+task mailerlite:groups:list               # List groups
+task mailerlite:stats                     # Account stats
+task mailerlite:server                    # Start webhook server
+task mailerlite:releases:latest           # Show latest GitHub release
+```
+
+**Web3Forms → MailerLite Flow:**
+
+```
+User submits "Get Started" form
+        ↓
+Web3Forms sends webhook POST
+        ↓
+mailerlite server receives at /webhook
+        ↓
+Parses form data (name, email, company, platform, industry)
+        ↓
+Adds subscriber to MailerLite via API
+        ↓
+(Optional) Auto-assigns to group
+```
+
+**Running the webhook server:**
+```bash
+# Development (local)
+task mailerlite:server PORT=8086
+
+# With auto-group assignment
+task mailerlite:server GROUP_ID=12345
+
+# Production: expose via tunnel
+ngrok http 8086
+# Then configure Web3Forms webhook URL to the ngrok URL
+```
+
+**GitHub Releases Integration:**
+```bash
+task mailerlite:releases:latest     # Show latest release info
+task mailerlite:releases:urls       # Get URLs for email templates
+```
+
+### Playwright Tool
+
+Reusable browser automation for OAuth flows and testing.
+
+**CLI:** `cmd/playwright/main.go`
+**Taskfile:** `taskfiles/tools/Taskfile.playwright.yml`
+
+**Commands:**
+```bash
+task playwright:install                    # Install browsers
+task playwright:oauth URL=https://...      # OAuth flow with callback
+task playwright:screenshot URL=x FILE=y   # Take screenshot
+task playwright:open URL=https://...       # Open URL in browser
+```
+
+**OAuth Output (JSON):**
+```json
+{
+  "code": "authorization_code_here",
+  "token": "access_token_if_present",
+  "query": { "all": "query", "params": "here" }
+}
+```
+
+Used by `cmd/google-auth` for automated Google OAuth flows.
+
 ### Page Images (banner, services, etc.)
 
 Location: `assets/images/`
