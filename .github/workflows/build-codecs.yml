@@ -16,6 +16,15 @@ permissions:
   contents: write  # Required for creating releases
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/build-codecs.yml'
+      - 'cmd/codeccheck/**'
+      - 'internal/codecinstaller/**'
+      - 'taskfiles/Taskfile.codecs.yml'
+      - 'pkg/mediadevicesdemo/**'
+      - 'pkg/codeccheck/**'
   workflow_dispatch:
     inputs:
       version:
