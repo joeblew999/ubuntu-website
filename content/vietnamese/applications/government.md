@@ -1,222 +1,222 @@
 ---
-title: "Chính phủ & Khu vực Công"
-meta_title: "Biểu mẫu Chính phủ & Xuất bản | Ubuntu Software"
-description: "Phục vụ mọi công dân. Xử lý mọi hồ sơ. Xuất bản từ nguồn duy nhất cho biểu mẫu chính phủ, tài liệu dễ tiếp cận và quy trình làm việc giấy+số."
+title: "Chính phủ & Khu vực công"
+meta_title: "Government Forms & Publishing | Ubuntu Software"
+description: "Phục vụ mọi công dân. Xử lý mọi hồ sơ. Xuất bản từ một nguồn duy nhất cho các biểu mẫu chính phủ, tài liệu truy cập được và quy trình làm việc kết hợp giấy và kỹ thuật số."
 image: "/images/government.svg"
 draft: false
 ---
 
-## Phục Vụ Mọi Công Dân. Xử Lý Mọi Hồ Sơ.
+## Phục vụ mọi công dân. Xử lý mọi hồ sơ.
 
-Chính phủ phục vụ tất cả mọi người—bao gồm những người không có internet, những người thích dùng giấy tờ, và những người cần định dạng dễ tiếp cận. Hệ thống của bạn cần hoạt động cho tất cả họ.
+Chính phủ phục vụ mọi người - bao gồm cả những người không có internet, những người ưa chuộng giấy tờ và những người cần các định dạng dễ tiếp cận. Hệ thống của bạn cần phải hoạt động cho tất cả họ.
 
-Xuất bản từ một nguồn duy nhất. Giấy tờ và kỹ thuật số thống nhất. Dễ tiếp cận theo mặc định.
-
----
-
-## Thách Thức
-
-Các tổ chức công gặp phải những hạn chế đặc thù:
-
-**Cần nhiều kênh tiếp nhận.** Không phải ai cũng có internet. Không phải ai cũng sử dụng được màn hình. Biểu mẫu giấy không thể loại bỏ.
-
-**Khả năng tiếp cận là bắt buộc.** Tuân thủ WCAG. Tương thích trình đọc màn hình. Đa ngôn ngữ. Không phải tùy chọn.
-
-**Yêu cầu lưu trữ.** Thời gian lưu giữ hồ sơ tính bằng thập kỷ. Định dạng phải đọc được lâu dài.
-
-**Tích hợp hệ thống cũ.** Cơ sở dữ liệu hiện có. Quy trình đã thiết lập. Không thể bỏ đi và thay thế hoàn toàn.
-
-**Hạn chế ngân sách.** Mọi đồng tiền đều được xem xét kỹ lưỡng. ROI phải rõ ràng.
+Xuất bản từ một nguồn duy nhất. Bản in và bản điện tử được tích hợp thống nhất. Truy cập mặc định.
 
 ---
 
-## Publish Giúp Gì
+## Thử thách
 
-### Thống Nhất Giấy Tờ + Kỹ Thuật Số
+Các tổ chức khu vực công phải đối mặt với những hạn chế đặc thù:
 
-Viết một lần. Tạo biểu mẫu web để nộp trực tuyến và biểu mẫu PDF để nộp giấy. Cả hai đều lưu vào cùng một cơ sở dữ liệu.
+**Cần nhiều kênh khác nhau.** Không phải ai cũng có internet. Không phải ai cũng có thể sử dụng màn hình. Các biểu mẫu giấy sẽ không biến mất.
 
-- Công dân chọn kênh của họ
-- Nhân viên xử lý tất cả hồ sơ theo cùng một cách
-- Không nhập liệu trùng lặp
-- Không kênh nào bị bỏ lại phía sau
+**Tính khả dụng là bắt buộc.** Tuân thủ WCAG. Tương thích với trình đọc màn hình. Hỗ trợ nhiều ngôn ngữ. Không phải là tùy chọn.
+
+**Yêu cầu lưu trữ.** Thời gian lưu trữ hồ sơ tính bằng thập kỷ. Các định dạng phải được duy trì để có thể đọc được.
+
+**Tích hợp hệ thống cũ.** Cơ sở dữ liệu hiện có. Quy trình làm việc đã được thiết lập. Không thể thay thế hoàn toàn.
+
+**Hạn chế ngân sách.** Mỗi đồng đều được xem xét kỹ lưỡng. Tỷ suất hoàn vốn (ROI) phải rõ ràng.
 
 ---
 
-### Dễ Tiếp Cận Theo Mặc Định
+## Cách Publish Hỗ Trợ
 
-Publish tự động tạo đầu ra dễ tiếp cận:
+### Giấy và Kỹ thuật số Tích hợp
 
-- **Biểu mẫu web** — Tuân thủ WCAG 2.1 AA
+Viết một lần. Tạo biểu mẫu web cho việc nộp trực tuyến và biểu mẫu PDF cho việc nộp bằng giấy. Cả hai đều lưu trữ vào cùng một cơ sở dữ liệu.
+
+- Công dân lựa chọn kênh của mình
+- Nhân viên xử lý tất cả các hồ sơ theo cùng một cách
+- Không nhập dữ liệu trùng lặp
+- Không có kênh nào bị bỏ lại phía sau
+
+---
+
+### Mặc định có thể truy cập
+
+Chức năng Publish tự động tạo ra các đầu ra có thể truy cập được:
+
+- **Biểu mẫu web* — Tuân thủ WCAG 2.1 AA
 - **Tài liệu PDF** — Được gắn thẻ cho trình đọc màn hình
-- **Nhiều định dạng** — Cùng nguồn, đầu ra khác nhau
-- **Phiên bản ngôn ngữ** — Duy trì bản dịch từ một nguồn duy nhất
+- **Nhiều định dạng** — Nguồn gốc giống nhau, kết quả đầu ra khác nhau
+- **Biến thể ngôn ngữ** — Duy trì bản dịch từ nguồn duy nhất
 
-Khả năng tiếp cận không phải là điều nghĩ sau. Nó được tích hợp sẵn.
+Tính khả dụng không phải là điều được nghĩ đến sau cùng. Nó được tích hợp sẵn.
 
 ---
 
-### OCR cho Hồ Sơ Giấy
+### Nhận dạng ký tự quang học (OCR) cho các tờ khai giấy
 
-Công dân gửi biểu mẫu giấy qua đường bưu điện. Publish xử lý chúng:
+Công dân gửi đơn đăng ký bằng giấy. Cơ quan chức năng xử lý các đơn đăng ký đó:
 
-- Biểu mẫu quét được nhận dạng tự động
-- Vị trí các trường được biết chính xác (chúng tôi đã tạo biểu mẫu)
+- Các biểu mẫu được quét sẽ được nhận diện tự động
+- Vị trí trên sân được xác định chính xác (chúng tôi đã tạo biểu mẫu)
 - Dữ liệu được trích xuất và xác thực
-- Chảy vào cơ sở dữ liệu của bạn như hồ sơ kỹ thuật số
+- Dữ liệu được gửi đến cơ sở dữ liệu của bạn dưới dạng các bản nộp trực tuyến
 
-**Không nhập liệu thủ công. Không lỗi sao chép.**
-
----
-
-### Sẵn Sàng Lưu Trữ
-
-Hồ sơ chính phủ tồn tại qua nhiều thế hệ:
-
-- **Đầu ra PDF/A** — Định dạng lưu trữ theo tiêu chuẩn ISO
-- **Định dạng mở** — Không phụ thuộc độc quyền
-- **Lịch sử phiên bản** — Đường dẫn kiểm toán đầy đủ
-- **Bảo tồn nguồn** — Tệp Markdown được kiểm soát phiên bản mãi mãi
-
-Hồ sơ của bạn sẽ đọc được trong 50 năm nữa.
+**Không nhập liệu thủ công. Không có lỗi nhập liệu.**
 
 ---
 
-### Tích Hợp, Không Thay Thế
+### Sẵn sàng lưu trữ
+
+Hồ sơ chính phủ của các thế hệ trước:
+
+- **Đầu ra PDF/A** — Định dạng lưu trữ tiêu chuẩn ISO
+- **Định dạng mở** — Không phụ thuộc vào các định dạng độc quyền
+- **Lịch sử phiên bản** — Lịch sử thay đổi đầy đủ
+- **Bảo tồn nguồn** — Các tệp Markdown được quản lý phiên bản vĩnh viễn
+
+Các tài liệu của bạn sẽ có thể đọc được sau 50 năm.
+
+---
+
+### Tích hợp, không thay thế
 
 Kết nối với các hệ thống hiện có của bạn:
 
-- Cơ sở dữ liệu của bạn (SQL, bất kỳ thứ gì bạn có)
-- Nhà cung cấp danh tính của bạn
+- Cơ sở dữ liệu của bạn (SQL, bất kỳ loại nào bạn có)
+- Nhà cung cấp dịch vụ xác thực của bạn
 - Hệ thống quản lý tài liệu của bạn
-- Công cụ quy trình làm việc của bạn
+- Các công cụ quản lý quy trình làm việc của bạn
 
-**Chúng tôi là một lớp bổ sung, không phải thay thế.**
+**Chúng tôi là một lớp, không phải là sự thay thế.*
 
 ---
 
-## Trường Hợp Sử Dụng
+## Các trường hợp sử dụng
 
-### Đơn Xin Cấp Phép
+### Đơn xin cấp phép
 
-Giấy phép xây dựng. Giấy phép kinh doanh. Giấy phép sự kiện.
+Giấy phép xây dựng. Giấy phép kinh doanh. Giấy phép tổ chức sự kiện.
 
-- Biểu mẫu đơn trên trang web
-- Cùng biểu mẫu có thể in cho người đến trực tiếp
-- Tất cả hồ sơ trong một hàng đợi
+- Mẫu đơn đăng ký trên trang web
+- Mẫu đơn in sẵn dành cho ứng viên nộp hồ sơ trực tiếp
+- Tất cả các bài nộp trong một hàng đợi
 - Cập nhật trạng thái tự động
 
 ---
 
-### Đăng Ký Phúc Lợi
+### Đăng ký quyền lợi
 
 Dịch vụ xã hội. Chương trình hỗ trợ. Đăng ký.
 
-- Biểu mẫu đủ điều kiện phức tạp được đơn giản hóa
+- Các biểu mẫu xét duyệt phức tạp được đơn giản hóa
 - Tải lên tài liệu hỗ trợ
-- Đơn giấy từ văn phòng thực địa được xử lý tự động
-- Tích hợp với quản lý hồ sơ
+- Các đơn đăng ký bằng giấy từ các văn phòng địa phương được xử lý tự động
+- Tích hợp với quản lý trường hợp
 
 ---
 
-### Yêu Cầu Hồ Sơ Công
+### Yêu cầu truy cập hồ sơ công khai
 
-FOIA. Hồ sơ mở. Minh bạch.
+FOIA. Hồ sơ công khai. Minh bạch.
 
-- Biểu mẫu yêu cầu được chuẩn hóa
+- Mẫu đơn yêu cầu chuẩn hóa
 - Theo dõi tự động
-- Tài liệu phản hồi được tạo từ mẫu
-- Hỗ trợ quy trình biên tập
+- Các tài liệu phản hồi được tạo ra từ các mẫu
+- Các quy trình làm việc liên quan đến việc che giấu thông tin được hỗ trợ
 
 ---
 
-### Nộp Hồ Sơ Quy Định
+### Các hồ sơ đăng ký với cơ quan quản lý
 
-Đăng ký doanh nghiệp. Báo cáo hàng năm. Tài liệu tuân thủ.
+Đăng ký kinh doanh. Báo cáo thường niên. Tài liệu tuân thủ.
 
 - Thu thập dữ liệu có cấu trúc
 - Xác thực khi nộp
-- Cơ sở dữ liệu ghi nhận được cập nhật tự động
-- Tài liệu xác nhận được tạo
+- Cơ sở dữ liệu chính được cập nhật tự động
+- Các tài liệu xác nhận được tạo ra
 
 ---
 
-### Phản Hồi từ Công Dân
+### Phản hồi của công dân
 
 Khảo sát. Ý kiến. Yêu cầu dịch vụ.
 
 - Thu thập đa kênh
-- Khảo sát giấy từ các cuộc họp cộng đồng được ghi nhận
+- Các bảng câu hỏi bằng giấy thu thập từ các cuộc họp cộng đồng
 - Cảm xúc và dữ liệu được tổng hợp
 - Báo cáo được tạo tự động
 
 ---
 
-## Bạn Nhận Được Gì
+## Bạn sẽ nhận được gì
 
-### Cho Công Dân
+### Dành cho công dân
 
-- Chọn giấy hoặc kỹ thuật số—cả hai đều hoạt động
-- Định dạng dễ tiếp cận cho mọi khả năng
-- Biểu mẫu rõ ràng, nhất quán
-- Xử lý nhanh hơn, ít chờ đợi hơn
+- Chọn giấy hoặc kỹ thuật số—cả hai đều được
+- Các định dạng dễ tiếp cận cho mọi khả năng
+- Các biểu mẫu rõ ràng, nhất quán
+- Xử lý nhanh hơn, ít phải chờ đợi hơn
 
-### Cho Nhân Viên
+### Dành cho nhân viên
 
-- Một hệ thống cho tất cả hồ sơ
-- Không nhập liệu thủ công từ giấy
-- Ít lỗi cần sửa hơn
-- Nhiều thời gian hơn cho dịch vụ thực sự
+- Một hệ thống duy nhất cho tất cả các hồ sơ nộp
+- Không nhập dữ liệu thủ công từ giấy
+- Ít lỗi hơn để sửa chữa
+- Nhiều thời gian hơn cho dịch vụ thực tế
 
-### Cho IT
+### Đối với CNTT
 
 - Kết nối với hạ tầng hiện có
-- Tiêu chuẩn mở, không bị khóa
+- Tiêu chuẩn mở, không bị ràng buộc
 - Tùy chọn tự lưu trữ cho dữ liệu nhạy cảm
-- Đội ngũ của bạn có thể bảo trì
+- Có thể duy trì bởi đội ngũ của bạn
 
-### Cho Lãnh Đạo
+### Cho Lãnh đạo
 
-- Hiệu quả đo lường được
-- Tuân thủ khả năng tiếp cận tích hợp sẵn
-- Đường dẫn kiểm toán cho mọi thứ
-- ROI thân thiện với ngân sách
+- Cải thiện hiệu quả có thể đo lường được
+- Tuân thủ tính năng truy cập được tích hợp sẵn
+- Danh sách theo dõi kiểm toán cho mọi thứ
+- Tỷ suất hoàn vốn (ROI) hợp lý về mặt chi phí
 
 ---
 
-## Những Con Số
+## Các con số
 
-**Trước Publish:**
-- 40% hồ sơ vẫn trên giấy
-- Trung bình 15 phút để nhập một biểu mẫu giấy
-- Tỷ lệ lỗi 3% trong nhập liệu thủ công
-- Hàng tuần để cập nhật biểu mẫu trên các kênh
+**Trước khi đăng:**
+- 40% số hồ sơ vẫn được nộp bằng giấy
+- trung bình mất 15 phút để điền vào một biểu mẫu giấy
+- tỷ lệ lỗi 3% trong quá trình nhập liệu thủ công
+- Cần vài tuần để cập nhật các biểu mẫu trên các kênh khác nhau
 
-**Sau Publish:**
-- Giấy tờ được xử lý tự động
-- Giây để ghi nhận, không phải phút
-- Gần như không có lỗi sao chép
+**Sau khi đăng:**
+- Giấy được xử lý tự động
+- Chỉ cần vài giây để chụp, không phải vài phút
+- Lỗi phiên mã gần như bằng không
 - Cập nhật một lần, triển khai mọi nơi
 
 ---
 
-## Hoàn Thiện Vòng Lặp với Spatial
+## Hoàn thiện vòng lặp với Spatial
 
-Một số công việc chính phủ vốn có tính không gian:
+Một số công việc của chính phủ mang tính chất không gian:
 
-- **Trực quan hóa giấy phép** — Giấy phép xây dựng trên bản đồ
-- **Quản lý hạ tầng** — Tiện ích, đường sá, cơ sở dưới dạng bản sao kỹ thuật số
-- **Quy hoạch và phân vùng** — Mô hình 3D của các dự án đề xuất
+- **Hiển thị giấy phép xây dựng* — Giấy phép xây dựng trên bản đồ
+- **Quản lý hạ tầng** — Hệ thống tiện ích, đường sá, cơ sở vật chất dưới dạng bản sao kỹ thuật số
+- **Quy hoạch và phân khu** — Mô hình 3D của các dự án phát triển đề xuất
 - **Theo dõi tài sản** — Đội xe, thiết bị, tài sản trong không gian
 
 Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
-[Khám Phá Spatial →](/platform/spatial/)
+[Khám phá Không gian →](/platform/spatial/)
 
 ---
 
-## Bắt Đầu
+## Bắt đầu
 
-Chính phủ hoạt động cho tất cả mọi người. Kỹ thuật số và giấy tờ. Dễ tiếp cận và hiệu quả.
+Chính phủ phục vụ mọi người. Số hóa và giấy tờ. Dễ tiếp cận và hiệu quả.
 
-[Liên Hệ Chúng Tôi →](/contact/)
+[Liên hệ với chúng tôi →](/contact/)

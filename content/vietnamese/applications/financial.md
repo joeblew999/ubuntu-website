@@ -1,220 +1,220 @@
 ---
-title: "Dịch vụ Tài chính"
-meta_title: "Biểu mẫu & Xuất bản Dịch vụ Tài chính | Ubuntu Software"
-description: "Tuân thủ mà không phức tạp. Xuất bản từ một nguồn duy nhất cho các ứng dụng, công bố thông tin và tài liệu quy định trong lĩnh vực ngân hàng, cho vay và quản lý tài sản."
+title: "Dịch vụ tài chính"
+meta_title: "Dịch vụ tài chính Forms & Publishing | Ubuntu Software"
+description: "Tuân thủ mà không phức tạp. Xuất bản từ một nguồn duy nhất cho các ứng dụng, thông báo và tài liệu tuân thủ quy định trong lĩnh vực ngân hàng, cho vay và quản lý tài sản."
 image: "/images/financial.svg"
 draft: false
 ---
 
-## Tuân Thủ Không Phức Tạp.
+## Tuân thủ mà không phức tạp.
 
-Dịch vụ tài chính hoạt động trong một thế giới đầy quy định. Mọi biểu mẫu, mọi thông báo, mọi thông tin liên lạc đều phải chính xác, tuân thủ và có thể kiểm toán. Tuy nhiên, khách hàng mong đợi sự tiện lợi trên mọi kênh.
+Dịch vụ tài chính hoạt động trong một môi trường đầy rẫy các quy định. Mọi biểu mẫu, mọi thông báo, mọi giao tiếp đều phải chính xác, tuân thủ và có thể kiểm toán. Tuy nhiên, khách hàng mong đợi sự tiện lợi trên mọi kênh.
 
-Xuất bản từ nguồn duy nhất. Tuân thủ quy định được tích hợp sẵn. Giấy và kỹ thuật số thống nhất.
-
----
-
-## Thách Thức
-
-Tài liệu tài chính có những yêu cầu đặc biệt:
-
-**Độ chính xác quy định.** Các thông báo phải chính xác. Các phiên bản phải được theo dõi. Các thay đổi phải có thể kiểm toán.
-
-**Phân phối đa kênh.** Chi nhánh. Thư. Web. Di động. Khách hàng mong đợi sự lựa chọn.
-
-**Độ nhạy cảm dữ liệu.** PII ở khắp nơi. Mã hóa bắt buộc. Kiểm soát truy cập.
-
-**Tích hợp hệ thống cũ.** Hệ thống ngân hàng lõi. CRM. Quản lý tài liệu. Không có gì kết nối với nhau.
-
-**Thay đổi nhanh chóng.** Quy định thay đổi. Sản phẩm thay đổi. Biểu mẫu phải theo kịp mà không vi phạm tuân thủ.
+Xuất bản từ một nguồn duy nhất. Tuân thủ quy định được tích hợp sẵn. Tích hợp giữa bản in và bản điện tử.
 
 ---
 
-## Publish Giúp Như Thế Nào
+## Thử thách
 
-### Đầu Ra Tuân Thủ Quy Định
+Tài liệu tài chính có những yêu cầu đặc thù:
 
-Tạo tài liệu đáp ứng yêu cầu:
+**Regulatory precision.** Công bố must be exact. Versions must be tracked. Changes must be auditable.
 
-- **PDF/A** — Tài liệu đạt tiêu chuẩn lưu trữ
-- **Định dạng có thể truy cập** — Tuân thủ ADA cho tất cả khách hàng
-- **Kiểm soát phiên bản** — Biết chính xác phiên bản nào được gửi khi nào
-- **Dấu vết kiểm toán** — Lịch sử đầy đủ của mọi tài liệu
+**Phân phối đa kênh.** Chi nhánh. Bưu điện. Trang web. Thiết bị di động. Khách hàng mong đợi sự lựa chọn.
 
----
+**Độ nhạy cảm của dữ liệu.** Thông tin cá nhân (PII) có mặt ở mọi nơi. Mã hóa bắt buộc. Quyền truy cập được kiểm soát.
 
-### Các Kênh Thống Nhất
+**Legacy integration.** Core banking systems. CRM. Quản lý tài liệu. Nothing talks to anything else.
 
-Cùng một tài liệu, mọi kênh:
-
-- Đơn đăng ký web trực tuyến
-- Đơn đăng ký giấy tại chi nhánh
-- PDF gửi qua email
-- Tất cả được thu thập vào cùng một hệ thống
-
-**Khách hàng lựa chọn. Bạn xử lý nhất quán.**
+**Thay đổi nhanh chóng.** Quy định thay đổi. Sản phẩm thay đổi. Các biểu mẫu phải được cập nhật kịp thời mà không vi phạm các quy định.
 
 ---
 
-### Xử Lý Dữ Liệu An Toàn
+## Cách Publish Hỗ Trợ
 
-Dữ liệu tài chính đòi hỏi bảo vệ:
+### Đầu ra tuân thủ quy định
 
-- **Mã hóa** — Trong quá trình truyền và khi lưu trữ
-- **Kiểm soát truy cập** — Dựa trên vai trò, có thể kiểm toán
-- **Tùy chọn tự lưu trữ** — Cơ sở hạ tầng của bạn, quyền kiểm soát của bạn
-- **Không tiết lộ cho bên thứ ba** — Dữ liệu ở nơi bạn đặt
+Tạo các tài liệu đáp ứng yêu cầu:
+
+- **PDF/A** — Tài liệu tiêu chuẩn lưu trữ
+- **Định dạng truy cập được** — Tuân thủ ADA cho tất cả khách hàng
+- **Quản lý phiên bản* — Biết chính xác phiên bản nào đã được gửi vào thời điểm nào
+- **Danh sách kiểm tra** — Lịch sử đầy đủ của mọi tài liệu
 
 ---
 
-### Tích Hợp Hệ Thống Lõi
+### Kênh Tích hợp
+
+Cùng một tài liệu, trên mọi kênh:
+
+- Ứng dụng web trực tuyến
+- Đơn đăng ký bằng giấy tại chi nhánh
+- Tệp PDF được gửi qua email
+- Tất cả dữ liệu được ghi lại vào cùng một hệ thống
+
+**Khách hàng lựa chọn. Bạn xử lý một cách nhất quán.**
+
+---
+
+### Xử lý dữ liệu an toàn
+
+Dữ liệu tài chính cần được bảo vệ:
+
+- **Mã hóa** — Trong quá trình truyền tải và khi lưu trữ
+- **Kiểm soát truy cập** — Dựa trên vai trò, có thể kiểm tra được
+- **Tùy chọn tự lưu trữ** — Your infrastructure, your control
+- **Không có sự tiếp xúc với bên thứ ba** — Dữ liệu được lưu trữ tại nơi bạn đặt nó
+
+---
+
+### Tích hợp Hệ thống Lõi
 
 Kết nối với những gì bạn có:
 
 - Nền tảng ngân hàng lõi
-- Hệ thống CRM
-- Quản lý tài liệu
-- Công cụ quy trình làm việc
+- Hệ thống quản lý quan hệ khách hàng (CRM)
+- Document management
+- Công cụ quản lý quy trình làm việc
 
-Đọc dữ liệu để điền. Ghi dữ liệu trở lại. Không cần nhập lại thủ công.
+Đọc dữ liệu để điền vào. Ghi dữ liệu trở lại. Không cần nhập lại thủ công.
 
 ---
 
-### Cập Nhật Nhanh Chóng
+### Cập nhật nhanh chóng
 
-Quy định thay đổi. Cập nhật một lần, triển khai ở mọi nơi:
+Quy định thay đổi. Cập nhật một lần, triển khai mọi nơi:
 
-- Nguồn sự thật duy nhất
-- Kiểm soát phiên bản tích hợp sẵn
+- Nguồn thông tin duy nhất
+- Hệ thống kiểm soát phiên bản tích hợp sẵn
 - Khả năng triển khai theo giai đoạn
-- Hoàn nguyên nếu cần
+- Quay lại nếu cần thiết
 
-**Không còn phải tìm kiếm các biểu mẫu lỗi thời.**
+**Không còn phải tìm kiếm các biểu mẫu lỗi thời.*
 
 ---
 
-## Trường Hợp Sử Dụng
+## Các trường hợp sử dụng
 
-### Mở Tài Khoản
+### Mở tài khoản
 
-Tài khoản thanh toán. Tiết kiệm. Tài khoản đầu tư.
+Tài khoản thanh toán. Tài khoản tiết kiệm. Tài khoản đầu tư.
 
-- Đơn đăng ký có cấu trúc với xác thực
+- Ứng dụng có cấu trúc với chức năng xác thực
 - Tích hợp xác minh danh tính
-- Thu thập chữ ký (kỹ thuật số hoặc giấy)
-- Xử lý thông suốt cho các đơn đăng ký hoàn chỉnh
+- Chữ ký điện tử (điện tử hoặc giấy)
+- Xử lý trực tiếp cho các ứng dụng sạch
 
 ---
 
-### Đơn Vay
+### Đơn xin vay vốn
 
 Thế chấp. Cá nhân. Doanh nghiệp. Ô tô.
 
-- Đơn đăng ký phức tạp trở nên dễ quản lý
-- Tích hợp thu thập tài liệu
-- Logic có điều kiện cho luồng đơn đăng ký
-- Theo dõi trạng thái cho người nộp đơn
+- Các ứng dụng phức tạp trở nên dễ quản lý
+- Hệ thống thu thập tài liệu tích hợp
+- Logic điều kiện cho luồng ứng dụng
+- Theo dõi trạng thái của ứng viên
 
 ---
 
-### Thông Báo
+### Disclosures
 
-Truth in Lending. Thông báo quyền riêng tư. Bảng phí.
+Thông tin về lãi suất. Thông báo về quyền riêng tư. Bảng phí.
 
 - Ngôn ngữ quy định chính xác
-- Cập nhật có kiểm soát phiên bản
-- Theo dõi giao hàng
+- Cập nhật được kiểm soát phiên bản
+- Theo dõi đơn hàng
 - Thu thập xác nhận
 
 ---
 
-### Dịch Vụ Tài Khoản
+### Dịch vụ quản lý tài khoản
 
-Thay đổi địa chỉ. Cập nhật người thụ hưởng. Sửa đổi tài khoản.
+Thay đổi địa chỉ. Cập nhật thông tin người thụ hưởng. Thay đổi thông tin tài khoản.
 
-- Tự phục vụ trực tuyến
-- Biểu mẫu giấy cho những ai thích
-- Tất cả được ghi vào hồ sơ tài khoản
-- Duy trì dấu vết kiểm toán
+- Dịch vụ tự phục vụ trực tuyến
+- Phiếu giấy dành cho những ai ưa thích
+- Tất cả các giao dịch đã được ghi nhận vào sổ kế toán
+- Danh sách theo dõi kiểm toán được duy trì
 
 ---
 
-### Quản Lý Tài Sản
+### Quản lý tài sản
 
-Báo cáo chính sách đầu tư. Biểu mẫu phù hợp. Thỏa thuận khách hàng.
+Tuyên bố chính sách đầu tư. Biểu mẫu đánh giá tính phù hợp. Hợp đồng khách hàng.
 
-- Lắp ráp tài liệu phức tạp
-- Cá nhân hóa từ dữ liệu khách hàng
+- Tạo lập tài liệu phức tạp
+- Được cá nhân hóa dựa trên dữ liệu của khách hàng
 - Tích hợp chữ ký điện tử
 - Lưu trữ để tuân thủ
 
 ---
 
-## Bạn Nhận Được Gì
+## Bạn sẽ nhận được gì
 
-### Cho Khách Hàng
+### Dành cho Khách hàng
 
-- Đăng ký qua kênh ưa thích
-- Trải nghiệm nhất quán ở mọi nơi
-- Tài liệu rõ ràng, dễ truy cập
+- Nộp đơn qua kênh ưa thích
+- Trải nghiệm nhất quán mọi nơi
+- Các tài liệu rõ ràng, dễ tiếp cận
 - Xử lý nhanh hơn
 
-### Cho Nhân Viên Chi Nhánh
+### Đối với nhân viên chi nhánh
 
-- Cùng một hệ thống cho giấy và kỹ thuật số
-- Biểu mẫu được điền sẵn
+- Hệ thống giống nhau cho cả bản giấy và bản điện tử
+- Các biểu mẫu đã được điền sẵn
 - Ít lỗi hơn
-- Nhiều thời gian hơn cho dịch vụ khách hàng
+- Dành thêm thời gian cho dịch vụ khách hàng
 
-### Cho Tuân Thủ
+### Để tuân thủ
 
-- Dấu vết kiểm toán cho mọi thứ
-- Kiểm soát phiên bản tích hợp sẵn
-- Định dạng quy định tự động
-- Quản lý thay đổi đơn giản hóa
+- Danh sách theo dõi kiểm toán cho mọi thứ
+- Hệ thống kiểm soát phiên bản tích hợp sẵn
+- Các định dạng quy định tự động
+- Quản lý thay đổi được đơn giản hóa
 
-### Cho IT
+### Đối với CNTT
 
-- Kết nối với hệ thống lõi
-- API tiêu chuẩn
-- Tùy chọn tự lưu trữ
-- Kiến trúc có thể bảo trì
+- Kết nối với các hệ thống chính
+- Giao diện lập trình ứng dụng tiêu chuẩn
+- Self-hosted option
+- Kiến trúc có thể duy trì
 
 ---
 
-## Các Con Số
+## Các con số
 
-**Trước Publish:**
-- 20 phút để xử lý đơn đăng ký giấy
-- Nhiều phiên bản biểu mẫu tại các chi nhánh
-- Theo dõi thủ công việc gửi thông báo
-- Lỗ hổng tuân thủ trong kiểm soát phiên bản
+**Trước khi đăng:**
+- 20 phút để xử lý đơn đăng ký bằng giấy
+- Các phiên bản biểu mẫu khác nhau trong các chi nhánh
+- Theo dõi thủ công việc giao nhận thông tin công bố
+- Khoảng trống tuân thủ trong quản lý phiên bản
 
-**Sau Publish:**
+**Sau khi đăng:**
 - Giấy được xử lý tự động
-- Nguồn duy nhất, tất cả địa điểm
-- Giao hàng được theo dõi có hệ thống
-- Dấu vết kiểm toán hoàn chỉnh
+- Nguồn duy nhất, tất cả các địa điểm
+- Vận chuyển được theo dõi một cách có hệ thống
+- Danh sách theo dõi kiểm toán đầy đủ
 
 ---
 
-## Hoàn Thành Vòng Lặp Với Spatial
+## Hoàn thiện vòng lặp với Spatial
 
 Một số công việc tài chính liên quan đến không gian vật lý:
 
-- **Quy hoạch chi nhánh** — Thiết kế và tối ưu hóa cơ sở
-- **Mạng ATM** — Đặt và quản lý thiết bị
-- **Bất động sản** — Danh mục bất động sản như bản sao kỹ thuật số
-- **Trung tâm dữ liệu** — Trực quan hóa cơ sở hạ tầng quan trọng
+- **Lập kế hoạch chi nhánh** — Thiết kế và tối ưu hóa cơ sở vật chất
+- **Mạng ATM** — Vị trí đặt thiết bị và quản lý
+- **Bất động sản** — Danh mục bất động sản dưới dạng bản sao kỹ thuật số
+- **Trung tâm dữ liệu** — Hình ảnh hóa cơ sở hạ tầng quan trọng
 
 Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
-[Khám Phá Spatial →](/platform/spatial/)
+[Khám phá Không gian →](/platform/spatial/)
 
 ---
 
-## Bắt Đầu
+## Bắt đầu
 
-Dịch vụ tài chính lập tài liệu tốt hơn. Tuân thủ dễ dàng hơn. Phục vụ nhanh hơn.
+Dịch vụ tài chính giúp quản lý hồ sơ hiệu quả hơn. Tuân thủ quy định dễ dàng hơn. Phục vụ nhanh chóng hơn.
 
-[Liên Hệ Chúng Tôi →](/contact/)
+[Liên hệ với chúng tôi →](/contact/)

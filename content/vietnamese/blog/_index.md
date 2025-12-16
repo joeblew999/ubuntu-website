@@ -1,6 +1,6 @@
 ---
 title: "Blog"
-meta_title: "Blog | Phần mềm Ubuntu"
+meta_title: "Blog | Ubuntu Software"
 description: "Những phân tích về thiết kế 3D bản địa AI, trí tuệ không gian và tương lai của cách chúng ta thiết kế thế giới vật lý."
 draft: false
 ---

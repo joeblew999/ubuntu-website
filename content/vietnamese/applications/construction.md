@@ -1,143 +1,143 @@
 ---
 title: "Xây dựng"
-meta_title: "Nền tảng Xây dựng Mô-đun | Ubuntu Software"
-description: "Thiết kế công trình thông minh, đúc sẵn, mô-đun. CAD được xây dựng theo cách ngành xây dựng thực sự đang thay đổi."
+meta_title: "Modular Xây dựng Platform | Ubuntu Software"
+description: "Thiết kế công trình mô-đun, tiền chế và thông minh. Phần mềm CAD được phát triển dựa trên sự thay đổi thực tế trong ngành xây dựng."
 image: "/images/construction.svg"
 draft: false
 ---
 
-## Xây Dựng Tương Lai, Nhà Máy Là Trọng Tâm
+## Xây dựng tương lai, Nhà máy là ưu tiên hàng đầu
 
-Ngành xây dựng đang chuyển đổi. Sự hỗn loạn của công trường đang chuyển sang sự chính xác của nhà máy. Các mô-đun được xây dựng trong môi trường có kiểm soát, vận chuyển hoàn chỉnh, lắp ráp tại công trường trong vài ngày thay vì vài tháng.
+Ngành xây dựng đang trải qua sự chuyển đổi. Sự hỗn loạn tại công trường đang nhường chỗ cho sự chính xác của nhà máy. Các mô-đun được sản xuất trong môi trường kiểm soát, vận chuyển hoàn chỉnh, lắp ráp tại công trường trong vài ngày thay vì vài tháng.
 
-Nhưng các công cụ chưa theo kịp. CAD truyền thống được thiết kế cho xây dựng truyền thống. Dựa trên tệp. Tách biệt. Không kết nối với thực tế sản xuất.
+Nhưng các công cụ vẫn chưa theo kịp. CAD truyền thống được thiết kế cho xây dựng truyền thống. Dựa trên tệp. Tách biệt. Không kết nối với thực tế sản xuất.
 
-Xây dựng mô-đun đòi hỏi một điều gì đó mới.
+Xây dựng mô-đun đòi hỏi những giải pháp mới.
 
 ---
 
-## Sự Chuyển Đổi
+## Sự chuyển đổi
 
-Xây dựng đang trở thành sản xuất công nghiệp.
+Xây dựng đang trở thành sản xuất.
 
 **Xây dựng truyền thống:**
-- Xây tại công trường, tiếp xúc với thời tiết
-- Mỗi dự án là duy nhất, mỗi vấn đề đều mới
-- Các ngành nghề tuần tự, chờ đợi lẫn nhau
-- Chất lượng thay đổi theo điều kiện và đội ngũ
-- Lãng phí được tính bằng thùng rác
+- Xây dựng tại chỗ, chịu ảnh hưởng của thời tiết
+- Mỗi dự án đều độc đáo, mỗi vấn đề đều mới mẻ
+- Giao dịch theo thứ tự, chờ đợi lẫn nhau
+- Chất lượng phụ thuộc vào điều kiện và đội ngũ thi công
+- Rác thải được đo lường trong thùng rác
 
 **Xây dựng mô-đun:**
-- Xây trong nhà máy, môi trường có kiểm soát
-- Quy trình có thể lặp lại, cải tiến liên tục
-- Sản xuất song song, lịch trình được nén lại
-- Chất lượng nhất quán, độ chính xác của nhà máy
-- Lãng phí được đo lường và giảm thiểu
+- Sản xuất tại nhà máy, trong môi trường được kiểm soát
+- Các quy trình có thể lặp lại, các cải tiến đã được học hỏi
+- Sản xuất song song, lịch trình gấp rút
+- Chất lượng ổn định, độ chính xác của nhà máy
+- Rác thải được đo lường và giảm thiểu
 
-**Ngành công nghiệp đang chuyển động. Phần mềm phải theo kịp.**
-
----
-
-## Vấn Đề
-
-CAD ngày nay không được xây dựng cho điều này:
-
-**Cộng tác dựa trên tệp bị phá vỡ.** Khi nhà máy ở Việt Nam, kỹ sư kết cấu ở Đức và kiến trúc sư ở Úc đều cần làm việc trên các mô-đun liên kết—gửi email tệp không thể mở rộng quy mô.
-
-**Không tích hợp sản xuất.** CAD truyền thống tạo ra bản vẽ. Nhà máy cần dữ liệu. Việc chuyển đổi là thủ công, dễ sai sót, tốn kém.
-
-**Định dạng độc quyền tạo ra ma sát.** Mỗi bên liên quan sử dụng phần mềm khác nhau. Mỗi lần bàn giao đều mất thông tin. Khả năng tương tác là một cuộc chiến liên tục.
-
-**AI không thể giúp đỡ.** Các kiến trúc cũ không được xây dựng cho trí tuệ nhân tạo. Hỗ trợ AI được gắn thêm vào, không phải được tích hợp sẵn.
-
-**Kết quả:** Lời hứa của xây dựng mô-đun—tốc độ, chất lượng, hiệu quả—bị suy yếu bởi các công cụ được thiết kế cho một thời đại khác.
+**Ngành công nghiệp đang thay đổi. Phần mềm phải theo kịp.**
 
 ---
 
-## Những Gì Chúng Tôi Mang Lại
+## Vấn đề
 
-### Cộng Tác Thời Gian Thực
+CAD ngày nay không được thiết kế cho mục đích này:
 
-Các đội ngũ phân tán làm việc như một.
+**Hợp tác dựa trên tệp tin gặp khó khăn.** Khi nhà máy ở Việt Nam, kỹ sư kết cấu ở Đức và kiến trúc sư ở Úc đều cần làm việc trên các mô-đun liên kết với nhau—việc gửi tệp qua email không còn hiệu quả.
 
-Đồng bộ hóa **Automerge CRDT** có nghĩa là:
+**Không có tích hợp sản xuất.** Phần mềm CAD truyền thống tạo ra bản vẽ. Các nhà máy cần dữ liệu. Việc chuyển đổi dữ liệu được thực hiện thủ công, dễ xảy ra lỗi và tốn kém.
 
-- Xưởng sản xuất ở Việt Nam thấy thay đổi thiết kế ngay lập tức
-- Kỹ sư ở Đức và kiến trúc sư ở Úc trên cùng một mô hình
-- Không có phiên bản tệp. Không có xung đột hợp nhất. Không có "cái nào là hiện tại?"
-- Thay đổi hiển thị theo thời gian thực, không phải sau các chu kỳ lưu-hợp nhất-cam kết
+**Các định dạng độc quyền gây ra rào cản.** Mỗi bên liên quan sử dụng phần mềm khác nhau. Mỗi lần chuyển giao đều mất thông tin. Khả năng tương tác là một thách thức liên tục.
+
+**Trí tuệ nhân tạo (AI) không thể giúp được.** Các kiến trúc truyền thống không được thiết kế cho trí tuệ. Hỗ trợ AI được tích hợp thêm, không phải là một phần tích hợp sẵn.
+
+**Kết quả:** Lợi thế của xây dựng mô-đun—tốc độ, chất lượng, hiệu quả—đã bị suy yếu bởi các công cụ được thiết kế cho một thời đại khác.
+
+---
+
+## Chúng tôi hỗ trợ
+
+### Hợp tác thời gian thực
+
+Các đội làm việc từ xa hợp tác như một đội duy nhất.
+
+**Automerge CRDT** đồng bộ hóa có nghĩa là:
+
+- Sàn nhà máy tại Việt Nam chứng kiến những thay đổi thiết kế ngay lập tức
+- Các kỹ sư ở Đức và các kiến trúc sư ở Úc theo cùng một mô hình
+- Không có phiên bản tệp. Không có xung đột hợp nhất. Không có câu hỏi "phiên bản nào là phiên bản hiện tại?"
+- Thay đổi hiển thị theo thời gian thực, không phải sau các chu kỳ lưu - hợp nhất - cam kết
 
 **Kiến trúc ưu tiên ngoại tuyến:**
 
-- Xưởng sản xuất hoạt động không cần internet ổn định
-- Văn phòng thiết kế làm việc trên máy bay và công trường xa
-- Mọi thứ đồng bộ tự động khi kết nối lại
-- Toàn bộ lịch sử phiên bản được bảo toàn
+- Sàn nhà máy hoạt động mà không có kết nối internet đáng tin cậy
+- Văn phòng thiết kế làm việc trên máy bay và các địa điểm từ xa
+- Tất cả dữ liệu sẽ được đồng bộ hóa tự động khi kết nối lại
+- Lịch sử phiên bản đầy đủ được lưu trữ
 
-**Đội ngũ toàn cầu. Hiệu suất cục bộ.**
+**Đội ngũ toàn cầu. Hiệu quả địa phương.**
 
 ---
 
-### Thiết Kế Lấy Mô-đun Làm Trung Tâm
+### Thiết kế tập trung vào mô-đun
 
-Hỗ trợ đầy đủ cho cách xây dựng mô-đun thực sự hoạt động.
+Hỗ trợ chuyên nghiệp về cách thức hoạt động thực tế của hệ thống mô-đun.
 
-- **Mô-đun là đơn vị** — Thiết kế, theo dõi và quản lý ở cấp độ mô-đun
-- **Quản lý giao diện** — Kết nối giữa các mô-đun rõ ràng và được xác thực
+- **Module as unit** — Thiết kế, theo dõi và quản lý ở cấp độ module
+- **Quản lý giao diện** — Các kết nối giữa các mô-đun được xác định rõ ràng và đã được kiểm tra
 - **Xử lý biến thể** — Thiết kế cơ bản với các tùy chọn có thể cấu hình
-- **Trình tự lắp ráp** — Lên kế hoạch thứ tự lắp đặt trong quá trình thiết kế
-- **Ràng buộc vận chuyển** — Kích thước, trọng lượng, điểm nâng được xem xét từ đầu
+- **Thứ tự lắp ráp** — Lập kế hoạch thứ tự lắp đặt trong quá trình thiết kế
+- **Hạn chế vận chuyển** — Kích thước, trọng lượng, điểm nâng được xem xét từ đầu
 
-**Không phải tòa nhà bị cắt thành từng mảnh. Mô-đun được thiết kế như mô-đun.**
-
----
-
-### Tích Hợp Nhà Máy
-
-Thiết kế kết nối với sản xuất.
-
-- **Xuất dữ liệu sản xuất** — Không phải bản vẽ. Dữ liệu. BOM, danh sách cắt, trình tự lắp ráp.
-- **Tích hợp CNC** — Máy cưa panel, máy phay CNC, dây chuyền tự động được cấp trực tiếp
-- **Lập kế hoạch sản xuất** — Lịch trình mô-đun liên kết với công suất nhà máy
-- **Điểm kiểm tra chất lượng** — Yêu cầu kiểm tra được nhúng trong mô hình
-
-**Thiết kế những gì nhà máy có thể xây dựng. Xây dựng những gì đã được thiết kế.**
+**Không phải các tòa nhà bị cắt thành từng mảnh. Các mô-đun được thiết kế như các mô-đun.**
 
 ---
 
-### Thiết Kế Được Hỗ Trợ Bởi AI
+### Tích hợp nhà máy
 
-Trí tuệ xuyên suốt quy trình làm việc.
+Thiết kế liên kết với sản xuất.
 
-Tích hợp **Model Context Protocol** cho phép:
+- **Xuất dữ liệu sản xuất** — Không phải bản vẽ. Dữ liệu. Danh sách vật liệu (BOM), danh sách cắt, trình tự lắp ráp.
+- **Tích hợp CNC** — Máy cưa bảng, máy router CNC, dây chuyền tự động được cấp liệu trực tiếp
+- **Lập kế hoạch sản xuất* — Lịch trình mô-đun liên kết với công suất nhà máy
+- **Điểm kiểm tra chất lượng* — Yêu cầu kiểm tra được tích hợp trong mô hình
 
-- **Tương tác bằng ngôn ngữ tự nhiên** — "Thêm một mô-đun phòng tắm vào cánh đông"
-- **Tối ưu hóa thiết kế** — Gợi ý AI về khả năng sản xuất, chi phí, hiệu suất
-- **Phát hiện xung đột** — Tự động xác định các xung đột trước khi chúng trở thành vấn đề
-- **Tuân thủ quy định** — Quy định được kiểm tra liên tục, không phải khi nộp hồ sơ
-- **Ước tính chi phí** — Thay đổi thiết kế được phản ánh trong ngân sách theo thời gian thực
-
-**AI hiểu tòa nhà, không chỉ hình học.**
+**Thiết kế những gì nhà máy có thể sản xuất. Sản xuất những gì đã được thiết kế.**
 
 ---
 
-### Tiêu Chuẩn Mở
+### Thiết kế được hỗ trợ bởi trí tuệ nhân tạo (AI)
 
-Không bị khóa. Khả năng tương tác đầy đủ. Chống lại tương lai.
+Trí tuệ nhân tạo được tích hợp xuyên suốt quy trình làm việc.
 
-**IFC (ISO 16739)** — Mô hình Thông tin Xây dựng gốc. Ngữ nghĩa phong phú đầy đủ. Không gian, hệ thống, vật liệu, thuộc tính. Không chỉ hình dạng—ý nghĩa.
+**Tích hợp Giao thức Bối cảnh Mô hình* cho phép:
 
-**STEP (ISO 10303)** — Trao đổi hình học chính xác. Định dạng mà ngành sản xuất tin tưởng.
+- **Tương tác bằng ngôn ngữ tự nhiên* — "Thêm mô-đun nhà tắm vào cánh đông"
+- **Tối ưu hóa thiết kế** — Đề xuất của AI về khả năng sản xuất, chi phí và hiệu suất
+- **Phát hiện va chạm** — Tự động nhận diện các xung đột trước khi chúng trở thành vấn đề
+- **Tuân thủ quy định** — Các quy định được kiểm tra liên tục, không chỉ khi nộp hồ sơ
+- **Dự toán chi phí** — Các thay đổi trong thiết kế được phản ánh trong ngân sách theo thời gian thực
 
-**Xuất mở** — Làm việc với bất kỳ hệ thống tuân thủ nào. Bàn giao cho bất kỳ bên liên quan nào. Lưu trữ với sự tự tin.
+**Trí tuệ nhân tạo (AI) hiểu về các tòa nhà, không chỉ đơn thuần là hình học.**
+
+---
+
+### Tiêu chuẩn mở
+
+Không có ràng buộc. Tương thích hoàn toàn. Đảm bảo tương lai.
+
+**IFC (ISO 16739)** — Mô hình thông tin xây dựng gốc. Đầy đủ tính phong phú ngữ nghĩa. Không gian, hệ thống, vật liệu, thuộc tính. Không chỉ là hình dạng — mà là ý nghĩa.
+
+**STEP (ISO 10303)** — Trao đổi hình học chính xác. Định dạng được các nhà sản xuất tin cậy.
+
+**Xuất khẩu mở** — Hợp tác với bất kỳ hệ thống tuân thủ nào. Chuyển giao cho bất kỳ bên liên quan nào. Lưu trữ một cách an tâm.
 
 **Thiết kế của bạn thuộc về bạn. Mãi mãi.**
 
 ---
 
-### Từ Công Trường Đến Nhà Máy Đến Công Trường
+### Từ công trường đến nhà máy và trở lại công trường
 
-Vòng lặp đầy đủ được kết nối.
+Vòng lặp hoàn chỉnh đã được kết nối.
 
 ```
 Site Survey    →    Design    →    Factory    →    Transport    →    Assembly
@@ -146,164 +146,164 @@ Site Survey    →    Design    →    Factory    →    Transport    →    Ass
                               Continuous feedback
 ```
 
-- **Thu thập thực tế** — Quét công trường, đưa vào mô hình
-- **Thiết kế trong bối cảnh** — Mô-đun được thiết kế cho điều kiện thực tế của công trường
-- **Sản xuất tại nhà máy** — Dữ liệu sản xuất chảy liền mạch
-- **Lập kế hoạch hậu cần** — Định tuyến vận chuyển, định vị cẩu, trình tự
-- **Hướng dẫn lắp ráp** — Hướng dẫn lắp đặt từ mô hình
-- **Thu thập hoàn công** — Những gì đã lắp đặt được phản hồi vào tài liệu
+- **Chụp ảnh thực tế* — Quét các địa điểm, đưa vào mô hình
+- **Thiết kế trong bối cảnh** — Các mô-đun được thiết kế phù hợp với điều kiện thực tế của công trình
+- **Sản xuất tại nhà máy* — Dữ liệu sản xuất được truyền tải một cách trơn tru
+- **Lập kế hoạch logistics** — Lập lộ trình vận chuyển, vị trí đặt cần cẩu, thứ tự thực hiện
+- **Hướng dẫn lắp ráp** — Hướng dẫn lắp đặt theo mẫu
+- **Ghi nhận hiện trạng** — Những gì đã được lắp đặt được phản ánh vào tài liệu
 
-**Không có khoảng trống thông tin. Không nhập lại. Không mất mát khi chuyển đổi.**
-
----
-
-## Trường Hợp Sử Dụng
-
-### Nhà Ở Mô-đun
-
-Nhà ở số lượng lớn. Tốc độ và khả năng chi trả ở quy mô lớn.
-
-- Mô-đun căn hộ được xây dựng tại nhà máy, lắp ráp tại công trường
-- Nhà ở giá rẻ được giao nhanh hơn
-- Ký túc xá sinh viên đáp ứng thời hạn học kỳ
-- Nhà ở công nhân ở nơi cần thiết
+**Không có khoảng trống thông tin. Không cần nhập lại. Không mất mát trong quá trình dịch.**
 
 ---
 
-### Thương Mại Tiền Chế
+## Các trường hợp sử dụng
 
-Văn phòng, khách sạn, y tế. Chất lượng và sự chắc chắn về tiến độ.
+### Nhà ở mô-đun
+
+Dự án nhà ở quy mô lớn. Tốc độ và tính kinh tế trên quy mô lớn.
+
+- Các mô-đun căn hộ được sản xuất tại nhà máy và lắp ráp tại công trường
+- Nhà ở giá rẻ được cung cấp nhanh hơn
+- Nhà ở cho sinh viên theo hạn chót của học kỳ
+- Nhà ở cho người lao động ở những nơi cần thiết
+
+---
+
+### Nhà tiền chế thương mại
+
+Văn phòng, khách sạn, y tế. Chất lượng và đảm bảo tiến độ.
 
 - Phòng khách sạn như các mô-đun hoàn chỉnh
-- Pod y tế với MEP tích hợp
-- Hoàn thiện văn phòng được sản xuất, không phải xây dựng
-- Mô-đun trung tâm dữ liệu, đã được vận hành thử trước
+- Các mô-đun y tế tích hợp hệ thống MEP
+- Nội thất văn phòng được sản xuất, không phải xây dựng
+- Các mô-đun trung tâm dữ liệu, đã được kiểm tra và nghiệm thu trước
 
 ---
 
-### Công Trường Xa & Khó Khăn
+### Các địa điểm xa xôi và khó tiếp cận
 
-Nơi xây dựng truyền thống gặp khó khăn.
+Nơi mà xây dựng truyền thống gặp khó khăn.
 
-- Trại khai thác mỏ và dự án tài nguyên
-- Công trình trên đảo và ngoài khơi
-- Địa điểm có khí hậu khắc nghiệt
-- Yêu cầu triển khai nhanh
-
----
-
-### Cải Tạo & Mở Rộng
-
-Tòa nhà hiện có, giải pháp mô-đun.
-
-- Phần mở rộng trên mái như các mô-đun được thả xuống
-- Pod phòng tắm trong các tòa nhà đang sử dụng
-- Thay thế phòng kỹ thuật, gián đoạn tối thiểu
-- Tòa nhà di sản với các mô-đun hiện đại
+- Các trại khai thác và dự án tài nguyên
+- Các công trình trên đảo và ngoài khơi
+- Các khu vực có điều kiện khí hậu cực đoan
+- Yêu cầu triển khai nhanh chóng
 
 ---
 
-## Dành Cho Nhà Sản Xuất
+### Sửa chữa và mở rộng
 
-Xây dựng mô-đun trong nhà máy của bạn.
+Các tòa nhà hiện có, giải pháp mô-đun.
 
-- **Thiết kế cho năng lực của bạn** — Các ràng buộc được hiểu từ đầu
-- **Tích hợp dữ liệu trực tiếp** — Không cần chuyển đổi thủ công sang sản xuất
-- **Cộng tác với nhà thiết kế** — Thời gian thực, không thông qua RFI
-- **Tài liệu chất lượng** — Được tích hợp vào mô hình, không thêm vào sau
-
-**Sản xuất những gì đã được thiết kế. Hiệu quả.**
+- Các phần mở rộng trên mái nhà được thiết kế dưới dạng mô-đun lắp ghép
+- Các mô-đun nhà tắm trong các tòa nhà đang được sử dụng
+- Thay thế phòng máy, gây ít gián đoạn nhất
+- Các công trình di sản kết hợp với các mô-đun hiện đại
 
 ---
 
-## Dành Cho Kiến Trúc Sư
+## Đối với các nhà sản xuất
 
-Thiết kế có thể sản xuất được.
+Sản xuất các mô-đun tại nhà máy của bạn.
 
-- **Phản hồi về khả năng sản xuất** — Biết liệu có thể xây được khi bạn thiết kế
-- **Cộng tác thời gian thực** — Làm việc với kỹ sư và nhà máy đồng thời
-- **Khám phá biến thể** — Các tùy chọn mà không cần vẽ lại mọi thứ
-- **Định dạng mở** — Bàn giao không có chiến tranh định dạng
+- **Thiết kế phù hợp với khả năng của bạn** — Các hạn chế được xác định từ đầu
+- **Tích hợp dữ liệu trực tiếp* — Không cần dịch thủ công sang môi trường sản xuất
+- **Hợp tác với các nhà thiết kế** — Thời gian thực, không thông qua các yêu cầu thông tin (RFIs)
+- **Tài liệu chất lượng** — Được tích hợp sẵn trong mô hình, không thêm sau này
 
-**Ý định thiết kế được bảo toàn xuyên suốt sản xuất.**
+**Sản xuất đúng theo thiết kế. Hiệu quả.**
 
 ---
 
-## Dành Cho Chủ Đầu Tư
+## Dành cho Kiến trúc sư
+
+Thiết kế để sản xuất.
+
+- **Phản hồi về khả năng sản xuất* — Biết liệu sản phẩm có thể được sản xuất theo thiết kế của bạn hay không
+- **Hợp tác thời gian thực* — Làm việc cùng kỹ sư và nhà máy đồng thời
+- **Khám phá biến thể* — Các tùy chọn mà không cần vẽ lại toàn bộ
+- **Định dạng mở** — Chuyển giao mà không cần tranh cãi về định dạng
+
+**Ý tưởng thiết kế được duy trì trong quá trình sản xuất.**
+
+---
+
+## Dành cho nhà phát triển
 
 Tốc độ. Đảm bảo chi phí. Chất lượng.
 
-- **Lịch trình nhanh hơn** — Sản xuất tại nhà máy song song với chuẩn bị công trường
-- **Tự tin về ngân sách** — Chi phí sản xuất dễ dự đoán hơn xây dựng tại công trường
-- **Đảm bảo chất lượng** — Điều kiện nhà máy tốt hơn điều kiện công trường
-- **Giảm rủi ro** — Ít ẩn số hơn, kết quả tốt hơn
+- **Lịch trình nhanh hơn** — Sản xuất tại nhà máy diễn ra song song với việc chuẩn bị mặt bằng
+- **Tự tin về ngân sách* — Chi phí sản xuất có thể dự đoán được hơn so với chi phí xây dựng công trình
+- **Kiểm soát chất lượng* — Điều kiện tại nhà máy tốt hơn điều kiện tại công trường
+- **Giảm rủi ro** — Ít yếu tố không xác định hơn, kết quả tốt hơn
 
-**Lời hứa của mô-đun, thực sự được thực hiện.**
+**Lời hứa của Modular, thực sự được thực hiện.**
 
 ---
 
-## Dành Cho Kỹ Sư
+## Dành cho Kỹ sư
 
-Kết cấu, MEP, phối hợp.
+Cấu trúc, Hệ thống MEP, phối hợp.
 
-- **Phối hợp tích hợp** — Tất cả các chuyên ngành trong một mô hình, thời gian thực
-- **Phát hiện xung đột** — Xung đột được phát hiện trong thiết kế, không phải tại công trường
-- **Xác thực giao diện mô-đun** — Kết nối được xác minh tự động
-- **Phối hợp sản xuất** — Kỹ thuật kết nối với sản xuất
+- **Tích hợp điều phối* — Tất cả các lĩnh vực trong một mô hình, thời gian thực
+- **Phát hiện xung đột** — Xung đột được phát hiện trong giai đoạn thiết kế, không phải tại công trường
+- **Kiểm tra giao diện mô-đun** — Các kết nối được xác minh tự động
+- **Phối hợp sản xuất* — Kỹ thuật liên kết với sản xuất
 
 **Kỹ thuật cho sản xuất, không chỉ cho xây dựng.**
 
 ---
 
-## Cơ Hội
+## Cơ hội
 
-Xây dựng mô-đun đang phát triển toàn cầu:
+Xây dựng mô-đun đang phát triển trên toàn cầu:
 
-- Thiếu hụt nhà ở đòi hỏi giao hàng nhanh hơn
-- Hạn chế lao động thúc đẩy hiệu quả nhà máy
-- Kỳ vọng chất lượng tăng cao
-- Yêu cầu bền vững ngày càng chặt chẽ
-- Áp lực chi phí gia tăng
+- Thiếu hụt nhà ở đòi hỏi việc giao nhà nhanh hơn
+- Những hạn chế về lao động đang thúc đẩy việc nâng cao hiệu quả sản xuất tại nhà máy
+- Yêu cầu về chất lượng ngày càng cao
+- Các yêu cầu về bền vững ngày càng được siết chặt
+- Áp lực chi phí ngày càng gia tăng
 
-**Ngành công nghiệp cần các công cụ được xây dựng cho nơi nó đang đi, không phải nơi nó đã ở.**
+**Ngành công nghiệp cần những công cụ được thiết kế cho hướng phát triển tương lai, chứ không phải cho quá khứ.*
 
 ---
 
-## Kiến Trúc
+## Kiến trúc
 
-Được xây dựng cho mô-đun. Được xây dựng cho cộng tác. Được xây dựng cho sản xuất.
+Được thiết kế cho mô-đun. Được thiết kế cho hợp tác. Được thiết kế cho sản xuất.
 
-| Lớp | Công nghệ | Mục đích |
+| Layer | Technology | Purpose |
 |-------|------------|---------|
-| BIM | IFC gốc | Ngữ nghĩa tòa nhà đầy đủ, tiêu chuẩn mở |
-| Hình học | STEP | Độ chính xác cấp sản xuất |
-| Cộng tác | Automerge CRDT | Đội ngũ toàn cầu, đồng bộ thời gian thực |
-| Nhắn tin | NATS JetStream | Tích hợp nhà máy, kết nối công trường |
-| AI | Model Context Protocol | Hỗ trợ thiết kế thông minh |
+| BIM | IFC native | Full building semantics, open standard |
+| Geometry | STEP | Manufacturing-grade precision |
+| Collaboration | Automerge CRDT | Global teams, real-time sync |
+| Messaging | NATS JetStream | Factory integration, site connectivity |
+| AI | Model Context Protocol | Intelligent design assistance |
 
-**Kiến trúc hiện đại cho xây dựng hiện đại.**
-
----
-
-## Hoàn Thành Vòng Lặp Với Publish
-
-Xây dựng tạo ra núi tài liệu.
-
-- **Gói hồ sơ nộp** — Thông số kỹ thuật, bản vẽ, tài liệu tuân thủ từ mô hình BIM
-- **RFI và lệnh thay đổi** — Biểu mẫu được thu thập kỹ thuật số hoặc trên giấy, theo dõi ngược lại mô hình
-- **Danh sách kiểm tra thanh tra** — Biểu mẫu kiểm soát chất lượng cho nhà máy và công trường, dữ liệu chảy vào hệ thống của bạn
-- **Sổ tay O&M** — Tài liệu vận hành và bảo trì được tạo khi bàn giao
-
-Tất cả từ một nguồn duy nhất. Tất cả phù hợp với mô hình tòa nhà.
-
-[Khám Phá Publish →](/platform/publish/)
+**Kiến trúc hiện đại cho công trình xây dựng hiện đại.**
 
 ---
 
-## Bắt Đầu
+## Hoàn tất quy trình với việc xuất bản
 
-Xây dựng đang thay đổi. Được xây dựng tại nhà máy. Được thiết kế toàn cầu. Được hỗ trợ bởi AI.
+Hoạt động xây dựng tạo ra một lượng lớn tài liệu.
 
-Các công cụ cũng nên thay đổi.
+- **Hồ sơ nộp** — Bản vẽ kỹ thuật, bản vẽ thiết kế, tài liệu tuân thủ từ mô hình BIM
+- **Yêu cầu thông tin (RFIs) và lệnh thay đổi** — Các biểu mẫu được thu thập dưới dạng kỹ thuật số hoặc trên giấy, được theo dõi trở lại mô hình
+- **Danh sách kiểm tra* — Biểu mẫu kiểm soát chất lượng cho nhà máy và công trường, dữ liệu được truyền vào hệ thống của bạn
+- **Hướng dẫn vận hành và bảo trì** — Tài liệu vận hành và bảo trì được lập tại thời điểm bàn giao
 
-[Liên Hệ Với Chúng Tôi →](/contact/)
+Tất cả từ một nguồn duy nhất. Tất cả đều được đồng bộ hóa với mô hình tòa nhà.
+
+[Khám phá → Xuất bản](/platform/publish/)
+
+---
+
+## Bắt đầu
+
+Xây dựng đang thay đổi. Xây dựng tại nhà máy. Thiết kế toàn cầu. Hỗ trợ bởi trí tuệ nhân tạo.
+
+Các công cụ cũng cần phải thay đổi.
+
+[Liên hệ với chúng tôi →](/contact/)

@@ -128,15 +128,17 @@ func SaveARB(path string, arb *ARBFile) error {
 
 // ARBTranslator handles translation of ARB catalog entries.
 type ARBTranslator struct {
-	provider  Provider
-	batchSize int
+	provider   Provider
+	batchSize  int
+	batchDelay time.Duration
 }
 
 // NewARBTranslator creates a new ARB translator.
 func NewARBTranslator(provider Provider) *ARBTranslator {
 	return &ARBTranslator{
-		provider:  provider,
-		batchSize: 50, // Translate 50 messages at a time
+		provider:   provider,
+		batchSize:  20,             // Smaller batches to avoid rate limits
+		batchDelay: 2 * time.Second, // Delay between batches
 	}
 }
 
@@ -205,6 +207,11 @@ func (t *ARBTranslator) TranslateARB(ctx context.Context, sourceARB, targetARB *
 
 		if verbose {
 			fmt.Printf("  Translated %d/%d entries\n", i+len(batch), total)
+		}
+
+		// Rate limit delay between batches (except for last batch)
+		if end < len(toTranslate) && t.batchDelay > 0 {
+			time.Sleep(t.batchDelay)
 		}
 	}
 

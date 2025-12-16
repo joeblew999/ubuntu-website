@@ -1,137 +1,137 @@
 ---
 title: "Bản sao kỹ thuật số"
-meta_title: "Nền tảng Digital Twin | Ubuntu Software"
-description: "Kết nối thiết kế và thực tế. Mô hình sống được kết nối với cảm biến, bảo trì dự đoán, tối ưu hóa năng lượng và quản lý cơ sở vật chất với trí tuệ không gian."
+meta_title: "Digital Twin Platform | Ubuntu Software"
+description: "Thiết kế cầu và thực tế. Mô hình sống kết nối với cảm biến, bảo trì dự đoán, tối ưu hóa năng lượng và quản lý cơ sở vật chất với trí tuệ không gian."
 image: "/images/digital-twins.svg"
 draft: false
 ---
 
-## Kết Nối Thiết Kế và Thực Tế
+## Thiết kế cầu và thực tế
 
-Một tòa nhà không kết thúc khi xây dựng xong. Một nhà máy không ngừng phát triển sau khi đưa vào vận hành. Một cơ sở sống, thở, thay đổi—và các hệ thống quản lý nó cần hiểu nó sâu sắc như các hệ thống đã thiết kế nó.
+Một tòa nhà không kết thúc sau khi hoàn thành xây dựng. Một nhà máy không ngừng phát triển sau khi đưa vào hoạt động. Một cơ sở vật chất luôn vận hành, thay đổi — và các hệ thống quản lý nó cần hiểu rõ nó như chính các hệ thống đã thiết kế ra nó.
 
-Bản sao số khép kín vòng lặp giữa những gì được thiết kế và những gì tồn tại. Giữa mô hình và thực tế. Giữa ý định và vận hành.
+Các bản sao kỹ thuật số (Digital twins) kết nối khoảng cách giữa thiết kế và thực tế. Giữa mô hình và hiện thực. Giữa ý định và hoạt động.
 
 ---
 
-## Sự Ngắt Kết Nối
+## Sự đứt gãy
 
-Ngày nay, thiết kế và vận hành tồn tại trong những thế giới riêng biệt:
+Ngày nay, thiết kế và vận hành hoạt động trong hai lĩnh vực riêng biệt:
 
-**Giai đoạn thiết kế:** Mô hình 3D phong phú. Thông số kỹ thuật chi tiết. Dữ liệu BIM. Ý định kỹ thuật được ghi lại chính xác.
+**Giai đoạn thiết kế:** Mô hình 3D chi tiết. Thông số kỹ thuật chi tiết. Dữ liệu BIM. Ý định kỹ thuật được ghi lại chính xác.
 
-**Bàn giao:** PDF. Bảng tính. Dữ liệu phẳng. Kiến thức bị mất.
+**Bàn giao:** Tệp PDF. Bảng tính. Dữ liệu đã được nén. Kiến thức bị mất.
 
-**Vận hành:** Các hệ thống riêng biệt. Dữ liệu rời rạc. Người vận hành chưa từng thấy bản thiết kế. Đội bảo trì làm việc từ giấy tờ.
+**Hoạt động:** Hệ thống tách biệt. Dữ liệu bị phân mảnh. Nhân viên vận hành chưa từng xem qua thiết kế. Đội ngũ bảo trì làm việc dựa trên tài liệu giấy.
 
-**Mô hình mất nhiều năm để tạo ra trở thành kho lưu trữ tĩnh ngay khi tòa nhà mở cửa.**
+**Mô hình mất nhiều năm để tạo ra trở thành một kho lưu trữ tĩnh ngay khi tòa nhà được khánh thành.**
 
 Trong khi đó:
-- Cảm biến tạo ra dữ liệu không ai kết nối với thiết kế
-- Thiết bị hỏng mà không có cảnh báo
-- Năng lượng bị lãng phí vì hệ thống không hiểu không gian
-- Cải tạo bắt đầu từ đầu vì bản hoàn công sai
+- Các cảm biến tạo ra dữ liệu mà không ai kết nối với thiết kế
+- Thiết bị hỏng hóc mà không có cảnh báo trước
+- Năng lượng bị lãng phí vì các hệ thống không hiểu được không gian
+- Các công trình cải tạo bắt đầu từ đầu vì bản vẽ hoàn công không chính xác
 
 Trí tuệ 3D tồn tại trong thiết kế biến mất khi bàn giao.
 
 ---
 
-## Những Gì Chúng Tôi Mang Lại
+## Chúng tôi hỗ trợ
 
-### Mô Hình Sống
+### Mô hình sống
 
-**Bản sao số của bạn không phải là ảnh chụp đóng băng. Đó là một hệ thống sống.**
+**Bản sao kỹ thuật số của bạn không phải là một bản sao tĩnh. Đó là một hệ thống sống động.**
 
 Đồng bộ hóa liên tục:
-- Thay đổi thiết kế chảy đến bản sao vận hành
-- Cập nhật hoàn công phản ánh lại mô hình
-- Dữ liệu cảm biến truyền vào ngữ cảnh không gian
-- Bản sao phát triển cùng cơ sở
+- Các thay đổi thiết kế được áp dụng cho phiên bản hoạt động song song
+- Các bản cập nhật theo thực tế được phản ánh trở lại mô hình
+- Dữ liệu từ cảm biến được truyền vào bối cảnh không gian
+- Cặp song sinh phát triển cùng với cơ sở vật chất
 
-**NATS JetStream** là cốt lõi. Kiến trúc hướng sự kiện xử lý:
-- Hàng nghìn luồng cảm biến
-- Cập nhật trạng thái thời gian thực
+**NATS JetStream** là lõi. Kiến trúc hướng sự kiện xử lý:
+- Hàng nghìn luồng dữ liệu từ cảm biến
+- Cập nhật trạng thái theo thời gian thực
 - Phát lại lịch sử
 - Triển khai phân tán trên các địa điểm
 
 ---
 
-### IoT Không Gian
+### IoT không gian
 
-**Cảm biến không có ngữ cảnh chỉ là những con số.** Một số đo nhiệt độ không có ý nghĩa cho đến khi bạn biết *ở đâu*.
+**Các cảm biến không có bối cảnh chỉ là những con số.** Một giá trị nhiệt độ không có ý nghĩa gì cho đến khi bạn biết *nơi*.
 
 Kết nối IoT với 3D:
-- Cảm biến được định vị trong mô hình, không phải bảng tính
-- Dữ liệu được trực quan hóa trong ngữ cảnh không gian
-- Mối quan hệ giữa các hệ thống có thể nhìn thấy
-- "HVAC phục vụ cánh đông" không phải "ID cảm biến 47832"
+- Các cảm biến được đặt trong mô hình, không phải trong bảng tính
+- Dữ liệu được hiển thị trong bối cảnh không gian
+- Mối quan hệ giữa các hệ thống có thể quan sát được
+- "Hệ thống HVAC phục vụ cho cánh đông" chứ không phải "ID cảm biến 47832"
 
 Quản lý thiết bị từ môi trường thiết kế:
-- Đưa cảm biến vào hoạt động theo mô hình
-- Giám sát trạng thái theo không gian
-- Xác định khoảng trống phủ sóng bằng trực quan
-- Quản lý hàng nghìn thiết bị ở quy mô lớn
+- Cảm biến hoa hồng so với mô hình
+- Theo dõi trạng thái theo không gian
+- Xác định các khoảng trống trong phạm vi bảo hiểm một cách trực quan
+- Quản lý hàng nghìn thiết bị trên quy mô lớn
 
 ---
 
-### Bảo Trì Dự Đoán
+### Bảo trì dự đoán
 
-**Phản ứng ít hơn. Dự đoán nhiều hơn.**
+**Hạn chế phản ứng. Tăng cường dự đoán.**
 
-AI hiểu cơ sở của bạn có thể dự đoán sự cố:
+Trí tuệ nhân tạo (AI) có khả năng hiểu rõ cơ sở của bạn có thể dự đoán các sự cố:
 
-- **Nhận dạng mẫu** — Bất thường được phát hiện trước khi trở thành sự cố
-- **Tương quan không gian** — Vấn đề trong một hệ thống ảnh hưởng đến hệ thống khác
-- **Học từ lịch sử** — Hành vi cụ thể của cơ sở bạn, không phải mô hình chung
-- **Tối ưu bảo trì** — Sửa chữa khi thuận tiện, không phải khi hỏng
+- **Nhận dạng mẫu** — Phát hiện các bất thường trước khi chúng trở thành sự cố
+- **Sự tương quan không gian** — Vấn đề trong một hệ thống ảnh hưởng đến hệ thống khác
+- **Học tập lịch sử** — Hành vi cụ thể của cơ sở của bạn, không phải các mô hình chung chung
+- **Tối ưu hóa bảo trì** — Sửa chữa khi thuận tiện, không phải khi hỏng hóc
 
-Từ bảo trì sự cố sang dự đoán. Từ phản ứng sang chủ động.
+Từ bảo trì khắc phục sự cố đến bảo trì dự đoán. Từ phản ứng đến chủ động.
 
 ---
 
-### Năng Lượng & Hiệu Suất
+### Năng lượng & Hiệu suất
 
-**Tòa nhà tiêu thụ 40% năng lượng toàn cầu. Phần lớn bị lãng phí.**
+**Các tòa nhà tiêu thụ 40% năng lượng toàn cầu. Hầu hết trong số đó bị lãng phí.**
 
-Bản sao số hiểu không gian có thể tối ưu hóa nó:
+Các bản sao kỹ thuật số có khả năng hiểu không gian có thể tối ưu hóa nó:
 
-- **Tối ưu HVAC** — Điều hòa dựa trên mức sử dụng và lấp đầy thực tế
-- **Chiếu sáng thông minh** — Tận dụng ánh sáng tự nhiên, phát hiện sự hiện diện, lập lịch
-- **Cân bằng tải** — Phân phối nhu cầu, giảm đỉnh
-- **Mô phỏng** — Thử nghiệm thay đổi trước khi triển khai
+- **Tối ưu hóa hệ thống HVAC* — Điều hòa không khí dựa trên tình trạng sử dụng thực tế và mức độ sử dụng
+- **Trí tuệ chiếu sáng** — Thu thập ánh sáng tự nhiên, phát hiện sự hiện diện, lập lịch trình
+- **Cân bằng tải** — Phân phối nhu cầu, giảm đỉnh tải
+- **Mô phỏng* — Kiểm tra các thay đổi trước khi triển khai
 
 Bền vững thông qua trí tuệ không gian.
 
 ---
 
-### Phân Tích Kịch Bản
+### Phân tích giả định
 
-**Trước khi thay đổi tòa nhà, hãy thay đổi bản sao.**
+**Trước khi thay đổi tòa nhà, hãy thay đổi cặp song sinh.**
 
-- **Lập kế hoạch cải tạo** — Mô hình hóa thay đổi, dự đoán tác động
-- **Phân tích công suất** — Không gian này có thể đáp ứng công dụng mới không?
-- **Mô phỏng khẩn cấp** — Sơ tán, lan truyền lửa, sự cố hệ thống
-- **Chuẩn bị tương lai** — Biến đổi khí hậu sẽ ảnh hưởng đến cơ sở này như thế nào trong 20 năm?
+- **Kế hoạch cải tạo** — Thay đổi mô hình, dự đoán tác động
+- **Phân tích khả năng* — Không gian này có thể đáp ứng được mục đích sử dụng mới không?
+- **Mô phỏng tình huống khẩn cấp** — Di tản, lan rộng đám cháy, sự cố hệ thống
+- **Chuẩn bị cho tương lai* — Biến đổi khí hậu sẽ ảnh hưởng đến cơ sở này như thế nào trong 20 năm tới?
 
-Thử nghiệm kịch bản trong mô phỏng. Triển khai với sự tự tin.
+Thử nghiệm các kịch bản trong mô phỏng. Triển khai với sự tự tin.
 
 ---
 
-### Tiêu Chuẩn Mở
+### Tiêu chuẩn mở
 
 **Dữ liệu cơ sở của bạn không nên bị khóa trong nền tảng của nhà cung cấp.**
 
-- **IFC (ISO 16739)** — Ngữ nghĩa Mô hình Thông tin Tòa nhà đầy đủ. Không gian, hệ thống, mối quan hệ, thuộc tính. Không chỉ hình học—ý nghĩa.
-- **STEP (ISO 10303)** — Hình học chính xác khi bạn cần.
-- **API mở** — Kết nối với BMS, CMMS, ERP hiện có của bạn. Chúng tôi tích hợp, không thay thế.
+- **IFC (ISO 16739)** — Ngữ nghĩa đầy đủ của Mô hình Thông tin Công trình (BIM). Không gian, hệ thống, mối quan hệ, thuộc tính. Không chỉ là hình học — mà là ý nghĩa.
+- **STEP (ISO 10303)** — Độ chính xác hình học khi bạn cần.
+- **Giao diện lập trình ứng dụng mở (Open APIs)* — Kết nối với hệ thống quản lý tòa nhà (BMS), hệ thống quản lý bảo trì (CMMS) và hệ thống hoạch định nguồn lực doanh nghiệp (ERP) hiện có của bạn. Chúng tôi tích hợp, không thay thế.
 
 Tòa nhà của bạn. Dữ liệu của bạn. Lựa chọn hệ thống của bạn.
 
 ---
 
-## Toàn Bộ Vòng Đời
+## Toàn bộ vòng đời
 
-Bản sao số kết nối mọi giai đoạn:
+Các bản sao kỹ thuật số kết nối mọi giai đoạn:
 
 ```
 Design    →    Construction    →    Handover    →    Operations    →    Renovation
@@ -140,142 +140,142 @@ Design    →    Construction    →    Handover    →    Operations    →    
                               Continuous feedback loop
 ```
 
-Không còn mất thông tin khi bàn giao. Không còn bắt đầu từ đầu. Mô hình được thiết kế trở thành mô hình vận hành trở thành mô hình cải tiến.
+Không còn mất mát thông tin khi chuyển giao. Không còn phải bắt đầu lại từ đầu. Mô hình được thiết kế trở thành mô hình hoạt động và trở thành mô hình được cải tiến.
 
 ---
 
-## Trường Hợp Sử Dụng
+## Các trường hợp sử dụng
 
-### Tòa Nhà Thương Mại
+### Các tòa nhà thương mại
 
-Văn phòng, bán lẻ, đa chức năng. Hàng nghìn cảm biến, hàng triệu feet vuông.
+Văn phòng, bán lẻ, đa chức năng. Hàng nghìn cảm biến, hàng triệu mét vuông.
 
-- Tối ưu hóa mức lấp đầy
-- Quản lý sự thoải mái của khách thuê
+- Tối ưu hóa tỷ lệ lấp đầy
+- Quản lý sự thoải mái của người thuê
 - Theo dõi hiệu suất năng lượng
 - Phối hợp bảo trì
 
 ---
 
-### Cơ Sở Công Nghiệp
+### Cơ sở công nghiệp
 
-Nhà máy, xưởng, kho. Nơi thời gian hoạt động là tất cả.
+Nhà máy, xưởng sản xuất, kho hàng. Nơi thời gian hoạt động liên tục là yếu tố quan trọng nhất.
 
-- Giám sát hệ thống sản xuất
+- Hệ thống giám sát sản xuất
 - Bảo trì dự đoán quy mô lớn
 - Tối ưu hóa quy trình
 - Tích hợp hệ thống an toàn
 
 ---
 
-### Hạ Tầng Quan Trọng
+### Cơ sở hạ tầng quan trọng
 
-Bệnh viện, trung tâm dữ liệu, sân bay. Nơi thất bại không phải là lựa chọn.
+Bệnh viện, trung tâm dữ liệu, sân bay. Nơi mà sự cố là điều không thể chấp nhận.
 
-- Giám sát dự phòng
+- Theo dõi dự phòng
 - Theo dõi tuân thủ
-- Lập kế hoạch ứng phó khẩn cấp
-- Nhận thức vận hành 24/7
+- Kế hoạch ứng phó khẩn cấp
+- nhận thức hoạt động 24/7
 
 ---
 
-### Khuôn Viên & Danh Mục
+### Các khuôn viên trường & Hồ sơ
 
 Nhiều tòa nhà, quản lý thống nhất.
 
-- Đánh giá so sánh giữa các cơ sở
+- So sánh hiệu suất giữa các cơ sở
 - Giám sát tập trung
-- Vận hành tiêu chuẩn hóa
-- Tối ưu hóa toàn danh mục
+- Các hoạt động tiêu chuẩn hóa
+- Tối ưu hóa trên toàn bộ danh mục đầu tư
 
 ---
 
-## Đã Chứng Minh Ở Quy Mô
+## Đã được chứng minh trên quy mô lớn
 
-**Đây không phải lý thuyết. Chúng tôi đã làm công việc này.**
+**Đây không phải là lý thuyết. Chúng tôi đã thực hiện công việc này.**
 
-Cách tiếp cận quản lý cơ sở của chúng tôi được xây dựng trên kinh nghiệm thực tế—bao gồm hệ thống quản lý cơ sở hỗ trợ AI được phát triển với **[Bilfinger](https://www.bilfinger.com/)**, một trong những công ty kỹ thuật và dịch vụ hàng đầu của Đức.
+Our approach to facility management is built on real-world experience—including AI-powered facility management systems developed with **[Bilfinger](https://www.bilfinger.com/)**, one of Germany's leading engineering and services companies.
 
-Quy mô doanh nghiệp. Quan trọng cho nhiệm vụ. Hoạt động thực tế.
+Quy mô doanh nghiệp. Quan trọng đối với hoạt động. Hoạt động.
 
-25 năm xây dựng hệ thống thời gian thực cho doanh nghiệp toàn cầu. Nay áp dụng cho môi trường xây dựng.
+25 năm kinh nghiệm trong việc phát triển hệ thống thời gian thực cho các doanh nghiệp toàn cầu. Hiện nay, công nghệ này được áp dụng vào lĩnh vực xây dựng.
 
 ---
 
-## Dành Cho Chủ Cơ Sở
+## Đối với Chủ sở hữu cơ sở
 
-**Tòa nhà của bạn là tài sản lớn nhất. Hãy quản lý nó như vậy.**
+**Tòa nhà của bạn là tài sản quý giá nhất của bạn. Hãy quản lý nó như một tài sản quý giá.**
 
 - Kéo dài tuổi thọ thiết bị thông qua bảo trì dự đoán
-- Giảm chi phí năng lượng với tối ưu hóa không gian
-- Cải thiện trải nghiệm người sử dụng với hệ thống phản hồi
-- Bảo vệ khoản đầu tư với tài liệu sống
+- Giảm chi phí năng lượng thông qua tối ưu hóa không gian
+- Nâng cao trải nghiệm của người sử dụng với các hệ thống phản hồi nhanh
+- Bảo vệ khoản đầu tư của bạn bằng tài liệu cập nhật liên tục
 
-ROI đo bằng số năm kéo dài tuổi thọ, hàng triệu chi phí tránh được.
+ROI được đo lường bằng số năm kéo dài tuổi thọ và hàng triệu đô la chi phí được tiết kiệm.
 
 ---
 
-## Dành Cho Người Vận Hành
+## Dành cho các nhà điều hành
 
 **Chuyển từ phản ứng sang chủ động.**
 
-- Xem cơ sở của bạn trong 3D, không phải bảng tính
+- Xem cơ sở của bạn dưới dạng 3D, không phải bảng tính
 - Hiểu mối quan hệ giữa các hệ thống
-- Phát hiện vấn đề trước khi trở thành khẩn cấp
-- Làm việc thông minh hơn với sự hỗ trợ của AI
+- Phát hiện vấn đề trước khi chúng trở thành tình huống khẩn cấp
+- Làm việc hiệu quả hơn với sự hỗ trợ của trí tuệ nhân tạo (AI)
 
-Vận hành được chuyển đổi bởi trí tuệ không gian.
-
----
-
-## Dành Cho Công Ty Kỹ Thuật
-
-**Bàn giao nhiều hơn một tòa nhà. Bàn giao một hệ thống sống.**
-
-- Khác biệt hóa với bàn giao bản sao số
-- Mối quan hệ liên tục sau xây dựng
-- Đảm bảo hiệu suất được hỗ trợ bởi dữ liệu
-- Nguồn doanh thu dịch vụ mới
-
-Từ dự án một lần sang quan hệ đối tác liên tục.
+Hoạt động được chuyển đổi bởi trí tuệ không gian.
 
 ---
 
-## Kiến Trúc
+## Đối với các công ty kỹ thuật
 
-Xây dựng cho quy mô. Xây dựng cho thực tế.
+**Không chỉ xây dựng một tòa nhà. Hãy tạo ra một hệ thống sống động.**
 
-| Lớp | Công Nghệ | Mục Đích |
-|-----|-----------|----------|
-| Nhắn tin | NATS JetStream | Truyền phát sự kiện thời gian thực ở quy mô |
-| Đồng bộ | Automerge CRDT | Cập nhật phân tán, khả năng ngoại tuyến |
-| Hình học | IFC/STEP | Dữ liệu không gian tiêu chuẩn mở |
-| AI | Model Context Protocol | Suy luận cơ sở thông minh |
-| Tích hợp | API mở | Kết nối hệ thống hiện có |
+- Phân biệt với việc chuyển giao mô hình số
+- Mối quan hệ lâu dài sau khi hoàn thành dự án
+- Cam kết về hiệu suất được hỗ trợ bởi dữ liệu
+- Các nguồn thu mới từ dịch vụ
 
-Hướng sự kiện. Phân tán. Kiên cường. Mở.
+Từ các dự án một lần đến các mối quan hệ hợp tác lâu dài.
 
 ---
 
-## Hoàn Thành Vòng Lặp với Publish
+## Kiến trúc
 
-Bản sao số tạo ra thông tin chi tiết—nhưng thông tin chi tiết cần đến được với mọi người.
+Được thiết kế cho quy mô. Được thiết kế cho thực tế.
 
-- **Báo cáo vận hành** — Hiệu suất năng lượng, lịch bảo trì, trạng thái tuân thủ
-- **Biểu mẫu kiểm tra** — Danh sách kiểm tra được tạo từ mô hình, ghi lại kỹ thuật số hoặc trên giấy
-- **Giao tiếp với khách thuê** — Mức sử dụng không gian, lịch dịch vụ, cập nhật tòa nhà
-- **Hồ sơ pháp quy** — Tài liệu tuân thủ với dữ liệu từ cảm biến
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| Messaging | NATS JetStream | Real-time event streaming at scale |
+| Sync | Automerge CRDT | Distributed updates, offline capability |
+| Geometry | IFC/STEP | Open standard spatial data |
+| AI | Model Context Protocol | Intelligent facility reasoning |
+| Integration | Open APIs | Connect existing systems |
 
-Tất cả từ nguồn duy nhất. Tất cả kết nối với mô hình cơ sở sống của bạn.
-
-[Khám Phá Publish →](/platform/publish/)
+Dựa trên sự kiện. Phân tán. Chịu lỗi. Mở.
 
 ---
 
-## Bắt Đầu
+## Hoàn tất quy trình với việc xuất bản
 
-Cơ sở của bạn tạo ra dữ liệu liên tục. Thiết kế của bạn chứa trí tuệ không gian. Hãy kết nối chúng.
+Các bản sao kỹ thuật số tạo ra những thông tin hữu ích—nhưng những thông tin này cần phải đến được với con người.
 
-Dù bạn đang xây mới, cải tạo hiện có, hay quản lý danh mục—bản sao đã sẵn sàng.
+- **Báo cáo hoạt động** — Hiệu suất năng lượng, lịch bảo trì, tình trạng tuân thủ
+- **Biểu mẫu kiểm tra** — Danh sách kiểm tra được tạo ra từ mô hình, được ghi lại dưới dạng kỹ thuật số hoặc trên giấy
+- **Thông tin cho người thuê** — Sử dụng không gian, lịch trình dịch vụ, cập nhật về tòa nhà
+- **Hồ sơ đăng ký quy định** — Tài liệu tuân thủ kèm theo dữ liệu từ các cảm biến
 
-[Liên Hệ Chúng Tôi →](/contact)
+Tất cả từ một nguồn duy nhất. Tất cả được kết nối với mô hình cơ sở lưu trú của bạn.
+
+[Khám phá → Xuất bản](/platform/publish/)
+
+---
+
+## Bắt đầu
+
+Cơ sở của bạn liên tục tạo ra dữ liệu. Thiết kế của bạn chứa đựng trí tuệ không gian. Kết nối chúng lại với nhau.
+
+Dù bạn đang xây dựng mới, cải tạo công trình hiện có hay quản lý danh mục đầu tư—giải pháp Twin đã sẵn sàng.
+
+[Liên hệ với chúng tôi →](/contact)

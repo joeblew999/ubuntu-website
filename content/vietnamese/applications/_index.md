@@ -1,88 +1,88 @@
 ---
 title: "Ứng dụng"
 meta_title: "Ứng dụng | Ubuntu Software"
-description: "Hai nền tảng, mười ngành công nghiệp. Spatial cho thiết kế 3D và robot. Publish cho tài liệu và biểu mẫu. Cả hai đều được hỗ trợ bởi AI, ưu tiên ngoại tuyến, xây dựng trên các tiêu chuẩn mở."
+description: "Hai nền tảng, mười ngành công nghiệp. Spatial dành cho thiết kế 3D và robotics. Publish dành cho tài liệu và biểu mẫu. Cả hai đều được hỗ trợ bởi trí tuệ nhân tạo (AI), ưu tiên hoạt động offline, và được xây dựng trên các tiêu chuẩn mở."
 image: "/images/applications.svg"
 draft: false
 ---
 
-## Hai Nền Tảng. Mười Ngành Công Nghiệp.
+## Hai nền tảng. Mười ngành công nghiệp.
 
-Dù bạn đang thiết kế ô làm việc robot hay xử lý hồ sơ bảo hiểm, chúng tôi có hạ tầng dành cho bạn.
+Dù bạn đang thiết kế các tế bào làm việc robot hay xử lý các yêu cầu bồi thường bảo hiểm, chúng tôi đều có hạ tầng phù hợp cho bạn.
 
-**Spatial** — Thiết kế 3D tích hợp AI gốc cho các ngành làm việc trong không gian vật lý.
+**Spatial** — Thiết kế 3D dựa trên AI dành cho các ngành công nghiệp hoạt động trong không gian vật lý.
 
-**Publish** — Quản lý nội dung từ nguồn đơn cho xuất bản đa kênh và thu thập dữ liệu.
+**Publish** — Quản lý nội dung từ một nguồn duy nhất cho việc xuất bản đa kênh và thu thập dữ liệu.
 
-Cả hai nền tảng đều chia sẻ nền tảng cốt lõi của chúng tôi: hỗ trợ AI, kiến trúc ưu tiên ngoại tuyến, đồng bộ Automerge và tiêu chuẩn mở.
-
----
-
-## Ứng Dụng Spatial
-
-**Dành cho các ngành làm việc trong ba chiều.**
-
-### [Robotics & Automation](/applications/robotics)
-Suy luận không gian cho những cỗ máy sẽ định hình thế giới của chúng ta. Thiết kế ô làm việc, lập kế hoạch đường đi và phối hợp đa robot.
-
-### [Simulation & Training](/applications/simulation)
-Nơi AI học trong không gian ảo trước khi hành động trong thế giới thực. Môi trường tổng hợp, dữ liệu huấn luyện quy mô lớn, quy trình từ mô phỏng đến thực tế.
-
-### [Digital Twins](/applications/digital-twins)
-Kết nối thiết kế và thực tế. Mô hình sống kết nối với cảm biến, bảo trì dự đoán, quản lý cơ sở với trí tuệ không gian.
-
-### [Manufacturing](/applications/manufacturing)
-Từ thiết kế đến chế tạo với AI hiểu các ràng buộc sản xuất. CAM, lập kế hoạch quy trình, tích hợp chất lượng.
-
-### [Construction](/applications/construction)
-Thiết kế tòa nhà thông minh, lắp ghép, mô-đun. Đội ngũ toàn cầu, cộng tác thời gian thực, tích hợp nhà máy.
+Cả hai nền tảng đều chia sẻ nền tảng cốt lõi của chúng tôi: Trợ lý AI, kiến trúc ưu tiên ngoại tuyến, đồng bộ hóa Automerge và tiêu chuẩn mở.
 
 ---
 
-## Ứng Dụng Publish
+## Ứng dụng không gian
 
-**Dành cho các ngành quản lý nội dung đa kênh.**
+**Dành cho các ngành công nghiệp hoạt động trong không gian ba chiều.**
 
-### [Government & Public Sector](/applications/government)
-Phục vụ mọi công dân. Giấy tờ và kỹ thuật số hợp nhất. Định dạng truy cập được, tuân thủ lưu trữ, tích hợp hệ thống cũ.
+### [Robotics & Tự động hóa](/applications/robotics)
+Khả năng suy luận không gian cho các hệ thống máy móc sẽ định hình thế giới của chúng ta. Thiết kế tế bào làm việc, lập kế hoạch đường đi và phối hợp đa robot.
 
-### [Healthcare](/applications/healthcare)
-Ít thủ tục hành chính hơn, ít lỗi hơn, chăm sóc tốt hơn. Tiếp nhận bệnh nhân, quản lý đồng ý, tích hợp EMR.
+### [Mô phỏng & Đào tạo](/applications/simulation)
+Nơi trí tuệ nhân tạo (AI) học tập trong không gian ảo trước khi áp dụng vào thế giới thực. Môi trường tổng hợp, dữ liệu đào tạo quy mô lớn, quy trình chuyển đổi từ mô phỏng sang thực tế.
 
-### [Financial Services](/applications/financial)
-Tuân thủ không phức tạp. Đơn vay, công bố thông tin, tài liệu pháp quy với lịch sử kiểm toán đầy đủ.
+### [Bản sao kỹ thuật số](/applications/digital-twins)
+Thiết kế cầu và thực tế. Mô hình sống kết nối với cảm biến, bảo trì dự đoán, quản lý cơ sở vật chất với trí tuệ không gian.
 
-### [Education](/applications/education)
-Quản trị hiện đại, lựa chọn truyền thống. Đăng ký, cấp phép, hồ sơ học sinh—giấy tờ và cổng thông tin hợp nhất.
+### [Sản xuất](/applications/manufacturing)
+Từ thiết kế đến gia công với trí tuệ nhân tạo (AI) hiểu rõ các hạn chế sản xuất. CAM, lập kế hoạch quy trình, tích hợp chất lượng.
 
-### [Insurance](/applications/insurance)
-Mọi kênh, một hệ thống. Đại lý thực địa, khách hàng trực tuyến, yêu cầu bồi thường gửi qua bưu điện—tất cả được xử lý đồng nhất.
-
----
-
-## Nền Tảng Chung
-
-Cả hai nền tảng đều được xây dựng trên cùng một công nghệ cốt lõi:
-
-| Khả năng | Lợi ích |
-|----------|---------|
-| **Hỗ trợ AI** | Tương tác ngôn ngữ tự nhiên với tài liệu hoặc thiết kế của bạn |
-| **Ưu tiên Ngoại tuyến** | Làm việc không cần kết nối, tự động đồng bộ khi kết nối lại |
-| **Đồng bộ Automerge** | Cộng tác thời gian thực không xung đột |
-| **Tiêu chuẩn Mở** | Không bị khóa, xuất mọi thứ, sở hữu công việc của bạn |
+### [Xây dựng](/applications/construction)
+Thiết kế công trình mô-đun, tiền chế và thông minh. Đội ngũ toàn cầu, hợp tác thời gian thực, tích hợp nhà máy.
 
 ---
 
-## Tìm Sự Phù Hợp
+## Đăng tải ứng dụng
 
-**Làm việc trong 3D?** Bắt đầu với [Spatial](/platform/spatial/).
+**Dành cho các ngành nghề quản lý nội dung trên nhiều kênh.**
 
-**Làm việc với tài liệu?** Bắt đầu với [Publish](/platform/publish/).
+### [Chính phủ & Khu vực công](/applications/government)
+Phục vụ mọi công dân. Hệ thống giấy tờ và kỹ thuật số được tích hợp thống nhất. Định dạng dễ tiếp cận, tuân thủ quy định lưu trữ, tích hợp với hệ thống cũ.
 
-**Cần cả hai?** Chúng tích hợp liền mạch. Bản vẽ kỹ thuật từ mô hình 3D. BOM chảy vào biểu mẫu. Tài liệu đồng bộ với thiết kế.
+### [Y tế](/applications/healthcare)
+Giảm bớt thủ tục hành chính, ít sai sót hơn, chăm sóc tốt hơn. Tiếp nhận bệnh nhân, quản lý sự đồng ý, tích hợp hệ thống quản lý hồ sơ y tế điện tử (EMR).
+
+### [Dịch vụ tài chính](/applications/financial)
+Tuân thủ mà không phức tạp. Đơn xin vay, thông báo, tài liệu tuân thủ quy định với đầy đủ hồ sơ kiểm toán.
+
+### [Giáo dục](/applications/education)
+Quản lý hiện đại, các tùy chọn truyền thống. Đăng ký, quyền truy cập, hồ sơ học sinh — giấy tờ và cổng thông tin được tích hợp thống nhất.
+
+### [Bảo hiểm](/applications/insurance)
+Mọi kênh, một hệ thống. Nhân viên hiện trường, khách hàng trực tuyến, yêu cầu bồi thường qua bưu điện—tất cả đều được xử lý thống nhất.
 
 ---
 
-## Hãy Trao Đổi
+## Nền tảng chung
 
-[Contact us](/contact) để thảo luận ứng dụng nào phù hợp với tổ chức của bạn.
+Cả hai nền tảng đều được xây dựng trên cùng một công nghệ lõi:
+
+| Capability | How It Helps |
+|------------|--------------|
+| **AI Assistance** | Natural language interaction with your documents or designs |
+| **Offline-First** | Work without connectivity, sync automatically when reconnected |
+| **Automerge Sync** | Real-time collaboration without conflicts |
+| **Open Standards** | No lock-in, export everything, own your work |
+
+---
+
+## Tìm kiếm sự phù hợp của bạn
+
+**Working in 3D?** Start with [Spatial](/platform/spatial/).
+
+**Working with documents?** Start with [Publish](/platform/publish/).
+
+**Cần cả hai?** Chúng tích hợp một cách mượt mà. Bản vẽ kỹ thuật từ mô hình 3D. Danh sách vật liệu (BOM) được chuyển sang biểu mẫu. Tài liệu được đồng bộ hóa với thiết kế.
+
+---
+
+## Hãy cùng trò chuyện
+
+[Contact us](/contact) to discuss which applications fit your organization.
