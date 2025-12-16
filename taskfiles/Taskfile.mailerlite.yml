@@ -308,10 +308,10 @@ tasks:
   release:build:
     desc: Build mailerlite for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - mkdir -p .build
-      - go build -o ".build/{{.MAILERLITE_BIN}}" ./cmd/mailerlite
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.MAILERLITE_BIN}}" ./cmd/mailerlite
 
   release:test:
     desc: Test built mailerlite release binary
     cmds:
-      - .build/{{.MAILERLITE_BIN}} -h || true
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.MAILERLITE_BIN}} -h || true"

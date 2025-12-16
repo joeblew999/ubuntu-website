@@ -217,3 +217,161 @@ tasks:
           exit 1
         fi
       - '{{.WRANGLER_CMD}} pages project delete {{.PROJECT_NAME}}'
+
+  # ===========================================================================
+  # Email Routing
+  # ===========================================================================
+
+  email:status:
+    desc: Check Email Routing status and list rules
+    cmds:
+      - |
+        if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+          echo "ERROR: CLOUDFLARE_API_TOKEN must be set in .env"
+          exit 1
+        fi
+        echo "========================================"
+        echo "Email Routing Status for {{.DOMAIN}}"
+        echo "========================================"
+        echo ""
+
+        # Get Email Routing settings
+        SETTINGS=$(curl -s "https://api.cloudflare.com/client/v4/zones/{{.CF_ZONE_ID}}/email/routing" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json")
+
+        ENABLED=$(echo "$SETTINGS" | jq -r '.result.enabled // "unknown"')
+        echo "Email Routing: $ENABLED"
+        echo ""
+
+        # List routing rules
+        echo "Routing Rules:"
+        echo "----------------------------------------"
+        RULES=$(curl -s "https://api.cloudflare.com/client/v4/zones/{{.CF_ZONE_ID}}/email/routing/rules" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json")
+
+        echo "$RULES" | jq -r '.result[] | "  \(.matchers[0].value // "catch-all") → \(.actions[0].value[0] // "drop") [\(if .enabled then "enabled" else "disabled" end)]"' 2>/dev/null || echo "  No rules configured"
+        echo ""
+
+        # List destination addresses
+        echo "Verified Destinations:"
+        echo "----------------------------------------"
+        DESTS=$(curl -s "https://api.cloudflare.com/client/v4/accounts/{{.CF_ACCOUNT_ID}}/email/routing/addresses" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json")
+
+        echo "$DESTS" | jq -r '.result[] | "  \(.email) [\(.verified | if . then "verified" else "pending" end)]"' 2>/dev/null || echo "  No destinations"
+
+  email:add:
+    desc: 'Add email forwarding rule (FROM=contact@domain.com TO=destination@gmail.com)'
+    requires:
+      vars: [FROM, TO]
+    cmds:
+      - |
+        if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+          echo "ERROR: CLOUDFLARE_API_TOKEN must be set in .env"
+          exit 1
+        fi
+
+        echo "========================================"
+        echo "Adding Email Routing Rule"
+        echo "========================================"
+        echo "  From: {{.FROM}}"
+        echo "  To:   {{.TO}}"
+        echo ""
+
+        # First, ensure destination is verified
+        echo "Checking destination address..."
+        DESTS=$(curl -s "https://api.cloudflare.com/client/v4/accounts/{{.CF_ACCOUNT_ID}}/email/routing/addresses" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json")
+
+        VERIFIED=$(echo "$DESTS" | jq -r --arg to "{{.TO}}" '.result[] | select(.email == $to) | .verified')
+
+        if [ "$VERIFIED" != "true" ]; then
+          echo "Destination {{.TO}} not verified. Adding..."
+          ADD_DEST=$(curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/{{.CF_ACCOUNT_ID}}/email/routing/addresses" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data '{"email": "{{.TO}}"}')
+
+          if echo "$ADD_DEST" | jq -e '.success' >/dev/null 2>&1; then
+            echo "Verification email sent to {{.TO}}"
+            echo "Please verify before continuing."
+            exit 0
+          else
+            echo "Note: Destination may already exist or require verification"
+          fi
+        else
+          echo "OK: Destination {{.TO}} is verified"
+        fi
+
+        # Create the routing rule
+        echo ""
+        echo "Creating routing rule..."
+        RESPONSE=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/{{.CF_ZONE_ID}}/email/routing/rules" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          --data '{
+            "actions": [{"type": "forward", "value": ["{{.TO}}"]}],
+            "matchers": [{"type": "literal", "field": "to", "value": "{{.FROM}}"}],
+            "enabled": true,
+            "name": "Forward {{.FROM}} to {{.TO}}"
+          }')
+
+        if echo "$RESPONSE" | jq -e '.success' >/dev/null 2>&1; then
+          echo "OK: Routing rule created successfully!"
+          echo ""
+          echo "Emails to {{.FROM}} will now forward to {{.TO}}"
+        else
+          ERROR=$(echo "$RESPONSE" | jq -r '.errors[0].message // "Unknown error"')
+          echo "ERROR: $ERROR"
+          echo ""
+          echo "Full response:"
+          echo "$RESPONSE" | jq .
+          exit 1
+        fi
+
+  email:remove:
+    desc: 'Remove email forwarding rule (FROM=contact@domain.com)'
+    requires:
+      vars: [FROM]
+    cmds:
+      - |
+        if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+          echo "ERROR: CLOUDFLARE_API_TOKEN must be set in .env"
+          exit 1
+        fi
+
+        echo "Removing routing rule for {{.FROM}}..."
+
+        # Find the rule ID
+        RULES=$(curl -s "https://api.cloudflare.com/client/v4/zones/{{.CF_ZONE_ID}}/email/routing/rules" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json")
+
+        RULE_ID=$(echo "$RULES" | jq -r --arg from "{{.FROM}}" '.result[] | select(.matchers[0].value == $from) | .tag')
+
+        if [ -z "$RULE_ID" ] || [ "$RULE_ID" = "null" ]; then
+          echo "ERROR: No routing rule found for {{.FROM}}"
+          exit 1
+        fi
+
+        # Delete the rule
+        RESPONSE=$(curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/{{.CF_ZONE_ID}}/email/routing/rules/$RULE_ID" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json")
+
+        if echo "$RESPONSE" | jq -e '.success' >/dev/null 2>&1; then
+          echo "OK: Routing rule removed"
+        else
+          echo "ERROR: Failed to remove rule"
+          echo "$RESPONSE" | jq .
+          exit 1
+        fi
+
+  email:open:
+    desc: Open Cloudflare Email Routing dashboard
+    cmds:
+      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/{{.DOMAIN}}/email/routing/routes"

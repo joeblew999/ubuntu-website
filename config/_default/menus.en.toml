@@ -1,12 +1,12 @@
 ############# English navigation ##############
 
-# main menu
-# Note: "Home" removed - logo already links to home, saves nav space
+# Main menu - 4 items + Get Started CTA button
+# Simplified for two audiences: Users (Platform, Solutions, Company) and Developers
 
 [[main]]
 name = "Platform"
 url = "/platform"
-weight = 2
+weight = 1
 hasChildren = true
 
 [[main]]
@@ -34,183 +34,141 @@ parent = "Platform"
 weight = 4
 
 [[main]]
-name = "Applications"
+name = "Solutions"
 url = "/applications"
-weight = 3
+weight = 2
 hasChildren = true
 
 [[main]]
 name = "Overview"
-identifier = "applications-overview"
+identifier = "solutions-overview"
 url = "/applications"
-parent = "Applications"
+parent = "Solutions"
 weight = 1
 
 [[main]]
-name = "Robotics"
-identifier = "applications-robotics"
-url = "/applications/robotics"
-parent = "Applications"
+name = "Manufacturing & Construction"
+url = "/applications/manufacturing"
+parent = "Solutions"
 weight = 2
 
 [[main]]
-name = "Simulation"
-url = "/applications/simulation"
-parent = "Applications"
+name = "Robotics & Simulation"
+url = "/applications/robotics"
+parent = "Solutions"
 weight = 3
 
 [[main]]
-name = "Digital Twins"
-url = "/applications/digital-twins"
-parent = "Applications"
+name = "Government & Healthcare"
+url = "/applications/government"
+parent = "Solutions"
 weight = 4
 
 [[main]]
-name = "Manufacturing"
-url = "/applications/manufacturing"
-parent = "Applications"
+name = "Financial Services"
+url = "/applications/financial"
+parent = "Solutions"
 weight = 5
 
 [[main]]
-name = "Construction"
-url = "/applications/construction"
-parent = "Applications"
-weight = 6
-
-[[main]]
-name = "Government"
-url = "/applications/government"
-parent = "Applications"
-weight = 7
-
-[[main]]
-name = "Healthcare"
-url = "/applications/healthcare"
-parent = "Applications"
-weight = 8
-
-[[main]]
-name = "Financial"
-url = "/applications/financial"
-parent = "Applications"
-weight = 9
-
-[[main]]
-name = "Education"
-url = "/applications/education"
-parent = "Applications"
-weight = 10
-
-[[main]]
-name = "Insurance"
-url = "/applications/insurance"
-parent = "Applications"
-weight = 11
-
-[[main]]
-name = "Technology"
-url = "/technology"
-weight = 4
+name = "Developers"
+url = "/pkg"
+weight = 3
 hasChildren = true
 
 [[main]]
-name = "Overview"
-identifier = "technology-overview"
-url = "/technology"
-parent = "Technology"
+name = "Packages"
+identifier = "developers-packages"
+url = "/pkg"
+parent = "Developers"
 weight = 1
 
 [[main]]
-name = "Robotics"
-identifier = "technology-robotics"
-url = "/technology/robotics"
-parent = "Technology"
+name = "Technology Stack"
+url = "/technology"
+parent = "Developers"
 weight = 2
 
 [[main]]
-name = "Linux & Cross-Platform"
-identifier = "technology-linux"
-url = "/technology/linux"
-parent = "Technology"
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "Developers"
 weight = 3
-
-[[main]]
-name = "Security"
-identifier = "technology-security"
-url = "/technology/security"
-parent = "Technology"
-weight = 4
 
 [[main]]
 name = "Company"
-weight = 5
+url = "/company"
+weight = 4
 hasChildren = true
 
 [[main]]
-name = "Overview"
-identifier = "company-overview"
+name = "About"
+identifier = "company-about"
 url = "/company"
 parent = "Company"
 weight = 1
 
 [[main]]
-name = "Experience"
-url = "/company/experience"
+name = "Founder"
+url = "/company/founder"
 parent = "Company"
 weight = 2
 
 [[main]]
-name = "Founder"
-url = "/company/founder"
+name = "Experience"
+url = "/company/experience"
 parent = "Company"
 weight = 3
 
 [[main]]
-name = "Advisors"
-url = "/company/advisors"
+name = "History"
+url = "/company-history"
 parent = "Company"
 weight = 4
 
 [[main]]
 name = "Blog"
 url = "/blog"
-weight = 6
+parent = "Company"
+weight = 5
 
 [[main]]
 name = "Contact"
 url = "/contact"
-weight = 7
+parent = "Company"
+weight = 6
 
 
-# footer menu
+# Footer menu - organized by section for discoverability
+
 [[footer]]
 name = "Platform"
 url = "/platform"
 weight = 1
 
 [[footer]]
-name = "Get Started"
-url = "/get-started"
+name = "Solutions"
+url = "/applications"
 weight = 2
 
 [[footer]]
-name = "Founder"
-url = "/company/founder"
+name = "Developers"
+url = "/pkg"
 weight = 3
-
-[[footer]]
-name = "Experience"
-url = "/company/experience"
-weight = 4
 
 [[footer]]
 name = "Blog"
 url = "/blog"
-weight = 5
+weight = 4
 
 [[footer]]
 name = "Contact"
 url = "/contact"
+weight = 5
+
+[[footer]]
+name = "Get Started"
+url = "/get-started"
 weight = 6
 
 [[footer]]
@@ -219,6 +177,16 @@ url = "/security"
 weight = 7
 
 [[footer]]
+name = "Company History"
+url = "/company-history"
+weight = 8
+
+[[footer]]
 name = "Privacy Policy"
 url = "/privacy-policy"
-weight = 8
+weight = 9
+
+[[footer]]
+name = "Terms of Service"
+url = "/terms-of-service"
+weight = 10

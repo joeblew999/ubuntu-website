@@ -23,6 +23,7 @@ version: '3'
 #   sitecheck:* - Site reachability checks (cmd/sitecheck)
 #   genlogo:*   - Logo/branding generation (cmd/genlogo)
 #   mailerlite:* - MailerLite subscriber management (cmd/mailerlite)
+#   pkg:*       - Go vanity import packages (cmd/pkg)
 #   google:*    - All Google services unified (cmd/google)
 #   env:*       - Environment management
 #   url:*       - URL shortcuts + SEO dashboards
@@ -44,6 +45,7 @@ includes:
   hugo: ./taskfiles/Taskfile.hugo.yml
   cf: ./taskfiles/Taskfile.cf.yml
   translate: ./taskfiles/Taskfile.translate.yml
+  autotranslate: ./taskfiles/Taskfile.autotranslate.yml
   analytics: ./taskfiles/Taskfile.analytics.yml
   sitecheck: ./taskfiles/Taskfile.sitecheck.yml
   genlogo: ./taskfiles/Taskfile.genlogo.yml
@@ -72,6 +74,9 @@ includes:
   # MCP servers
   google-mcp: ./taskfiles/tools/Taskfile.google-mcp.yml
 
+  # Claude CLI (for autotranslate claude-cli provider)
+  claude-cli: ./taskfiles/tools/Taskfile.claude-cli.yml
+
   # Browser automation
   playwright: ./taskfiles/tools/Taskfile.playwright.yml
 
@@ -80,6 +85,12 @@ includes:
 
   # Codec libraries (for pion/mediadevices)
   codecs: ./taskfiles/Taskfile.codecs.yml
+
+  # Go vanity imports (/pkg/)
+  pkg: ./taskfiles/Taskfile.pkg.yml
+
+  # Toki i18n toolkit (fork: joeblew999/toki)
+  toki: ./taskfiles/Taskfile.toki.yml
 
 # =============================================================================
 # Environment
@@ -152,6 +163,12 @@ vars:
   # Unix: ~/.local/bin (standard for user binaries)
   # Windows: ~/bin (simpler path)
   BIN_INSTALL_DIR: '{{if eq OS "windows"}}{{.HOME}}/bin{{else}}{{.HOME}}/.local/bin{{end}}'
+
+  # Global source directory - for cloned forks and upstream repos
+  # Used by google-mcp, playwright, etc.
+  SRC_DIR: '{{.ROOT_DIR}}/.src'
+
+  
 
 # =============================================================================
 # Tasks
@@ -363,4 +380,3 @@ tasks:
     desc: Run tests
     cmds:
       - go test ./... -v
-

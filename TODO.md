@@ -1,6 +1,112 @@
 # TODO
 
 
+https://github.com/line/line-bot-sdk-go
+https://github.com/line/line-bot-sdk-go/releases/tag/v8.18.0
+
+https://developers.line.biz/en/docs/basics/channel-access-token/
+
+---
+
+JUst like LINE has a QR system, we need them too
+
+https://line.me/R/ti/p/@linedevth?from=page
+
+
+
+---
+
+Like the Google MCP, we need the same.
+
+We have a LINE account so can test it.
+
+Maybe someone already has a golang MPC that wraps this ? 
+
+---
+
+Claude got an:
+
+MCP error -32602: Output validation error: Invalid structured content for tool directory_tree: [
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "content"
+    ],
+    "message": "Invalid input: expected string, received array"
+  }
+]
+
+I wonder if our claude.json and our MCP server is messing things up ?
+
+---
+
+SCION web page regarding high security to avoid BGP crappiness ? 
+https://www.scion.org
+https://github.com/scionproto/scion
+
+
+
+---
+
+Finish the Email System ready for Google Verification !!!
+
+Need this so we can access other peoples google drive, email, etc without htem having to do anything.
+
+
+---
+
+### GitHub Organization: ubuntusoftware-net
+
+**Status:** Org created, repo transfer DEFERRED
+
+**Created:** `github.com/ubuntusoftware-net` (Dec 2024)
+
+**Why deferred:** People are currently viewing `joeblew999/ubuntu-website`. Don't want broken links during evaluation period.
+
+**Transfer steps (when ready):**
+
+1. **Notify contacts** - Let key people know about the migration
+2. **Transfer repo:**
+   ```bash
+   # Via web: github.com/joeblew999/ubuntu-website/settings → Transfer
+   # Select: ubuntusoftware-net
+   ```
+3. **Fork back to personal:**
+   ```bash
+   gh repo fork ubuntusoftware-net/ubuntu-website --clone=false
+   ```
+4. **Update local remote:**
+   ```bash
+   git remote set-url origin https://github.com/ubuntusoftware-net/ubuntu-website
+   git remote add personal https://github.com/joeblew999/ubuntu-website
+   ```
+5. **Update package frontmatter** (repo_url in `content/english/pkg/*.md`):
+   ```bash
+   task pkg:update  # or manually edit repo_url fields
+   ```
+6. **Verify:**
+   - GitHub Actions still run on org
+   - Vanity imports work: `go get www.ubuntusoftware.net/pkg/mailerlite`
+   - Old links redirect (GitHub does this automatically)
+
+**Notes:**
+- GitHub Actions free tier is same for orgs (2000 min/month private, unlimited public)
+- Vanity URLs (`www.ubuntusoftware.net/pkg/*`) shield users from GitHub structure changes
+- GitHub auto-redirects old URLs for a period after transfer
+
+---
+
+- https://github.com/romshark/toki might help use with Transaltion of pages ? 
+- He is currently updating a branch to add Datastar real time Web gui, which is perfert for us.
+
+It does not parse markdown yet, so we can fork and add that somehow, so that it will help with use translating markdown.
+
+I have an issue to add Date/Time at: https://github.com/romshark/toki/issues/18
+
+
+---
+
 We need to ensure we release this via github and that we then finish the ability for anyone sending in an email from "Get Started" can have the software sent to them via email. I think we need to finsih the mailerlite stuff in order to do that . Will be a sprint ...
 
 ---

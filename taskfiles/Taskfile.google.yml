@@ -1,0 +1,448 @@
+# Google Unified CLI Tasks
+#
+# Single CLI for all Google services: Auth, Calendar, Gmail, Drive, Sheets, Docs, Slides.
+#
+# TaskUI Quick Actions (no variables needed):
+#   google:check            - Verify CLI is built
+#   google:auth:check       - Check setup status
+#   google:calendar:today   - List today's events
+#   google:gmail:check      - Check Gmail API
+#   google:drive:list       - List root Drive files
+#
+# Environment:
+#   Uses tokens from google-mcp (~/.google-mcp-accounts)
+
+version: '3'
+
+vars:
+  GOOGLE_BIN: 'google{{exeExt}}'
+  GOOGLE_CMD: '{{.BIN_INSTALL_DIR}}/{{.GOOGLE_BIN}}'
+
+tasks:
+  # ===========================================================================
+  # Quick Actions (no variables needed - perfect for TaskUI one-click)
+  # ===========================================================================
+
+  default:
+    desc: Show unified Google CLI status and help
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}}'
+
+  check:
+    desc: Verify Google CLI is built and working
+    deps: [check:deps]
+    cmds:
+      - |
+        echo "Google CLI is ready at: {{.GOOGLE_CMD}}"
+        {{.GOOGLE_CMD}} 2>&1 | head -5
+
+  check:deps:
+    desc: Ensure google binary is available
+    internal: true
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.GOOGLE_BIN}}"
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.GOOGLE_BIN}}" ./cmd/google
+
+  # ===========================================================================
+  # Auth Commands
+  # ===========================================================================
+
+  auth:check:
+    desc: Check Google setup status
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} auth check'
+
+  auth:guide:
+    desc: Show setup guide
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} auth guide'
+
+  auth:add:
+    desc: Add Google MCP server to Claude Code
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} auth add {{if .LOCATION}}--location={{.LOCATION}}{{end}}'
+
+  auth:remove:
+    desc: Remove Google MCP server
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} auth remove {{if .LOCATION}}--location={{.LOCATION}}{{end}}'
+
+  auth:status:
+    desc: Show MCP configuration status
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} auth status {{if .LOCATION}}--location={{.LOCATION}}{{end}}'
+
+  auth:login:
+    desc: Authenticate with Google (OAuth flow)
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} auth login {{if .ACCOUNT}}--account={{.ACCOUNT}}{{end}}'
+
+  auth:open:
+    desc: Open Google Cloud Console page (TARGET required)
+    deps: [check:deps]
+    requires:
+      vars: [TARGET]
+    cmds:
+      - '{{.GOOGLE_CMD}} auth open {{.TARGET}}'
+
+  auth:help:
+    desc: Show Auth commands
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} auth'
+
+  # ===========================================================================
+  # Calendar Commands
+  # ===========================================================================
+
+  calendar:today:
+    desc: List today's calendar events
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} calendar today'
+
+  calendar:list:
+    desc: List upcoming events (MAX optional, default 10)
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} calendar list --max={{.MAX | default "10"}}'
+
+  calendar:list:week:
+    desc: List this week's events
+    deps: [check:deps]
+    cmds:
+      - |
+        END=$(date -v+7d +%Y-%m-%dT23:59:59%z 2>/dev/null || date -d "+7 days" +%Y-%m-%dT23:59:59%z)
+        {{.GOOGLE_CMD}} calendar list --end="$END" --max=50
+
+  calendar:create:
+    desc: Create calendar event (TITLE, START, END required)
+    summary: |
+      Create a calendar event using the Google Calendar API.
+
+      Variables:
+        TITLE       - Event title (required)
+        START       - Start time (required, RFC3339 or "tomorrow 2pm")
+        END         - End time (required)
+        DESCRIPTION - Event description (optional)
+        LOCATION    - Event location (optional)
+        ATTENDEES   - Comma-separated emails (optional)
+
+      Example:
+        task google:calendar:create TITLE="Team Meeting" START="tomorrow 2pm" END="tomorrow 3pm"
+    deps: [check:deps]
+    requires:
+      vars: [TITLE, START, END]
+    cmds:
+      - |
+        {{.GOOGLE_CMD}} calendar create \
+          --title="{{.TITLE}}" \
+          --start="{{.START}}" \
+          --end="{{.END}}" \
+          {{if .DESCRIPTION}}--description="{{.DESCRIPTION}}"{{end}} \
+          {{if .LOCATION}}--location="{{.LOCATION}}"{{end}} \
+          {{if .ATTENDEES}}--attendees="{{.ATTENDEES}}"{{end}}
+
+  calendar:compose:
+    desc: Open calendar to create event (TITLE, START, END required)
+    deps: [check:deps]
+    requires:
+      vars: [TITLE, START, END]
+    cmds:
+      - |
+        {{.GOOGLE_CMD}} calendar compose \
+          --title="{{.TITLE}}" \
+          --start="{{.START}}" \
+          --end="{{.END}}" \
+          {{if .DESCRIPTION}}--description="{{.DESCRIPTION}}"{{end}} \
+          {{if .LOCATION}}--location="{{.LOCATION}}"{{end}}
+
+  calendar:check:
+    desc: Verify Calendar API connection
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} calendar check'
+
+  calendar:open:
+    desc: Open Google Calendar in browser (VIEW=day|week|month|agenda)
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} calendar open {{.VIEW | default "week"}}'
+
+  calendar:server:
+    desc: Start Calendar webhook server
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} calendar server --port={{.PORT | default "8088"}}'
+
+  calendar:help:
+    desc: Show Calendar commands
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} calendar'
+
+  # ===========================================================================
+  # Gmail Commands
+  # ===========================================================================
+
+  gmail:list:
+    desc: List recent Gmail messages (MAX optional)
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} gmail list --max={{.MAX | default "10"}} {{if .QUERY}}--query="{{.QUERY}}"{{end}}'
+
+  gmail:send:
+    desc: Send email via Gmail API (TO, SUBJECT, BODY required)
+    deps: [check:deps]
+    requires:
+      vars: [TO, SUBJECT, BODY]
+    cmds:
+      - '{{.GOOGLE_CMD}} gmail send --to="{{.TO}}" --subject="{{.SUBJECT}}" --body="{{.BODY}}"'
+
+  gmail:compose:
+    desc: Open Gmail compose (TO, SUBJECT, BODY required)
+    deps: [check:deps]
+    requires:
+      vars: [TO, SUBJECT, BODY]
+    cmds:
+      - '{{.GOOGLE_CMD}} gmail compose --to="{{.TO}}" --subject="{{.SUBJECT}}" --body="{{.BODY}}"'
+
+  gmail:check:
+    desc: Verify Gmail API connection
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} gmail check'
+
+  gmail:server:
+    desc: Start Gmail webhook server
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} gmail server --port={{.PORT | default "8087"}}'
+
+  gmail:help:
+    desc: Show Gmail commands
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} gmail'
+
+  # ===========================================================================
+  # Drive Commands
+  # ===========================================================================
+
+  drive:list:
+    desc: List files in Google Drive (FOLDER optional)
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} drive list {{.FOLDER | default ""}}'
+
+  drive:get:
+    desc: Get file metadata (FILE_ID required)
+    deps: [check:deps]
+    requires:
+      vars: [FILE_ID]
+    cmds:
+      - '{{.GOOGLE_CMD}} drive get {{.FILE_ID}}'
+
+  drive:download:
+    desc: Download file (FILE_ID required, OUTPUT optional)
+    deps: [check:deps]
+    requires:
+      vars: [FILE_ID]
+    cmds:
+      - '{{.GOOGLE_CMD}} drive download {{.FILE_ID}} {{.OUTPUT | default ""}}'
+
+  drive:upload:
+    desc: Upload file (FILE required, PARENT optional)
+    deps: [check:deps]
+    requires:
+      vars: [FILE]
+    cmds:
+      - '{{.GOOGLE_CMD}} drive upload {{.FILE}} {{if .PARENT}}--parent={{.PARENT}}{{end}}'
+
+  drive:mkdir:
+    desc: Create folder (NAME required, PARENT optional)
+    deps: [check:deps]
+    requires:
+      vars: [NAME]
+    cmds:
+      - '{{.GOOGLE_CMD}} drive mkdir {{.NAME}} {{if .PARENT}}--parent={{.PARENT}}{{end}}'
+
+  drive:rm:
+    desc: Delete file (FILE_ID required)
+    deps: [check:deps]
+    requires:
+      vars: [FILE_ID]
+    cmds:
+      - '{{.GOOGLE_CMD}} drive rm {{.FILE_ID}}'
+
+  drive:help:
+    desc: Show Drive commands
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} drive'
+
+  # ===========================================================================
+  # Sheets Commands
+  # ===========================================================================
+
+  sheets:info:
+    desc: Get spreadsheet info (SPREADSHEET_ID required)
+    deps: [check:deps]
+    requires:
+      vars: [SPREADSHEET_ID]
+    cmds:
+      - '{{.GOOGLE_CMD}} sheets info {{.SPREADSHEET_ID}}'
+
+  sheets:get:
+    desc: Get cell values (SPREADSHEET_ID, RANGE required)
+    deps: [check:deps]
+    requires:
+      vars: [SPREADSHEET_ID, RANGE]
+    cmds:
+      - '{{.GOOGLE_CMD}} sheets get {{.SPREADSHEET_ID}} "{{.RANGE}}"'
+
+  sheets:set:
+    desc: Update cells (SPREADSHEET_ID, RANGE, VALUES required)
+    deps: [check:deps]
+    requires:
+      vars: [SPREADSHEET_ID, RANGE, VALUES]
+    cmds:
+      - '{{.GOOGLE_CMD}} sheets set {{.SPREADSHEET_ID}} "{{.RANGE}}" "{{.VALUES}}"'
+
+  sheets:append:
+    desc: Append rows (SPREADSHEET_ID, RANGE, VALUES required)
+    deps: [check:deps]
+    requires:
+      vars: [SPREADSHEET_ID, RANGE, VALUES]
+    cmds:
+      - '{{.GOOGLE_CMD}} sheets append {{.SPREADSHEET_ID}} "{{.RANGE}}" "{{.VALUES}}"'
+
+  sheets:clear:
+    desc: Clear range (SPREADSHEET_ID, RANGE required)
+    deps: [check:deps]
+    requires:
+      vars: [SPREADSHEET_ID, RANGE]
+    cmds:
+      - '{{.GOOGLE_CMD}} sheets clear {{.SPREADSHEET_ID}} "{{.RANGE}}"'
+
+  sheets:help:
+    desc: Show Sheets commands
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} sheets'
+
+  # ===========================================================================
+  # Docs Commands
+  # ===========================================================================
+
+  docs:get:
+    desc: Get document content (DOCUMENT_ID required)
+    deps: [check:deps]
+    requires:
+      vars: [DOCUMENT_ID]
+    cmds:
+      - '{{.GOOGLE_CMD}} docs get {{.DOCUMENT_ID}}'
+
+  docs:create:
+    desc: Create new document (TITLE required)
+    deps: [check:deps]
+    requires:
+      vars: [TITLE]
+    cmds:
+      - '{{.GOOGLE_CMD}} docs create "{{.TITLE}}"'
+
+  docs:append:
+    desc: Append text to document (DOCUMENT_ID, TEXT required)
+    deps: [check:deps]
+    requires:
+      vars: [DOCUMENT_ID, TEXT]
+    cmds:
+      - '{{.GOOGLE_CMD}} docs append {{.DOCUMENT_ID}} "{{.TEXT}}"'
+
+  docs:insert:
+    desc: Insert text at index (DOCUMENT_ID, INDEX, TEXT required)
+    deps: [check:deps]
+    requires:
+      vars: [DOCUMENT_ID, INDEX, TEXT]
+    cmds:
+      - '{{.GOOGLE_CMD}} docs insert {{.DOCUMENT_ID}} {{.INDEX}} "{{.TEXT}}"'
+
+  docs:replace:
+    desc: Replace text (DOCUMENT_ID, FIND, REPLACE required)
+    deps: [check:deps]
+    requires:
+      vars: [DOCUMENT_ID, FIND, REPLACE]
+    cmds:
+      - '{{.GOOGLE_CMD}} docs replace {{.DOCUMENT_ID}} "{{.FIND}}" "{{.REPLACE}}"'
+
+  docs:help:
+    desc: Show Docs commands
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} docs'
+
+  # ===========================================================================
+  # Slides Commands
+  # ===========================================================================
+
+  slides:get:
+    desc: Get presentation info (PRESENTATION_ID required)
+    deps: [check:deps]
+    requires:
+      vars: [PRESENTATION_ID]
+    cmds:
+      - '{{.GOOGLE_CMD}} slides get {{.PRESENTATION_ID}}'
+
+  slides:create:
+    desc: Create new presentation (TITLE required)
+    deps: [check:deps]
+    requires:
+      vars: [TITLE]
+    cmds:
+      - '{{.GOOGLE_CMD}} slides create "{{.TITLE}}"'
+
+  slides:add:
+    desc: Add slide (PRESENTATION_ID required, INDEX optional)
+    deps: [check:deps]
+    requires:
+      vars: [PRESENTATION_ID]
+    cmds:
+      - '{{.GOOGLE_CMD}} slides add-slide {{.PRESENTATION_ID}} {{.INDEX | default ""}}'
+
+  slides:delete:
+    desc: Delete slide (PRESENTATION_ID, SLIDE_ID required)
+    deps: [check:deps]
+    requires:
+      vars: [PRESENTATION_ID, SLIDE_ID]
+    cmds:
+      - '{{.GOOGLE_CMD}} slides delete-slide {{.PRESENTATION_ID}} {{.SLIDE_ID}}'
+
+  slides:help:
+    desc: Show Slides commands
+    deps: [check:deps]
+    cmds:
+      - '{{.GOOGLE_CMD}} slides'
+
+  # ===========================================================================
+  # Release (release:* - build for distribution)
+  # ===========================================================================
+
+  release:build:
+    desc: Build google CLI for release
+    cmds:
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.GOOGLE_BIN}}" ./cmd/google
+
+  release:test:
+    desc: Test built google release binary
+    cmds:
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.GOOGLE_BIN}} -h || {{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.GOOGLE_BIN}} || true"

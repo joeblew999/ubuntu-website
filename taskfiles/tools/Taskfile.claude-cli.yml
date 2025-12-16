@@ -1,0 +1,81 @@
+# Claude CLI - Anthropic Claude Code Taskfile
+#
+# Installs and manages Claude CLI via Bun.
+# Used by autotranslate.yml for Claude-based translations using your subscription.
+#
+# Claude CLI is npm-only (no standalone binaries), so we install via Bun globally.
+# Uses full path to bun global bin dir since it may not be in PATH.
+
+version: '3'
+
+vars:
+  # Binary name - npm/bun handles platform-specific shims (.cmd on Windows)
+  CLAUDE_CLI_BIN: 'claude'
+  # Bun global bin directory (consistent location)
+  BUN_GLOBAL_BIN: '{{.HOME}}/.bun/bin'
+
+tasks:
+  # ===========================================================================
+  # Checks
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure Claude CLI is installed via Bun
+    status:
+      - test -f "{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}"
+    cmds:
+      - 'command -v bun >/dev/null 2>&1 || (echo "ERROR: Bun not installed. Install from https://bun.sh" && exit 1)'
+      - task: install
+
+  install:
+    desc: Install Claude CLI globally via Bun
+    cmds:
+      - 'echo "Installing Claude CLI via Bun..."'
+      - bun add -g @anthropic-ai/claude-code
+      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" --version'
+      - 'echo "OK: Claude CLI installed to {{.BUN_GLOBAL_BIN}}"'
+      - 'echo ""'
+      - 'echo "Next: Run \"claude auth login\" to authenticate"'
+
+  check:validate:
+    desc: Validate Claude CLI works
+    deps: [check:deps]
+    cmds:
+      - |
+        VERSION=$("{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" --version 2>/dev/null | head -1)
+        echo "OK: Claude CLI $VERSION"
+
+  # ===========================================================================
+  # Authentication
+  # ===========================================================================
+
+  auth:login:
+    desc: Login to Claude (opens browser)
+    deps: [check:deps]
+    cmds:
+      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" auth login'
+
+  auth:status:
+    desc: Check authentication status
+    deps: [check:deps]
+    cmds:
+      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" auth status'
+
+  # ===========================================================================
+  # Version Management
+  # ===========================================================================
+
+  version:
+    desc: Show installed Claude CLI version
+    deps: [check:deps]
+    cmds:
+      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" --version'
+
+  upgrade:
+    desc: Upgrade Claude CLI to latest version
+    cmds:
+      - 'command -v bun >/dev/null 2>&1 || (echo "ERROR: Bun not installed" && exit 1)'
+      - 'echo "Upgrading Claude CLI to latest..."'
+      - bun add -g @anthropic-ai/claude-code@latest
+      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" --version'
+      - 'echo "OK: Claude CLI upgraded"'

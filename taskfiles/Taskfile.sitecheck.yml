@@ -84,10 +84,10 @@ tasks:
   release:build:
     desc: Build sitecheck for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - mkdir -p .build
-      - go build -o ".build/{{.SITECHECK_BIN}}" ./cmd/sitecheck
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.SITECHECK_BIN}}" ./cmd/sitecheck
 
   release:test:
     desc: Test built sitecheck release binary
     cmds:
-      - .build/{{.SITECHECK_BIN}} -h || true
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.SITECHECK_BIN}} -h || true"

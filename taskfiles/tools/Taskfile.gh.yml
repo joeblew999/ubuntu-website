@@ -102,7 +102,7 @@ tasks:
         {{.GH_BIN}} release create "$TAG" --generate-notes $FILES
 
   release:publish:
-    desc: Create release with binaries from .build/ (requires NAME, VERSION vars)
+    desc: Create release with binaries from {{.ROOT_DIR}}/{{.DIR_BUILD}}/ (requires NAME, VERSION vars)
     requires:
       vars: [NAME, VERSION]
     dir: '{{.ROOT_DIR}}'
@@ -110,11 +110,11 @@ tasks:
       - |
         TAG="{{.NAME}}-{{.VERSION}}"
         echo "Creating release: $TAG"
-        echo "Assets from .build/:"
-        ls -la .build/ 2>/dev/null || echo "  (no files in .build/)"
+        echo "Assets from {{.ROOT_DIR}}/{{.DIR_BUILD}}/:"
+        ls -la {{.ROOT_DIR}}/{{.DIR_BUILD}}/ 2>/dev/null || echo "  (no files in {{.ROOT_DIR}}/{{.DIR_BUILD}}/)"
         echo ""
         echo "Uploading to GitHub..."
-        {{.GH_BIN}} release create "$TAG" --generate-notes .build/*
+        {{.GH_BIN}} release create "$TAG" --generate-notes {{.ROOT_DIR}}/{{.DIR_BUILD}}/*
         echo ""
         echo "Release created: https://github.com/$({{.GH_BIN}} repo view --json nameWithOwner -q .nameWithOwner)/releases/tag/$TAG"
 

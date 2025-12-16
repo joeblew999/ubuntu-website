@@ -1,12 +1,12 @@
 ############# Japanese navigation ##############
 
-# main menu
-# Note: "Home" removed - logo already links to home, saves nav space
+# Main menu - 4 items + Get Started CTA button
+# Simplified for two audiences: Users (Platform, Solutions, Company) and Developers
 
 [[main]]
 name = "プラットフォーム"
 url = "/platform"
-weight = 2
+weight = 1
 hasChildren = true
 
 [[main]]
@@ -34,183 +34,135 @@ parent = "プラットフォーム"
 weight = 4
 
 [[main]]
-name = "アプリケーション"
+name = "ソリューション"
 url = "/applications"
-weight = 3
+weight = 2
 hasChildren = true
 
 [[main]]
 name = "概要"
-identifier = "applications-overview"
+identifier = "solutions-overview"
 url = "/applications"
-parent = "アプリケーション"
+parent = "ソリューション"
 weight = 1
 
 [[main]]
-name = "ロボティクス"
-identifier = "applications-robotics"
-url = "/applications/robotics"
-parent = "アプリケーション"
+name = "製造業・建設"
+url = "/applications/manufacturing"
+parent = "ソリューション"
 weight = 2
 
 [[main]]
-name = "シミュレーション"
-url = "/applications/simulation"
-parent = "アプリケーション"
+name = "ロボティクス・シミュレーション"
+url = "/applications/robotics"
+parent = "ソリューション"
 weight = 3
 
 [[main]]
-name = "デジタルツイン"
-url = "/applications/digital-twins"
-parent = "アプリケーション"
+name = "政府・ヘルスケア"
+url = "/applications/government"
+parent = "ソリューション"
 weight = 4
 
 [[main]]
-name = "製造業"
-url = "/applications/manufacturing"
-parent = "アプリケーション"
+name = "金融サービス"
+url = "/applications/financial"
+parent = "ソリューション"
 weight = 5
 
 [[main]]
-name = "建設"
-url = "/applications/construction"
-parent = "アプリケーション"
-weight = 6
-
-[[main]]
-name = "政府"
-url = "/applications/government"
-parent = "アプリケーション"
-weight = 7
-
-[[main]]
-name = "ヘルスケア"
-url = "/applications/healthcare"
-parent = "アプリケーション"
-weight = 8
-
-[[main]]
-name = "金融"
-url = "/applications/financial"
-parent = "アプリケーション"
-weight = 9
-
-[[main]]
-name = "教育"
-url = "/applications/education"
-parent = "アプリケーション"
-weight = 10
-
-[[main]]
-name = "保険"
-url = "/applications/insurance"
-parent = "アプリケーション"
-weight = 11
-
-[[main]]
-name = "テクノロジー"
-url = "/technology"
-weight = 4
+name = "開発者"
+url = "/pkg"
+weight = 3
 hasChildren = true
 
 [[main]]
-name = "概要"
-identifier = "technology-overview"
-url = "/technology"
-parent = "テクノロジー"
+name = "パッケージ"
+identifier = "developers-packages"
+url = "/pkg"
+parent = "開発者"
 weight = 1
 
 [[main]]
-name = "ロボティクス"
-identifier = "technology-robotics"
-url = "/technology/robotics"
-parent = "テクノロジー"
+name = "テクノロジースタック"
+url = "/technology"
+parent = "開発者"
 weight = 2
 
 [[main]]
-name = "Linux＆クロスプラットフォーム"
-identifier = "technology-linux"
-url = "/technology/linux"
-parent = "テクノロジー"
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "開発者"
 weight = 3
-
-[[main]]
-name = "セキュリティ"
-identifier = "technology-security"
-url = "/technology/security"
-parent = "テクノロジー"
-weight = 4
 
 [[main]]
 name = "会社"
-weight = 5
+url = "/company"
+weight = 4
 hasChildren = true
 
 [[main]]
-name = "概要"
-identifier = "company-overview"
+name = "会社概要"
+identifier = "company-about"
 url = "/company"
 parent = "会社"
 weight = 1
 
 [[main]]
-name = "経験"
-url = "/company/experience"
+name = "創業者"
+url = "/company/founder"
 parent = "会社"
 weight = 2
 
 [[main]]
-name = "創業者"
-url = "/company/founder"
+name = "経験"
+url = "/company/experience"
 parent = "会社"
 weight = 3
 
 [[main]]
-name = "アドバイザー"
-url = "/company/advisors"
+name = "ブログ"
+url = "/blog"
 parent = "会社"
 weight = 4
 
 [[main]]
-name = "ブログ"
-url = "/blog"
-weight = 6
-
-[[main]]
 name = "お問い合わせ"
 url = "/contact"
-weight = 7
+parent = "会社"
+weight = 5
 
 
-# footer menu
+# Footer menu - organized by section for discoverability
+
 [[footer]]
 name = "プラットフォーム"
 url = "/platform"
 weight = 1
 
 [[footer]]
-name = "はじめる"
-url = "/get-started"
+name = "ソリューション"
+url = "/applications"
 weight = 2
 
 [[footer]]
-name = "創業者"
-url = "/company/founder"
+name = "開発者"
+url = "/pkg"
 weight = 3
-
-[[footer]]
-name = "経験"
-url = "/company/experience"
-weight = 4
 
 [[footer]]
 name = "ブログ"
 url = "/blog"
-weight = 5
+weight = 4
 
 [[footer]]
 name = "お問い合わせ"
 url = "/contact"
+weight = 5
+
+[[footer]]
+name = "はじめる"
+url = "/get-started"
 weight = 6
 
 [[footer]]
@@ -223,3 +175,7 @@ name = "プライバシーポリシー"
 url = "/privacy-policy"
 weight = 8
 
+[[footer]]
+name = "利用規約"
+url = "/terms-of-service"
+weight = 9

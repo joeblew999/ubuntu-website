@@ -54,10 +54,10 @@ tasks:
   release:build:
     desc: Build analytics for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - mkdir -p .build
-      - go build -o ".build/{{.ANALYTICS_BIN}}" ./cmd/analytics
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.ANALYTICS_BIN}}" ./cmd/analytics
 
   release:test:
     desc: Test built analytics release binary
     cmds:
-      - .build/{{.ANALYTICS_BIN}} -h || true
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.ANALYTICS_BIN}} -h || true"

@@ -93,16 +93,30 @@ func (c *Checker) CheckDiff(file string) DiffResult {
 func (c *Checker) CheckMissing() MissingResult {
 	englishFiles := c.getEnglishFiles()
 	result := MissingResult{
-		ByLanguage: make(map[string][]string),
+		ByLanguage:      make(map[string][]string),
+		ByLanguageFiles: make(map[string][]MissingFile),
 	}
 
+	// Track chars per language (each language needs its own translation)
 	for _, enFile := range englishFiles {
 		relPath := strings.TrimPrefix(enFile, c.sourcePath()+string(os.PathSeparator))
+
+		// Get file size
+		var charCount int64
+		if info, err := os.Stat(enFile); err == nil {
+			charCount = info.Size()
+		}
+
 		for _, lang := range c.config.TargetLangs {
 			langFile := filepath.Join(c.config.ContentDir, lang.DirName, relPath)
 			if _, err := os.Stat(langFile); os.IsNotExist(err) {
 				result.ByLanguage[lang.Name] = append(result.ByLanguage[lang.Name], relPath)
+				result.ByLanguageFiles[lang.Name] = append(result.ByLanguageFiles[lang.Name], MissingFile{
+					Path:      relPath,
+					CharCount: charCount,
+				})
 				result.TotalCount++
+				result.TotalChars += charCount
 			}
 		}
 	}

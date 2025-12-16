@@ -1,6 +1,6 @@
 # Google MCP Server Setup
 #
-# Integrates ngs/google-mcp-server - a Go-based MCP server for Google Workspace.
+# Integrates google-mcp-server - a Go-based MCP server for Google Workspace.
 # Provides: Gmail, Calendar, Drive, Sheets, Docs, Slides
 #
 # Architecture:
@@ -8,7 +8,8 @@
 #   cmd/google-auth   - Go binary for .mcp.json management (add/remove/status)
 #   google-mcp-server - External binary (handles auth + MCP protocol)
 #
-# Source: https://github.com/ngs/google-mcp-server
+# Source: https://github.com/joeblew999/google-mcp-server (fork of ngs/google-mcp-server)
+# Upstream: https://github.com/ngs/google-mcp-server 
 #
 # Prerequisites:
 #   1. Google Cloud account
@@ -26,11 +27,16 @@
 version: '3'
 
 vars:
-  # google-mcp-server is an external binary, installed via go install
-  GOOGLE_MCP_BIN: '{{.GOPATH}}/bin/google-mcp-server'
-  # google-auth is our project tool, installed to project .build/ (already gitignored)
-  GOOGLE_AUTH_BIN: '{{.ROOT_DIR}}/.build/google-auth'
+  # Upstream module path (keep original for PR compatibility)
+  GOOGLE_MCP_MODULE: go.ngs.io/google-mcp-server
+  # Fork repo for cloning (use fork for development, upstream for stable)
+  GOOGLE_MCP_FORK: github.com/joeblew999/google-mcp-server
+  # Binaries installed to DIR_BUILD (gitignored, project-local)
+  GOOGLE_MCP_BIN: '{{.ROOT_DIR}}/{{.DIR_BUILD}}/google-mcp-server'
+  GOOGLE_AUTH_BIN: '{{.ROOT_DIR}}/{{.DIR_BUILD}}/google-auth'
   ACCOUNTS_DIR: '{{.HOME}}/.google-mcp-accounts'
+  # Source directory for fork development (uses global SRC_DIR)
+  GOOGLE_MCP_SRC: '{{.SRC_DIR}}/google-mcp-server'
 
 tasks:
   default:
@@ -88,14 +94,78 @@ tasks:
   install:
     desc: Install Google MCP Server
     cmds:
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
       - |
         echo "Installing Google MCP Server..."
+        echo "Module: {{.GOOGLE_MCP_MODULE}}"
+        echo "Target: {{.GOOGLE_MCP_BIN}}"
         echo ""
-        go install go.ngs.io/google-mcp-server@latest
+        GOPROXY=direct GOBIN="{{.ROOT_DIR}}/{{.DIR_BUILD}}" go install {{.GOOGLE_MCP_MODULE}}@latest
         echo ""
         echo "✅ Installed to {{.GOOGLE_MCP_BIN}}"
     status:
-      - command -v google-mcp-server
+      - test -f "{{.GOOGLE_MCP_BIN}}"
+
+  # ============================================================================
+  # Source Development (fork management)
+  # ============================================================================
+
+  src:clone:
+    desc: Clone the google-mcp-server fork for development
+    cmds:
+      - mkdir -p "{{.SRC_DIR}}"
+      - git clone https://{{.GOOGLE_MCP_FORK}}.git "{{.GOOGLE_MCP_SRC}}"
+      - |
+        cd "{{.GOOGLE_MCP_SRC}}"
+        git remote add upstream https://github.com/ngs/google-mcp-server.git
+        echo "✅ Cloned to {{.GOOGLE_MCP_SRC}}"
+        echo "   Upstream remote added: ngs/google-mcp-server"
+        echo ""
+        echo "To install from local source:"
+        echo "   task google-mcp:src:install"
+    status:
+      - test -d "{{.GOOGLE_MCP_SRC}}/.git"
+
+  src:sync:
+    desc: Sync fork with upstream (fetch + rebase)
+    dir: '{{.GOOGLE_MCP_SRC}}'
+    cmds:
+      - git fetch upstream
+      - git rebase upstream/master
+      - |
+        echo "✅ Synced with upstream"
+        echo ""
+        echo "To push changes to your fork:"
+        echo "  cd {{.GOOGLE_MCP_SRC}} && git push origin master"
+    preconditions:
+      - sh: test -d "{{.GOOGLE_MCP_SRC}}/.git"
+        msg: "Fork not cloned. Run: task google-mcp:src:clone"
+
+  src:install:
+    desc: Install from local source (for development)
+    dir: '{{.GOOGLE_MCP_SRC}}'
+    cmds:
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - |
+        echo "Installing from local source..."
+        echo "Source: {{.GOOGLE_MCP_SRC}}"
+        echo "Target: {{.GOOGLE_MCP_BIN}}"
+        echo ""
+        # GOWORK=off prevents go.work from interfering with module resolution
+        GOWORK=off GOBIN="{{.ROOT_DIR}}/{{.DIR_BUILD}}" go install .
+        echo ""
+        echo "✅ Installed from local source to {{.GOOGLE_MCP_BIN}}"
+    preconditions:
+      - sh: test -d "{{.GOOGLE_MCP_SRC}}/.git"
+        msg: "Fork not cloned. Run: task google-mcp:src:clone"
+
+  src:open:
+    desc: Open fork source directory
+    cmds:
+      - open "{{.GOOGLE_MCP_SRC}}"
+    preconditions:
+      - sh: test -d "{{.GOOGLE_MCP_SRC}}"
+        msg: "Fork not cloned. Run: task google-mcp:src:clone"
 
   setup:
     desc: Full Google MCP setup (interactive)

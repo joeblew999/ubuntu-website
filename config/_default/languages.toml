@@ -28,3 +28,10 @@ contentDir = "content/japanese"
 weight = 4
 hasCJKLanguage = true
 
+
+################ Tiếng Việt ##################
+[vi]
+languageName = "Tiếng Việt"
+languageCode = "vi"
+contentDir = "content/vietnamese"
+weight = 5

@@ -7,7 +7,7 @@ image: "/images/blog/self-sovereign-email.svg"
 categories: ["Publish", "AI"]
 author: "Gerard Webb"
 tags: ["email", "automation", "ai", "mcp", "self-sovereign", "wellknown"]
-draft: false
+draft: true
 ---
 
 The average business sends thousands of emails monthly through services they don't control. Your customer communications flow through third-party servers, your contact lists live in someone else's database, and your automation rules depend on platforms that can change pricing, policies, or disappear entirely.

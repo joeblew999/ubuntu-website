@@ -30,10 +30,18 @@ type DiffResult struct {
 	Error      error  // Any error that occurred
 }
 
+// MissingFile represents a file missing translation with size info
+type MissingFile struct {
+	Path      string // Relative path from content dir
+	CharCount int64  // Character count (file size in bytes)
+}
+
 // MissingResult contains missing translation data
 type MissingResult struct {
-	ByLanguage map[string][]string // lang code → missing files
-	TotalCount int                 // Total missing files across all languages
+	ByLanguage      map[string][]string // lang name → missing files (paths only)
+	ByLanguageFiles map[string][]MissingFile // lang name → missing files with char counts
+	TotalCount      int                 // Total missing files across all languages
+	TotalChars      int64               // Total characters across all missing files
 }
 
 // HasIssues returns true if any translations are missing

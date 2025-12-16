@@ -14,6 +14,11 @@ Key points:
 - Use `status:` for idempotent `check:deps` tasks
 - Use `deps:` for declarative dependencies
 
+### Code Structure (internal vs pkg)
+- Keep project-only helpers in `internal/` (e.g., `internal/codecinstaller`), not API-stable.
+- Put reusable surfaces in `pkg/` with small, clear interfaces; no `pkg` imports from `internal`.
+- Share code across commands via `pkg/…`, not by duplicating under `cmd/`.
+
 **Workflow Naming:** `{category}-{name}.yml`
 
 | Category | Purpose | Examples |
@@ -154,38 +159,7 @@ task playwright:open URL=https://...       # Open URL in browser
 
 Used by `cmd/google-auth` for automated Google OAuth flows.
 
-### Codec Libraries (for pion/mediadevices)
 
-Pre-built static libraries for video conferencing with pion/mediadevices.
-
-**CLI:** `cmd/codeccheck/main.go`
-**Taskfile:** `taskfiles/Taskfile.codecs.yml`
-**Workflow:** `.github/workflows/build-codecs.yml`
-
-**Commands:**
-```bash
-task codecs:status             # Check codec availability
-task codecs:install            # Download pre-built libraries
-task codecs:recommend          # Show zero-dependency option
-task codecs:build:trigger      # Trigger build workflow (maintainers)
-```
-
-**User Experience:**
-1. **RECOMMENDED** (zero install): Use openh264 instead of x264
-   ```go
-   // Change from: "github.com/pion/mediadevices/pkg/codec/x264"
-   // To:          "github.com/pion/mediadevices/pkg/codec/openh264"
-   ```
-2. **Pre-built download**: `task codecs:install` downloads from GitHub releases
-3. **Manual install**: `brew install x264 libvpx opus` (macOS)
-
-**Build Workflow:**
-GitHub Actions builds x264, libvpx, opus as static libraries for:
-- darwin-arm64, darwin-amd64
-- linux-amd64, linux-arm64
-- windows-amd64
-
-Releases are tagged `codecs-v1.0.0` and users download via `codeccheck -install`.
 
 ### Google MCP Setup (Prerequisites for Gmail/Calendar)
 
@@ -244,6 +218,27 @@ task google-mcp:claude:add
 task google-mcp:status   # Shows binary, accounts, config status
 task google-mcp:check    # Shows next step if incomplete
 ```
+
+### Email Sending (SMTP2GO)
+
+**Primary email relay service:** SMTP2GO (smtp2go.com)
+
+Configured inside Gmail settings to send outbound email through SMTP2GO relay. This provides better deliverability than direct Gmail sending.
+
+**Setup:** Gmail → Settings → Accounts → "Send mail as" → configured with SMTP2GO credentials
+**From address:** `gerard.webb@ubuntusoftware.net`
+**Dashboard:** https://app.smtp2go.com
+**Support:** ticket@smtp2go.com
+
+**⚠️ Setup was painful** - getting SMTP2GO working with Gmail's "Send mail as" required careful configuration on both sides. Don't casually reconfigure unless necessary.
+
+**Why SMTP2GO:**
+- Better deliverability (dedicated IP reputation)
+- Free tier: 1,000 emails/month, 200/day (no expiry, no credit card)
+- Delivery tracking and analytics
+- No browser automation needed
+
+**Future consideration:** Could add direct SMTP2GO API integration (`/email/send` endpoint) for programmatic sending without Gmail.
 
 ### Gmail CLI Tool
 
@@ -375,7 +370,7 @@ Style: Hugo Plate grayscale line-art (white, `#f5f5f5`, `#ccc`, `#999`, `#666`)
 
 ### Translation Workflow
 
-Languages: de (German), zh (Chinese), ja (Japanese) - auto-loaded from `config/_default/languages.toml`.
+Languages: de (German), zh (Chinese), ja (Japanese), vi (Vietnamese) - auto-loaded from `config/_default/languages.toml`.
 
 **Architecture - Separation of Concerns:**
 - `internal/translator/hugo.go` - ALL Hugo-specific code (language parsing, menu parsing)
@@ -408,6 +403,39 @@ Languages: de (German), zh (Chinese), ja (Japanese) - auto-loaded from `config/_
 4. Run `translate:content:done` → moves checkpoint, status is clean
 
 **CI:** `monitor-translate.yml` runs weekly, creates GitHub Issue if missing translations.
+
+### Auto-Translation (DeepL)
+
+Automatic translation of Hugo markdown using DeepL API. Preserves front matter, shortcodes, code blocks.
+
+**Setup:**
+1. Get free API key at https://www.deepl.com/pro-api (500k chars/month free)
+2. Add to `.env`: `DEEPL_API_KEY=your-key-here`
+
+**CLI:** `cmd/autotranslate/main.go`
+**Package:** `internal/autotranslate/`
+**Taskfile:** `taskfiles/Taskfile.autotranslate.yml`
+
+**Commands:**
+```bash
+task autotranslate:status                    # Check API config
+task autotranslate:languages                 # List supported languages
+task autotranslate:missing LANG=vi           # Translate all missing Vietnamese
+task autotranslate:missing LANG=vi DRY_RUN=true  # Preview what would translate
+task autotranslate:file FILE=path LANG=vi    # Translate single file
+task autotranslate:vi                        # Shortcut: all missing Vietnamese
+task autotranslate:all DRY_RUN=true          # Preview all languages
+```
+
+**What it preserves (won't translate):**
+- YAML front matter (except title, description, meta_title)
+- Hugo shortcodes `{{< >}}` and `{{% %}}`
+- Code blocks (fenced and inline)
+- URLs in markdown links
+- HTML tags
+- Image references
+
+**Provider Interface:** Designed to support multiple providers. Currently DeepL, can add Google/OpenAI later via `internal/autotranslate/provider.go`.
 
 ### Path Convention
 **ALWAYS use `joeblew999` (with three 9s), NEVER `joeblew99` (with two 9s)**
@@ -542,5 +570,4 @@ Social links to use:
 This Project is a web site for my company. I have various info here about me and the company.
 
 - **Source code**: `/Users/apple/Library/Mobile Documents/com~apple~CloudDocs/Thailand /`
-
 

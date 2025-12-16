@@ -15,6 +15,9 @@ go.sum
 *.test
 *.out
 
+# Toki (translation bundles)
+tokibundle/
+
 # Environment
 .env
 .env.*
@@ -28,6 +31,9 @@ logs/
 # Testing
 .playwright-mcp/
 
+# Source experiments (cloned repos for evaluation)
+.src/
+
 # Via framework
 .via/
 
@@ -38,3 +44,6 @@ logs/
 # IDE & OS
 .vscode/
 .DS_Store
+
+# Downloaded codec libraries
+lib/codecs/

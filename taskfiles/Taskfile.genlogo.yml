@@ -109,10 +109,10 @@ tasks:
   release:build:
     desc: Build genlogo for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - mkdir -p .build
-      - go build -o ".build/{{.GENLOGO_BIN}}" ./cmd/genlogo
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.GENLOGO_BIN}}" ./cmd/genlogo
 
   release:test:
     desc: Test built genlogo release binary
     cmds:
-      - .build/{{.GENLOGO_BIN}} -h || true
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.GENLOGO_BIN}} -h || true"

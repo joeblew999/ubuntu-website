@@ -1,0 +1,55 @@
+{{ define "main" }}
+  {{ partial "page-header" . }}
+
+  <section class="section-sm">
+    <div class="container">
+      <div class="row justify-center">
+        <div class="lg:col-10">
+          <div class="content mb-8">
+            {{ .Content }}
+          </div>
+
+          <!-- Package Grid -->
+          <div class="grid gap-6 md:grid-cols-2">
+            {{ range where .Site.RegularPages "Section" "pkg" }}
+            {{ if .Param "import_path" }}
+            <div class="rounded-lg border border-border p-6 bg-theme-light dark:bg-darkmode-theme-light">
+              <h3 class="h4 mb-2">
+                <a href="{{ .RelPermalink }}" class="text-dark dark:text-white hover:text-primary">
+                  {{ .Title }}
+                </a>
+              </h3>
+              <p class="text-text dark:text-white text-sm mb-4">{{ .Param "description" }}</p>
+
+              <div class="font-mono text-xs bg-body dark:bg-darkmode-body text-dark dark:text-white rounded px-3 py-2 mb-4">
+                go get {{ .Param "import_path" }}
+              </div>
+
+              <div class="flex flex-wrap gap-2 text-xs">
+                {{ with .Param "version" }}
+                <span class="bg-primary/10 dark:bg-darkmode-primary/20 text-primary dark:text-darkmode-primary px-2 py-1 rounded">{{ . }}</span>
+                {{ end }}
+                {{ with .Param "license" }}
+                <span class="bg-body dark:bg-darkmode-body text-dark dark:text-white px-2 py-1 rounded">{{ . }}</span>
+                {{ end }}
+              </div>
+
+              <div class="flex gap-4 mt-4 text-sm">
+                <a href="{{ .Param "repo_url" }}" target="_blank" class="text-primary dark:text-darkmode-primary hover:underline">
+                  GitHub
+                </a>
+                {{ with .Param "documentation_url" }}
+                <a href="{{ . }}" target="_blank" class="text-primary dark:text-darkmode-primary hover:underline">
+                  Docs
+                </a>
+                {{ end }}
+              </div>
+            </div>
+            {{ end }}
+            {{ end }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{{ end }}

@@ -24,6 +24,13 @@
 {{ partial "basic-seo.html" . }}
 
 
+<!-- go vanity import meta tags (for /pkg/ section) -->
+{{ if .Param "import_path" }}
+<meta name="go-import" content="{{ .Param "import_path" }} git {{ .Param "repo_url" }}">
+<meta name="go-source" content="{{ .Param "import_path" }} {{ .Param "repo_url" }} {{ .Param "repo_url" }}/tree/main{/dir} {{ .Param "repo_url" }}/blob/main{/dir}/{file}#L{line}">
+{{ end }}
+
+
 <!-- custom script -->
 {{ partialCached "custom-script.html" . }}
 

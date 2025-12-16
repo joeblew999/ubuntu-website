@@ -1,7 +1,7 @@
 // playwright - Reusable browser automation CLI
 //
-// This tool provides a reusable Playwright-based browser automation
-// that can be used for OAuth flows, web scraping, and testing.
+// A thin CLI wrapper around browser automation packages.
+// Domain logic lives in internal/browser and internal/google/gmail.
 //
 // Usage:
 //
@@ -15,24 +15,21 @@
 //	-headless        Run browser in headless mode
 //	-timeout=120     Timeout in seconds (default: 120)
 //	-port=8085       Callback server port (default: 8085)
+//	-profile=DIR     Browser profile directory (reuses logins)
+//	-browser=ENGINE  Browser engine: chromium, firefox, webkit
+//	-chrome          Use system Chrome instead of bundled Chromium
 //	-version         Show version
-//
-// The oauth command starts a local callback server and opens the URL
-// in a Playwright-controlled browser. When the callback receives a
-// response, it extracts the code/token and returns it.
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/playwright-community/playwright-go"
+	"github.com/joeblew999/ubuntu-website/internal/browser"
+	"github.com/joeblew999/ubuntu-website/internal/browser/sites"
+	"github.com/joeblew999/ubuntu-website/internal/google/gmail"
 )
 
 var version = "dev"
@@ -43,6 +40,9 @@ func main() {
 		headless    = flag.Bool("headless", false, "Run browser in headless mode")
 		timeout     = flag.Int("timeout", 120, "Timeout in seconds")
 		port        = flag.Int("port", 8085, "Callback server port")
+		profile     = flag.String("profile", "", "Browser profile directory (reuses logins)")
+		useChrome   = flag.Bool("chrome", false, "Use system Chrome instead of Chromium")
+		browserFlag = flag.String("browser", "chromium", "Browser engine: chromium (default), firefox, webkit")
 		showVersion = flag.Bool("version", false, "Show version")
 	)
 	flag.Parse()
@@ -59,9 +59,12 @@ func main() {
 	}
 
 	app := &App{
-		headless: *headless,
-		timeout:  *timeout,
-		port:     *port,
+		headless:  *headless,
+		timeout:   *timeout,
+		port:      *port,
+		profile:   *profile,
+		useChrome: *useChrome,
+		browser:   *browserFlag,
 	}
 
 	if err := app.Run(args); err != nil {
@@ -70,295 +73,254 @@ func main() {
 	}
 }
 
+// App holds CLI configuration
 type App struct {
-	headless bool
-	timeout  int
-	port     int
+	headless  bool
+	timeout   int
+	port      int
+	profile   string
+	useChrome bool
+	browser   string
 }
 
+// browserEngine returns the browser engine from flag
+func (a *App) browserEngine() browser.BrowserEngine {
+	switch a.browser {
+	case "firefox":
+		return browser.BrowserFirefox
+	case "webkit", "safari":
+		return browser.BrowserWebKit
+	default:
+		return browser.BrowserChromium
+	}
+}
+
+// browserConfig creates a browser config based on app flags
+func (a *App) browserConfig() *browser.PlaywrightConfig {
+	config := &browser.PlaywrightConfig{
+		Engine:      a.browserEngine(),
+		Headless:    a.headless,
+		Timeout:     float64(a.timeout * 1000),
+		UserDataDir: a.profile,
+	}
+	if a.useChrome && config.Engine == browser.BrowserChromium {
+		config.Channel = "chrome"
+	}
+	return config
+}
+
+// automationConfig creates automation config for HIL flows
+func (a *App) automationConfig() *browser.AutomationConfig {
+	return &browser.AutomationConfig{
+		Engine:    a.browserEngine(),
+		Profile:   a.profile,
+		Headless:  a.headless,
+		Timeout:   time.Duration(a.timeout) * time.Second,
+		Verbose:   true,
+		UseChrome: a.useChrome,
+	}
+}
+
+// Run dispatches to the appropriate command handler
 func (a *App) Run(args []string) error {
 	cmd := args[0]
 	subArgs := args[1:]
 
 	switch cmd {
+	// Core browser commands
 	case "oauth":
-		if len(subArgs) < 1 {
-			return fmt.Errorf("oauth requires a URL: playwright oauth <url>")
-		}
-		return a.runOAuth(subArgs[0])
+		return a.runOAuth(subArgs)
 	case "open":
-		if len(subArgs) < 1 {
-			return fmt.Errorf("open requires a URL: playwright open <url>")
-		}
-		return a.runOpen(subArgs[0])
+		return a.runOpen(subArgs)
 	case "screenshot":
-		if len(subArgs) < 2 {
-			return fmt.Errorf("screenshot requires URL and filename: playwright screenshot <url> <file>")
-		}
-		return a.runScreenshot(subArgs[0], subArgs[1])
+		return a.runScreenshot(subArgs)
 	case "install":
 		return a.runInstall()
+
+	// Gmail commands - delegate to internal/google/gmail
+	case "gmail-sendas":
+		return a.runGmailSendAs(subArgs)
+	case "gmail-settings":
+		return a.runGmailSettings()
+	case "gmail-logout":
+		return a.runGmailLogout()
+	case "gmail-switch":
+		return a.runGmailSwitch()
+
+	// Cloudflare commands - delegate to internal/browser/sites
+	case "cloudflare":
+		return a.runCloudflare(subArgs)
+	case "cloudflare-email":
+		return a.runCloudflareEmail(subArgs)
+	case "cloudflare-email-add":
+		return a.runCloudflareEmailAdd(subArgs)
+	case "cloudflare-token":
+		return a.runCloudflareToken(subArgs)
+
 	default:
-		return fmt.Errorf("unknown command: %s", cmd)
+		return fmt.Errorf("unknown command: %s\nRun 'playwright' for usage", cmd)
 	}
 }
 
-// OAuthResult contains the result of an OAuth flow
-type OAuthResult struct {
-	Code  string            `json:"code,omitempty"`
-	Token string            `json:"token,omitempty"`
-	Error string            `json:"error,omitempty"`
-	Query map[string]string `json:"query,omitempty"`
+// =============================================================================
+// Core Browser Commands
+// =============================================================================
+
+func (a *App) runOAuth(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("oauth requires a URL: playwright oauth <url>")
+	}
+	config := &browser.CLIOAuthConfig{
+		URL:     args[0],
+		Port:    a.port,
+		Timeout: time.Duration(a.timeout) * time.Second,
+		Browser: a.browserConfig(),
+	}
+	_, err := browser.RunCLIOAuthFlow(config)
+	return err
 }
 
-// runOAuth starts an OAuth flow with a callback server
-func (a *App) runOAuth(authURL string) error {
-	fmt.Println("Starting OAuth flow...")
-	fmt.Printf("  URL: %s\n", authURL)
-	fmt.Printf("  Port: %d\n", a.port)
-	fmt.Printf("  Timeout: %ds\n", a.timeout)
+func (a *App) runOpen(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("open requires a URL: playwright open <url>")
+	}
+	return browser.OpenURLInPlaywright(args[0], time.Duration(a.timeout)*time.Second, a.browserConfig())
+}
+
+func (a *App) runScreenshot(args []string) error {
+	if len(args) < 2 {
+		return fmt.Errorf("screenshot requires URL and filename: playwright screenshot <url> <file>")
+	}
+	return browser.TakeScreenshot(args[0], args[1], a.browserConfig())
+}
+
+func (a *App) runInstall() error {
+	return browser.InstallBrowsers(a.browserEngine())
+}
+
+// =============================================================================
+// Gmail Commands - Delegate to internal/google/gmail
+// =============================================================================
+
+func (a *App) runGmailSendAs(args []string) error {
+	if len(args) < 5 {
+		printGmailSendAsUsage()
+		return nil
+	}
+	config := gmail.ParseSMTPConfig(args[0], args[1], args[2], args[3], args[4])
+	fmt.Println("🔧 Gmail 'Send mail as' Configuration")
+	fmt.Println("=====================================")
+	fmt.Printf("  Name:     %s\n", config.Name)
+	fmt.Printf("  Email:    %s\n", config.Email)
+	fmt.Printf("  SMTP:     %s:%s\n", config.SMTPHost, config.SMTPPort)
+	fmt.Printf("  Username: %s\n", config.SMTPUsername)
 	fmt.Println()
 
-	// Channels for results
-	resultChan := make(chan OAuthResult, 1)
-	errChan := make(chan error, 1)
+	automation := gmail.NewSettingsAutomation(config)
+	return automation.ConfigureSendAs()
+}
 
-	// Context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(a.timeout)*time.Second)
-	defer cancel()
+func (a *App) runGmailSettings() error {
+	fmt.Println("Opening Gmail Settings > Accounts...")
+	fmt.Println()
+	automation := gmail.NewSettingsAutomation(&gmail.SMTPConfig{})
+	return automation.OpenSettingsPage()
+}
 
-	// Start callback server
-	server := &http.Server{Addr: fmt.Sprintf(":%d", a.port)}
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		result := OAuthResult{
-			Query: make(map[string]string),
-		}
+func (a *App) runGmailLogout() error {
+	fmt.Println("Logging out of Google accounts...")
+	fmt.Println()
+	automation := gmail.NewSettingsAutomation(&gmail.SMTPConfig{})
+	return automation.Logout()
+}
 
-		// Extract all query parameters
-		for key, values := range r.URL.Query() {
-			if len(values) > 0 {
-				result.Query[key] = values[0]
-			}
-		}
+func (a *App) runGmailSwitch() error {
+	fmt.Println("Opening Google Account chooser...")
+	fmt.Println()
+	automation := gmail.NewSettingsAutomation(&gmail.SMTPConfig{})
+	return automation.SwitchAccount()
+}
 
-		// Check for common OAuth parameters
-		if code := r.URL.Query().Get("code"); code != "" {
-			result.Code = code
-		}
-		if token := r.URL.Query().Get("access_token"); token != "" {
-			result.Token = token
-		}
-		if errMsg := r.URL.Query().Get("error"); errMsg != "" {
-			result.Error = errMsg
-		}
+// =============================================================================
+// Cloudflare Commands - Delegate to internal/browser/sites
+// =============================================================================
 
-		// Send success response
-		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, `<!DOCTYPE html>
-<html>
-<head><title>Success</title></head>
-<body style="font-family: -apple-system, sans-serif; padding: 40px; text-align: center;">
-<h1 style="color: #22c55e;">Authentication Complete</h1>
-<p>You can close this window and return to the terminal.</p>
-</body>
-</html>`)
-
-		select {
-		case resultChan <- result:
-		default:
-		}
-	})
-	server.Handler = mux
-
-	go func() {
-		if err := server.ListenAndServe(); err != http.ErrServerClosed {
-			select {
-			case errChan <- fmt.Errorf("server error: %w", err):
-			default:
-			}
-		}
-	}()
-
-	// Install Playwright if needed
-	if err := playwright.Install(&playwright.RunOptions{
-		Browsers: []string{"chromium"},
-		Verbose:  false,
-	}); err != nil {
-		return fmt.Errorf("failed to install playwright: %w", err)
+func (a *App) runCloudflare(args []string) error {
+	domain := "ubuntusoftware.net"
+	page := ""
+	if len(args) > 0 {
+		page = args[0]
+	}
+	if len(args) > 1 {
+		domain = args[1]
 	}
 
-	// Start Playwright
-	pw, err := playwright.Run()
-	if err != nil {
-		return fmt.Errorf("could not start playwright: %w", err)
+	config := sites.DefaultCloudflareConfig(domain)
+	if a.profile != "" {
+		config.Profile = a.profile
 	}
-	defer pw.Stop()
+	cf := sites.NewCloudflareAutomation(config)
+	return cf.OpenDashboard(page)
+}
 
-	// Launch browser
-	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(a.headless),
-	})
-	if err != nil {
-		return fmt.Errorf("could not launch browser: %w", err)
-	}
-	defer browser.Close()
-
-	// Create page and navigate
-	page, err := browser.NewPage()
-	if err != nil {
-		return fmt.Errorf("could not create page: %w", err)
+func (a *App) runCloudflareEmail(args []string) error {
+	domain := "ubuntusoftware.net"
+	if len(args) > 0 {
+		domain = args[0]
 	}
 
-	fmt.Println("Opening browser...")
-	if _, err := page.Goto(authURL); err != nil {
-		return fmt.Errorf("could not navigate: %w", err)
+	config := sites.DefaultCloudflareConfig(domain)
+	if a.profile != "" {
+		config.Profile = a.profile
 	}
+	cf := sites.NewCloudflareAutomation(config)
+	return cf.OpenEmailRouting()
+}
 
-	fmt.Println("Waiting for callback...")
-
-	// Wait for result, error, or timeout
-	select {
-	case result := <-resultChan:
-		server.Shutdown(ctx)
-		browser.Close()
-
-		if result.Error != "" {
-			return fmt.Errorf("OAuth error: %s", result.Error)
-		}
-
-		// Output result as JSON for parsing by other tools
-		output, _ := json.MarshalIndent(result, "", "  ")
-		fmt.Println(string(output))
+func (a *App) runCloudflareEmailAdd(args []string) error {
+	if len(args) < 2 {
+		fmt.Println("Usage: playwright cloudflare-email-add <from-email> <to-email> [domain]")
+		fmt.Println()
+		fmt.Println("Examples:")
+		fmt.Println("  playwright cloudflare-email-add contact@ubuntusoftware.net gedw99@gmail.com")
+		fmt.Println("  playwright cloudflare-email-add info@example.com me@gmail.com example.com")
 		return nil
-
-	case err := <-errChan:
-		browser.Close()
-		server.Shutdown(ctx)
-		return err
-
-	case <-ctx.Done():
-		browser.Close()
-		server.Shutdown(context.Background())
-		return fmt.Errorf("timeout after %d seconds", a.timeout)
-	}
-}
-
-// runOpen opens a URL in Playwright browser (useful for debugging)
-func (a *App) runOpen(url string) error {
-	fmt.Printf("Opening %s...\n", url)
-
-	// Install if needed
-	if err := playwright.Install(&playwright.RunOptions{
-		Browsers: []string{"chromium"},
-		Verbose:  false,
-	}); err != nil {
-		return fmt.Errorf("failed to install playwright: %w", err)
 	}
 
-	pw, err := playwright.Run()
-	if err != nil {
-		return fmt.Errorf("could not start playwright: %w", err)
+	domain := "ubuntusoftware.net"
+	if len(args) > 2 {
+		domain = args[2]
 	}
-	defer pw.Stop()
 
-	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(a.headless),
+	config := sites.DefaultCloudflareConfig(domain)
+	if a.profile != "" {
+		config.Profile = a.profile
+	}
+	cf := sites.NewCloudflareAutomation(config)
+	return cf.AddEmailRoutingRule(&sites.EmailRoutingRule{
+		FromAddress: args[0],
+		ToAddress:   args[1],
 	})
-	if err != nil {
-		return fmt.Errorf("could not launch browser: %w", err)
-	}
-	defer browser.Close()
-
-	page, err := browser.NewPage()
-	if err != nil {
-		return fmt.Errorf("could not create page: %w", err)
-	}
-
-	if _, err := page.Goto(url); err != nil {
-		return fmt.Errorf("could not navigate: %w", err)
-	}
-
-	fmt.Println("Browser open. Press Ctrl+C to close.")
-
-	// Wait for timeout or interrupt
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(a.timeout)*time.Second)
-	defer cancel()
-	<-ctx.Done()
-
-	return nil
 }
 
-// runScreenshot takes a screenshot of a URL
-func (a *App) runScreenshot(url, filename string) error {
-	fmt.Printf("Taking screenshot of %s...\n", url)
-
-	// Install if needed
-	if err := playwright.Install(&playwright.RunOptions{
-		Browsers: []string{"chromium"},
-		Verbose:  false,
-	}); err != nil {
-		return fmt.Errorf("failed to install playwright: %w", err)
+func (a *App) runCloudflareToken(args []string) error {
+	domain := "ubuntusoftware.net"
+	envFile := ".env"
+	if len(args) > 0 {
+		envFile = args[0]
 	}
 
-	pw, err := playwright.Run()
-	if err != nil {
-		return fmt.Errorf("could not start playwright: %w", err)
+	config := sites.DefaultCloudflareConfig(domain)
+	if a.profile != "" {
+		config.Profile = a.profile
 	}
-	defer pw.Stop()
-
-	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(true), // Always headless for screenshots
-	})
-	if err != nil {
-		return fmt.Errorf("could not launch browser: %w", err)
-	}
-	defer browser.Close()
-
-	page, err := browser.NewPage()
-	if err != nil {
-		return fmt.Errorf("could not create page: %w", err)
-	}
-
-	if _, err := page.Goto(url); err != nil {
-		return fmt.Errorf("could not navigate: %w", err)
-	}
-
-	// Wait for page to load
-	page.WaitForLoadState(playwright.PageWaitForLoadStateOptions{
-		State: playwright.LoadStateNetworkidle,
-	})
-
-	// Ensure filename has extension
-	if !strings.HasSuffix(filename, ".png") && !strings.HasSuffix(filename, ".jpg") {
-		filename = filename + ".png"
-	}
-
-	if _, err := page.Screenshot(playwright.PageScreenshotOptions{
-		Path:     playwright.String(filename),
-		FullPage: playwright.Bool(true),
-	}); err != nil {
-		return fmt.Errorf("could not take screenshot: %w", err)
-	}
-
-	fmt.Printf("Screenshot saved to %s\n", filename)
-	return nil
+	cf := sites.NewCloudflareAutomation(config)
+	return cf.SetupAPIToken(envFile)
 }
 
-// runInstall installs Playwright browsers
-func (a *App) runInstall() error {
-	fmt.Println("Installing Playwright browsers...")
-
-	if err := playwright.Install(&playwright.RunOptions{
-		Browsers: []string{"chromium"},
-		Verbose:  true,
-	}); err != nil {
-		return fmt.Errorf("failed to install: %w", err)
-	}
-
-	fmt.Println("Installation complete!")
-	return nil
-}
+// =============================================================================
+// Usage
+// =============================================================================
 
 func printUsage() {
 	fmt.Println("playwright - Reusable browser automation CLI")
@@ -371,15 +333,43 @@ func printUsage() {
 	fmt.Println("  open <url>               Open URL in Playwright browser")
 	fmt.Println("  screenshot <url> <file>  Take screenshot of URL")
 	fmt.Println("  install                  Install Playwright browsers")
+	fmt.Println("  gmail-sendas <args>      Configure Gmail 'Send mail as' with SMTP relay")
+	fmt.Println("  gmail-settings           Open Gmail settings page (manual setup)")
+	fmt.Println("  gmail-logout             Logout of Google accounts (clear session)")
+	fmt.Println("  gmail-switch             Open Google account chooser (add/switch)")
+	fmt.Println("  cloudflare [page]        Open Cloudflare dashboard (email|pages|dns)")
+	fmt.Println("  cloudflare-email [domain] Open Cloudflare Email Routing")
+	fmt.Println("  cloudflare-email-add <from> <to> Add email forwarding rule (HIL)")
+	fmt.Println("  cloudflare-token         Setup Cloudflare API token (guided)")
 	fmt.Println()
 	fmt.Println("Flags:")
+	fmt.Println("  -browser=ENGINE  Browser engine: chromium (default), firefox, webkit")
 	fmt.Println("  -headless        Run browser in headless mode")
 	fmt.Println("  -timeout=120     Timeout in seconds (default: 120)")
 	fmt.Println("  -port=8085       Callback server port (default: 8085)")
+	fmt.Println("  -profile=DIR     Browser profile directory (reuses logins)")
+	fmt.Println("  -chrome          Use system Chrome instead of Chromium")
 	fmt.Println("  -version         Show version")
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  playwright oauth 'https://accounts.google.com/...'")
 	fmt.Println("  playwright -headless screenshot https://example.com shot.png")
 	fmt.Println("  playwright install")
+	fmt.Println("  playwright gmail-sendas 'Name' 'email@domain.com' smtp2go 'user' 'pass'")
+	fmt.Println("  playwright -profile=~/.my-profile cloudflare email")
+}
+
+func printGmailSendAsUsage() {
+	fmt.Println("Usage: playwright gmail-sendas <name> <email> <provider> <user> <pass>")
+	fmt.Println()
+	fmt.Println("Pre-configured providers:")
+	fmt.Println("  smtp2go - mail.smtp2go.com:587")
+	fmt.Println("  brevo   - smtp-relay.brevo.com:587")
+	fmt.Println("  resend  - smtp.resend.com:587")
+	fmt.Println()
+	fmt.Println("Or use custom SMTP host as provider.")
+	fmt.Println()
+	fmt.Println("Examples:")
+	fmt.Println("  playwright gmail-sendas 'Gerard Webb' 'gerard@domain.com' smtp2go 'user' 'pass'")
+	fmt.Println("  playwright gmail-sendas 'Name' 'me@domain.com' 'smtp.example.com' 'user' 'pass'")
 }

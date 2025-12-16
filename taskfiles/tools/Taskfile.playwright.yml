@@ -148,8 +148,8 @@ tasks:
   release:build:
     desc: Build playwright for release
     cmds:
-      - mkdir -p .build
-      - go build -o ".build/{{.PLAYWRIGHT_BIN}}" ./cmd/playwright
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.PLAYWRIGHT_BIN}}" ./cmd/playwright
 
   # ===========================================================================
   # Examples - Show how to use playwright tool
@@ -206,3 +206,192 @@ tasks:
         echo "  task playwright:oauth URL='https://connect.mailerlite.com/oauth/authorize?...'"
         echo ""
         echo "Then parse the JSON output and exchange the code for tokens."
+
+  # ===========================================================================
+  # Gmail Settings Automation
+  # ===========================================================================
+
+  gmail:settings:
+    desc: Open Gmail Settings > Accounts page (manual setup)
+    summary: |
+      Opens Gmail settings in a Playwright browser for manual "Send mail as" configuration.
+      Use this if you want to configure manually with guidance.
+    deps: [check:deps]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} gmail-settings'
+
+  gmail:sendas:
+    desc: 'Configure Gmail "Send mail as" with SMTP relay (NAME=x EMAIL=x PROVIDER=smtp2go USER=x PASS=x)'
+    summary: |
+      Automates Gmail "Send mail as" configuration using Playwright.
+      Opens Gmail settings and fills in the SMTP relay details.
+
+      Variables:
+        NAME     - Display name for "From" field (required)
+        EMAIL    - Email address to send from (required)
+        PROVIDER - SMTP provider: smtp2go, brevo, resend, or custom host (required)
+        USER     - SMTP username (required)
+        PASS     - SMTP password (required)
+
+      Examples:
+        # SMTP2GO:
+        task playwright:gmail:sendas NAME="Gerard Webb" EMAIL="gerard.webb@ubuntusoftware.net" \
+          PROVIDER=smtp2go USER="myuser" PASS="mypassword"
+
+        # Brevo:
+        task playwright:gmail:sendas NAME="Gerard Webb" EMAIL="gerard.webb@ubuntusoftware.net" \
+          PROVIDER=brevo USER="myuser" PASS="myapikey"
+
+        # Custom SMTP host:
+        task playwright:gmail:sendas NAME="Gerard Webb" EMAIL="me@example.com" \
+          PROVIDER="smtp.example.com" USER="myuser" PASS="mypassword"
+    deps: [check:deps]
+    requires:
+      vars: [NAME, EMAIL, PROVIDER, USER, PASS]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} gmail-sendas "{{.NAME}}" "{{.EMAIL}}" "{{.PROVIDER}}" "{{.USER}}" "{{.PASS}}"'
+
+  gmail:sendas:smtp2go:
+    desc: 'Configure Gmail "Send mail as" with SMTP2GO (NAME=x EMAIL=x USER=x PASS=x)'
+    summary: |
+      Configure Gmail "Send mail as" using SMTP2GO credentials.
+
+      Can use environment variables from .env:
+        SMTP2GO_USERNAME - SMTP username (default from .env)
+        SMTP2GO_PASSWORD - SMTP password (default from .env)
+
+      Or override with task variables:
+        USER - Override SMTP username
+        PASS - Override SMTP password
+    deps: [check:deps]
+    requires:
+      vars: [NAME, EMAIL]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} gmail-sendas "{{.NAME}}" "{{.EMAIL}}" smtp2go "{{.USER}}" "{{.PASS}}"'
+    vars:
+      USER: '{{.USER | default .SMTP2GO_USERNAME}}'
+      PASS: '{{.PASS | default .SMTP2GO_PASSWORD}}'
+    env:
+      SMTP2GO_USERNAME: '{{.SMTP2GO_USERNAME | default "ubuntusoftware.net"}}'
+      SMTP2GO_PASSWORD: '{{.SMTP2GO_PASSWORD}}'
+
+  gmail:sendas:brevo:
+    desc: 'Configure Gmail "Send mail as" with Brevo (NAME=x EMAIL=x USER=x PASS=x)'
+    deps: [check:deps]
+    requires:
+      vars: [NAME, EMAIL, USER, PASS]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} gmail-sendas "{{.NAME}}" "{{.EMAIL}}" brevo "{{.USER}}" "{{.PASS}}"'
+
+  gmail:sendas:resend:
+    desc: 'Configure Gmail "Send mail as" with Resend (NAME=x EMAIL=x APIKEY=x)'
+    deps: [check:deps]
+    requires:
+      vars: [NAME, EMAIL, APIKEY]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} gmail-sendas "{{.NAME}}" "{{.EMAIL}}" resend "resend" "{{.APIKEY}}"'
+
+  gmail:logout:
+    desc: Logout of Google accounts in Gmail automation profile
+    summary: |
+      Clears Google account sessions from the persistent Gmail browser profile.
+      Use this when you want to switch to a different Google account.
+
+      The profile is stored at: ~/.playwright-profile-gmail
+    deps: [check:deps]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} gmail-logout'
+
+  gmail:switch:
+    desc: Open Google Account chooser (add or switch accounts)
+    summary: |
+      Opens the Google Account chooser in the persistent Gmail browser profile.
+      You can add additional Google accounts or switch between them.
+
+      Google supports multiple accounts in one browser session - use this to:
+        - Add joeblew99@gmail.com alongside gedw99@gmail.com
+        - Switch between accounts for different "Send mail as" configurations
+    deps: [check:deps]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} gmail-switch'
+
+  # ===========================================================================
+  # Cloudflare Browser Automation
+  # ===========================================================================
+
+  cloudflare:
+    desc: Open Cloudflare dashboard in browser (with persistent profile)
+    summary: |
+      Opens Cloudflare dashboard in a Playwright browser with optional persistent profile.
+      Log in once, and the session is saved for future use.
+
+      Usage:
+        task playwright:cloudflare                    # Open main dashboard
+        task playwright:cloudflare -- email           # Email Routing
+        task playwright:cloudflare -- pages           # Pages dashboard
+        task playwright:cloudflare -- dns mydomain.com # DNS for specific domain
+    deps: [check:deps]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} -profile={{.PROFILE}} cloudflare {{.CLI_ARGS}}'
+    vars:
+      PROFILE: '{{.PROFILE | default "~/.playwright-cloudflare"}}'
+
+  cloudflare:email:
+    desc: Open Cloudflare Email Routing (DOMAIN=ubuntusoftware.net)
+    summary: |
+      Opens Cloudflare Email Routing page to configure email forwarding rules.
+      Use this to set up forwarding from custom addresses to your Gmail.
+
+      Steps:
+        1. Run this task - browser opens to Email Routing
+        2. Log in if needed (session saved with -profile)
+        3. Click "Create address"
+        4. Enter custom address (e.g., contact@domain.com)
+        5. Select destination (e.g., you@gmail.com)
+        6. Save
+
+      After adding the rule, Gmail verification emails will arrive at your destination.
+    deps: [check:deps]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} -profile={{.PROFILE}} cloudflare-email "{{.DOMAIN}}"'
+    vars:
+      DOMAIN: '{{.DOMAIN | default "ubuntusoftware.net"}}'
+      PROFILE: '{{.PROFILE | default "~/.playwright-cloudflare"}}'
+
+  cloudflare:email:add:
+    desc: 'Add email forwarding rule with HIL automation (FROM=x TO=x)'
+    summary: |
+      Human-in-the-Loop (HIL) automation for adding Cloudflare Email Routing rule.
+      You log in and pass captcha, then automation takes over to add the rule.
+
+      Variables:
+        FROM - Source email address (e.g., contact@ubuntusoftware.net)
+        TO   - Destination email address (e.g., gedw99@gmail.com)
+    deps: [check:deps]
+    requires:
+      vars: [FROM, TO]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} -profile={{.PROFILE}} cloudflare-email-add "{{.FROM}}" "{{.TO}}" "{{.DOMAIN}}"'
+    vars:
+      DOMAIN: '{{.FROM | splitList "@" | last}}'
+      PROFILE: '{{.PROFILE | default "~/.playwright-cloudflare"}}'
+
+  cloudflare:token:
+    desc: Setup Cloudflare API token (guided browser flow)
+    summary: |
+      Guides you through creating a Cloudflare API token with correct permissions.
+
+      Flow:
+        1. Opens Cloudflare API Tokens page in browser
+        2. You log in and create a token with Email Routing permissions
+        3. Copy the token and paste it in the terminal
+        4. Token is verified and saved to .env
+
+      After setup, you can use API-based commands like:
+        task cf:email:status
+        task cf:email:add FROM=x TO=y
+    deps: [check:deps]
+    cmds:
+      - '{{.PLAYWRIGHT_CMD}} -profile={{.PROFILE}} cloudflare-token'
+    vars:
+      PROFILE: '{{.PROFILE | default "~/.playwright-cloudflare"}}'

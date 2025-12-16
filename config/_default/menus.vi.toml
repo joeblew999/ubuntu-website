@@ -1,0 +1,181 @@
+############# vi navigation ##############
+
+# main menu
+# Note: "Home" removed - logo already links to home, saves nav space
+
+[[main]]
+name = "Nền tảng"
+url = "/platform"
+weight = 1
+hasChildren = true
+
+[[main]]
+name = "Xuất bản"
+url = "/platform/publish"
+parent = "Nền tảng"
+weight = 1
+
+[[main]]
+name = "Không gian"
+url = "/platform/spatial"
+parent = "Nền tảng"
+weight = 2
+
+[[main]]
+name = "Nền móng"
+url = "/platform/foundation"
+parent = "Nền tảng"
+weight = 3
+
+[[main]]
+name = "Cảm biến"
+url = "/platform/sensing"
+parent = "Nền tảng"
+weight = 4
+
+[[main]]
+name = "Giải pháp"
+url = "/applications"
+weight = 2
+hasChildren = true
+
+[[main]]
+name = "Tổng quan"
+identifier = "solutions-overview"
+url = "/applications"
+parent = "Giải pháp"
+weight = 1
+
+[[main]]
+name = "Sản xuất & Xây dựng"
+url = "/applications/manufacturing"
+parent = "Giải pháp"
+weight = 2
+
+[[main]]
+name = "Robot & Mô phỏng"
+url = "/applications/robotics"
+parent = "Giải pháp"
+weight = 3
+
+[[main]]
+name = "Chính phủ & Y tế"
+url = "/applications/government"
+parent = "Giải pháp"
+weight = 4
+
+[[main]]
+name = "Dịch vụ Tài chính"
+url = "/applications/financial"
+parent = "Giải pháp"
+weight = 5
+
+[[main]]
+name = "Nhà phát triển"
+url = "/pkg"
+weight = 3
+hasChildren = true
+
+[[main]]
+name = "Gói phần mềm"
+identifier = "developers-packages"
+url = "/pkg"
+parent = "Nhà phát triển"
+weight = 1
+
+[[main]]
+name = "Công nghệ"
+url = "/technology"
+parent = "Nhà phát triển"
+weight = 2
+
+[[main]]
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "Nhà phát triển"
+weight = 3
+
+[[main]]
+name = "Công ty"
+url = "/company"
+weight = 4
+hasChildren = true
+
+[[main]]
+name = "Giới thiệu"
+identifier = "company-about"
+url = "/company"
+parent = "Công ty"
+weight = 1
+
+[[main]]
+name = "Nhà sáng lập"
+url = "/company/founder"
+parent = "Công ty"
+weight = 2
+
+[[main]]
+name = "Kinh nghiệm"
+url = "/company/experience"
+parent = "Công ty"
+weight = 3
+
+[[main]]
+name = "Blog"
+url = "/blog"
+parent = "Công ty"
+weight = 4
+
+[[main]]
+name = "Liên hệ"
+url = "/contact"
+parent = "Công ty"
+weight = 5
+
+
+# footer menu
+[[footer]]
+name = "Nền tảng"
+url = "/platform"
+weight = 1
+
+[[footer]]
+name = "Giải pháp"
+url = "/applications"
+weight = 2
+
+[[footer]]
+name = "Nhà phát triển"
+url = "/pkg"
+weight = 3
+
+[[footer]]
+name = "Blog"
+url = "/blog"
+weight = 4
+
+[[footer]]
+name = "Liên hệ"
+url = "/contact"
+weight = 5
+
+[[footer]]
+name = "Bắt đầu"
+url = "/get-started"
+weight = 6
+
+[[footer]]
+name = "Bảo mật"
+url = "/security"
+weight = 7
+
+[[footer]]
+name = "Chính sách Bảo mật"
+url = "/privacy-policy"
+weight = 8
+
+[[footer]]
+name = "Điều khoản Dịch vụ"
+url = "/terms-of-service"
+weight = 9
+

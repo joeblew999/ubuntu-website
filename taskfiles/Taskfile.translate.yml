@@ -189,10 +189,10 @@ tasks:
   release:build:
     desc: Build translate for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - mkdir -p .build
-      - go build -o ".build/{{.TRANSLATE_BIN}}" ./cmd/translate
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.TRANSLATE_BIN}}" ./cmd/translate
 
   release:test:
     desc: Test built translate release binary
     cmds:
-      - .build/{{.TRANSLATE_BIN}} -h || true
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.TRANSLATE_BIN}} -h || true"

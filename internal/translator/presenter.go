@@ -151,20 +151,48 @@ func (p *TerminalPresenter) Diff(r DiffResult) {
 func (p *TerminalPresenter) Missing(r MissingResult) {
 	p.header("Missing Content Files by Language")
 
-	// Need ordered language list - we'll pass it through result
-	for langCode, files := range r.ByLanguage {
+	// Show per-language breakdown with character counts
+	for langName, files := range r.ByLanguageFiles {
 		if len(files) > 0 {
-			fmt.Fprintf(p.w, "MISSING: %s: Missing %d files\n", langCode, len(files))
+			// Calculate total chars for this language
+			var langChars int64
 			for _, f := range files {
-				fmt.Fprintf(p.w, "  - %s\n", f)
+				langChars += f.CharCount
+			}
+			fmt.Fprintf(p.w, "MISSING: %s: Missing %d files (~%s chars)\n", langName, len(files), formatChars(langChars))
+			for _, f := range files {
+				fmt.Fprintf(p.w, "  - %s (%s chars)\n", f.Path, formatChars(f.CharCount))
 			}
 			fmt.Fprintln(p.w)
 		} else {
-			fmt.Fprintf(p.w, "OK: %s: Complete\n", langCode)
+			fmt.Fprintf(p.w, "OK: %s: Complete\n", langName)
 		}
 	}
 
+	// Show total summary
+	if r.TotalChars > 0 {
+		fmt.Fprintf(p.w, "Total: %d files, ~%s characters\n", r.TotalCount, formatChars(r.TotalChars))
+		fmt.Fprintln(p.w, "(Actual API usage may be lower - front matter, code blocks, etc. are not translated)")
+	}
+
 	p.footer()
+}
+
+// formatChars formats a character count with comma separators
+func formatChars(n int64) string {
+	str := fmt.Sprintf("%d", n)
+	if len(str) <= 3 {
+		return str
+	}
+
+	var result []byte
+	for i, c := range str {
+		if i > 0 && (len(str)-i)%3 == 0 {
+			result = append(result, ',')
+		}
+		result = append(result, byte(c))
+	}
+	return string(result)
 }
 
 // Stale formats stale translations for terminal.
@@ -607,14 +635,26 @@ func (p *MarkdownPresenter) Missing(r MissingResult) {
 	fmt.Fprintln(p.w, "## Missing Translations")
 	fmt.Fprintln(p.w)
 
-	for langCode, files := range r.ByLanguage {
+	// Use ByLanguageFiles for character counts
+	for langName, files := range r.ByLanguageFiles {
 		if len(files) > 0 {
-			fmt.Fprintf(p.w, "### %s (%d files)\n", langCode, len(files))
+			// Calculate total chars for this language
+			var langChars int64
 			for _, f := range files {
-				fmt.Fprintf(p.w, "- `%s`\n", f)
+				langChars += f.CharCount
+			}
+			fmt.Fprintf(p.w, "### %s (%d files, ~%s chars)\n", langName, len(files), formatChars(langChars))
+			for _, f := range files {
+				fmt.Fprintf(p.w, "- `%s` (%s chars)\n", f.Path, formatChars(f.CharCount))
 			}
 			fmt.Fprintln(p.w)
 		}
+	}
+
+	// Show total summary
+	if r.TotalChars > 0 {
+		fmt.Fprintf(p.w, "**Total:** %d files, ~%s characters\n", r.TotalCount, formatChars(r.TotalChars))
+		fmt.Fprintln(p.w, "\n_Note: Actual API usage may be lower - front matter, code blocks, etc. are not translated._")
 	}
 }
 

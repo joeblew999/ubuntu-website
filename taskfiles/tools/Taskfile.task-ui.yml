@@ -50,13 +50,13 @@ tasks:
   release:build:
     desc: Build task-ui for release (current platform, or set GOOS/GOARCH)
     cmds:
-      - mkdir -p .build
-      - go build -o ".build/{{.TUI_BIN}}" ./cmd/task-ui
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.TUI_BIN}}" ./cmd/task-ui
 
   release:test:
     desc: Test built task-ui release binary
     cmds:
-      - .build/{{.TUI_BIN}} --help || true
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.TUI_BIN}} --help || true"
 
   release:publish:
     desc: Build all platforms and create GitHub release

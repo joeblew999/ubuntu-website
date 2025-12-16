@@ -1,0 +1,275 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Blog header: Google Workspace via MCP -->
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="white"/>
+
+  <!-- Title area -->
+  <text x="600" y="50" font-family="sans-serif" font-size="26" fill="#333" text-anchor="middle" font-weight="bold">Google Workspace via MCP: Zero-Config AI Integration</text>
+  <text x="600" y="75" font-family="sans-serif" font-size="14" fill="#999" text-anchor="middle">One command. Full access. Local control.</text>
+
+  <!-- Left side: Single Command Setup -->
+  <g transform="translate(60, 100)">
+    <rect x="0" y="0" width="300" height="180" rx="8" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+    <rect x="0" y="0" width="300" height="35" rx="8" fill="#1a1a1a"/>
+    <rect x="0" y="25" width="300" height="10" fill="#1a1a1a"/>
+
+    <!-- Terminal dots -->
+    <circle cx="18" cy="17" r="6" fill="#ff5f57"/>
+    <circle cx="38" cy="17" r="6" fill="#febc2e"/>
+    <circle cx="58" cy="17" r="6" fill="#28c840"/>
+
+    <!-- Terminal content -->
+    <text x="20" y="60" font-family="monospace" font-size="11" fill="#666">$</text>
+    <text x="35" y="60" font-family="monospace" font-size="11" fill="#333" font-weight="bold">task google-mcp:setup</text>
+
+    <!-- Progress indicators -->
+    <text x="20" y="85" font-family="monospace" font-size="10" fill="#28c840">✓</text>
+    <text x="35" y="85" font-family="monospace" font-size="10" fill="#666">Installing MCP server...</text>
+
+    <text x="20" y="105" font-family="monospace" font-size="10" fill="#28c840">✓</text>
+    <text x="35" y="105" font-family="monospace" font-size="10" fill="#666">Opening authentication...</text>
+
+    <text x="20" y="125" font-family="monospace" font-size="10" fill="#28c840">✓</text>
+    <text x="35" y="125" font-family="monospace" font-size="10" fill="#666">Configuring Claude Code...</text>
+
+    <text x="20" y="145" font-family="monospace" font-size="10" fill="#28c840">✓</text>
+    <text x="35" y="145" font-family="monospace" font-size="10" fill="#666">Verifying connection...</text>
+
+    <text x="20" y="168" font-family="monospace" font-size="11" fill="#28c840" font-weight="bold">🎉 Setup complete!</text>
+  </g>
+
+  <!-- Arrow from setup to services -->
+  <g transform="translate(370, 175)">
+    <path d="M 0 15 L 40 15" stroke="#58a6ff" stroke-width="3"/>
+    <polygon points="45,15 35,8 35,22" fill="#58a6ff"/>
+  </g>
+
+  <!-- Center: MCP Protocol Hub -->
+  <g transform="translate(420, 115)">
+    <rect x="0" y="0" width="120" height="150" rx="12" fill="#58a6ff" stroke="#3d8bdb" stroke-width="2"/>
+
+    <text x="60" y="30" font-family="sans-serif" font-size="14" fill="white" text-anchor="middle" font-weight="bold">MCP</text>
+    <text x="60" y="48" font-family="sans-serif" font-size="9" fill="white" text-anchor="middle" opacity="0.9">Model Context</text>
+    <text x="60" y="60" font-family="sans-serif" font-size="9" fill="white" text-anchor="middle" opacity="0.9">Protocol</text>
+
+    <!-- AI Brain icon -->
+    <g transform="translate(35, 70)">
+      <circle cx="25" cy="25" r="22" fill="white" stroke="#3d8bdb" stroke-width="2"/>
+      <!-- Neural network -->
+      <circle cx="15" cy="18" r="4" fill="#58a6ff"/>
+      <circle cx="35" cy="18" r="4" fill="#58a6ff"/>
+      <circle cx="25" cy="32" r="4" fill="#58a6ff"/>
+      <circle cx="12" cy="35" r="3" fill="#58a6ff"/>
+      <circle cx="38" cy="35" r="3" fill="#58a6ff"/>
+      <line x1="15" y1="18" x2="25" y2="32" stroke="#58a6ff" stroke-width="1.5"/>
+      <line x1="35" y1="18" x2="25" y2="32" stroke="#58a6ff" stroke-width="1.5"/>
+      <line x1="15" y1="18" x2="35" y2="18" stroke="#58a6ff" stroke-width="1.5"/>
+      <line x1="12" y1="35" x2="25" y2="32" stroke="#58a6ff" stroke-width="1.5"/>
+      <line x1="38" y1="35" x2="25" y2="32" stroke="#58a6ff" stroke-width="1.5"/>
+    </g>
+
+    <text x="60" y="140" font-family="sans-serif" font-size="8" fill="white" text-anchor="middle" opacity="0.8">LOCAL PROCESSING</text>
+  </g>
+
+  <!-- Arrows to Google services -->
+  <g transform="translate(545, 130)">
+    <path d="M 0 10 L 35 -20" stroke="#58a6ff" stroke-width="2"/>
+    <path d="M 0 40 L 35 20" stroke="#58a6ff" stroke-width="2"/>
+    <path d="M 0 70 L 35 60" stroke="#58a6ff" stroke-width="2"/>
+    <path d="M 0 100 L 35 100" stroke="#58a6ff" stroke-width="2"/>
+    <path d="M 0 130 L 35 140" stroke="#58a6ff" stroke-width="2"/>
+    <path d="M 0 160 L 35 180" stroke="#58a6ff" stroke-width="2"/>
+  </g>
+
+  <!-- Right side: Google Services Grid -->
+  <g transform="translate(590, 95)">
+    <rect x="0" y="0" width="550" height="190" rx="8" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+    <rect x="0" y="0" width="550" height="30" rx="8" fill="#e8e8e8"/>
+    <rect x="0" y="22" width="550" height="8" fill="#e8e8e8"/>
+    <text x="275" y="21" font-family="sans-serif" font-size="12" fill="#666" text-anchor="middle" font-weight="bold">GOOGLE WORKSPACE - FULL ACCESS</text>
+
+    <!-- Gmail -->
+    <g transform="translate(20, 45)">
+      <rect x="0" y="0" width="80" height="65" rx="4" fill="white" stroke="#ea4335" stroke-width="1.5"/>
+      <rect x="10" y="12" width="60" height="35" rx="2" fill="#fce4ec"/>
+      <path d="M 10 12 L 40 32 L 70 12" stroke="#ea4335" stroke-width="2" fill="none"/>
+      <text x="40" y="60" font-family="sans-serif" font-size="9" fill="#ea4335" text-anchor="middle" font-weight="bold">Gmail</text>
+    </g>
+
+    <!-- Calendar -->
+    <g transform="translate(110, 45)">
+      <rect x="0" y="0" width="80" height="65" rx="4" fill="white" stroke="#4285f4" stroke-width="1.5"/>
+      <rect x="15" y="10" width="50" height="38" rx="2" fill="#e3f2fd"/>
+      <rect x="15" y="10" width="50" height="10" fill="#4285f4"/>
+      <text x="40" y="18" font-family="sans-serif" font-size="7" fill="white" text-anchor="middle">DEC</text>
+      <text x="40" y="40" font-family="sans-serif" font-size="14" fill="#4285f4" text-anchor="middle" font-weight="bold">15</text>
+      <text x="40" y="60" font-family="sans-serif" font-size="9" fill="#4285f4" text-anchor="middle" font-weight="bold">Calendar</text>
+    </g>
+
+    <!-- Drive -->
+    <g transform="translate(200, 45)">
+      <rect x="0" y="0" width="80" height="65" rx="4" fill="white" stroke="#34a853" stroke-width="1.5"/>
+      <g transform="translate(20, 8)">
+        <polygon points="20,0 40,35 0,35" fill="#4285f4"/>
+        <polygon points="20,12 35,35 5,35" fill="#34a853"/>
+        <polygon points="20,20 30,35 10,35" fill="#fbbc05"/>
+      </g>
+      <text x="40" y="60" font-family="sans-serif" font-size="9" fill="#34a853" text-anchor="middle" font-weight="bold">Drive</text>
+    </g>
+
+    <!-- Sheets -->
+    <g transform="translate(290, 45)">
+      <rect x="0" y="0" width="80" height="65" rx="4" fill="white" stroke="#0f9d58" stroke-width="1.5"/>
+      <rect x="15" y="10" width="50" height="38" rx="2" fill="#e8f5e9"/>
+      <!-- Grid lines -->
+      <line x1="15" y1="22" x2="65" y2="22" stroke="#0f9d58" stroke-width="1"/>
+      <line x1="15" y1="34" x2="65" y2="34" stroke="#0f9d58" stroke-width="1"/>
+      <line x1="35" y1="10" x2="35" y2="48" stroke="#0f9d58" stroke-width="1"/>
+      <line x1="50" y1="10" x2="50" y2="48" stroke="#0f9d58" stroke-width="1"/>
+      <text x="40" y="60" font-family="sans-serif" font-size="9" fill="#0f9d58" text-anchor="middle" font-weight="bold">Sheets</text>
+    </g>
+
+    <!-- Docs -->
+    <g transform="translate(380, 45)">
+      <rect x="0" y="0" width="80" height="65" rx="4" fill="white" stroke="#4285f4" stroke-width="1.5"/>
+      <rect x="15" y="10" width="50" height="38" rx="2" fill="#e3f2fd"/>
+      <rect x="20" y="16" width="30" height="3" fill="#4285f4"/>
+      <rect x="20" y="23" width="40" height="3" fill="#90caf9"/>
+      <rect x="20" y="30" width="35" height="3" fill="#90caf9"/>
+      <rect x="20" y="37" width="40" height="3" fill="#90caf9"/>
+      <text x="40" y="60" font-family="sans-serif" font-size="9" fill="#4285f4" text-anchor="middle" font-weight="bold">Docs</text>
+    </g>
+
+    <!-- Slides -->
+    <g transform="translate(470, 45)">
+      <rect x="0" y="0" width="60" height="65" rx="4" fill="white" stroke="#fbbc05" stroke-width="1.5"/>
+      <rect x="10" y="12" width="40" height="30" rx="2" fill="#fff8e1"/>
+      <rect x="15" y="17" width="20" height="4" fill="#fbbc05"/>
+      <rect x="15" y="25" width="30" height="3" fill="#ffe082"/>
+      <rect x="15" y="32" width="25" height="3" fill="#ffe082"/>
+      <text x="30" y="60" font-family="sans-serif" font-size="9" fill="#fbbc05" text-anchor="middle" font-weight="bold">Slides</text>
+    </g>
+
+    <!-- Capabilities row -->
+    <g transform="translate(20, 120)">
+      <rect x="0" y="0" width="510" height="55" rx="4" fill="white" stroke="#ccc" stroke-width="1"/>
+
+      <text x="15" y="18" font-family="sans-serif" font-size="9" fill="#666" font-weight="bold">Natural Language Actions:</text>
+
+      <text x="15" y="35" font-family="sans-serif" font-size="8" fill="#999">"Show emails about the proposal"</text>
+      <text x="180" y="35" font-family="sans-serif" font-size="8" fill="#999">"What's on my calendar tomorrow?"</text>
+      <text x="370" y="35" font-family="sans-serif" font-size="8" fill="#999">"Create a doc from this"</text>
+
+      <text x="15" y="48" font-family="sans-serif" font-size="8" fill="#999">"Add to the budget spreadsheet"</text>
+      <text x="180" y="48" font-family="sans-serif" font-size="8" fill="#999">"Draft a reply to Sarah"</text>
+      <text x="370" y="48" font-family="sans-serif" font-size="8" fill="#999">"Search Drive for contracts"</text>
+    </g>
+  </g>
+
+  <!-- Bottom section: Key Benefits -->
+  <g transform="translate(60, 310)">
+    <rect x="0" y="0" width="1080" height="130" rx="8" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+    <rect x="0" y="0" width="1080" height="30" rx="8" fill="#e8e8e8"/>
+    <rect x="0" y="22" width="1080" height="8" fill="#e8e8e8"/>
+    <text x="540" y="21" font-family="sans-serif" font-size="12" fill="#666" text-anchor="middle" font-weight="bold">WHY THIS MATTERS</text>
+
+    <!-- Benefit 1: Zero Config -->
+    <g transform="translate(30, 45)">
+      <rect x="0" y="0" width="240" height="70" rx="4" fill="white" stroke="#28c840" stroke-width="1.5"/>
+      <circle cx="25" cy="35" r="15" fill="#28c840"/>
+      <text x="25" y="40" font-family="sans-serif" font-size="16" fill="white" text-anchor="middle" font-weight="bold">1</text>
+      <text x="130" y="25" font-family="sans-serif" font-size="11" fill="#333" text-anchor="middle" font-weight="bold">Zero Configuration</text>
+      <text x="130" y="42" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">No API keys to manage</text>
+      <text x="130" y="55" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">No console setup required</text>
+    </g>
+
+    <!-- Benefit 2: Multi-Account -->
+    <g transform="translate(290, 45)">
+      <rect x="0" y="0" width="240" height="70" rx="4" fill="white" stroke="#58a6ff" stroke-width="1.5"/>
+      <circle cx="25" cy="35" r="15" fill="#58a6ff"/>
+      <text x="25" y="40" font-family="sans-serif" font-size="16" fill="white" text-anchor="middle" font-weight="bold">2</text>
+      <text x="130" y="25" font-family="sans-serif" font-size="11" fill="#333" text-anchor="middle" font-weight="bold">Multi-Account Support</text>
+      <text x="130" y="42" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Personal + Work + Client</text>
+      <text x="130" y="55" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">All accessible via AI</text>
+    </g>
+
+    <!-- Benefit 3: Local Control -->
+    <g transform="translate(550, 45)">
+      <rect x="0" y="0" width="240" height="70" rx="4" fill="white" stroke="#8b5cf6" stroke-width="1.5"/>
+      <circle cx="25" cy="35" r="15" fill="#8b5cf6"/>
+      <text x="25" y="40" font-family="sans-serif" font-size="16" fill="white" text-anchor="middle" font-weight="bold">3</text>
+      <text x="130" y="25" font-family="sans-serif" font-size="11" fill="#333" text-anchor="middle" font-weight="bold">Self-Sovereign</text>
+      <text x="130" y="42" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Credentials stay local</text>
+      <text x="130" y="55" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">No third-party access</text>
+    </g>
+
+    <!-- Benefit 4: Publishing Integration -->
+    <g transform="translate(810, 45)">
+      <rect x="0" y="0" width="240" height="70" rx="4" fill="white" stroke="#f59e0b" stroke-width="1.5"/>
+      <circle cx="25" cy="35" r="15" fill="#f59e0b"/>
+      <text x="25" y="40" font-family="sans-serif" font-size="16" fill="white" text-anchor="middle" font-weight="bold">4</text>
+      <text x="130" y="25" font-family="sans-serif" font-size="11" fill="#333" text-anchor="middle" font-weight="bold">Publishing Pipeline</text>
+      <text x="130" y="42" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Markdown → Google Docs</text>
+      <text x="130" y="55" font-family="sans-serif" font-size="9" fill="#666" text-anchor="middle">Sheets ↔ Content sync</text>
+    </g>
+  </g>
+
+  <!-- Architecture diagram -->
+  <g transform="translate(60, 460)">
+    <rect x="0" y="0" width="1080" height="110" rx="8" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+    <text x="540" y="25" font-family="sans-serif" font-size="11" fill="#888" text-anchor="middle">LOCAL ARCHITECTURE</text>
+
+    <!-- Your Machine box -->
+    <g transform="translate(30, 40)">
+      <rect x="0" y="0" width="200" height="55" rx="4" fill="#2a2a2a" stroke="#444" stroke-width="1"/>
+      <text x="100" y="18" font-family="sans-serif" font-size="9" fill="#58a6ff" text-anchor="middle" font-weight="bold">YOUR MACHINE</text>
+      <text x="100" y="35" font-family="monospace" font-size="8" fill="#888" text-anchor="middle">Claude Code + MCP Server</text>
+      <text x="100" y="48" font-family="monospace" font-size="8" fill="#666" text-anchor="middle">~/.google-mcp-accounts/</text>
+    </g>
+
+    <!-- Arrow -->
+    <path d="M 240 67 L 290 67" stroke="#58a6ff" stroke-width="2"/>
+    <polygon points="295,67 287,62 287,72" fill="#58a6ff"/>
+
+    <!-- MCP Protocol -->
+    <g transform="translate(300, 40)">
+      <rect x="0" y="0" width="120" height="55" rx="4" fill="#58a6ff" stroke="#3d8bdb" stroke-width="1"/>
+      <text x="60" y="22" font-family="sans-serif" font-size="10" fill="white" text-anchor="middle" font-weight="bold">MCP</text>
+      <text x="60" y="38" font-family="sans-serif" font-size="8" fill="white" text-anchor="middle" opacity="0.9">Secure Bridge</text>
+      <text x="60" y="50" font-family="sans-serif" font-size="7" fill="white" text-anchor="middle" opacity="0.7">OAuth + Batching</text>
+    </g>
+
+    <!-- Arrow -->
+    <path d="M 430 67 L 480 67" stroke="#58a6ff" stroke-width="2"/>
+    <polygon points="485,67 477,62 477,72" fill="#58a6ff"/>
+
+    <!-- Google APIs -->
+    <g transform="translate(490, 40)">
+      <rect x="0" y="0" width="200" height="55" rx="4" fill="#2a2a2a" stroke="#444" stroke-width="1"/>
+      <text x="100" y="18" font-family="sans-serif" font-size="9" fill="#34a853" text-anchor="middle" font-weight="bold">GOOGLE APIS</text>
+
+      <!-- Service icons -->
+      <circle cx="35" cy="40" r="8" fill="#ea4335"/>
+      <circle cx="60" cy="40" r="8" fill="#4285f4"/>
+      <circle cx="85" cy="40" r="8" fill="#34a853"/>
+      <circle cx="110" cy="40" r="8" fill="#0f9d58"/>
+      <circle cx="135" cy="40" r="8" fill="#4285f4"/>
+      <circle cx="160" cy="40" r="8" fill="#fbbc05"/>
+    </g>
+
+    <!-- Outcome -->
+    <g transform="translate(720, 40)">
+      <rect x="0" y="0" width="330" height="55" rx="4" fill="#28c840" stroke="#1e8e3e" stroke-width="1"/>
+      <text x="165" y="22" font-family="sans-serif" font-size="10" fill="white" text-anchor="middle" font-weight="bold">RESULT: ONE COMMAND SETUP</text>
+      <text x="165" y="40" font-family="monospace" font-size="9" fill="white" text-anchor="middle" opacity="0.9">task google-mcp:setup</text>
+      <text x="165" y="52" font-family="sans-serif" font-size="8" fill="white" text-anchor="middle" opacity="0.7">→ Full Google Workspace access via AI</text>
+    </g>
+  </g>
+
+  <!-- Bottom indicator -->
+  <g transform="translate(500, 585)">
+    <rect x="0" y="0" width="200" height="28" rx="4" fill="#f5f5f5" stroke="#ccc" stroke-width="1"/>
+    <text x="100" y="18" font-family="sans-serif" font-size="10" fill="#666" text-anchor="middle">Ubuntu Software + WellKnown</text>
+  </g>
+</svg>

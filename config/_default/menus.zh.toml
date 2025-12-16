@@ -1,12 +1,12 @@
 ############# Chinese navigation ##############
 
-# main menu
-# Note: "Home" removed - logo already links to home, saves nav space
+# Main menu - 4 items + Get Started CTA button
+# Simplified for two audiences: Users (Platform, Solutions, Company) and Developers
 
 [[main]]
 name = "平台"
 url = "/platform"
-weight = 2
+weight = 1
 hasChildren = true
 
 [[main]]
@@ -34,183 +34,135 @@ parent = "平台"
 weight = 4
 
 [[main]]
-name = "应用"
+name = "解决方案"
 url = "/applications"
-weight = 3
+weight = 2
 hasChildren = true
 
 [[main]]
 name = "概览"
-identifier = "applications-overview"
+identifier = "solutions-overview"
 url = "/applications"
-parent = "应用"
+parent = "解决方案"
 weight = 1
 
 [[main]]
-name = "机器人"
-identifier = "applications-robotics"
-url = "/applications/robotics"
-parent = "应用"
+name = "制造业与建筑"
+url = "/applications/manufacturing"
+parent = "解决方案"
 weight = 2
 
 [[main]]
-name = "仿真"
-url = "/applications/simulation"
-parent = "应用"
+name = "机器人与仿真"
+url = "/applications/robotics"
+parent = "解决方案"
 weight = 3
 
 [[main]]
-name = "数字孪生"
-url = "/applications/digital-twins"
-parent = "应用"
+name = "政府与医疗"
+url = "/applications/government"
+parent = "解决方案"
 weight = 4
 
 [[main]]
-name = "制造业"
-url = "/applications/manufacturing"
-parent = "应用"
+name = "金融服务"
+url = "/applications/financial"
+parent = "解决方案"
 weight = 5
 
 [[main]]
-name = "建筑"
-url = "/applications/construction"
-parent = "应用"
-weight = 6
-
-[[main]]
-name = "政府"
-url = "/applications/government"
-parent = "应用"
-weight = 7
-
-[[main]]
-name = "医疗"
-url = "/applications/healthcare"
-parent = "应用"
-weight = 8
-
-[[main]]
-name = "金融"
-url = "/applications/financial"
-parent = "应用"
-weight = 9
-
-[[main]]
-name = "教育"
-url = "/applications/education"
-parent = "应用"
-weight = 10
-
-[[main]]
-name = "保险"
-url = "/applications/insurance"
-parent = "应用"
-weight = 11
-
-[[main]]
-name = "技术"
-url = "/technology"
-weight = 4
+name = "开发者"
+url = "/pkg"
+weight = 3
 hasChildren = true
 
 [[main]]
-name = "概览"
-identifier = "technology-overview"
-url = "/technology"
-parent = "技术"
+name = "软件包"
+identifier = "developers-packages"
+url = "/pkg"
+parent = "开发者"
 weight = 1
 
 [[main]]
-name = "机器人"
-identifier = "technology-robotics"
-url = "/technology/robotics"
-parent = "技术"
+name = "技术栈"
+url = "/technology"
+parent = "开发者"
 weight = 2
 
 [[main]]
-name = "Linux与跨平台"
-identifier = "technology-linux"
-url = "/technology/linux"
-parent = "技术"
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "开发者"
 weight = 3
-
-[[main]]
-name = "安全"
-identifier = "technology-security"
-url = "/technology/security"
-parent = "技术"
-weight = 4
 
 [[main]]
 name = "公司"
-weight = 5
+url = "/company"
+weight = 4
 hasChildren = true
 
 [[main]]
-name = "概览"
-identifier = "company-overview"
+name = "关于我们"
+identifier = "company-about"
 url = "/company"
 parent = "公司"
 weight = 1
 
 [[main]]
-name = "经验"
-url = "/company/experience"
+name = "创始人"
+url = "/company/founder"
 parent = "公司"
 weight = 2
 
 [[main]]
-name = "创始人"
-url = "/company/founder"
+name = "经验"
+url = "/company/experience"
 parent = "公司"
 weight = 3
 
 [[main]]
-name = "顾问"
-url = "/company/advisors"
+name = "博客"
+url = "/blog"
 parent = "公司"
 weight = 4
 
 [[main]]
-name = "博客"
-url = "/blog"
-weight = 6
-
-[[main]]
 name = "联系我们"
 url = "/contact"
-weight = 7
+parent = "公司"
+weight = 5
 
 
-# footer menu
+# Footer menu - organized by section for discoverability
+
 [[footer]]
 name = "平台"
 url = "/platform"
 weight = 1
 
 [[footer]]
-name = "开始使用"
-url = "/get-started"
+name = "解决方案"
+url = "/applications"
 weight = 2
 
 [[footer]]
-name = "创始人"
-url = "/company/founder"
+name = "开发者"
+url = "/pkg"
 weight = 3
-
-[[footer]]
-name = "经验"
-url = "/company/experience"
-weight = 4
 
 [[footer]]
 name = "博客"
 url = "/blog"
-weight = 5
+weight = 4
 
 [[footer]]
 name = "联系我们"
 url = "/contact"
+weight = 5
+
+[[footer]]
+name = "开始使用"
+url = "/get-started"
 weight = 6
 
 [[footer]]
@@ -223,3 +175,7 @@ name = "隐私政策"
 url = "/privacy-policy"
 weight = 8
 
+[[footer]]
+name = "服务条款"
+url = "/terms-of-service"
+weight = 9

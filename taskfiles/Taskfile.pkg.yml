@@ -1,0 +1,87 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  DIR_BUILD: '{{.DIR_BUILD | default ".bin"}}'
+  VANITY_BIN: "{{.DIR_BUILD}}/vanity"
+
+tasks:
+  default:
+    desc: Show available package commands
+    cmds:
+      - task --list-all | grep pkg
+
+  build:
+    desc: Build the vanity CLI tool
+    cmds:
+      - go build -o {{.VANITY_BIN}} ./cmd/pkg/...
+    sources:
+      - cmd/pkg/**/*.go
+      - internal/vanity/**/*.go
+    generates:
+      - "{{.VANITY_BIN}}"
+
+  list:
+    desc: List all packages
+    deps: [build]
+    cmds:
+      - "{{.VANITY_BIN}} list"
+
+  info:
+    desc: Show package information
+    deps: [build]
+    cmds:
+      - "{{.VANITY_BIN}} info {{.NAME}}"
+    requires:
+      vars: [NAME]
+
+  add:
+    desc: Add a new package
+    deps: [build]
+    cmds:
+      - |
+        {{.VANITY_BIN}} add {{.NAME}} \
+          {{if .REPO}}--repo "{{.REPO}}"{{end}} \
+          {{if .DESCRIPTION}}--description "{{.DESCRIPTION}}"{{end}} \
+          {{if .VERSION}}--version "{{.VERSION}}"{{end}}
+    requires:
+      vars: [NAME]
+
+  update:
+    desc: Update package metadata from GitHub
+    deps: [build]
+    cmds:
+      - "{{.VANITY_BIN}} update {{.NAME | default \"\"}}"
+
+  update:all:
+    desc: Update all packages from GitHub
+    deps: [build]
+    cmds:
+      - "{{.VANITY_BIN}} update"
+
+  docs:
+    desc: Generate markdown docs for a package
+    deps: [build]
+    cmds:
+      - "{{.VANITY_BIN}} docs {{.NAME}} {{if .OUTPUT}}-o {{.OUTPUT}}{{end}}"
+    requires:
+      vars: [NAME]
+
+  docs:save:
+    desc: Generate and save docs to content directory
+    deps: [build]
+    cmds:
+      - "{{.VANITY_BIN}} docs {{.NAME}} -o content/english/pkg/{{.NAME}}.md"
+    requires:
+      vars: [NAME]
+
+  # Convenience aliases for TaskUI
+  packages:
+    desc: "[alias] List all packages"
+    deps: [list]
+
+  help:
+    desc: Show vanity CLI help
+    deps: [build]
+    cmds:
+      - "{{.VANITY_BIN}} --help"
