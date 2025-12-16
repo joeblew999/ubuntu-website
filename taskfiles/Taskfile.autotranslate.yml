@@ -1,0 +1,337 @@
+# Auto-Translation Tasks
+#
+# Automatic translation of Hugo markdown content using DeepL or Claude.
+# Preserves front matter, shortcodes, code blocks, and markdown formatting.
+#
+# PROVIDERS:
+#   DeepL      - Free tier: 500,000 chars/month (DEEPL_API_KEY)
+#   Claude     - Anthropic API, requires credits (CLAUDE_API_KEY)
+#   Claude-CLI - Uses Claude CLI with logged-in session (your subscription)
+#
+# SETUP:
+#   DeepL:      Get free key at https://www.deepl.com/pro-api
+#   Claude:     Get API key at https://console.anthropic.com/settings/keys
+#   Claude-CLI: task claude-cli:install && claude auth login
+#
+# WORKFLOWS:
+#
+#   1. FILE-BY-FILE (simple but slow):
+#      task autotranslate:missing LANG=vi
+#
+#   2. ARB BATCH (recommended, 50 strings at a time):
+#      task toki:md:generate         # Extract strings to ARB catalogs
+#      task autotranslate:arb:vi     # Translate empty ARB entries
+#      task toki:md:apply LANG=vi    # Apply translations to markdown
+#
+# COMMAND REFERENCE:
+#   file        Translate a single file to target language
+#   missing     Translate all missing files for a language
+#   arb         Translate ARB catalog entries (batch mode - recommended)
+#   arb-status  Show ARB translation completeness
+#   languages   List supported languages
+#   status      Show API configuration status
+#
+# EXAMPLES:
+#   task autotranslate:file FILE=content/english/blog/post.md LANG=vi
+#   task autotranslate:missing LANG=vi                        # Uses DeepL (default)
+#   task autotranslate:arb:status                             # Check ARB status
+#   task autotranslate:arb:vi                                 # Translate ARB (batch)
+
+version: '3'
+
+vars:
+  AUTOTRANSLATE_BIN: 'autotranslate{{exeExt}}'
+  AUTOTRANSLATE_CMD: '{{.BIN_INSTALL_DIR}}/{{.AUTOTRANSLATE_BIN}}'
+
+tasks:
+  # ===========================================================================
+  # Dependency Management
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure autotranslate binary is available
+    internal: true
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.AUTOTRANSLATE_BIN}}"
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.AUTOTRANSLATE_BIN}}" ./cmd/autotranslate
+
+  # ===========================================================================
+  # Translation Commands
+  # ===========================================================================
+
+  file:
+    desc: Translate a single file to target language
+    deps: [check:deps]
+    requires:
+      vars: [FILE, LANG]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider={{.PROVIDER}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} {{if eq .VERBOSE "true"}}--verbose{{end}} file {{.FILE}} {{.LANG}}'
+    vars:
+      PROVIDER: '{{.PROVIDER | default "deepl"}}'
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+      VERBOSE: '{{.VERBOSE | default "false"}}'
+
+  missing:
+    desc: Translate all missing files for a language
+    deps: [check:deps]
+    requires:
+      vars: [LANG]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider={{.PROVIDER}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} {{if eq .VERBOSE "true"}}--verbose{{end}} missing {{.LANG}}'
+    vars:
+      PROVIDER: '{{.PROVIDER | default "deepl"}}'
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+      VERBOSE: '{{.VERBOSE | default "false"}}'
+
+  # ===========================================================================
+  # Information Commands
+  # ===========================================================================
+
+  languages:
+    desc: List supported languages
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider={{.PROVIDER}} languages'
+    vars:
+      PROVIDER: '{{.PROVIDER | default "deepl"}}'
+
+  status:
+    desc: Show API configuration status for all providers
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} status'
+
+  # ===========================================================================
+  # DeepL Convenience Commands (500k free chars/month)
+  # ===========================================================================
+
+  vi:
+    desc: Translate Vietnamese (DeepL)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing vi'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  de:
+    desc: Translate German (DeepL)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing de'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  zh:
+    desc: Translate Chinese (DeepL)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing zh'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  ja:
+    desc: Translate Japanese (DeepL)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing ja'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  # ===========================================================================
+  # Claude Convenience Commands (uses your subscription - no per-char cost)
+  # ===========================================================================
+
+  vi:claude:
+    desc: Translate Vietnamese (Claude - unlimited)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing vi'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  de:claude:
+    desc: Translate German (Claude - unlimited)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing de'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  zh:claude:
+    desc: Translate Chinese (Claude - unlimited)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing zh'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  ja:claude:
+    desc: Translate Japanese (Claude - unlimited)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing ja'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  # ===========================================================================
+  # Batch Commands
+  # ===========================================================================
+
+  all:
+    desc: Translate all languages (DeepL - uses quota!)
+    deps: [check:deps]
+    cmds:
+      - echo "Translating all missing content to all languages..."
+      - echo "This may use significant API quota!"
+      - '{{.AUTOTRANSLATE_CMD}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing vi'
+      - '{{.AUTOTRANSLATE_CMD}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing de'
+      - '{{.AUTOTRANSLATE_CMD}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing zh'
+      - '{{.AUTOTRANSLATE_CMD}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing ja'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  all:claude:
+    desc: Translate all languages (Claude API - requires credits)
+    deps: [check:deps]
+    cmds:
+      - echo "Translating all missing content using Claude API..."
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing vi'
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing de'
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing zh'
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing ja'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  # ===========================================================================
+  # Claude CLI Convenience Commands (uses logged-in session - your subscription)
+  # ===========================================================================
+
+  vi:cli:
+    desc: Translate Vietnamese (Claude CLI - uses subscription)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude-cli {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing vi'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  de:cli:
+    desc: Translate German (Claude CLI - uses subscription)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude-cli {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing de'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  zh:cli:
+    desc: Translate Chinese (Claude CLI - uses subscription)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude-cli {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing zh'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  ja:cli:
+    desc: Translate Japanese (Claude CLI - uses subscription)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude-cli {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing ja'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  all:cli:
+    desc: Translate all languages (Claude CLI - uses subscription)
+    deps: [check:deps]
+    cmds:
+      - echo "Translating all missing content using Claude CLI..."
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude-cli {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing vi'
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude-cli {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing de'
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude-cli {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing zh'
+      - '{{.AUTOTRANSLATE_CMD}} --provider=claude-cli {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose missing ja'
+    vars:
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  # ===========================================================================
+  # ARB Workflow (toki-based, batch translation - RECOMMENDED)
+  # ===========================================================================
+  #
+  # This workflow uses toki's ARB (Application Resource Bundle) format for
+  # more efficient batch translation. Instead of translating file by file,
+  # it translates all text strings in batches of 50.
+  #
+  # Workflow:
+  #   1. toki generate  - Extract strings from markdown to ARB catalogs
+  #   2. autotranslate arb <lang> - Translate empty entries in ARB
+  #   3. toki apply -t <lang> - Apply ARB translations back to markdown
+  #
+
+  arb:
+    desc: Translate ARB catalog entries for a language (batch mode)
+    deps: [check:deps]
+    requires:
+      vars: [LANG]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --provider={{.PROVIDER}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} {{if eq .VERBOSE "true"}}--verbose{{end}} arb {{.LANG}}'
+    vars:
+      PROVIDER: '{{.PROVIDER | default "deepl"}}'
+      BUNDLE: '{{.BUNDLE | default "tokibundle"}}'
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+      VERBOSE: '{{.VERBOSE | default "false"}}'
+
+  arb:status:
+    desc: Show ARB translation status for all languages
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} arb-status'
+    vars:
+      BUNDLE: '{{.BUNDLE | default "tokibundle"}}'
+
+  arb:vi:
+    desc: Translate Vietnamese ARB (DeepL - batch)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose arb vi'
+    vars:
+      BUNDLE: '{{.BUNDLE | default "tokibundle"}}'
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  arb:de:
+    desc: Translate German ARB (DeepL - batch)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose arb de'
+    vars:
+      BUNDLE: '{{.BUNDLE | default "tokibundle"}}'
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  arb:zh:
+    desc: Translate Chinese ARB (DeepL - batch)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose arb zh'
+    vars:
+      BUNDLE: '{{.BUNDLE | default "tokibundle"}}'
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  arb:ja:
+    desc: Translate Japanese ARB (DeepL - batch)
+    deps: [check:deps]
+    cmds:
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose arb ja'
+    vars:
+      BUNDLE: '{{.BUNDLE | default "tokibundle"}}'
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+
+  arb:all:
+    desc: Translate all ARB catalogs (DeepL - batch)
+    deps: [check:deps]
+    cmds:
+      - echo "Translating all ARB catalogs..."
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose arb vi'
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose arb de'
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose arb zh'
+      - '{{.AUTOTRANSLATE_CMD}} --bundle={{.BUNDLE}} {{if eq .DRY_RUN "true"}}--dry-run{{end}} --verbose arb ja'
+    vars:
+      BUNDLE: '{{.BUNDLE | default "tokibundle"}}'
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'

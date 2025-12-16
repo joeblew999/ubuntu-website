@@ -1,0 +1,273 @@
+# Toki Tasks
+#
+# Go internationalization toolkit for translation workflow.
+# Fork: github.com/joeblew999/toki (upstream: romshark/toki)
+#
+# Lifecycle:
+#   task toki:check:deps   - Clone/update source and build binary
+#   task toki:webedit      - Start web UI for editing translations
+#   task toki:generate     - Generate i18n bundles from Go source
+#   task toki:lint         - Lint translations for errors
+#
+# Markdown Translation (Hugo):
+#   task toki:md:generate  - Extract English content, generate ARB catalogs for all languages
+#   task toki:md:status    - Show ARB completeness stats
+#   task toki:md:webedit   - Edit translations in web UI
+#   task toki:md:clean     - Remove generated tokibundle directory
+#
+# Development:
+#   task toki:src:clone    - Clone fork to .src/toki
+#   task toki:src:update   - Pull latest from fork
+#   task toki:src:upstream - Fetch upstream changes
+#   task toki:build        - Build toki binary
+
+version: '3'
+
+vars:
+  # Source and binary locations
+  TOKI_SRC: '{{.SRC_DIR}}/toki'
+  TOKI_BIN: 'toki{{exeExt}}'
+  TOKI_CMD: '{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}}'
+
+  # Markdown content (Hugo)
+  CONTENT_DIR: '{{.ROOT_DIR}}/content'
+  SOURCE_LANG: english
+  TOKI_BUNDLE_DIR: '{{.ROOT_DIR}}/tokibundle'
+
+  # Git remotes
+  TOKI_REPO_FORK: https://github.com/joeblew999/toki.git
+  TOKI_REPO_UPSTREAM: https://github.com/romshark/toki.git
+
+tasks:
+  # ===========================================================================
+  # Checks (check:* - lifecycle phase)
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure toki source is cloned and binary is built
+    deps: [src:clone]
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}}"
+    cmds:
+      - task: build
+
+  # ===========================================================================
+  # Source Management (src:* - clone/update/sync)
+  # ===========================================================================
+
+  src:clone:
+    desc: Clone toki fork to .src/toki
+    status:
+      - test -d "{{.TOKI_SRC}}/.git"
+    cmds:
+      - mkdir -p "{{.SRC_DIR}}"
+      - git clone "{{.TOKI_REPO_FORK}}" "{{.TOKI_SRC}}"
+      - cd "{{.TOKI_SRC}}" && git remote add upstream "{{.TOKI_REPO_UPSTREAM}}" 2>/dev/null || true
+
+  src:update:
+    desc: Pull latest from fork (origin)
+    dir: '{{.TOKI_SRC}}'
+    cmds:
+      - git fetch origin
+      - git pull origin main
+
+  src:upstream:
+    desc: Fetch upstream changes (romshark/toki)
+    dir: '{{.TOKI_SRC}}'
+    cmds:
+      - git fetch upstream
+      - echo ""
+      - echo "Upstream changes fetched. To merge:"
+      - echo "  cd {{.TOKI_SRC}}"
+      - echo "  git merge upstream/main"
+
+  src:upstream:merge:
+    desc: Merge upstream main into current branch
+    dir: '{{.TOKI_SRC}}'
+    cmds:
+      - git fetch upstream
+      - git merge upstream/main
+
+  src:status:
+    desc: Show git status of toki source
+    dir: '{{.TOKI_SRC}}'
+    cmds:
+      - git status
+      - echo ""
+      - git log --oneline -5
+
+  src:open:
+    desc: Open toki source in VSCode
+    cmds:
+      - code "{{.TOKI_SRC}}"
+
+  # ===========================================================================
+  # Build (build:* - compile binary)
+  # ===========================================================================
+
+  build:
+    desc: Build toki binary from source
+    dir: '{{.TOKI_SRC}}'
+    sources:
+      - '{{.TOKI_SRC}}/**/*.go'
+    generates:
+      - '{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}}'
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}}" .
+
+  build:clean:
+    desc: Remove built binary
+    cmds:
+      - rm -f "{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}}"
+
+  # ===========================================================================
+  # Run (run:* - execute toki commands)
+  # ===========================================================================
+
+  webedit:
+    desc: Start toki web UI for editing translations
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}} webedit {{.CLI_ARGS}}'
+
+  generate:
+    desc: Generate i18n bundles from Go source
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}} generate {{.CLI_ARGS}}'
+
+  lint:
+    desc: Lint translations for errors
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}} lint {{.CLI_ARGS}}'
+
+  help:
+    desc: Show toki help
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}} --help'
+
+  version:
+    desc: Show toki version
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.TOKI_BIN}} version'
+
+  # ===========================================================================
+  # Development (dev:* - for working on toki itself)
+  # ===========================================================================
+
+  dev:test:
+    desc: Run toki tests
+    dir: '{{.TOKI_SRC}}'
+    cmds:
+      - go test ./...
+
+  dev:fmt:
+    desc: Format toki source
+    dir: '{{.TOKI_SRC}}'
+    cmds:
+      - gofumpt -w .
+
+  dev:lint:
+    desc: Lint toki source
+    dir: '{{.TOKI_SRC}}'
+    cmds:
+      - golangci-lint run
+
+  # ===========================================================================
+  # GitHub (gh:* - repository management)
+  # ===========================================================================
+
+  gh:open:
+    desc: Open fork on GitHub
+    cmds:
+      - open "https://github.com/joeblew999/toki"
+
+  gh:upstream:
+    desc: Open upstream repo on GitHub
+    cmds:
+      - open "https://github.com/romshark/toki"
+
+  gh:compare:
+    desc: Compare fork with upstream
+    cmds:
+      - open "https://github.com/romshark/toki/compare/main...joeblew999:toki:main"
+
+  gh:pr:
+    desc: Open PR from fork to upstream
+    cmds:
+      - open "https://github.com/romshark/toki/compare/main...joeblew999:toki:main?expand=1"
+
+  # ===========================================================================
+  # Markdown Translation (md:* - Hugo content translation)
+  # ===========================================================================
+
+  md:generate:
+    desc: Generate ARB catalogs from English markdown (de, zh, ja)
+    deps: [check:deps]
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - '{{.TOKI_CMD}} generate -l en -md {{.CONTENT_DIR}}/{{.SOURCE_LANG}} -md-only -t de -t zh -t ja -v'
+
+  md:status:
+    desc: Show ARB completeness stats
+    cmds:
+      - |
+        echo "=== Toki ARB Catalogs ==="
+        if [ -d "{{.TOKI_BUNDLE_DIR}}" ]; then
+          for f in {{.TOKI_BUNDLE_DIR}}/catalog_*.arb; do
+            locale=$(basename "$f" .arb | sed 's/catalog_//')
+            count=$(grep -c '"msg' "$f" 2>/dev/null || echo 0)
+            empty=$(grep -c '": ""' "$f" 2>/dev/null || echo 0)
+            echo "$locale: $count messages, $empty empty"
+          done
+        else
+          echo "No tokibundle directory. Run: task toki:md:generate"
+        fi
+
+  md:webedit:
+    desc: Edit translations in web UI
+    deps: [check:deps]
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - '{{.TOKI_CMD}} webedit -bundle {{.TOKI_BUNDLE_DIR}}'
+
+  md:clean:
+    desc: Remove generated tokibundle directory
+    cmds:
+      - rm -rf "{{.TOKI_BUNDLE_DIR}}"
+
+  md:apply:
+    desc: Apply translations from ARB to markdown (requires LANG=xx)
+    deps: [check:deps]
+    dir: '{{.ROOT_DIR}}'
+    requires:
+      vars: [LANG]
+    vars:
+      TARGET_DIR:
+        sh: |
+          case "{{.LANG}}" in
+            vi) echo "vietnamese" ;;
+            de) echo "german" ;;
+            zh) echo "chinese" ;;
+            ja) echo "japanese" ;;
+            *) echo "{{.LANG}}" ;;
+          esac
+    cmds:
+      - '{{.TOKI_CMD}} apply -md {{.CONTENT_DIR}}/{{.SOURCE_LANG}} -out {{.CONTENT_DIR}}/{{.TARGET_DIR}} -b {{.TOKI_BUNDLE_DIR}} -t {{.LANG}} -v'
+
+  md:apply:all:
+    desc: Apply all translations (de, zh, ja, vi)
+    deps: [check:deps]
+    cmds:
+      - task: md:apply
+        vars: { LANG: vi }
+      - task: md:apply
+        vars: { LANG: de }
+      - task: md:apply
+        vars: { LANG: zh }
+      - task: md:apply
+        vars: { LANG: ja }
