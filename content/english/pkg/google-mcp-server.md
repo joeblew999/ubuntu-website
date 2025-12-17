@@ -9,6 +9,9 @@ license: MIT
 author: Gerard Webb
 created_at: 2024-12-16T00:00:00Z
 updated_at: 2024-12-16T00:00:00Z
+has_binary: true
+binary_name: google-mcp-server
+taskfile_path: taskfiles/tools/Taskfile.google-mcp.yml
 ---
 
 ## About
