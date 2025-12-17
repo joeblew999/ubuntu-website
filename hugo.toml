@@ -120,6 +120,12 @@ baseName = "searchindex"
 isPlainText = true
 notAlternative = true
 
+[outputFormats.PackageRegistry]
+mediaType = "application/json"
+baseName = "registry"
+isPlainText = true
+notAlternative = true
+
 
 ############################# Plugins ##############################
 
