@@ -571,3 +571,28 @@ This Project is a web site for my company. I have various info here about me and
 
 - **Source code**: `/Users/apple/Library/Mobile Documents/com~apple~CloudDocs/Thailand /`
 
+### Company Registration Details (for App Store / Developer Programs)
+
+**Ubuntu Software (Australia)**
+
+| Field | Value |
+|-------|-------|
+| Legal Name | Ubuntu Software |
+| ABN | 95 595 575 880 |
+| D-U-N-S Number | 891770992 |
+| Domain | ubuntusoftware.net |
+| Support Email | support@ubuntusoftware.net |
+| Developer Contact | gerard.webb@ubuntusoftware.net |
+| Principal | Gerard Joseph Webb |
+
+**Verification Links:**
+- ABN Lookup: https://abr.business.gov.au/ABN/View?id=95595575880
+- D-U-N-S Lookup (illion): https://express.illion.com.au/company (search by ABN)
+- Company History: https://www.ubuntusoftware.net/pages/company-history/
+
+**D-U-N-S Registered Program:** Applied at https://www.dunsregistered.com - awaiting confirmation email to `gerard.webb@ubuntusoftware.net`
+
+**Bundle ID Pattern:** `net.ubuntusoftware.<appname>` (e.g., `net.ubuntusoftware.cad`)
+
+See [DEEPLINK.md](DEEPLINK.md) for full App Store deployment plan.
+

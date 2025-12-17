@@ -63,15 +63,38 @@ We maintain copies of key documents proving our company history:
 
 We chose this name in 1999 because it reflects our belief in technology that serves humanity - building software that empowers people and communities.
 
-## Current Operations
+## Current Operations (Australia)
 
-Ubuntu Software now operates from Australia (ABN: 95 595 575 880), continuing our mission of developing software tools that enhance productivity and respect user privacy.
+Ubuntu Software now operates from Australia, continuing our mission of developing software tools that enhance productivity and respect user privacy.
 
-Our focus areas include:
+### Australian Business Registration
+
+| Field | Value |
+|-------|-------|
+| **Business Name** | Ubuntu Software |
+| **ABN** | 95 595 575 880 |
+| **D-U-N-S Number** | 891770992 |
+| **Registered** | 2024 |
+| **Principal** | Gerard Joseph Webb |
+
+### Official Records
+
+- [ABN Lookup](https://abr.business.gov.au/ABN/View?id=95595575880) - Australian Business Register
+- [Business Name Registration (PDF)](/company-australia/ubuntusoftware-registration-of-business-name.pdf) - ASIC registration certificate
+
+### D-U-N-S Verification
+
+Our D-U-N-S® Number **891770992** was issued by [illion](https://www.illion.com.au/), the official Dun & Bradstreet partner for Australia.
+
+**Verify:** [illion Company Express](https://express.illion.com.au/company) (search by ABN 95 595 575 880)
+
+### Focus Areas
+
 - Local AI and privacy-preserving software
 - Developer productivity tools
+- Cross-platform mobile applications (iOS, Android)
 - Open source contributions
 
 ---
 
-*For verification of our UK company history, please refer to [Companies House](https://find-and-update.company-information.service.gov.uk/company/03724740).*
+*For verification of our UK company history, please refer to [Companies House](https://find-and-update.company-information.service.gov.uk/company/03724740). For Australian business details, see the [ABN Lookup](https://abr.business.gov.au/ABN/View?id=95595575880).*

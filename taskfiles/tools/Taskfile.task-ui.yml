@@ -1,11 +1,11 @@
 # Task-UI Tasks
 #
 # Web-based dashboard for executing Taskfile tasks.
+# Source: github.com/joeblew999/xplat/cmd/task-ui
 #
 # Usage:
 #   task tui:up             Start Task-UI at http://localhost:3000
 #   task tui:down           Stop Task-UI (Ctrl+C)
-#   task tui:status         Not running as daemon
 #
 # Documentation: https://github.com/titpetric/task-ui
 
@@ -15,6 +15,8 @@ vars:
   TUI_BIN: 'task-ui{{exeExt}}'
   TUI_CMD: '{{.BIN_INSTALL_DIR}}/{{.TUI_BIN}}'
   TUI_PORT: '3000'
+  # xplat is the source of truth for task-ui
+  XPLAT_DIR: '{{.ROOT_DIR}}/../xplat'
 
 tasks:
   # ===========================================================================
@@ -22,13 +24,14 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure task-ui binary is available (builds from source or downloads)
+    desc: Ensure task-ui binary is available (installs from xplat)
     internal: true
     status:
       - test -f "{{.BIN_INSTALL_DIR}}/{{.TUI_BIN}}"
     cmds:
       - mkdir -p "{{.BIN_INSTALL_DIR}}"
-      - go build -o "{{.BIN_INSTALL_DIR}}/{{.TUI_BIN}}" ./cmd/task-ui
+      - go install github.com/joeblew999/xplat/cmd/task-ui@latest
+      - cp "$(go env GOPATH)/bin/{{.TUI_BIN}}" "{{.BIN_INSTALL_DIR}}/{{.TUI_BIN}}"
 
   # ===========================================================================
   # Core Commands (up/down)
@@ -42,25 +45,3 @@ tasks:
       - 'echo "Press Ctrl+C to stop"'
       - 'echo ""'
       - '{{.TUI_CMD}} --history-enable'
-
-  # ===========================================================================
-  # Release (release:* - build for distribution)
-  # ===========================================================================
-
-  release:build:
-    desc: Build task-ui for release (current platform, or set GOOS/GOARCH)
-    cmds:
-      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
-      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.TUI_BIN}}" ./cmd/task-ui
-
-  release:test:
-    desc: Test built task-ui release binary
-    cmds:
-      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.TUI_BIN}} --help || true"
-
-  release:publish:
-    desc: Build all platforms and create GitHub release
-    requires:
-      vars: [VERSION]
-    cmds:
-      - echo "Release publishing requires manual process - build binaries and use gh release create"

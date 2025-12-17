@@ -1,0 +1,63 @@
+# Cloudflare Analytics Tasks
+#
+# Cloudflare Web Analytics reporting via cmd/cfanalytics.
+#
+# Usage:
+#   task cfanalytics:report          - Run analytics report
+#   task cfanalytics:report:verbose  - Verbose output
+#   task cfanalytics:check:deps      - Ensure binary is available
+
+version: '3'
+
+vars:
+  CFANALYTICS_BIN: 'cfanalytics{{exeExt}}'
+
+tasks:
+  # ===========================================================================
+  # Checks
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure cfanalytics binary is available (builds from source or downloads)
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}}"
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}}" ./cmd/cfanalytics
+
+  # ===========================================================================
+  # Reports
+  # ===========================================================================
+
+  report:
+    desc: Check analytics and report changes (>20% threshold)
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}}'
+
+  report:verbose:
+    desc: Check analytics with verbose output
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}} -v'
+
+  report:webhook:
+    desc: Post analytics changes to webhook (set ANALYTICS_WEBHOOK_URL)
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}} -webhook "$ANALYTICS_WEBHOOK_URL"'
+
+  # ===========================================================================
+  # Release (release:* - build for distribution)
+  # ===========================================================================
+
+  release:build:
+    desc: Build cfanalytics for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.CFANALYTICS_BIN}}" ./cmd/cfanalytics
+
+  release:test:
+    desc: Test built cfanalytics release binary
+    cmds:
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.CFANALYTICS_BIN}} -h || true"

@@ -33,11 +33,11 @@ jobs:
         with:
           version: 3.45.5
 
-      # Build analytics binary
-      - name: Build analytics
+      # Build cfanalytics binary
+      - name: Build cfanalytics
         run: |
           mkdir -p $HOME/.local/bin
-          go build -o $HOME/.local/bin/analytics ./cmd/analytics
+          go build -o $HOME/.local/bin/cfanalytics ./cmd/cfanalytics
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       # Download previous state from artifact (if exists)
@@ -50,14 +50,14 @@ jobs:
           workflow_conclusion: success
           search_artifacts: true
 
-      # Run analytics check via Taskfile
+      # Run cfanalytics check via Taskfile
       - name: Check Analytics
-        id: analytics
+        id: cfanalytics
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
           CF_WEB_ANALYTICS_SITE_TAG: ${{ vars.CF_WEB_ANALYTICS_SITE_TAG }}
-        run: task ci:analytics > report.md
+        run: task ci:cfanalytics > report.md
         continue-on-error: true
 
       # Save state for next run
@@ -72,7 +72,7 @@ jobs:
 
       # Create issue if changes detected (exit code 1)
       - name: Create Issue
-        if: steps.analytics.outcome == 'failure'
+        if: steps.cfanalytics.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

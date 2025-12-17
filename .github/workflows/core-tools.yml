@@ -1,6 +1,6 @@
 # Core Tools Build & Test
 #
-# Validates all binary tools (analytics, sitecheck, genlogo) build and run.
+# Validates all binary tools (cfanalytics, sitecheck, genlogo) build and run.
 # Runs on push/PR to catch issues early.
 #
 # Category: CORE CI (P0 - must pass for merge)
@@ -11,17 +11,17 @@ on:
   push:
     branches: [main]
     paths:
-      - 'cmd/analytics/**'
+      - 'cmd/cfanalytics/**'
       - 'cmd/sitecheck/**'
       - 'cmd/genlogo/**'
-      - 'taskfiles/Taskfile.analytics.yml'
+      - 'taskfiles/Taskfile.cfanalytics.yml'
       - 'taskfiles/Taskfile.sitecheck.yml'
       - 'taskfiles/Taskfile.genlogo.yml'
       - '.env'
       - '.github/workflows/core-tools.yml'
   pull_request:
     paths:
-      - 'cmd/analytics/**'
+      - 'cmd/cfanalytics/**'
       - 'cmd/sitecheck/**'
       - 'cmd/genlogo/**'
       - 'taskfiles/Taskfile.*.yml'
@@ -46,10 +46,10 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       # Build all binary tools
-      - name: Build analytics
+      - name: Build cfanalytics
         run: |
-          go build -o bin/analytics ./cmd/analytics
-          echo "Built analytics"
+          go build -o bin/cfanalytics ./cmd/cfanalytics
+          echo "Built cfanalytics"
 
       - name: Build sitecheck
         run: |
@@ -66,8 +66,8 @@ jobs:
         run: |
           echo "=== Tool Smoke Tests ==="
 
-          echo "Testing: analytics --help"
-          ./bin/analytics --help || ./bin/analytics -h || echo "(no help flag)"
+          echo "Testing: cfanalytics --help"
+          ./bin/cfanalytics --help || ./bin/cfanalytics -h || echo "(no help flag)"
 
           echo "Testing: sitecheck --help"
           ./bin/sitecheck --help || ./bin/sitecheck -h || echo "(no help flag)"
@@ -81,6 +81,6 @@ jobs:
       - name: Run unit tests
         run: |
           echo "Running Go unit tests..."
-          go test -v ./cmd/analytics/... 2>/dev/null || echo "No tests in cmd/analytics"
+          go test -v ./cmd/cfanalytics/... 2>/dev/null || echo "No tests in cmd/cfanalytics"
           go test -v ./cmd/sitecheck/... 2>/dev/null || echo "No tests in cmd/sitecheck"
           go test -v ./cmd/genlogo/... 2>/dev/null || echo "No tests in cmd/genlogo"

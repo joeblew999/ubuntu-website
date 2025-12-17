@@ -1,5 +1,35 @@
 # TODO
 
+Current ubuntu-website state: You have significant uncommitted changes - looks like you've been refactoring CLI tools (moving things into internal/ packages, deleting duplicates). These appear to be separate from the xplat package manager work. Optional enhancements we could do:
+Clean up ubuntu-website - Commit the CLI refactoring work you have staged
+Add more packages - sitecheck, translate, autotranslate, vanityimport could be added to registry
+Create xplat v0.2.1 release - Include the local registry support changes
+Document the workflow - Add usage examples to CLAUDE.md
+
+---
+
+---
+
+We need a you tube downloader.
+
+https://claude.ai/chat/d3586c8e-a751-41ef-8a5f-2c1f2501b2da
+
+We need a ffmpeg wrapper that pulls in the right ffmpeg into a cache so its idemptent.
+
+---
+
+All our internal code is wrapped by a cmd.
+
+We need this to we easy to run using narun ? 
+
+https://github.com/akhenakh/narun
+https://github.com/akhenakh/nats2sse
+https://github.com/akhenakh/nlock
+
+
+
+---
+
 
 https://github.com/line/line-bot-sdk-go
 https://github.com/line/line-bot-sdk-go/releases/tag/v8.18.0

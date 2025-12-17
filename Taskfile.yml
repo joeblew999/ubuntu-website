@@ -19,11 +19,11 @@ version: '3'
 #   cf:*        - Cloudflare Pages management
 #   git:*       - Git operations
 #   translate:* - Translation workflow
-#   analytics:* - Cloudflare Web Analytics (cmd/analytics)
+#   cfanalytics:* - Cloudflare Web Analytics (cmd/cfanalytics)
 #   sitecheck:* - Site reachability checks (cmd/sitecheck)
 #   genlogo:*   - Logo/branding generation (cmd/genlogo)
 #   mailerlite:* - MailerLite subscriber management (cmd/mailerlite)
-#   pkg:*       - Go vanity import packages (cmd/pkg)
+#   vanityimport:* - Go vanity import packages (cmd/vanityimport)
 #   google:*    - All Google services unified (cmd/google)
 #   env:*       - Environment management
 #   url:*       - URL shortcuts + SEO dashboards
@@ -46,7 +46,7 @@ includes:
   cf: ./taskfiles/Taskfile.cf.yml
   translate: ./taskfiles/Taskfile.translate.yml
   autotranslate: ./taskfiles/Taskfile.autotranslate.yml
-  analytics: ./taskfiles/Taskfile.analytics.yml
+  cfanalytics: ./taskfiles/Taskfile.cfanalytics.yml
   sitecheck: ./taskfiles/Taskfile.sitecheck.yml
   genlogo: ./taskfiles/Taskfile.genlogo.yml
   mailerlite: ./taskfiles/Taskfile.mailerlite.yml
@@ -87,7 +87,7 @@ includes:
   codecs: ./taskfiles/Taskfile.codecs.yml
 
   # Go vanity imports (/pkg/)
-  pkg: ./taskfiles/Taskfile.pkg.yml
+  vanityimport: ./taskfiles/Taskfile.vanityimport.yml
 
   # Toki i18n toolkit (fork: joeblew999/toki)
   toki: ./taskfiles/Taskfile.toki.yml
@@ -319,7 +319,7 @@ tasks:
   # CI Interface (called by GitHub Actions workflows)
   # ===========================================================================
   # Workflows call these tasks - all logic stays in Taskfile.
-  # Note: ci:analytics and ci:sitecheck use binaries via their respective taskfiles
+  # Note: ci:cfanalytics and ci:sitecheck use binaries via their respective taskfiles
 
   ci:health:
     desc: "[Monitor] Health - Run health checks for CI"
@@ -332,11 +332,11 @@ tasks:
       - echo "Simulating health check failure..."
       - exit 1
 
-  ci:analytics:
-    desc: "[Monitor] Analytics - Run analytics check for CI"
-    deps: [analytics:check:deps]
+  ci:cfanalytics:
+    desc: "[Monitor] Cloudflare Analytics - Run analytics check for CI"
+    deps: [cfanalytics:check:deps]
     cmds:
-      - '{{.HOME}}/.local/bin/analytics{{exeExt}} -github-issue'
+      - '{{.HOME}}/.local/bin/cfanalytics{{exeExt}} -github-issue'
 
   ci:sitecheck:
     desc: "[Monitor] Sitecheck - Run site check for CI"

@@ -1,0 +1,87 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  DIR_BUILD: '{{.DIR_BUILD | default ".bin"}}'
+  VANITYIMPORT_BIN: "{{.DIR_BUILD}}/vanityimport"
+
+tasks:
+  default:
+    desc: Show available vanity import commands
+    cmds:
+      - task --list-all | grep vanityimport
+
+  build:
+    desc: Build the vanityimport CLI tool
+    cmds:
+      - go build -o {{.VANITYIMPORT_BIN}} ./cmd/vanityimport/...
+    sources:
+      - cmd/vanityimport/**/*.go
+      - internal/vanity/**/*.go
+    generates:
+      - "{{.VANITYIMPORT_BIN}}"
+
+  list:
+    desc: List all packages
+    deps: [build]
+    cmds:
+      - "{{.VANITYIMPORT_BIN}} list"
+
+  info:
+    desc: Show package information
+    deps: [build]
+    cmds:
+      - "{{.VANITYIMPORT_BIN}} info {{.NAME}}"
+    requires:
+      vars: [NAME]
+
+  add:
+    desc: Add a new package
+    deps: [build]
+    cmds:
+      - |
+        {{.VANITYIMPORT_BIN}} add {{.NAME}} \
+          {{if .REPO}}--repo "{{.REPO}}"{{end}} \
+          {{if .DESCRIPTION}}--description "{{.DESCRIPTION}}"{{end}} \
+          {{if .VERSION}}--version "{{.VERSION}}"{{end}}
+    requires:
+      vars: [NAME]
+
+  update:
+    desc: Update package metadata from GitHub
+    deps: [build]
+    cmds:
+      - "{{.VANITYIMPORT_BIN}} update {{.NAME | default \"\"}}"
+
+  update:all:
+    desc: Update all packages from GitHub
+    deps: [build]
+    cmds:
+      - "{{.VANITYIMPORT_BIN}} update"
+
+  docs:
+    desc: Generate markdown docs for a package
+    deps: [build]
+    cmds:
+      - "{{.VANITYIMPORT_BIN}} docs {{.NAME}} {{if .OUTPUT}}-o {{.OUTPUT}}{{end}}"
+    requires:
+      vars: [NAME]
+
+  docs:save:
+    desc: Generate and save docs to content directory
+    deps: [build]
+    cmds:
+      - "{{.VANITYIMPORT_BIN}} docs {{.NAME}} -o content/english/pkg/{{.NAME}}.md"
+    requires:
+      vars: [NAME]
+
+  # Convenience aliases for TaskUI
+  packages:
+    desc: "[alias] List all packages"
+    deps: [list]
+
+  help:
+    desc: Show vanityimport CLI help
+    deps: [build]
+    cmds:
+      - "{{.VANITYIMPORT_BIN}} --help"
