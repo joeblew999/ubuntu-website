@@ -98,7 +98,7 @@ Không chỉ là bảng điều khiển. Cảm biến trong bối cảnh.
 
 ## Xây dựng trên nền tảng
 
-Sensing inherits all [Foundation](/platform/foundation/) capabilities automatically:
+Sensing inherits all [Foundation](/vi/platform/foundation/) capabilities automatically:
 
 | Capability | What It Means |
 |------------|---------------|
@@ -107,7 +107,7 @@ Sensing inherits all [Foundation](/platform/foundation/) capabilities automatica
 | **Self-sovereign** | Your sensors, your data, your servers |
 | **Real-time sync** | Stream to multiple destinations simultaneously |
 
-[Tìm hiểu thêm về Quỹ →](/platform/foundation/)
+[Tìm hiểu thêm về Quỹ →](/vi/platform/foundation/)
 
 ---
 
@@ -117,7 +117,7 @@ Sensing là lớp nhận thức của nền tảng phần mềm Ubuntu.
 
 Đối với các tổ chức cần thiết kế 3D và trí tuệ nhân tạo (AI), nền tảng Spatial của chúng tôi cung cấp môi trường thiết kế với tích hợp trực tiếp vào dữ liệu cảm biến của bạn.
 
-[Khám phá Không gian →](/platform/spatial/)
+[Khám phá Không gian →](/vi/platform/spatial/)
 
 ---
 
@@ -125,4 +125,4 @@ Sensing là lớp nhận thức của nền tảng phần mềm Ubuntu.
 
 Đang triển khai cảm biến? Đang phát triển hệ thống nhận thức? Hãy cùng thảo luận.
 
-[Liên hệ →](/contact)
+[Liên hệ →](/vi/contact)

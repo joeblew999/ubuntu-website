@@ -17,8 +17,8 @@ Chúng tôi đã nhận được yêu cầu của quý khách và sẽ liên h�
 2. Chúng tôi sẽ liên hệ để sắp xếp một cuộc gọi giới thiệu
 3. Chúng tôi sẽ thảo luận về trường hợp sử dụng của bạn và giúp bạn bắt đầu
 
-In the meantime, feel free to explore the [Platform](/platform/) or learn more about our [Founder](/company/founder/).
+In the meantime, feel free to explore the [Platform](/vi/platform/) or learn more about our [Founder](/vi/company/founder/).
 
 ---
 
-Questions? [Contact us](/contact/) anytime.
+Questions? [Contact us](/vi/contact/) anytime.

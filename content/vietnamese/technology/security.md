@@ -77,7 +77,7 @@ NATS JetStream là phụ thuộc bên ngoài duy nhất của chúng tôi. Synad
 | **Synadia (NATS)** | SOC 2 Type II | Vanta |
 
 - [Thông báo về Chứng nhận Synadia SOC 2 Loại II →](https://www.synadia.com/blog/synadia-soc2-type2-compliant)
-- [Xem Báo cáo SOC 2 Loại II của Synadia (PDF) →](/doc/synadia-soc2-type2-report.pdf)
+- [Xem Báo cáo SOC 2 Loại II của Synadia (PDF) →](/vi/doc/synadia-soc2-type2-report.pdf)
 
 **Một nhà cung cấp. Một cuộc kiểm toán.** Đó là lợi thế của việc giảm thiểu sự phụ thuộc.
 
@@ -87,7 +87,7 @@ NATS JetStream là phụ thuộc bên ngoài duy nhất của chúng tôi. Synad
 
 Kiến trúc của chúng tôi đảm nhận phần việc khó khăn. Các cuộc kiểm toán của bạn sẽ trở nên dễ dàng hơn.
 
-[Bắt đầu →](/get-started/)
+[Bắt đầu →](/vi/get-started/)
 
 ---
 
@@ -95,7 +95,7 @@ Kiến trúc của chúng tôi đảm nhận phần việc khó khăn. Các cu�
 
 Phát hiện vấn đề bảo mật? Chúng tôi coi trọng vấn đề bảo mật và đánh giá cao việc tiết lộ có trách nhiệm.
 
-[Chính sách công bố lỗ hổng bảo mật →](/security/)
+[Chính sách công bố lỗ hổng bảo mật →](/vi/security/)
 
 ---
 
@@ -103,4 +103,4 @@ Phát hiện vấn đề bảo mật? Chúng tôi coi trọng vấn đề bảo 
 
 Cần thảo luận về các yêu cầu tuân thủ cụ thể?
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

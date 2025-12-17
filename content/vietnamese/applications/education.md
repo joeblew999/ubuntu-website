@@ -206,7 +206,7 @@ Một số công việc giáo dục liên quan đến không gian vật lý:
 
 Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
-[Khám phá Không gian →](/platform/spatial/)
+[Khám phá Không gian →](/vi/platform/spatial/)
 
 ---
 
@@ -214,4 +214,4 @@ Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
 Quản lý giáo dục phục vụ mọi gia đình. Cả bản giấy và bản điện tử. Hiện đại và dễ tiếp cận.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

@@ -114,8 +114,8 @@ Mọi thứ Gerard đã xây dựng đều tập trung vào việc kết nối c
 
 ## Tìm hiểu thêm về chúng tôi
 
-[Experience](/company/experience/) — 25 years of mission-critical systems for global enterprises.
+[Experience](/vi/company/experience/) — 25 years of mission-critical systems for global enterprises.
 
-[Advisors](/company/advisors/) — Industry leaders who collaborate with us.
+[Advisors](/vi/company/advisors/) — Industry leaders who collaborate with us.
 
-[Contact](/contact/) — Get in touch.
+[Contact](/vi/contact/) — Get in touch.

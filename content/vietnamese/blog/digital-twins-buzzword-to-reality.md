@@ -196,4 +196,4 @@ Thuật ngữ thời thượng sẽ phai nhạt. Giá trị thì không.
 
 ---
 
-*Building digital twin capabilities? [See how our platform helps →](/platform)*
+*Building digital twin capabilities? [See how our platform helps →](/vi/platform)*

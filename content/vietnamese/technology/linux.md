@@ -129,10 +129,10 @@ Hàng thập kỷ kinh nghiệm. Đã được chứng minh trên quy mô toàn 
 
 ## Tìm hiểu thêm
 
-[Tổng quan về công nghệ →](/technology/)
+[Tổng quan về công nghệ →](/vi/technology/)
 
-[Hệ thống robotics →](/technology/robotics/)
+[Hệ thống robotics →](/vi/technology/robotics/)
 
-[Nền tảng →](/platform/foundation/)
+[Nền tảng →](/vi/platform/foundation/)
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

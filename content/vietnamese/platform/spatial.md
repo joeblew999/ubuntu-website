@@ -129,17 +129,17 @@ Cửa sổ đang mở. Chúng ta đang xây dựng qua nó.
 
 ## Xem nó hoạt động như thế nào
 
-- [Robotics & Automation →](/applications/robotics)
-- [Mô phỏng & Đào tạo →](/applications/simulation)
-- [Bản sao kỹ thuật số →](/applications/digital-twins)
-- [Sản xuất →](/applications/manufacturing)
-- [Xây dựng →](/applications/construction)
+- [Robotics & Automation →](/vi/applications/robotics)
+- [Mô phỏng & Đào tạo →](/vi/applications/simulation)
+- [Bản sao kỹ thuật số →](/vi/applications/digital-twins)
+- [Sản xuất →](/vi/applications/manufacturing)
+- [Xây dựng →](/vi/applications/construction)
 
 ---
 
 ## Xây dựng trên nền tảng
 
-Spatial inherits all [Foundation](/platform/foundation/) capabilities automatically:
+Spatial inherits all [Foundation](/vi/platform/foundation/) capabilities automatically:
 
 | Capability | What It Means |
 |------------|---------------|
@@ -149,7 +149,7 @@ Spatial inherits all [Foundation](/platform/foundation/) capabilities automatica
 | **Real-time sync** | Multiple designers, automatic conflict resolution |
 | **Wellknown Gateway** | Publish TO Big Tech, never locked IN |
 
-[Tìm hiểu thêm về Quỹ →](/platform/foundation/)
+[Tìm hiểu thêm về Quỹ →](/vi/platform/foundation/)
 
 ---
 
@@ -159,7 +159,7 @@ Spatial là lớp 3D của nền tảng phần mềm Ubuntu.
 
 Đối với các tổ chức cũng cần chức năng xuất bản tài liệu, biểu mẫu và thu thập dữ liệu, nền tảng Publish của chúng tôi cung cấp lớp 2D—với tích hợp liền mạch với các mô hình 3D của bạn.
 
-[Khám phá → Xuất bản](/platform/publish/)
+[Khám phá → Xuất bản](/vi/platform/publish/)
 
 ---
 
@@ -167,4 +167,4 @@ Spatial là lớp 3D của nền tảng phần mềm Ubuntu.
 
 Quý vị quan tâm đến nền tảng này? Đang phát triển một dự án trong lĩnh vực này? Hãy liên hệ với chúng tôi.
 
-[Liên hệ →](/contact)
+[Liên hệ →](/vi/contact)

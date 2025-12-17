@@ -108,4 +108,4 @@ Nếu bất kỳ điều khoản nào trong Điều khoản này được xác �
 
 ## 13. Hợp đồng toàn bộ
 
-These Terms, together with our [Privacy Policy](/privacy-policy/), constitute the entire agreement between you and Ubuntu Software regarding your use of our services.
+These Terms, together with our [Privacy Policy](/vi/privacy-policy/), constitute the entire agreement between you and Ubuntu Software regarding your use of our services.

@@ -13,7 +13,7 @@ Chúng tôi đã nhận được tin nhắn của bạn và sẽ liên hệ lạ
 
 Trong thời gian này, bạn có thể tự do khám phá:
 
-- [Nền tảng của chúng tôi](/platform/)
-- [Người sáng lập của chúng tôi](/company/founder/)
-- [Get Started](/get-started/) — if you're ready to build with us
+- [Nền tảng của chúng tôi](/vi/platform/)
+- [Người sáng lập của chúng tôi](/vi/company/founder/)
+- [Get Started](/vi/get-started/) — if you're ready to build with us
 

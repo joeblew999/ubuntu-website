@@ -209,7 +209,7 @@ Một số công việc tài chính liên quan đến không gian vật lý:
 
 Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
-[Khám phá Không gian →](/platform/spatial/)
+[Khám phá Không gian →](/vi/platform/spatial/)
 
 ---
 
@@ -217,4 +217,4 @@ Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
 Dịch vụ tài chính giúp quản lý hồ sơ hiệu quả hơn. Tuân thủ quy định dễ dàng hơn. Phục vụ nhanh chóng hơn.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

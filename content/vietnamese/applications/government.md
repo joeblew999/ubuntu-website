@@ -211,7 +211,7 @@ Một số công việc của chính phủ mang tính chất không gian:
 
 Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
-[Khám phá Không gian →](/platform/spatial/)
+[Khám phá Không gian →](/vi/platform/spatial/)
 
 ---
 
@@ -219,4 +219,4 @@ Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
 Chính phủ phục vụ mọi người. Số hóa và giấy tờ. Dễ tiếp cận và hiệu quả.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

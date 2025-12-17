@@ -252,4 +252,4 @@ Kiến trúc được thiết kế cho phân phối toàn cầu:
 
 Nền tảng đã được tích hợp sẵn. Khi bạn sử dụng Publish hoặc Spatial, bạn sẽ tự động nhận được các tùy chọn triển khai ưu tiên ngoại tuyến, triển khai đa nền tảng và tự chủ dữ liệu.
 
-[Explore Publish →](/platform/publish/) | [Explore Spatial →](/platform/spatial/) | [Linux & Cross-Platform →](/technology/linux/) | [Contact Us →](/contact/)
+[Explore Publish →](/vi/platform/publish/) | [Explore Spatial →](/vi/platform/spatial/) | [Linux & Cross-Platform →](/vi/technology/linux/) | [Contact Us →](/vi/contact/)

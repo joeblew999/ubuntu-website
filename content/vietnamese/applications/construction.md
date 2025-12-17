@@ -296,7 +296,7 @@ Hoạt động xây dựng tạo ra một lượng lớn tài liệu.
 
 Tất cả từ một nguồn duy nhất. Tất cả đều được đồng bộ hóa với mô hình tòa nhà.
 
-[Khám phá → Xuất bản](/platform/publish/)
+[Khám phá → Xuất bản](/vi/platform/publish/)
 
 ---
 
@@ -306,4 +306,4 @@ Xây dựng đang thay đổi. Xây dựng tại nhà máy. Thiết kế toàn c
 
 Các công cụ cũng cần phải thay đổi.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

@@ -31,7 +31,7 @@ Viết một lần bằng Markdown. Tạo trang web, tệp PDF và biểu mẫu 
 
 Chính phủ. Y tế. Dịch vụ tài chính. Giáo dục. Bảo hiểm. Hoạt động doanh nghiệp.
 
-[Khám phá → Xuất bản](/platform/publish/)
+[Khám phá → Xuất bản](/vi/platform/publish/)
 
 ---
 
@@ -52,7 +52,7 @@ Trí tuệ nhân tạo (AI) thực sự hiểu về hình học, không chỉ m�
 
 Robotics. Sản xuất. Xây dựng. Mô phỏng. Quản lý cơ sở vật chất.
 
-[Khám phá Không gian →](/platform/spatial/)
+[Khám phá Không gian →](/vi/platform/spatial/)
 
 ---
 
@@ -69,7 +69,7 @@ Cả hai nền tảng đều chia sẻ cơ sở hạ tầng cốt lõi:
 | **Self-sovereign** | Your data, your servers, your rules |
 | **Open standards** | No proprietary formats. Export everything. Own your work. |
 
-[Khám phá Quỹ →](/platform/foundation/)
+[Khám phá Quỹ →](/vi/platform/foundation/)
 
 ---
 
@@ -90,17 +90,17 @@ Kết nối LiDAR, camera và cảm biến công nghiệp với mô hình không
 
 Khảo sát. Xây dựng. Robot. An ninh. Hạ tầng thông minh.
 
-[Khám phá Cảm biến →](/platform/sensing/)
+[Khám phá Cảm biến →](/vi/platform/sensing/)
 
 ---
 
 ## Chọn con đường của bạn
 
 **Need content management?**
-Start with [Publish](/platform/publish/). Add Spatial later if you move into 3D.
+Start with [Publish](/vi/platform/publish/). Add Spatial later if you move into 3D.
 
 **Need 3D design and AI?**
-Start with [Spatial](/platform/spatial/). Publish integrates when you need documentation.
+Start with [Spatial](/vi/platform/spatial/). Publish integrates when you need documentation.
 
 **Need both?**
 They work together. Technical drawings generated from 3D models. BOMs flowing to forms. Documentation aligned with design.
@@ -111,4 +111,4 @@ They work together. Technical drawings generated from 3D models. BOMs flowing to
 
 Dù bạn đang xử lý các biểu mẫu giấy hay thiết kế các tế bào làm việc robot, chúng tôi đều có hạ tầng phù hợp cho bạn.
 
-[Liên hệ với chúng tôi →](/contact)
+[Liên hệ với chúng tôi →](/vi/contact)

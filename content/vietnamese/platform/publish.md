@@ -175,11 +175,11 @@ Cơ sở dữ liệu của bạn. Cấu trúc cơ sở dữ liệu của bạn.
 
 | Industry | Why Publish |
 |----------|-------------|
-| [**Government**](/applications/government) | Serve every citizen. Paper + digital. Accessible. Compliant. |
-| [**Healthcare**](/applications/healthcare) | Less administration. Fewer errors. Better care. |
-| [**Financial**](/applications/financial) | Compliance without complexity. Complete audit trails. |
-| [**Education**](/applications/education) | Modern administration. Traditional options. |
-| [**Insurance**](/applications/insurance) | Every channel. One system. Field to office unified. |
+| [**Government**](/vi/applications/government) | Serve every citizen. Paper + digital. Accessible. Compliant. |
+| [**Healthcare**](/vi/applications/healthcare) | Less administration. Fewer errors. Better care. |
+| [**Financial**](/vi/applications/financial) | Compliance without complexity. Complete audit trails. |
+| [**Education**](/vi/applications/education) | Modern administration. Traditional options. |
+| [**Insurance**](/vi/applications/insurance) | Every channel. One system. Field to office unified. |
 
 ---
 
@@ -226,13 +226,13 @@ Cùng một phương pháp nguồn duy nhất cũng áp dụng cho:
 
 **Kiosk** *(sắp ra mắt)* — Màn hình Raspberry Pi, thực đơn nhà hàng, văn phòng chính phủ, biển hiệu bán lẻ.
 
-All links route through [your gateway](/platform/foundation/#wellknown-gateway). Publish TO Big Tech platforms. Never be locked IN.
+All links route through [your gateway](/vi/platform/foundation/#wellknown-gateway). Publish TO Big Tech platforms. Never be locked IN.
 
 ---
 
 ## Xây dựng trên nền tảng
 
-Publish inherits all [Foundation](/platform/foundation/) capabilities automatically:
+Publish inherits all [Foundation](/vi/platform/foundation/) capabilities automatically:
 
 | Capability | What It Means |
 |------------|---------------|
@@ -242,7 +242,7 @@ Publish inherits all [Foundation](/platform/foundation/) capabilities automatica
 | **Real-time sync** | Multiple editors, automatic conflict resolution |
 | **Wellknown Gateway** | Publish TO Big Tech, never locked IN |
 
-[Tìm hiểu thêm về Quỹ →](/platform/foundation/)
+[Tìm hiểu thêm về Quỹ →](/vi/platform/foundation/)
 
 ---
 
@@ -250,7 +250,7 @@ Publish inherits all [Foundation](/platform/foundation/) capabilities automatica
 
 Nếu bạn đang quản lý nội dung ở nhiều nơi, theo dõi sự thay đổi thương hiệu, chờ đợi bản dịch hoặc xử lý thủ công các bản nộp—có một cách tốt hơn.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)
 
 ---
 
@@ -260,4 +260,4 @@ Publish là lớp 2D của nền tảng phần mềm Ubuntu.
 
 Đối với các tổ chức hoạt động trong lĩnh vực 3D—robot, sản xuất, xây dựng, mô hình số—Publish cung cấp lớp tài liệu. Bản vẽ kỹ thuật, danh sách vật liệu (BOM), hướng dẫn công việc, biểu mẫu tuân thủ—tất cả đều được tạo ra từ một nguồn duy nhất và đồng bộ với mô hình 3D.
 
-[Khám phá Nền tảng Không gian →](/platform/spatial/)
+[Khám phá Nền tảng Không gian →](/vi/platform/spatial/)

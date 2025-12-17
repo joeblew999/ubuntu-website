@@ -125,4 +125,4 @@ Ai xây dựng cơ sở hạ tầng này sẽ nắm bắt được cơ hội "c�
 
 ---
 
-*Building or deploying robots? [See how we're addressing this →](/applications/robotics)*
+*Building or deploying robots? [See how we're addressing this →](/vi/applications/robotics)*

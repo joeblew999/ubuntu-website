@@ -270,7 +270,7 @@ Sản xuất phụ thuộc vào giấy tờ không kém gì máy móc.
 
 Tất cả từ một nguồn duy nhất. Tất cả được kết nối với dữ liệu sản xuất của bạn.
 
-[Khám phá → Xuất bản](/platform/publish/)
+[Khám phá → Xuất bản](/vi/platform/publish/)
 
 ---
 
@@ -280,4 +280,4 @@ Sản xuất là nơi thiết kế gặp gỡ thực tế. Nơi hình học tr�
 
 Trí tuệ nhân tạo (AI) có khả năng hiểu cả thiết kế và sản xuất. Đó chính là điều chúng tôi đang xây dựng.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

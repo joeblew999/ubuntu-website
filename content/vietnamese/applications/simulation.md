@@ -246,7 +246,7 @@ Mô phỏng không chỉ tạo ra các mô hình được huấn luyện mà cò
 
 Tất cả từ một nguồn duy nhất. Tất cả các phiên bản được quản lý cùng với môi trường mô phỏng của bạn.
 
-[Khám phá → Xuất bản](/platform/publish/)
+[Khám phá → Xuất bản](/vi/platform/publish/)
 
 ---
 
@@ -256,4 +256,4 @@ Mọi hệ thống trí tuệ nhân tạo (AI) sẽ hoạt động trong thế g
 
 Chúng tôi đang xây dựng nơi diễn ra quá trình học tập.
 
-[Liên hệ với chúng tôi →](/contact)
+[Liên hệ với chúng tôi →](/vi/contact)

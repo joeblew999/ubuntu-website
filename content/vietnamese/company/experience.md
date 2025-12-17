@@ -224,12 +224,12 @@ Chúng tôi có:
 
 Nếu bạn đang đánh giá xem chúng tôi có thể đáp ứng quy mô mà bạn cần hay không, câu trả lời là: chúng tôi đã làm điều đó trong 25 năm qua.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)
 
 ---
 
 ## Tìm hiểu thêm về chúng tôi
 
-[Founder](/company/founder/) — Meet the person behind Ubuntu Software and the journey that led here.
+[Founder](/vi/company/founder/) — Meet the person behind Ubuntu Software and the journey that led here.
 
-[Advisors](/company/advisors/) — Industry leaders who collaborate with us.
+[Advisors](/vi/company/advisors/) — Industry leaders who collaborate with us.

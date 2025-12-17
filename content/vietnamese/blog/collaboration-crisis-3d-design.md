@@ -100,4 +100,4 @@ Nhưng các công cụ thiết kế 3D không theo kịp. Hình học phức t�
 
 ---
 
-*Working with distributed teams on 3D design projects? [See how we're solving this →](/platform)*
+*Working with distributed teams on 3D design projects? [See how we're solving this →](/vi/platform)*

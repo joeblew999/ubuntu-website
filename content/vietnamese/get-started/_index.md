@@ -54,7 +54,7 @@ Cả hai nền tảng đều chạy bản địa trên:
 | **Android** | Mobile app |
 | **Web** | Browser-based |
 
-Deploy on your infrastructure—cloud, on-premises, or air-gapped. [Learn more about our Linux & cross-platform expertise →](/technology/linux/)
+Deploy on your infrastructure—cloud, on-premises, or air-gapped. [Learn more about our Linux & cross-platform expertise →](/vi/technology/linux/)
 
 ---
 
@@ -123,4 +123,4 @@ Deploy on your infrastructure—cloud, on-premises, or air-gapped. [Learn more a
 
 ## Có câu hỏi nào không?
 
-Want to learn more first? [Contact us](/contact/) — we're happy to discuss.
+Want to learn more first? [Contact us](/vi/contact/) — we're happy to discuss.

@@ -159,4 +159,4 @@ Dữ liệu của bạn. Lựa chọn của bạn. Tương lai của bạn.
 
 ---
 
-*We built our platform on STEP, IFC, and open APIs. [See how it works →](/platform)*
+*We built our platform on STEP, IFC, and open APIs. [See how it works →](/vi/platform)*

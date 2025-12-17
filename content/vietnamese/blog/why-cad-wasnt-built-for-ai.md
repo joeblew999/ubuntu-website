@@ -81,4 +81,4 @@ Chúng tôi đang xây dựng chúng.
 
 ---
 
-*Want to learn more about AI-native 3D design? [Explore our platform →](/platform)*
+*Want to learn more about AI-native 3D design? [Explore our platform →](/vi/platform)*

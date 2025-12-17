@@ -52,7 +52,7 @@ Chính sách này áp dụng cho tất cả các sản phẩm và dịch vụ c�
 
 ## Cách báo cáo
 
-Use our [Contact Form](/contact/?subject=security) to submit your report.
+Use our [Contact Form](/vi/contact/?subject=security) to submit your report.
 
 Vui lòng bao gồm:
 
@@ -64,7 +64,7 @@ Vui lòng bao gồm:
 
 Bạn có thể báo cáo ẩn danh. Chúng tôi không yêu cầu thông tin cá nhân.
 
-[Báo cáo lỗ hổng bảo mật →](/contact/?subject=security)
+[Báo cáo lỗ hổng bảo mật →](/vi/contact/?subject=security)
 
 ---
 
@@ -83,7 +83,7 @@ Chúng tôi sẽ thông báo cho quý khách về tiến độ công việc và 
 
 ## Nhận diện
 
-We believe in thanking researchers who help us improve security. Valid reports are recognized on our [Security Acknowledgments](/security/acknowledgments/) page.
+We believe in thanking researchers who help us improve security. Valid reports are recognized on our [Security Acknowledgments](/vi/security/acknowledgments/) page.
 
 Hiện tại, chúng tôi không cung cấp phần thưởng tiền mặt, nhưng chúng tôi rất biết ơn sự đóng góp của bạn trong việc giúp sản phẩm của chúng tôi trở nên an toàn hơn.
 
@@ -93,10 +93,10 @@ Hiện tại, chúng tôi không cung cấp phần thưởng tiền mặt, nhưn
 
 Để hỏi về chính sách này hoặc làm rõ phạm vi áp dụng:
 
-[Liên hệ với chúng tôi →](/contact/?subject=security)
+[Liên hệ với chúng tôi →](/vi/contact/?subject=security)
 
 ---
 
 ## Chính sách có thể đọc được bằng máy
 
-Security researchers can find our [security.txt](/.well-known/security.txt) file at the standard location per [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
+Security researchers can find our [security.txt](/vi/.well-known/security.txt) file at the standard location per [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).

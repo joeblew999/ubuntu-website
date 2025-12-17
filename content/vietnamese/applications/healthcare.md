@@ -207,7 +207,7 @@ Một số công việc trong lĩnh vực y tế mang tính chất không gian:
 
 Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
-[Khám phá Không gian →](/platform/spatial/)
+[Khám phá Không gian →](/vi/platform/spatial/)
 
 ---
 
@@ -215,4 +215,4 @@ Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
 Dịch vụ y tế ghi chép tốt hơn. Tích hợp dễ dàng hơn. Ít sai sót hơn.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

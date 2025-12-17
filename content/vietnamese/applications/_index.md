@@ -22,19 +22,19 @@ Cả hai nền tảng đều chia sẻ nền tảng cốt lõi của chúng tôi
 
 **Dành cho các ngành công nghiệp hoạt động trong không gian ba chiều.**
 
-### [Robotics & Tự động hóa](/applications/robotics)
+### [Robotics & Tự động hóa](/vi/applications/robotics)
 Khả năng suy luận không gian cho các hệ thống máy móc sẽ định hình thế giới của chúng ta. Thiết kế tế bào làm việc, lập kế hoạch đường đi và phối hợp đa robot.
 
-### [Mô phỏng & Đào tạo](/applications/simulation)
+### [Mô phỏng & Đào tạo](/vi/applications/simulation)
 Nơi trí tuệ nhân tạo (AI) học tập trong không gian ảo trước khi áp dụng vào thế giới thực. Môi trường tổng hợp, dữ liệu đào tạo quy mô lớn, quy trình chuyển đổi từ mô phỏng sang thực tế.
 
-### [Bản sao kỹ thuật số](/applications/digital-twins)
+### [Bản sao kỹ thuật số](/vi/applications/digital-twins)
 Thiết kế cầu và thực tế. Mô hình sống kết nối với cảm biến, bảo trì dự đoán, quản lý cơ sở vật chất với trí tuệ không gian.
 
-### [Sản xuất](/applications/manufacturing)
+### [Sản xuất](/vi/applications/manufacturing)
 Từ thiết kế đến gia công với trí tuệ nhân tạo (AI) hiểu rõ các hạn chế sản xuất. CAM, lập kế hoạch quy trình, tích hợp chất lượng.
 
-### [Xây dựng](/applications/construction)
+### [Xây dựng](/vi/applications/construction)
 Thiết kế công trình mô-đun, tiền chế và thông minh. Đội ngũ toàn cầu, hợp tác thời gian thực, tích hợp nhà máy.
 
 ---
@@ -43,19 +43,19 @@ Thiết kế công trình mô-đun, tiền chế và thông minh. Đội ngũ to
 
 **Dành cho các ngành nghề quản lý nội dung trên nhiều kênh.**
 
-### [Chính phủ & Khu vực công](/applications/government)
+### [Chính phủ & Khu vực công](/vi/applications/government)
 Phục vụ mọi công dân. Hệ thống giấy tờ và kỹ thuật số được tích hợp thống nhất. Định dạng dễ tiếp cận, tuân thủ quy định lưu trữ, tích hợp với hệ thống cũ.
 
-### [Y tế](/applications/healthcare)
+### [Y tế](/vi/applications/healthcare)
 Giảm bớt thủ tục hành chính, ít sai sót hơn, chăm sóc tốt hơn. Tiếp nhận bệnh nhân, quản lý sự đồng ý, tích hợp hệ thống quản lý hồ sơ y tế điện tử (EMR).
 
-### [Dịch vụ tài chính](/applications/financial)
+### [Dịch vụ tài chính](/vi/applications/financial)
 Tuân thủ mà không phức tạp. Đơn xin vay, thông báo, tài liệu tuân thủ quy định với đầy đủ hồ sơ kiểm toán.
 
-### [Giáo dục](/applications/education)
+### [Giáo dục](/vi/applications/education)
 Quản lý hiện đại, các tùy chọn truyền thống. Đăng ký, quyền truy cập, hồ sơ học sinh — giấy tờ và cổng thông tin được tích hợp thống nhất.
 
-### [Bảo hiểm](/applications/insurance)
+### [Bảo hiểm](/vi/applications/insurance)
 Mọi kênh, một hệ thống. Nhân viên hiện trường, khách hàng trực tuyến, yêu cầu bồi thường qua bưu điện—tất cả đều được xử lý thống nhất.
 
 ---
@@ -75,9 +75,9 @@ Cả hai nền tảng đều được xây dựng trên cùng một công nghệ
 
 ## Tìm kiếm sự phù hợp của bạn
 
-**Working in 3D?** Start with [Spatial](/platform/spatial/).
+**Working in 3D?** Start with [Spatial](/vi/platform/spatial/).
 
-**Working with documents?** Start with [Publish](/platform/publish/).
+**Working with documents?** Start with [Publish](/vi/platform/publish/).
 
 **Cần cả hai?** Chúng tích hợp một cách mượt mà. Bản vẽ kỹ thuật từ mô hình 3D. Danh sách vật liệu (BOM) được chuyển sang biểu mẫu. Tài liệu được đồng bộ hóa với thiết kế.
 
@@ -85,4 +85,4 @@ Cả hai nền tảng đều được xây dựng trên cùng một công nghệ
 
 ## Hãy cùng trò chuyện
 
-[Contact us](/contact) to discuss which applications fit your organization.
+[Contact us](/vi/contact) to discuss which applications fit your organization.

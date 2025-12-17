@@ -19,7 +19,7 @@ Chúng tôi xin chân thành cảm ơn các nhà nghiên cứu bảo mật sau �
 
 ## Cách để được liệt kê
 
-If you discover a security vulnerability, please report it according to our [Vulnerability Disclosure Policy](/security/).
+If you discover a security vulnerability, please report it according to our [Vulnerability Disclosure Policy](/vi/security/).
 
 Sau khi chúng tôi xác minh và xử lý báo cáo của bạn, chúng tôi sẽ thêm tên hoặc biệt danh của bạn vào đây (với sự đồng ý của bạn).
 
@@ -37,4 +37,4 @@ Sau khi chúng tôi xác minh và xử lý báo cáo của bạn, chúng tôi s�
 
 Bạn đã tìm thấy điều gì đó? Chúng tôi muốn nghe ý kiến của bạn.
 
-[Chính sách công bố lỗ hổng bảo mật →](/security/)
+[Chính sách công bố lỗ hổng bảo mật →](/vi/security/)

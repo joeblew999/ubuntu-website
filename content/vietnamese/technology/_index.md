@@ -58,19 +58,19 @@ NATS JetStream cung cấp nền tảng cho kiến trúc hướng sự kiện c�
 
 Hệ thống robotics của chúng tôi được xây dựng trên Viam RDK—một bộ công cụ phát triển robotics mã nguồn mở cung cấp trừu tượng hóa phần cứng, lập kế hoạch chuyển động và thị giác máy tính.
 
-[Hệ thống robotics →](/technology/robotics/)
+[Hệ thống robotics →](/vi/technology/robotics/)
 
 ### Linux & Đa nền tảng
 
 Hàng chục năm kinh nghiệm với Linux. Ứng dụng đa nền tảng cho Windows, Mac, Linux, iOS và Android. Khung giao diện người dùng (GUI) riêng sau nhiều năm làm việc với Qt, Flutter và Electron.
 
-[Linux & Đa nền tảng →](/technology/linux/)
+[Linux & Đa nền tảng →](/vi/technology/linux/)
 
 ### An ninh & Tuân thủ
 
 Kiến trúc tự chủ giúp đơn giản hóa việc tuân thủ SOC 2, FedRAMP, HIPAA và ISO 27001. Triển khai cách ly mạng, không kết nối về máy chủ, kiểm soát hoàn toàn dữ liệu.
 
-[An ninh & Tuân thủ →](/technology/security/)
+[An ninh & Tuân thủ →](/vi/technology/security/)
 
 ---
 
@@ -106,9 +106,9 @@ Chúng tôi phát triển và đóng góp cho mã nguồn mở:
 
 ## Tìm hiểu thêm
 
-- [Hệ thống robotics →](/technology/robotics/)
-- [Linux & Đa nền tảng →](/technology/linux/)
-- [An ninh & Tuân thủ →](/technology/security/)
-- [Nền tảng không gian →](/platform/spatial/)
-- [Nền tảng →](/platform/foundation/)
-- [Liên hệ với chúng tôi →](/contact/)
+- [Hệ thống robotics →](/vi/technology/robotics/)
+- [Linux & Đa nền tảng →](/vi/technology/linux/)
+- [An ninh & Tuân thủ →](/vi/technology/security/)
+- [Nền tảng không gian →](/vi/platform/spatial/)
+- [Nền tảng →](/vi/platform/foundation/)
+- [Liên hệ với chúng tôi →](/vi/contact/)

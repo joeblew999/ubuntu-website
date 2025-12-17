@@ -209,7 +209,7 @@ Một số công việc bảo hiểm mang tính chất không gian:
 
 Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
-[Khám phá Không gian →](/platform/spatial/)
+[Khám phá Không gian →](/vi/platform/spatial/)
 
 ---
 
@@ -217,4 +217,4 @@ Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
 Bảo hiểm hoạt động trên mọi nền tảng: trực tiếp, trực tuyến và trên giấy tờ. Mọi kênh, một hệ thống.
 
-[Liên hệ với chúng tôi →](/contact/)
+[Liên hệ với chúng tôi →](/vi/contact/)

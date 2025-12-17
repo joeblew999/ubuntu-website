@@ -268,7 +268,7 @@ Các bản sao kỹ thuật số tạo ra những thông tin hữu ích—nhưng
 
 Tất cả từ một nguồn duy nhất. Tất cả được kết nối với mô hình cơ sở lưu trú của bạn.
 
-[Khám phá → Xuất bản](/platform/publish/)
+[Khám phá → Xuất bản](/vi/platform/publish/)
 
 ---
 
@@ -278,4 +278,4 @@ Cơ sở của bạn liên tục tạo ra dữ liệu. Thiết kế của bạn 
 
 Dù bạn đang xây dựng mới, cải tạo công trình hiện có hay quản lý danh mục đầu tư—giải pháp Twin đã sẵn sàng.
 
-[Liên hệ với chúng tôi →](/contact)
+[Liên hệ với chúng tôi →](/vi/contact)

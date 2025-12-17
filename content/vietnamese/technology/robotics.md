@@ -157,6 +157,6 @@ Modbus → PLC cho tích hợp tự động hóa công nghiệp. Điều khiển
 
 ## Tìm hiểu thêm
 
-- [Tổng quan về công nghệ →](/technology/)
-- [Nền tảng không gian →](/platform/spatial/)
-- [Liên hệ với chúng tôi →](/contact/)
+- [Tổng quan về công nghệ →](/vi/technology/)
+- [Nền tảng không gian →](/vi/platform/spatial/)
+- [Liên hệ với chúng tôi →](/vi/contact/)

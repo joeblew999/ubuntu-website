@@ -6,7 +6,7 @@ description: "Bắt đầu xây dựng với các nền tảng xuất bản tài
 button:
   enable: true
   label: "Get Started"
-  link: "/get-started"
+  link: "/vi/get-started"
 
 # don't create a separate page
 build:

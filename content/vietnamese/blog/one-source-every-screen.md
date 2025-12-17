@@ -198,8 +198,8 @@ Màn hình chỉ là một định dạng đầu ra khác.
 
 ---
 
-*Interested in early access to kiosk capabilities? [Contact us →](/contact)*
+*Interested in early access to kiosk capabilities? [Contact us →](/vi/contact)*
 
 ---
 
-*Part of our Publish platform. [Learn more about single-source publishing →](/platform/publish)*
+*Part of our Publish platform. [Learn more about single-source publishing →](/vi/platform/publish)*

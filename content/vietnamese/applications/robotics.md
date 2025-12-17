@@ -184,7 +184,7 @@ Robotics không chỉ là mô hình 3D—nó còn là tài liệu kỹ thuật.
 
 Tất cả từ một nguồn duy nhất. Tất cả đều được thiết kế phù hợp với thiết kế tế bào làm việc 3D của bạn.
 
-[Khám phá → Xuất bản](/platform/publish/)
+[Khám phá → Xuất bản](/vi/platform/publish/)
 
 ---
 
@@ -194,4 +194,4 @@ Sự bùng nổ của robotics đòi hỏi cơ sở hạ tầng. Chúng tôi đa
 
 Dù bạn đang thiết kế robot hình người, triển khai cobot hay tự động hóa kho hàng—hãy cùng thảo luận.
 
-[Liên hệ với chúng tôi →](/contact)
+[Liên hệ với chúng tôi →](/vi/contact)
