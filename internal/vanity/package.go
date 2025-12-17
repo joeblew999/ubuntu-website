@@ -15,17 +15,42 @@ import (
 
 // Package represents a Go package with vanity import metadata.
 type Package struct {
-	Title            string    `yaml:"title"`
-	ImportPath       string    `yaml:"import_path"`
-	RepoURL          string    `yaml:"repo_url"`
-	Description      string    `yaml:"description"`
-	Version          string    `yaml:"version"`
-	DocumentationURL string    `yaml:"documentation_url,omitempty"`
-	License          string    `yaml:"license"`
-	Author           string    `yaml:"author"`
-	CreatedAt        time.Time `yaml:"created_at"`
-	UpdatedAt        time.Time `yaml:"updated_at"`
-	HasBinary        bool      `yaml:"has_binary,omitempty"`
+	Title            string         `yaml:"title"`
+	ImportPath       string         `yaml:"import_path"`
+	RepoURL          string         `yaml:"repo_url"`
+	Description      string         `yaml:"description"`
+	Version          string         `yaml:"version"`
+	DocumentationURL string         `yaml:"documentation_url,omitempty"`
+	License          string         `yaml:"license"`
+	Author           string         `yaml:"author"`
+	CreatedAt        time.Time      `yaml:"created_at"`
+	UpdatedAt        time.Time      `yaml:"updated_at"`
+	HasBinary        bool           `yaml:"has_binary,omitempty"`
+	BinaryName       string         `yaml:"binary_name,omitempty"`   // CLI binary name (e.g., "mailerlite")
+	TaskfilePath     string         `yaml:"taskfile_path,omitempty"` // Path in repo (e.g., "taskfiles/Taskfile.mailerlite.yml")
+	Process          *ProcessConfig `yaml:"process,omitempty"`       // Process configuration for servers
+}
+
+// ProcessConfig defines how a package runs as a long-running process.
+// This enables automatic process-compose.yaml generation from package metadata.
+type ProcessConfig struct {
+	// Command is the command to run (e.g., "task mailerlite:server")
+	Command string `yaml:"command,omitempty"`
+
+	// Port is the HTTP port the service listens on (e.g., 8086)
+	Port int `yaml:"port,omitempty"`
+
+	// HealthPath is the health check endpoint (e.g., "/health")
+	HealthPath string `yaml:"health_path,omitempty"`
+
+	// Disabled means the process is defined but not started by default
+	Disabled bool `yaml:"disabled,omitempty"`
+
+	// DependsOn lists processes that must start before this one
+	DependsOn []string `yaml:"depends_on,omitempty"`
+
+	// Namespace groups related processes (e.g., "servers", "workers")
+	Namespace string `yaml:"namespace,omitempty"`
 }
 
 // DefaultContentDir is the default location for package content files.

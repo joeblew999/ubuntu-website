@@ -1,6 +1,7 @@
 # Process-Compose Tasks
 #
 # Local development process orchestration with health checks and auto-restart.
+# Now uses xplat's embedded process-compose (xplat process).
 #
 # Usage:
 #   task pc:up              Start all dev processes with TUI dashboard
@@ -9,16 +10,16 @@
 #   task pc:status          Show process status
 #
 # Enable optional processes:
-#   process-compose up --enable translate
-#   process-compose up --enable mailerlite
+#   xplat process up --enable translate
+#   xplat process up --enable mailerlite
 #
 # Documentation: https://github.com/F1bonacc1/process-compose
 
 version: '3'
 
 vars:
-  PC_BIN: 'process-compose{{exeExt}}'
-  PC_CMD: '{{.BIN_INSTALL_DIR}}/{{.PC_BIN}}'
+  # Use xplat's embedded process-compose
+  PC_CMD: '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process'
 
 tasks:
   # ===========================================================================
@@ -26,13 +27,12 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure process-compose binary is available (builds from source or downloads)
+    desc: Ensure xplat is available (process-compose is embedded)
     internal: true
     status:
-      - test -f "{{.BIN_INSTALL_DIR}}/{{.PC_BIN}}"
+      - test -f "{{.BIN_INSTALL_DIR}}/xplat{{exeExt}}"
     cmds:
-      - mkdir -p "{{.BIN_INSTALL_DIR}}"
-      - go build -o "{{.BIN_INSTALL_DIR}}/{{.PC_BIN}}" ./cmd/process-compose
+      - task: xplat:check:deps
 
   # ===========================================================================
   # Core Commands (up/down/logs/status)
@@ -97,23 +97,33 @@ tasks:
       - '{{.PC_CMD}} process start {{.PROCESS}}'
 
   # ===========================================================================
-  # Release (release:* - build for distribution)
+  # Process Generation (from package registry)
   # ===========================================================================
 
-  release:build:
-    desc: Build process-compose for release (current platform, or set GOOS/GOARCH)
+  generate:
+    desc: Generate process-compose.yaml from package registry
+    deps: [check:deps]
     cmds:
-      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
-      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.PC_BIN}}" ./cmd/process-compose
+      - '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process-gen generate'
 
-  release:test:
-    desc: Test built process-compose release binary
-    cmds:
-      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.PC_BIN}} version || true"
-
-  release:publish:
-    desc: Build all platforms and create GitHub release
+  add:
+    desc: Add a package's process to process-compose.yaml (PKG=mailerlite)
+    deps: [check:deps]
     requires:
-      vars: [VERSION]
+      vars: [PKG]
     cmds:
-      - echo "Release publishing requires manual process - build binaries and use gh release create"
+      - '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process-gen add {{.PKG}}'
+
+  remove:
+    desc: Remove a package's process from process-compose.yaml (PKG=mailerlite)
+    deps: [check:deps]
+    requires:
+      vars: [PKG]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process-gen remove {{.PKG}}'
+
+  list:packages:
+    desc: List packages with process configurations
+    deps: [check:deps]
+    cmds:
+      - '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process-gen list'

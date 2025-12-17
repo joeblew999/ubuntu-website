@@ -1,0 +1,38 @@
+{{- $packages := dict -}}
+{{- range .Pages -}}
+  {{- if and (.Param "import_path") (ne .File.BaseFileName "_index") -}}
+    {{- $name := .File.BaseFileName -}}
+    {{- /* Build process config if present */ -}}
+    {{- $process := dict -}}
+    {{- with .Param "process" -}}
+      {{- $process = dict
+          "command" (index . "command" | default "")
+          "port" (index . "port" | default 0)
+          "health_path" (index . "health_path" | default "")
+          "disabled" (index . "disabled" | default false)
+          "depends_on" (index . "depends_on" | default (slice))
+          "namespace" (index . "namespace" | default "")
+      -}}
+    {{- end -}}
+    {{- $pkg := dict
+        "name" $name
+        "version" (.Param "version" | default "v0.1.0")
+        "description" (.Param "description" | default "")
+        "import_path" (.Param "import_path")
+        "repo_url" (.Param "repo_url")
+        "has_binary" (.Param "has_binary" | default false)
+        "binary_name" (.Param "binary_name" | default "")
+        "taskfile_path" (.Param "taskfile_path" | default "")
+        "license" (.Param "license" | default "MIT")
+        "author" (.Param "author" | default "")
+    -}}
+    {{- /* Only add process if command is set */ -}}
+    {{- with .Param "process" -}}
+      {{- if index . "command" -}}
+        {{- $pkg = merge $pkg (dict "process" $process) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $packages = merge $packages (dict $name $pkg) -}}
+  {{- end -}}
+{{- end -}}
+{{- dict "packages" $packages "generated_at" (now.Format "2006-01-02T15:04:05Z07:00") "registry_url" "https://www.ubuntusoftware.net/pkg/" | jsonify (dict "indent" "  ") -}}
