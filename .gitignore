@@ -47,3 +47,4 @@ logs/
 
 # Downloaded codec libraries
 lib/codecs/
+.bin/
