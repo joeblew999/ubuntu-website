@@ -12,13 +12,13 @@ package main
 import (
 	"os"
 
-	"github.com/joeblew999/ubuntu-website/internal/vanity"
+	"github.com/joeblew999/ubuntu-website/internal/vanityimport"
 )
 
 // version is set via ldflags at build time
 var version = "dev"
 
 func main() {
-	exitCode := vanity.Run(os.Args, version, os.Stdout, os.Stderr)
+	exitCode := vanityimport.Run(os.Args, version, os.Stdout, os.Stderr)
 	os.Exit(exitCode)
 }

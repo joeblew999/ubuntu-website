@@ -14,12 +14,12 @@ package main
 import (
 	"os"
 
-	"github.com/joeblew999/ubuntu-website/internal/playwrightcli"
+	"github.com/joeblew999/ubuntu-website/internal/playwright"
 )
 
 var version = "dev"
 
 func main() {
-	exitCode := playwrightcli.Run(os.Args, version, os.Stdout, os.Stderr)
+	exitCode := playwright.Run(os.Args, version, os.Stdout, os.Stderr)
 	os.Exit(exitCode)
 }

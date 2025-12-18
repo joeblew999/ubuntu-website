@@ -195,7 +195,7 @@ The translation tool:
 ├── cmd/env/                # Environment setup CLI
 ├── cmd/translate/          # Translation CLI
 ├── internal/env/           # Environment management
-├── internal/translator/    # Translation logic
+├── internal/translate/     # Translation logic
 ├── content/
 │   ├── english/           # Source (EN)
 │   ├── german/            # DE translations

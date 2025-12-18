@@ -1,0 +1,507 @@
+# YouTube Tasks
+#
+# Download and manage videos for self-hosting on Hugo website.
+# Uses yt-dlp for downloading and FFmpeg for post-processing.
+# Both are auto-installed to .build/ on first use.
+#
+# Structure:
+#   static/videos/cache/   - Original downloads (gitignored)
+#   static/videos/         - Edited videos for Hugo (tracked via Git LFS)
+#
+# Download (to cache/):
+#   task youtube:info URL=https://...           - Show metadata and formats
+#   task youtube:download URL=https://...       - Download to cache/ (best quality)
+#   task youtube:download:720 URL=https://...   - Download at 720p max
+#   task youtube:download:480 URL=https://...   - Download at 480p (Cloudflare Pages friendly)
+#   task youtube:download:audio URL=https://... - Audio only
+#
+# Management:
+#   task youtube:list                           - List videos with sources (from manifests)
+#   task youtube:list:files                     - List video files with sizes
+#   task youtube:refresh                        - Re-download all from manifests
+#
+# Edit (FFmpeg post-processing):
+#   task youtube:probe FILE=video.mp4           - Show video info
+#   task youtube:crop FILE=x W=1280 H=720       - Crop video
+#   task youtube:trim FILE=x START=10 END=90   - Trim video
+#   task youtube:scale FILE=x H=480             - Resize video
+#   task youtube:compress FILE=x CRF=28         - Compress for smaller size
+#   task youtube:overlay FILE=x IMAGE=logo.png  - Add logo (resolution independent)
+#   task youtube:gif FILE=x                      - Extract animated GIF
+#   task youtube:thumbnail FILE=x                - Extract poster frame
+#   task youtube:speed FILE=x FACTOR=2.0         - Change playback speed
+#   task youtube:rotate FILE=x DEG=90            - Rotate video
+#   task youtube:fade FILE=x IN=1 OUT=1          - Add fade in/out
+#   task youtube:concat FILE1=x FILE2=y          - Join videos
+#   task youtube:mute FILE=x                     - Remove audio
+#   task youtube:audio FILE=x AUDIO=y            - Replace audio track
+#
+# Hugo shortcode:
+#   {{</* video src="videos/filename.mp4" */>}}
+#
+# Cloudflare Pages FREE tier: 25MB max file size
+# Use 480p or compress to stay under limit
+
+version: '3'
+
+vars:
+  YOUTUBE_BIN: 'youtube{{exeExt}}'
+  YOUTUBE_CMD: '{{.BIN_INSTALL_DIR}}/{{.YOUTUBE_BIN}}'
+  # Default sample video for testing (YouTube's "Me at the zoo" - first ever YouTube video)
+  DEFAULT_URL: 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
+  # Video storage location (Hugo static directory)
+  VIDEO_DIR: '{{.ROOT_DIR}}/static/videos'
+  # Cache directory for original downloads (edit workflows use these as input)
+  CACHE_DIR: '{{.VIDEO_DIR}}/cache'
+  # Output template: downloads go to cache/, edited videos stay in VIDEO_DIR
+  OUTPUT_TEMPLATE: '{{.CACHE_DIR}}/%(title)s.%(ext)s'
+
+tasks:
+  # ===========================================================================
+  # Checks
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure youtube CLI is built
+    status:
+      - test -f "{{.YOUTUBE_CMD}}"
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.YOUTUBE_CMD}}" ./cmd/youtube
+
+  # ===========================================================================
+  # Info
+  # ===========================================================================
+
+  default:
+    desc: Show youtube CLI help
+    deps: [check:deps]
+    cmds:
+      - '"{{.YOUTUBE_CMD}}" --help'
+
+  info:
+    desc: Show metadata and formats for a URL
+    deps: [check:deps]
+    vars:
+      URL: '{{.URL | default .DEFAULT_URL}}'
+    cmds:
+      - '"{{.YOUTUBE_CMD}}" info {{.URL}} {{.CLI_ARGS | default ""}}'
+
+  # ===========================================================================
+  # Download
+  # ===========================================================================
+
+  download:
+    desc: Download video to static/videos/cache/ (best quality)
+    deps: [check:deps]
+    vars:
+      URL: '{{.URL | default .DEFAULT_URL}}'
+    cmds:
+      - mkdir -p "{{.CACHE_DIR}}"
+      - '"{{.YOUTUBE_CMD}}" download -output "{{.OUTPUT_TEMPLATE}}" {{.URL}} {{.CLI_ARGS | default ""}}'
+      - echo ""
+      - echo "Original saved to cache/. Use edit workflow to process and output to static/videos/"
+
+  download:720:
+    desc: Download video at 720p max to cache/
+    deps: [check:deps]
+    vars:
+      URL: '{{.URL | default .DEFAULT_URL}}'
+    cmds:
+      - mkdir -p "{{.CACHE_DIR}}"
+      - '"{{.YOUTUBE_CMD}}" download -quality 720 -output "{{.OUTPUT_TEMPLATE}}" {{.URL}} {{.CLI_ARGS | default ""}}'
+
+  download:480:
+    desc: Download video at 480p max to cache/
+    deps: [check:deps]
+    vars:
+      URL: '{{.URL | default .DEFAULT_URL}}'
+    cmds:
+      - mkdir -p "{{.CACHE_DIR}}"
+      - '"{{.YOUTUBE_CMD}}" download -quality 480 -output "{{.OUTPUT_TEMPLATE}}" {{.URL}} {{.CLI_ARGS | default ""}}'
+
+  download:audio:
+    desc: Download audio only to cache/
+    deps: [check:deps]
+    vars:
+      URL: '{{.URL | default .DEFAULT_URL}}'
+    cmds:
+      - mkdir -p "{{.CACHE_DIR}}"
+      - '"{{.YOUTUBE_CMD}}" download -audio-only -output "{{.OUTPUT_TEMPLATE}}" {{.URL}} {{.CLI_ARGS | default ""}}'
+
+  # ===========================================================================
+  # Management
+  # ===========================================================================
+
+  list:
+    desc: List downloaded videos with source URLs (from cache/ manifests)
+    deps: [check:deps]
+    cmds:
+      - |
+        if [ -d "{{.CACHE_DIR}}" ]; then
+          "{{.YOUTUBE_CMD}}" list -dir "{{.CACHE_DIR}}"
+        else
+          echo "No cache directory yet. Run: task youtube:download URL=..."
+        fi
+
+  list:files:
+    desc: List video files with sizes (both cache and edited)
+    cmds:
+      - |
+        echo "=== Original downloads (cache/) ==="
+        if [ -d "{{.CACHE_DIR}}" ]; then
+          ls -lh "{{.CACHE_DIR}}" 2>/dev/null || echo "  (empty)"
+        else
+          echo "  (no cache directory)"
+        fi
+        echo ""
+        echo "=== Edited videos (static/videos/) ==="
+        if [ -d "{{.VIDEO_DIR}}" ]; then
+          ls -lh "{{.VIDEO_DIR}}" 2>/dev/null | grep -v "^d" | grep -v "^total" || echo "  (empty)"
+        else
+          echo "  (no videos directory)"
+        fi
+
+  refresh:
+    desc: Re-download all videos from their manifests (same quality settings)
+    deps: [check:deps]
+    cmds:
+      - '"{{.YOUTUBE_CMD}}" refresh -dir "{{.CACHE_DIR}}"'
+
+  clean:
+    desc: Remove all downloaded videos (interactive)
+    prompt: This will delete ALL videos in static/videos/ (including cache). Continue?
+    cmds:
+      - rm -rf "{{.VIDEO_DIR}}"
+      - echo "Cleaned static/videos/"
+
+  clean:cache:
+    desc: Remove only original downloads (keep edited videos)
+    prompt: This will delete original downloads in static/videos/cache/. Continue?
+    cmds:
+      - rm -rf "{{.CACHE_DIR}}"
+      - echo "Cleaned static/videos/cache/"
+
+  # ===========================================================================
+  # Edit (FFmpeg post-processing)
+  # ===========================================================================
+
+  probe:
+    desc: Show video info (resolution, codec, duration, size)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:probe FILE=path/to/video.mp4"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" probe "{{.FILE}}"
+
+  crop:
+    desc: Crop video (FILE=input W=width H=height X=0 Y=0)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      W: '{{.W | default "0"}}'
+      H: '{{.H | default "0"}}'
+      X: '{{.X | default "0"}}'
+      Y: '{{.Y | default "0"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ] || [ "{{.W}}" = "0" ] || [ "{{.H}}" = "0" ]; then
+          echo "Usage: task youtube:crop FILE=video.mp4 W=1280 H=720 [X=0 Y=0] [OUT=output.mp4]"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" crop -w {{.W}} -h {{.H}} -x {{.X}} -y {{.Y}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  trim:
+    desc: Trim video (FILE=input START=time END=time)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      START: '{{.START | default ""}}'
+      END: '{{.END | default ""}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:trim FILE=video.mp4 START=00:00:10 END=00:01:30 [OUT=output.mp4]"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" trim {{if .START}}-start "{{.START}}"{{end}} {{if .END}}-end "{{.END}}"{{end}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  scale:
+    desc: Scale/resize video (FILE=input W=width or H=height)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      W: '{{.W | default "-1"}}'
+      H: '{{.H | default "-1"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:scale FILE=video.mp4 W=1280 [H=-1] [OUT=output.mp4]"
+          echo "       Use -1 for auto-calculate (maintains aspect ratio)"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" scale -w {{.W}} -h {{.H}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  compress:
+    desc: Compress video (FILE=input CRF=23 PRESET=medium)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      CRF: '{{.CRF | default "23"}}'
+      PRESET: '{{.PRESET | default "medium"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:compress FILE=video.mp4 [CRF=23] [PRESET=medium] [OUT=output.mp4]"
+          echo "       CRF: 18-28, lower=better quality, 23=default"
+          echo "       PRESET: ultrafast/fast/medium/slow/veryslow"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" compress -crf {{.CRF}} -preset {{.PRESET}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  overlay:
+    desc: Add logo/watermark overlay (FILE=input IMAGE=logo.png) - resolution independent
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      IMAGE: '{{.IMAGE | default ""}}'
+      POS: '{{.POS | default "bottomright"}}'
+      SCALE: '{{.SCALE | default "10"}}'
+      MARGIN: '{{.MARGIN | default "2"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ] || [ -z "{{.IMAGE}}" ]; then
+          echo "Usage: task youtube:overlay FILE=video.mp4 IMAGE=logo.png [POS=bottomright] [SCALE=10] [MARGIN=2] [OUT=output.mp4]"
+          echo "       POS: topleft, topright, bottomleft, bottomright, center"
+          echo "       SCALE: logo size as % of video width (default 10%)"
+          echo "       MARGIN: margin as % of video width (default 2%)"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" overlay -image "{{.IMAGE}}" -pos {{.POS}} -scale {{.SCALE}} -margin {{.MARGIN}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  gif:
+    desc: Extract animated GIF (FILE=input START=0 DURATION=5 W=480 FPS=10)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      START: '{{.START | default "0"}}'
+      DURATION: '{{.DURATION | default "5"}}'
+      W: '{{.W | default "480"}}'
+      FPS: '{{.FPS | default "10"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:gif FILE=video.mp4 [START=0] [DURATION=5] [W=480] [FPS=10] [OUT=output.gif]"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" gif -start "{{.START}}" -duration {{.DURATION}} -w {{.W}} -fps {{.FPS}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  thumbnail:
+    desc: Extract poster frame as JPG (FILE=input TIME=00:00:01)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      TIME: '{{.TIME | default "00:00:01"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:thumbnail FILE=video.mp4 [TIME=00:00:01] [OUT=output.jpg]"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" thumbnail -time "{{.TIME}}" {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  speed:
+    desc: Change playback speed (FILE=input FACTOR=2.0)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      FACTOR: '{{.FACTOR | default "1.0"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ] || [ "{{.FACTOR}}" = "1.0" ]; then
+          echo "Usage: task youtube:speed FILE=video.mp4 FACTOR=2.0 [OUT=output.mp4]"
+          echo "       FACTOR: 0.5=half speed, 2.0=double speed"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" speed -factor {{.FACTOR}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  rotate:
+    desc: Rotate video (FILE=input DEG=90)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      DEG: '{{.DEG | default "90"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:rotate FILE=video.mp4 DEG=90 [OUT=output.mp4]"
+          echo "       DEG: 90, 180, or 270"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" rotate -deg {{.DEG}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  fade:
+    desc: Add fade in/out effects (FILE=input IN=1 OUT=1)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      IN: '{{.IN | default "0"}}'
+      OUT_FADE: '{{.OUT_FADE | default "0"}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:fade FILE=video.mp4 [IN=1] [OUT_FADE=1] [OUT=output.mp4]"
+          echo "       IN: fade in duration in seconds"
+          echo "       OUT_FADE: fade out duration in seconds"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" fade -in {{.IN}} -out {{.OUT_FADE}} {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  concat:
+    desc: Join multiple videos (FILE1=first FILE2=second)
+    deps: [check:deps]
+    vars:
+      FILE1: '{{.FILE1 | default ""}}'
+      FILE2: '{{.FILE2 | default ""}}'
+      FILE3: '{{.FILE3 | default ""}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE1}}" ] || [ -z "{{.FILE2}}" ]; then
+          echo "Usage: task youtube:concat FILE1=video1.mp4 FILE2=video2.mp4 [FILE3=video3.mp4] [OUT=output.mp4]"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" concat {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE1}}" "{{.FILE2}}" {{if .FILE3}}"{{.FILE3}}"{{end}}
+
+  mute:
+    desc: Remove audio track (FILE=input)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ]; then
+          echo "Usage: task youtube:mute FILE=video.mp4 [OUT=output.mp4]"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" mute {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  audio:
+    desc: Replace audio track (FILE=video AUDIO=audio.mp3)
+    deps: [check:deps]
+    vars:
+      FILE: '{{.FILE | default ""}}'
+      AUDIO: '{{.AUDIO | default ""}}'
+      OUT: '{{.OUT | default ""}}'
+    cmds:
+      - |
+        if [ -z "{{.FILE}}" ] || [ -z "{{.AUDIO}}" ]; then
+          echo "Usage: task youtube:audio FILE=video.mp4 AUDIO=audio.mp3 [OUT=output.mp4]"
+          exit 1
+        fi
+        "{{.YOUTUBE_CMD}}" audio -file "{{.AUDIO}}" {{if .OUT}}-o "{{.OUT}}"{{end}} -force "{{.FILE}}"
+
+  # ===========================================================================
+  # Edit Workflows (Taskfile as "edit list")
+  #
+  # Define named video editing pipelines here. Each task processes a specific
+  # video with predetermined settings - the taskfile becomes your edit list!
+  # ===========================================================================
+
+  edit:visual-inertial-nav:
+    desc: Process visual-inertial navigation demo for website
+    # Source: https://www.youtube.com/watch?v=cjNkLobw2Cw (Spectacular AI)
+    # Original: 854x480, 59s, 3.1MB
+    # Pipeline:
+    #   1. Trim first 5 seconds to remove intro text
+    #   2. Add Ubuntu Software logo (10% of video width, 2% margin - resolution independent)
+    deps: [check:deps]
+    vars:
+      INPUT: '{{.CACHE_DIR}}/visual-inertial-navigation-module-demo.mp4'
+      TRIMMED: '{{.CACHE_DIR}}/visual-inertial-navigation-module-demo-trimmed.mp4'
+      OUTPUT: '{{.VIDEO_DIR}}/visual-inertial-nav-edited.mp4'
+      LOGO: '{{.ROOT_DIR}}/assets/images/favicon.png'
+      LOGO_POS: 'bottomright'
+    cmds:
+      - echo "=== Processing visual-inertial navigation demo ==="
+      - echo "Source https://www.youtube.com/watch?v=cjNkLobw2Cw"
+      - echo ""
+      - echo "Step 1 Trim first 5 seconds to remove intro text"
+      - '"{{.YOUTUBE_CMD}}" trim -start 5 -o "{{.TRIMMED}}" -force "{{.INPUT}}"'
+      - echo ""
+      - echo "Step 2 Add Ubuntu Software logo (resolution independent)"
+      - '"{{.YOUTUBE_CMD}}" overlay -image "{{.LOGO}}" -pos {{.LOGO_POS}} -o "{{.OUTPUT}}" -force "{{.TRIMMED}}"'
+      - echo ""
+      - echo "Step 3 Cleanup intermediate files"
+      - rm -f "{{.TRIMMED}}"
+      - echo ""
+      - echo "=== Done ==="
+      - '"{{.YOUTUBE_CMD}}" probe "{{.OUTPUT}}"'
+      - echo ""
+      - echo "Hugo shortcode:"
+      - echo "  video src=videos/visual-inertial-nav-edited.mp4"
+
+  edit:gps-free-vio:
+    desc: Process GPS-free VIO navigation demo for website
+    # Source: https://www.youtube.com/watch?v=M2yySQxFG7c (Spectacular AI)
+    # Original: 1280x720, 1:16
+    # Pipeline:
+    #   1. Trim to 60 seconds (remove end)
+    #   2. Add Ubuntu Software logo (10% of video width, 2% margin - resolution independent)
+    deps: [check:deps]
+    vars:
+      INPUT: '{{.CACHE_DIR}}/autonomous-gps-free-navigation-with-vio-closed-loop-test.mp4'
+      TRIMMED: '{{.CACHE_DIR}}/autonomous-gps-free-navigation-with-vio-closed-loop-test-trimmed.mp4'
+      OUTPUT: '{{.VIDEO_DIR}}/gps-free-vio-edited.mp4'
+      LOGO: '{{.ROOT_DIR}}/assets/images/favicon.png'
+      LOGO_POS: 'bottomright'
+    cmds:
+      - echo "=== Processing GPS-free VIO navigation demo ==="
+      - echo "Source https://www.youtube.com/watch?v=M2yySQxFG7c"
+      - echo ""
+      - echo "Step 1 Trim to 60 seconds"
+      - '"{{.YOUTUBE_CMD}}" trim -end 60 -o "{{.TRIMMED}}" -force "{{.INPUT}}"'
+      - echo ""
+      - echo "Step 2 Add Ubuntu Software logo (resolution independent)"
+      - '"{{.YOUTUBE_CMD}}" overlay -image "{{.LOGO}}" -pos {{.LOGO_POS}} -o "{{.OUTPUT}}" -force "{{.TRIMMED}}"'
+      - echo ""
+      - echo "Step 3 Cleanup intermediate files"
+      - rm -f "{{.TRIMMED}}"
+      - echo ""
+      - echo "=== Done ==="
+      - '"{{.YOUTUBE_CMD}}" probe "{{.OUTPUT}}"'
+      - echo ""
+      - echo "Hugo shortcode:"
+      - echo "  video src=videos/gps-free-vio-edited.mp4"
+  # ===========================================================================
+
+  # ===========================================================================
+  # Release
+  # ===========================================================================
+
+  release:build:
+    desc: Build youtube for release
+    cmds:
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.YOUTUBE_BIN}}" ./cmd/youtube
+
+  release:test:
+    desc: Test built youtube release binary
+    cmds:
+      - '"{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.YOUTUBE_BIN}}" -h || true'

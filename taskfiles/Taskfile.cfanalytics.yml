@@ -11,6 +11,7 @@ version: '3'
 
 vars:
   CFANALYTICS_BIN: 'cfanalytics{{exeExt}}'
+  CFANALYTICS_CMD: '{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}}'
 
 tasks:
   # ===========================================================================
@@ -18,12 +19,12 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure cfanalytics binary is available (builds from source or downloads)
+    desc: Ensure cfanalytics binary is available
     status:
-      - test -f "{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}}"
+      - test -f "{{.CFANALYTICS_CMD}}"
     cmds:
       - mkdir -p "{{.BIN_INSTALL_DIR}}"
-      - go build -o "{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}}" ./cmd/cfanalytics
+      - go build -o "{{.CFANALYTICS_CMD}}" ./cmd/cfanalytics
 
   # ===========================================================================
   # Reports
@@ -33,19 +34,19 @@ tasks:
     desc: Check analytics and report changes (>20% threshold)
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}}'
+      - '{{.CFANALYTICS_CMD}}'
 
   report:verbose:
     desc: Check analytics with verbose output
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}} -v'
+      - '{{.CFANALYTICS_CMD}} -v'
 
   report:webhook:
     desc: Post analytics changes to webhook (set ANALYTICS_WEBHOOK_URL)
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.CFANALYTICS_BIN}} -webhook "$ANALYTICS_WEBHOOK_URL"'
+      - '{{.CFANALYTICS_CMD}} -webhook "$ANALYTICS_WEBHOOK_URL"'
 
   # ===========================================================================
   # Release (release:* - build for distribution)

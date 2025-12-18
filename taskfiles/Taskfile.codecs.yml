@@ -1,9 +1,0 @@
-version: '3'
-
-# Placeholder taskfile for codec-related tooling.
-# Add real tasks when codec build/test workflows are ready.
-tasks:
-  default:
-    desc: Stub codecs taskfile (no tasks defined yet)
-    cmds:
-      - echo "Codec tasks not yet implemented."

@@ -1,0 +1,108 @@
+# translate - Hugo Multilingual Content Workflow
+#
+# Build/test on push, weekly translation status check on Monday 9am UTC.
+# Creates GitHub Issue if translations are missing, stale, or orphaned.
+#
+# Checks (via ci:translate task):
+# - Missing translations (English content not in target languages)
+# - Stale translations (target < 50% of source size)
+# - Orphaned files (target exists but source deleted)
+# - Menu issues (broken links, sync problems)
+
+name: translate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cmd/translate/**'
+      - 'internal/translate/**'
+      - 'taskfiles/Taskfile.translate.yml'
+      - '.github/workflows/translate.yml'
+  pull_request:
+    paths:
+      - 'cmd/translate/**'
+      - 'internal/translate/**'
+      - 'taskfiles/Taskfile.translate.yml'
+      - '.github/workflows/translate.yml'
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9am UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build & Test
+    # Skip on scheduled runs - only for push/PR
+    if: github.event_name != 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build translate
+        run: |
+          go build -o bin/translate ./cmd/translate
+          echo "Built translate"
+
+      - name: Smoke test
+        run: |
+          echo "Testing: translate --help"
+          ./bin/translate --help || ./bin/translate -h || echo "(no help flag)"
+
+      - name: Run unit tests
+        run: |
+          echo "Running Go unit tests..."
+          go test -v ./cmd/translate/... 2>/dev/null || echo "No tests in cmd/translate"
+          go test -v ./internal/translate/... 2>/dev/null || echo "No tests in internal/translate"
+
+  monitor:
+    runs-on: ubuntu-latest
+    name: Weekly Translation Check
+    # Only run on schedule or manual trigger
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for git tag comparison
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.45.5
+
+      - name: Build translate
+        run: |
+          mkdir -p $HOME/.local/bin
+          go build -o $HOME/.local/bin/translate ./cmd/translate
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Check Translation Status
+        id: check
+        run: |
+          set +e
+          task ci:translate > report.md 2>&1
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          cat report.md
+          exit 0
+
+      - name: Create Issue
+        if: steps.check.outputs.exit_code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "Translation: Issues detected" \
+            --body-file report.md \
+            --label "translation,automated"

@@ -373,10 +373,10 @@ Style: Hugo Plate grayscale line-art (white, `#f5f5f5`, `#ccc`, `#999`, `#666`)
 Languages: de (German), zh (Chinese), ja (Japanese), vi (Vietnamese) - auto-loaded from `config/_default/languages.toml`.
 
 **Architecture - Separation of Concerns:**
-- `internal/translator/hugo.go` - ALL Hugo-specific code (language parsing, menu parsing)
-- `internal/translator/checker.go` - Pure query functions (CheckStatus, CheckMissing, etc.)
-- `internal/translator/mutator.go` - Side-effect functions (DoClean, DoDone, etc.)
-- `internal/translator/presenter.go` - Terminal and Markdown output formatting
+- `internal/translate/hugo.go` - ALL Hugo-specific code (language parsing, menu parsing)
+- `internal/translate/checker.go` - Pure query functions (CheckStatus, CheckMissing, etc.)
+- `internal/translate/mutator.go` - Side-effect functions (DoClean, DoDone, etc.)
+- `internal/translate/presenter.go` - Terminal and Markdown output formatting
 - `taskfiles/Taskfile.translate.yml` - CLI interface (calls Go binary)
 
 **Taskfile Commands (all namespaced):**

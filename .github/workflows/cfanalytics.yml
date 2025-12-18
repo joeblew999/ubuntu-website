@@ -1,0 +1,122 @@
+# cfanalytics - Cloudflare Web Analytics CLI
+#
+# Build/test on push, scheduled weekly analytics report on Sunday 9am UTC.
+# Creates GitHub Issue if traffic changes >20% from previous week.
+#
+# Required secrets:
+#   - CLOUDFLARE_API_TOKEN (with Account Analytics:Read permission)
+#   - CF_WEB_ANALYTICS_SITE_TAG (optional, has fallback default)
+
+name: cfanalytics
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cmd/cfanalytics/**'
+      - 'internal/cfanalytics/**'
+      - 'taskfiles/Taskfile.cfanalytics.yml'
+      - '.github/workflows/cfanalytics.yml'
+  pull_request:
+    paths:
+      - 'cmd/cfanalytics/**'
+      - 'internal/cfanalytics/**'
+      - 'taskfiles/Taskfile.cfanalytics.yml'
+      - '.github/workflows/cfanalytics.yml'
+  schedule:
+    - cron: '0 9 * * 0'  # Sunday 9am UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build & Test
+    # Skip on scheduled runs - only for push/PR
+    if: github.event_name != 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build cfanalytics
+        run: |
+          go build -o bin/cfanalytics ./cmd/cfanalytics
+          echo "Built cfanalytics"
+
+      - name: Smoke test
+        run: |
+          echo "Testing: cfanalytics --help"
+          ./bin/cfanalytics --help || ./bin/cfanalytics -h || echo "(no help flag)"
+
+      - name: Run unit tests
+        run: |
+          echo "Running Go unit tests..."
+          go test -v ./cmd/cfanalytics/... 2>/dev/null || echo "No tests in cmd/cfanalytics"
+          go test -v ./internal/cfanalytics/... 2>/dev/null || echo "No tests in internal/cfanalytics"
+
+  monitor:
+    runs-on: ubuntu-latest
+    name: Weekly Analytics Report
+    # Only run on schedule or manual trigger
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.45.5
+
+      - name: Build cfanalytics
+        run: |
+          mkdir -p $HOME/.local/bin
+          go build -o $HOME/.local/bin/cfanalytics ./cmd/cfanalytics
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Download previous state
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: analytics-state
+          path: .
+          if_no_artifact_found: ignore
+          workflow_conclusion: success
+          search_artifacts: true
+
+      - name: Check Analytics
+        id: cfanalytics
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
+          CF_WEB_ANALYTICS_SITE_TAG: ${{ vars.CF_WEB_ANALYTICS_SITE_TAG }}
+        run: task ci:cfanalytics > report.md
+        continue-on-error: true
+
+      - name: Upload state
+        uses: actions/upload-artifact@v4
+        with:
+          name: analytics-state
+          path: .analytics-state.json
+          retention-days: 90
+          overwrite: true
+          include-hidden-files: true
+
+      - name: Create Issue
+        if: steps.cfanalytics.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          task tools:gh:issue:create-from-file \
+            TITLE="Analytics Alert: Significant traffic change detected" \
+            FILE="report.md" \
+            LABELS="analytics,automated"

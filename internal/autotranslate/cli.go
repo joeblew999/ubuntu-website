@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/joeblew999/ubuntu-website/internal/translator"
+	"github.com/joeblew999/ubuntu-website/internal/translate"
 )
 
 // CLIOptions holds the parsed CLI flags
@@ -206,8 +206,8 @@ func (c *cliRunner) runMissingTranslation(targetLang string) int {
 	ctx := context.Background()
 
 	// Load Hugo config to get languages
-	config := translator.DefaultConfig()
-	if err := translator.TryLoadHugoConfig(config); err != nil {
+	config := translate.DefaultConfig()
+	if err := translate.TryLoadHugoConfig(config); err != nil {
 		fmt.Fprintf(c.stderr, "Error loading config: %v\n", err)
 		return 1
 	}
@@ -706,8 +706,8 @@ func (c *cliRunner) runARBStatus() int {
 // sourceToTargetPath converts English source path to target language path
 func (c *cliRunner) sourceToTargetPath(sourcePath, targetLang string) string {
 	// Load Hugo config to get target directory name
-	config := translator.DefaultConfig()
-	translator.TryLoadHugoConfig(config)
+	config := translate.DefaultConfig()
+	translate.TryLoadHugoConfig(config)
 
 	var targetDir string
 	for _, lang := range config.TargetLangs {

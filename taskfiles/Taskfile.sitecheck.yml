@@ -13,6 +13,7 @@ version: '3'
 
 vars:
   SITECHECK_BIN: 'sitecheck{{exeExt}}'
+  SITECHECK_CMD: '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}'
 
 tasks:
   # ===========================================================================
@@ -20,12 +21,12 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure sitecheck binary is available (builds from source or downloads)
+    desc: Ensure sitecheck binary is available
     status:
-      - test -f "{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}"
+      - test -f "{{.SITECHECK_CMD}}"
     cmds:
       - mkdir -p "{{.BIN_INSTALL_DIR}}"
-      - go build -o "{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}" ./cmd/sitecheck
+      - go build -o "{{.SITECHECK_CMD}}" ./cmd/sitecheck
 
   # ===========================================================================
   # Default Task
@@ -35,7 +36,7 @@ tasks:
     desc: Check site HTTP reachability from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}'
+      - '{{.SITECHECK_CMD}}'
 
   # ===========================================================================
   # Individual Checks
@@ -45,25 +46,25 @@ tasks:
     desc: Check site HTTP reachability from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}}'
+      - '{{.SITECHECK_CMD}}'
 
   dns:
     desc: Check DNS resolution from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}} -type dns'
+      - '{{.SITECHECK_CMD}} -type dns'
 
   tcp:
     desc: Check TCP port 443 from all global locations
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}} -type tcp'
+      - '{{.SITECHECK_CMD}} -type tcp'
 
   redirect:
     desc: Check apex domain redirects to www
     deps: [check:deps]
     cmds:
-      - '{{.BIN_INSTALL_DIR}}/{{.SITECHECK_BIN}} -type redirect'
+      - '{{.SITECHECK_CMD}} -type redirect'
 
   # ===========================================================================
   # Combined

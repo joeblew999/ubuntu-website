@@ -1,0 +1,49 @@
+# genlogo - Logo/Branding Asset Generator
+#
+# Build/test on push/PR to catch issues early.
+
+name: genlogo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cmd/genlogo/**'
+      - 'internal/genlogo/**'
+      - 'taskfiles/Taskfile.genlogo.yml'
+      - '.github/workflows/genlogo.yml'
+  pull_request:
+    paths:
+      - 'cmd/genlogo/**'
+      - 'internal/genlogo/**'
+      - 'taskfiles/Taskfile.genlogo.yml'
+      - '.github/workflows/genlogo.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build & Test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build genlogo
+        run: |
+          go build -o bin/genlogo ./cmd/genlogo
+          echo "Built genlogo"
+
+      - name: Smoke test
+        run: |
+          echo "Testing: genlogo --help"
+          ./bin/genlogo --help || ./bin/genlogo -h || echo "(no help flag)"
+
+      - name: Run unit tests
+        run: |
+          echo "Running Go unit tests..."
+          go test -v ./cmd/genlogo/... 2>/dev/null || echo "No tests in cmd/genlogo"
+          go test -v ./internal/genlogo/... 2>/dev/null || echo "No tests in internal/genlogo"

@@ -47,4 +47,6 @@ logs/
 
 # Downloaded codec libraries
 lib/codecs/
-.bin/
+
+# Downloaded videos - originals not committed, edited tracked via LFS
+static/videos/cache/

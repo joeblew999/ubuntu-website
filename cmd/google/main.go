@@ -13,12 +13,12 @@ package main
 import (
 	"os"
 
-	"github.com/joeblew999/ubuntu-website/internal/googlecli"
+	"github.com/joeblew999/ubuntu-website/internal/google"
 )
 
 var version = "dev"
 
 func main() {
-	exitCode := googlecli.Run(os.Args, version, os.Stdout, os.Stderr)
+	exitCode := google.Run(os.Args, version, os.Stdout, os.Stderr)
 	os.Exit(exitCode)
 }

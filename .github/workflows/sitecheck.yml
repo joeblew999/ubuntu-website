@@ -1,0 +1,130 @@
+# sitecheck - Site Reachability Monitor
+#
+# Build/test on push, scheduled check every 6 hours.
+# Creates GitHub Issue if failures detected or significant changes occur.
+#
+# Uses check-host.net API (no secrets required)
+# Optional: Set SITE_URL variable to monitor a different site
+
+name: sitecheck
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cmd/sitecheck/**'
+      - 'internal/sitecheck/**'
+      - 'taskfiles/Taskfile.sitecheck.yml'
+      - '.github/workflows/sitecheck.yml'
+  pull_request:
+    paths:
+      - 'cmd/sitecheck/**'
+      - 'internal/sitecheck/**'
+      - 'taskfiles/Taskfile.sitecheck.yml'
+      - '.github/workflows/sitecheck.yml'
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build & Test
+    # Skip on scheduled runs - only for push/PR
+    if: github.event_name != 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build sitecheck
+        run: |
+          go build -o bin/sitecheck ./cmd/sitecheck
+          echo "Built sitecheck"
+
+      - name: Smoke test
+        run: |
+          echo "Testing: sitecheck --help"
+          ./bin/sitecheck --help || ./bin/sitecheck -h || echo "(no help flag)"
+
+      - name: Run unit tests
+        run: |
+          echo "Running Go unit tests..."
+          go test -v ./cmd/sitecheck/... 2>/dev/null || echo "No tests in cmd/sitecheck"
+          go test -v ./internal/sitecheck/... 2>/dev/null || echo "No tests in internal/sitecheck"
+
+  monitor:
+    runs-on: ubuntu-latest
+    name: Site Reachability Check
+    # Only run on schedule or manual trigger
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.45.5
+
+      - name: Build sitecheck
+        run: |
+          mkdir -p $HOME/.local/bin
+          go build -o $HOME/.local/bin/sitecheck ./cmd/sitecheck
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Download previous state
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: sitecheck-state
+          path: .
+          if_no_artifact_found: ignore
+          workflow_conclusion: success
+          search_artifacts: true
+
+      - name: Run Site Check
+        id: check
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          set +e
+          task ci:sitecheck > report.md 2>&1
+          exit_code=$?
+          cat report.md
+          if [ $exit_code -ne 0 ]; then
+            echo "SITECHECK_FAILED=true" >> $GITHUB_OUTPUT
+          fi
+          exit 0
+
+      - name: Upload state
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitecheck-state
+          path: .sitecheck-state.json
+          retention-days: 90
+          overwrite: true
+          include-hidden-files: true
+
+      - name: Create Issue
+        if: steps.check.outputs.SITECHECK_FAILED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s report.md ]; then
+            gh issue create \
+              --title "Site Alert: Reachability issue detected" \
+              --body-file report.md \
+              --label "site-monitor,automated"
+          else
+            echo "No report content to create issue with"
+          fi

@@ -31,13 +31,13 @@ package main
 import (
 	"os"
 
-	"github.com/joeblew999/ubuntu-website/internal/translator"
+	"github.com/joeblew999/ubuntu-website/internal/translate"
 )
 
 // version is set via ldflags at build time
 var version = "dev"
 
 func main() {
-	exitCode := translator.Run(os.Args, version, os.Stdout, os.Stderr, os.Stdin)
+	exitCode := translate.Run(os.Args, version, os.Stdout, os.Stderr, os.Stdin)
 	os.Exit(exitCode)
 }

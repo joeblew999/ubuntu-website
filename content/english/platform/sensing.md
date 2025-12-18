@@ -35,6 +35,28 @@ Same edge agent. Same sensors. Different config.
 | **Robot** | Viam RDK, ROS2 | Navigation, pick-and-place |
 | **Fixed** | Permanent mount | Traffic, security, warehouse |
 
+### GPS-Free Navigation
+
+Visual-inertial odometry enables autonomous flight without GPS—critical for indoor environments, urban canyons, and GPS-denied zones.
+
+{{< video src="videos/visual-inertial-nav-edited.mp4" width="100%" controls="true" loop="true" muted="true" autoplay="true" >}}
+
+*Real-time position tracking using only cameras and IMU. No external infrastructure required.*
+
+{{< video src="videos/gps-free-vio-edited.mp4" width="100%" controls="true" loop="true" muted="true" autoplay="true" >}}
+
+*Autonomous closed-loop flight using visual-inertial odometry.*
+
+### Hardware Specifications
+
+| Component | Specification |
+|-----------|---------------|
+| **Frame** | Holybro X500 |
+| **FCU** | Pixhawk 6X |
+| **Battery** | 5800 mAh |
+| **CPU** | Raspberry Pi CM4 |
+| **Camera** | IMX296 (VC) |
+
 ---
 
 ## Sensor Abstraction

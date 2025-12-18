@@ -80,6 +80,7 @@ Ubuntu Software now operates from Australia, continuing our mission of developin
 ### Official Records
 
 - [ABN Lookup](https://abr.business.gov.au/ABN/View?id=95595575880) - Australian Business Register
+- [ASIC Connect Online](https://connectonline.asic.gov.au/RegistrySearch/faces/landing/bySearchId.jspx?searchIdType=BUSN&searchId=682774223) - Business name search (ID: 682774223)
 - [Business Name Registration (PDF)](/company-australia/ubuntusoftware-registration-of-business-name.pdf) - ASIC registration certificate
 
 ### D-U-N-S Verification

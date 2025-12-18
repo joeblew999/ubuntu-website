@@ -2,45 +2,43 @@
 version: "3"
 
 vars:
-  DIR_BUILD: '{{.DIR_BUILD | default ".bin"}}'
-  VANITYIMPORT_BIN: "{{.DIR_BUILD}}/vanityimport"
+  VANITYIMPORT_BIN: 'vanityimport{{exeExt}}'
+  VANITYIMPORT_CMD: '{{.BIN_INSTALL_DIR}}/{{.VANITYIMPORT_BIN}}'
 
 tasks:
+  check:deps:
+    desc: Ensure vanityimport CLI is built
+    status:
+      - test -f "{{.VANITYIMPORT_CMD}}"
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.VANITYIMPORT_CMD}}" ./cmd/vanityimport
+
   default:
     desc: Show available vanity import commands
     cmds:
       - task --list-all | grep vanityimport
 
-  build:
-    desc: Build the vanityimport CLI tool
-    cmds:
-      - go build -o {{.VANITYIMPORT_BIN}} ./cmd/vanityimport/...
-    sources:
-      - cmd/vanityimport/**/*.go
-      - internal/vanity/**/*.go
-    generates:
-      - "{{.VANITYIMPORT_BIN}}"
-
   list:
     desc: List all packages
-    deps: [build]
+    deps: [check:deps]
     cmds:
-      - "{{.VANITYIMPORT_BIN}} list"
+      - "{{.VANITYIMPORT_CMD}} list"
 
   info:
     desc: Show package information
-    deps: [build]
+    deps: [check:deps]
     cmds:
-      - "{{.VANITYIMPORT_BIN}} info {{.NAME}}"
+      - "{{.VANITYIMPORT_CMD}} info {{.NAME}}"
     requires:
       vars: [NAME]
 
   add:
     desc: Add a new package
-    deps: [build]
+    deps: [check:deps]
     cmds:
       - |
-        {{.VANITYIMPORT_BIN}} add {{.NAME}} \
+        {{.VANITYIMPORT_CMD}} add {{.NAME}} \
           {{if .REPO}}--repo "{{.REPO}}"{{end}} \
           {{if .DESCRIPTION}}--description "{{.DESCRIPTION}}"{{end}} \
           {{if .VERSION}}--version "{{.VERSION}}"{{end}}
@@ -49,39 +47,38 @@ tasks:
 
   update:
     desc: Update package metadata from GitHub
-    deps: [build]
+    deps: [check:deps]
     cmds:
-      - "{{.VANITYIMPORT_BIN}} update {{.NAME | default \"\"}}"
+      - "{{.VANITYIMPORT_CMD}} update {{.NAME | default \"\"}}"
 
   update:all:
     desc: Update all packages from GitHub
-    deps: [build]
+    deps: [check:deps]
     cmds:
-      - "{{.VANITYIMPORT_BIN}} update"
+      - "{{.VANITYIMPORT_CMD}} update"
 
   docs:
     desc: Generate markdown docs for a package
-    deps: [build]
+    deps: [check:deps]
     cmds:
-      - "{{.VANITYIMPORT_BIN}} docs {{.NAME}} {{if .OUTPUT}}-o {{.OUTPUT}}{{end}}"
+      - "{{.VANITYIMPORT_CMD}} docs {{.NAME}} {{if .OUTPUT}}-o {{.OUTPUT}}{{end}}"
     requires:
       vars: [NAME]
 
   docs:save:
     desc: Generate and save docs to content directory
-    deps: [build]
+    deps: [check:deps]
     cmds:
-      - "{{.VANITYIMPORT_BIN}} docs {{.NAME}} -o content/english/pkg/{{.NAME}}.md"
+      - "{{.VANITYIMPORT_CMD}} docs {{.NAME}} -o content/english/pkg/{{.NAME}}.md"
     requires:
       vars: [NAME]
 
-  # Convenience aliases for TaskUI
   packages:
     desc: "[alias] List all packages"
     deps: [list]
 
   help:
     desc: Show vanityimport CLI help
-    deps: [build]
+    deps: [check:deps]
     cmds:
-      - "{{.VANITYIMPORT_BIN}} --help"
+      - "{{.VANITYIMPORT_CMD}} --help"

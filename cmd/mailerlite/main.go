@@ -42,7 +42,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joeblew999/ubuntu-website/pkg/mailerlite"
+	"github.com/joeblew999/ubuntu-website/internal/mailerlite"
 )
 
 var version = "dev"

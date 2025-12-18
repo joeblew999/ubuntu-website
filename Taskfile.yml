@@ -51,6 +51,7 @@ includes:
   genlogo: ./taskfiles/Taskfile.genlogo.yml
   mailerlite: ./taskfiles/Taskfile.mailerlite.yml
   google: ./taskfiles/Taskfile.google.yml
+  youtube: ./taskfiles/Taskfile.youtube.yml
   env: ./taskfiles/Taskfile.env.yml
   url: ./taskfiles/Taskfile.url.yml
 
@@ -82,9 +83,6 @@ includes:
 
   # Cloudflare Workers (serverless webhooks)
   workers: ./taskfiles/Taskfile.workers.yml
-
-  # Codec libraries (for pion/mediadevices)
-  codecs: ./taskfiles/Taskfile.codecs.yml
 
   # Go vanity imports (/pkg/)
   vanityimport: ./taskfiles/Taskfile.vanityimport.yml
