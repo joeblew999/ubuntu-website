@@ -311,6 +311,14 @@ Purchase from a [certified partner]({{< relref "/partners" >}}) and get:
 
 ---
 
+## Component Sellers
+
+Direct purchase links for each BOM component:
+
+{{< bom-sellers >}}
+
+---
+
 ## Next
 
 [Software Stack →]({{< relref "/fleet/software" >}})

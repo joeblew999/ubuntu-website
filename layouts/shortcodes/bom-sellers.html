@@ -1,0 +1,62 @@
+{{/* BOM Sellers Table - renders CSV data as interactive table with purchase links */}}
+{{ $file := .Get 0 | default "data/x500_fleet_sellers.csv" }}
+{{ with resources.Get $file }}
+  {{ $csv := . | transform.Unmarshal }}
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-gray-100 dark:bg-gray-800">
+          {{ range index $csv 0 }}
+            {{ if not (or (eq . "Seller1_URL") (eq . "Seller2_URL") (eq . "Seller3_URL")) }}
+              <th class="p-3 border-b font-semibold">{{ . }}</th>
+            {{ end }}
+          {{ end }}
+        </tr>
+      </thead>
+      <tbody>
+        {{ range $i, $row := $csv }}
+          {{ if gt $i 0 }}
+            <tr class="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
+              {{ $category := index $row 0 }}
+              {{ $component := index $row 1 }}
+              {{ $sku := index $row 2 }}
+              {{ $seller1 := index $row 3 }}
+              {{ $seller1URL := index $row 4 }}
+              {{ $seller2 := index $row 5 }}
+              {{ $seller2URL := index $row 6 }}
+              {{ $seller3 := index $row 7 }}
+              {{ $seller3URL := index $row 8 }}
+
+              <td class="p-3"><strong>{{ $category }}</strong></td>
+              <td class="p-3">{{ $component }}</td>
+              <td class="p-3"><code>{{ $sku }}</code></td>
+              <td class="p-3">
+                {{ if $seller1URL }}
+                  <a href="{{ $seller1URL }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $seller1 }}</a>
+                {{ else if $seller1 }}
+                  {{ $seller1 }}
+                {{ end }}
+              </td>
+              <td class="p-3">
+                {{ if $seller2URL }}
+                  <a href="{{ $seller2URL }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $seller2 }}</a>
+                {{ else if $seller2 }}
+                  {{ $seller2 }}
+                {{ end }}
+              </td>
+              <td class="p-3">
+                {{ if $seller3URL }}
+                  <a href="{{ $seller3URL }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $seller3 }}</a>
+                {{ else if $seller3 }}
+                  {{ $seller3 }}
+                {{ end }}
+              </td>
+            </tr>
+          {{ end }}
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ else }}
+  <p class="text-red-500">Error: Could not load {{ $file }}</p>
+{{ end }}
