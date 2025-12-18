@@ -292,7 +292,7 @@ See [Sensing platform](/platform/sensing/) for details on 5G/LTE connectivity ar
 | **Mounting** | Pixhawk Vibration Mount | SKU12010 |
 | **Cabling** | Holybro Cable Kit | SKU12055 |
 
-**[Download Complete BOM (CSV) →](/x500_fleet_bom.csv)**
+**[Download Complete BOM (CSV) →](/x500_fleet_bom.csv)** | **[BOM with Sellers (CSV) →](/x500_fleet_sellers.csv)**
 
 ---
 
