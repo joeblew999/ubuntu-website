@@ -55,15 +55,29 @@ The **Pixhawk 6X** running **PX4 v1.14 LTS** handles all flight-critical functio
 
 | Specification | Value |
 |---------------|-------|
-| **SKU** | 11070 (Pixhawk 6X Pro) |
+| **Pixhawk 6X** | SKU 11073 |
+| **Baseboard** | SKU 18117 |
+| **Accessories** | SKU 15011 (cables & case) |
 | **Processor** | STM32H753 (480MHz Cortex-M7) |
 | **IMU** | Triple redundant (ICM-42688-P, ICM-45686, BMI088) |
 | **Barometer** | Dual (MS5611, ICP-20100) |
 | **Magnetometer** | IST8310 |
 | **Interfaces** | 3x CAN, 6x UART, SPI, I2C, PWM |
-| **Cable Set SKU** | 18119 (Standard Baseboard V2) |
 
 **Purchase:** [Holybro Store](https://holybro.com/collections/pixhawk-6x-series) | [Documentation](https://docs.holybro.com/autopilot/pixhawk-6x)
+
+### Flight Controller Accessories
+
+| Component | SKU | Purpose |
+|-----------|-----|---------|
+| **PM06 V2 Power Module** | 15019 | Power sensing + 5V/3A BEC |
+| **Holybro M9N GPS** | 12027 | GPS + compass module |
+| **GPS Mast** | 12033 | Folding mast for interference reduction |
+| **Safety Switch & Buzzer** | 12007 | Arm safety + audio alerts |
+| **Vibration Mount** | 12010 | Anti-vibration damping |
+| **Cable Kit** | 12055 | JST-GH/CAN cables |
+
+**Purchase:** [Holybro Store](https://holybro.com/collections/pixhawk-accessories)
 
 **Why Pixhawk 6X:**
 
@@ -92,14 +106,14 @@ Handles lightweight sensor integration and data collection:
 
 | Specification | Value |
 |---------------|-------|
-| **Model** | Compute Module 4 (CM4) |
-| **SKU** | CM4104032 (4GB RAM, 32GB eMMC, WiFi) |
+| **Model** | Raspberry Pi 4 Model B |
+| **SKU** | RPI4-MODEL-B-8GB |
 | **Processor** | Quad-core Cortex-A72 @ 1.8GHz |
-| **RAM** | 4GB or 8GB |
-| **Storage** | 32GB+ eMMC (or microSD for Pi 4) |
+| **RAM** | 8GB |
+| **Storage** | Industrial microSD 128GB (SDSDQED-128G-GNSIN) |
 | **Power** | 5V @ 3A typical |
 
-**Purchase:** [Raspberry Pi](https://www.raspberrypi.com/products/compute-module-4/) | [Digi-Key](https://www.digikey.com/en/products/filter/embedded-system-on-module/660?s=N4IgTCBcDaIIwFYwA4C0SA7ALvAxgYwEsAnAcw1wEMAXfAIxAF0BfIA) | [Mouser](https://www.mouser.com/c/embedded-solutions/computing/single-board-computers-sbcs/?m=Raspberry%20Pi)
+**Purchase:** [Raspberry Pi](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | [Digi-Key](https://www.digikey.com/en/products/filter/embedded-system-on-module/660?s=N4IgTCBcDaIIwFYwA4C0SA7ALvAxgYwEsAnAcw1wEMAXfAIxAF0BfIA) | [Mouser](https://www.mouser.com/c/embedded-solutions/computing/single-board-computers-sbcs/?m=Raspberry%20Pi)
 
 **Responsibilities:**
 
@@ -115,10 +129,16 @@ Handles compute-intensive workloads:
 
 | Model | SKU | GPU Cores | AI Performance | Power |
 |-------|-----|-----------|----------------|-------|
+| **Jetson Orin Nano 8GB** ★ | 900-13767-0000-000 | 1024 CUDA | 40 TOPS | 7-15W |
 | **Jetson Orin Nano Super** | 945-13766-0000-000 | 1024 CUDA | 67 TOPS | 7-25W |
-| **Jetson Orin NX** | 900-13767-0000-000 | 1024 CUDA | 100 TOPS | 10-25W |
+| **Jetson Orin NX** | 900-13767-0040-000 | 1024 CUDA | 100 TOPS | 10-25W |
 | **Jetson AGX Orin** | 900-13701-0000-000 | 2048 CUDA | 275 TOPS | 15-60W |
-| **Jetson Xavier NX** | 900-83668-0000-000 | 384 CUDA | 21 TOPS | 10-20W |
+
+★ = Reference BOM selection
+
+| Storage | SKU | Capacity |
+|---------|-----|----------|
+| **NVMe SSD** | WD-SN530-256G | 256GB |
 
 **Purchase:** [NVIDIA Store](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/) | [SparkFun](https://www.sparkfun.com/nvidia-jetson-orin-nano-developer-kit.html) | [Seeed Studio](https://www.seeedstudio.com/NVIDIAr-Jetson-Orintm-Nano-Developer-Kit-p-5617.html)
 
@@ -142,13 +162,14 @@ Fleet deployments typically use **Jetson Orin Nano** for cost-effective inferenc
 
 | Specification | Value |
 |---------------|-------|
-| **Frequency** | 915MHz (US) / 868MHz (EU) |
+| **Receiver** | ExpressLRS EP1 |
+| **SKU** | HM-EP1-2400 |
+| **Frequency** | 2.4GHz |
 | **Range** | 10km+ (depending on power/antenna) |
 | **Latency** | <5ms |
 | **Protocol** | Open-source (CRSF) |
-| **Receiver** | BetaFPV ELRS Nano (~0.7g) |
 
-**Purchase:** [BetaFPV](https://betafpv.com/products/elrs-nano-receiver) | [GetFPV](https://www.getfpv.com/betafpv-expresslrs-nano-915mhz-receiver.html) | [Pyrodrone](https://pyrodrone.com/products/betafpv-elrs-nano-receiver-915mhz)
+**Purchase:** [HappyModel](https://www.happymodel.cn/index.php/product-category/elrs/) | [GetFPV](https://www.getfpv.com/search?q=expresslrs+ep1) | [Pyrodrone](https://pyrodrone.com/products?q=expresslrs)
 
 **Why ExpressLRS:**
 
@@ -188,9 +209,10 @@ For production fleet operations, telemetry primarily flows through the Jetson's 
 
 | Specification | Value |
 |---------------|-------|
+| **SKU** | TAA60004S35 |
 | **Configuration** | 4S (14.8V nominal) |
-| **Capacity** | 5000-6000mAh typical |
-| **Discharge Rate** | 30C+ |
+| **Capacity** | 6000mAh |
+| **Discharge Rate** | 35C |
 | **Connector** | XT60 |
 
 **Fleet Considerations:**
@@ -202,9 +224,20 @@ For production fleet operations, telemetry primarily flows through the Jetson's 
 
 ### Power Distribution
 
-- **PDB/PMS** — Power management board for companion computers
+| Component | SKU | Purpose |
+|-----------|-----|---------|
+| **PM06 V2 Power Module** | 15019 | Power sensing + 5V/3A BEC |
+
 - **BEC** — 5V regulated supply for Pi, servos
 - **Jetson power** — Direct from battery through regulator (12V typical)
+
+### Networking
+
+| Component | SKU | Purpose |
+|-----------|-----|---------|
+| **Industrial Ethernet Switch** | USR-ES105 | 3-port GbE between Pi, Jetson, payload |
+
+Enables high-bandwidth communication between companion computers and connected payloads (cameras, sensors).
 
 ---
 
@@ -236,18 +269,30 @@ See [Sensing platform](/platform/sensing/) for details on 5G/LTE connectivity ar
 
 ---
 
-## Summary
+## Complete Bill of Materials
 
-| Component | Selection | SKU | Rationale |
-|-----------|-----------|-----|-----------|
-| **Frame** | Holybro X500 V2 ARF | 30125 | Proven, available, maintainable |
-| **FCU** | Pixhawk 6X Pro | 11070 | Redundancy, PX4 LTS support |
-| **Sensor Companion** | Raspberry Pi CM4 | CM4104032 | Cost-effective, GPIO-rich |
-| **AI Companion** | Jetson Orin Nano Super | 945-13766-0000-000 | GPU inference, CUDA ecosystem |
-| **RC Receiver** | BetaFPV ELRS Nano 915MHz | — | Open-source, long range, 0.7g |
-| **Telemetry** | Holybro SiK Radio V3 | 17012/17013 | Backup link, debugging |
-| **Power** | 4S LiPo 5000mAh | — | Fleet standardization |
-| **Cellular** | Quectel RM520N-GL | RM520NGLAA-M20-SGASA | OTA provisioning, 5G coverage |
+| Category | Component | SKU |
+|----------|-----------|-----|
+| **Airframe** | Holybro X500 V2 ARF Kit | SKU30125 |
+| **Flight Control** | Pixhawk 6X | SKU11073 |
+| **Flight Control** | Pixhawk 6X Baseboard | SKU18117 |
+| **Flight Control** | Pixhawk 6X Accessories | SKU15011 |
+| **Power** | PM06 V2 Power Module | SKU15019 |
+| **Navigation** | Holybro M9N GPS | SKU12027 |
+| **Navigation** | GPS Mast | SKU12033 |
+| **Safety** | Safety Switch & Buzzer | SKU12007 |
+| **Companion** | Raspberry Pi 4 8GB | RPI4-MODEL-B-8GB |
+| **Storage** | Industrial microSD 128GB | SDSDQED-128G-GNSIN |
+| **Companion** | Jetson Orin Nano 8GB | 900-13767-0000-000 |
+| **Storage** | NVMe SSD 256GB | WD-SN530-256G |
+| **RC** | ExpressLRS EP1 | HM-EP1-2400 |
+| **Telemetry** | SiK Telemetry Radio V3 | SKU17012 |
+| **Networking** | Industrial Ethernet Switch | USR-ES105 |
+| **Power** | LiPo Battery 4S 6000mAh | TAA60004S35 |
+| **Mounting** | Pixhawk Vibration Mount | SKU12010 |
+| **Cabling** | Holybro Cable Kit | SKU12055 |
+
+**[Download Complete BOM (CSV) →](/x500_fleet_bom.csv)**
 
 ---
 
