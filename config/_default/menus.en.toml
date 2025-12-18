@@ -34,6 +34,12 @@ parent = "Platform"
 weight = 4
 
 [[main]]
+name = "Drone Fleet"
+url = "/fleet"
+parent = "Platform"
+weight = 5
+
+[[main]]
 name = "Solutions"
 url = "/applications"
 weight = 2
@@ -46,29 +52,91 @@ url = "/applications"
 parent = "Solutions"
 weight = 1
 
+# Drone Fleet Applications
 [[main]]
-name = "Manufacturing & Construction"
-url = "/applications/manufacturing"
+name = "Agriculture"
+url = "/applications/fleet-agriculture"
 parent = "Solutions"
 weight = 2
 
 [[main]]
-name = "Robotics & Simulation"
-url = "/applications/robotics"
+name = "Construction"
+url = "/applications/fleet-construction"
 parent = "Solutions"
 weight = 3
 
 [[main]]
-name = "Government & Healthcare"
-url = "/applications/government"
+name = "Public Safety"
+url = "/applications/fleet-safety"
 parent = "Solutions"
 weight = 4
 
 [[main]]
-name = "Financial Services"
-url = "/applications/financial"
+name = "Logistics"
+url = "/applications/fleet-logistics"
 parent = "Solutions"
 weight = 5
+
+[[main]]
+name = "Energy"
+url = "/applications/fleet-energy"
+parent = "Solutions"
+weight = 6
+
+[[main]]
+name = "Mining"
+url = "/applications/fleet-mining"
+parent = "Solutions"
+weight = 7
+
+[[main]]
+name = "Environment"
+url = "/applications/fleet-environment"
+parent = "Solutions"
+weight = 8
+
+# Enterprise Platforms
+[[main]]
+name = "Manufacturing"
+url = "/applications/manufacturing"
+parent = "Solutions"
+weight = 10
+
+[[main]]
+name = "Robotics"
+url = "/applications/robotics"
+parent = "Solutions"
+weight = 11
+
+[[main]]
+name = "Government"
+url = "/applications/government"
+parent = "Solutions"
+weight = 12
+
+[[main]]
+name = "Financial"
+url = "/applications/financial"
+parent = "Solutions"
+weight = 13
+
+[[main]]
+name = "Healthcare"
+url = "/applications/healthcare"
+parent = "Solutions"
+weight = 14
+
+[[main]]
+name = "Education"
+url = "/applications/education"
+parent = "Solutions"
+weight = 15
+
+[[main]]
+name = "Insurance"
+url = "/applications/insurance"
+parent = "Solutions"
+weight = 16
 
 [[main]]
 name = "Developers"
@@ -100,6 +168,25 @@ name = "Company"
 url = "/company"
 weight = 4
 hasChildren = true
+
+[[main]]
+name = "Partners"
+url = "/partners"
+weight = 5
+hasChildren = true
+
+[[main]]
+name = "Partner Program"
+identifier = "partners-program"
+url = "/partners"
+parent = "Partners"
+weight = 1
+
+[[main]]
+name = "Become a Partner"
+url = "/partners/become-partner"
+parent = "Partners"
+weight = 2
 
 [[main]]
 name = "About"
@@ -157,36 +244,46 @@ url = "/pkg"
 weight = 3
 
 [[footer]]
+name = "Drone Fleet"
+url = "/fleet"
+weight = 4
+
+[[footer]]
 name = "Blog"
 url = "/blog"
-weight = 4
+weight = 5
 
 [[footer]]
 name = "Contact"
 url = "/contact"
-weight = 5
+weight = 6
+
+[[footer]]
+name = "Partners"
+url = "/partners"
+weight = 7
 
 [[footer]]
 name = "Get Started"
 url = "/get-started"
-weight = 6
+weight = 8
 
 [[footer]]
 name = "Security"
 url = "/security"
-weight = 7
+weight = 8
 
 [[footer]]
 name = "Company History"
 url = "/company-history"
-weight = 8
+weight = 9
 
 [[footer]]
 name = "Privacy Policy"
 url = "/privacy-policy"
-weight = 9
+weight = 10
 
 [[footer]]
 name = "Terms of Service"
 url = "/terms-of-service"
-weight = 10
+weight = 11

@@ -47,15 +47,7 @@ Visual-inertial odometry enables autonomous flight without GPS—critical for in
 
 *Autonomous closed-loop flight using visual-inertial odometry.*
 
-### Hardware Specifications
-
-| Component | Specification |
-|-----------|---------------|
-| **Frame** | Holybro X500 |
-| **FCU** | Pixhawk 6X |
-| **Battery** | 5800 mAh |
-| **CPU** | Raspberry Pi CM4 |
-| **Camera** | IMX296 (VC) |
+For detailed hardware specifications, see our [Drone Fleet Hardware →]({{< relref "/fleet/hardware" >}})
 
 ---
 
@@ -140,6 +132,14 @@ Sensing is the perception layer of the Ubuntu Software platform.
 For organizations that need 3D design and AI, our Spatial platform provides the design environment—with direct integration to your sensor data.
 
 [Explore Spatial →](/platform/spatial/)
+
+---
+
+## Production Reference: 1,000-Drone Fleet
+
+See how these sensing capabilities scale to production. Our reference architecture demonstrates a complete fleet deployment using the hardware and software stack described above—1,000 Holybro X500 drones with PX4, dual companion computers, and NATS JetStream for fleet-scale digital twinning.
+
+[Explore Drone Fleet Architecture →]({{< relref "/fleet" >}})
 
 ---
 

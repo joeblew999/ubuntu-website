@@ -111,12 +111,14 @@ Your work cell design isn't trapped in a proprietary format. It's yours.
 
 **Close the gap.**
 
-NATS JetStream architecture connects your digital twin to the physical cell:
+Connect your digital twin to the physical cell:
 
 - Stream real sensor data into simulation
 - Validate models against actual performance
 - Predict maintenance before failures
 - Continuous improvement loop from production back to design
+
+For aerial robotics and autonomous vehicles, see our [Drone Fleet Architecture]({{< relref "/fleet" >}})—the same NATS JetStream infrastructure powers both ground and air platforms.
 
 ---
 

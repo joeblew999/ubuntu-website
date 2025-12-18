@@ -1,88 +1,97 @@
 ---
-title: "Applications"
-meta_title: "Applications | Ubuntu Software"
-description: "Two platforms, ten industries. Spatial for 3D design and robotics. Publish for documents and forms. Both AI-powered, offline-first, built on open standards."
+title: "Solutions"
+meta_title: "Drone Fleet & Enterprise Solutions | Ubuntu Software"
+description: "Drone fleet solutions for agriculture, construction, public safety, and logistics. Enterprise platforms for manufacturing, government, healthcare, and financial services."
 image: "/images/applications.svg"
 draft: false
 ---
 
-## Two Platforms. Ten Industries.
+## Drone Fleet Solutions
 
-Whether you're designing robot work cells or processing insurance claims, we have infrastructure for you.
-
-**Spatial** — AI-native 3D design for industries that work in physical space.
-
-**Publish** — Single-source content management for multi-channel publishing and data capture.
-
-Both platforms share our core foundation: AI assistance, offline-first architecture, Automerge sync, and open standards.
+Deploy autonomous drone fleets with **onboard AI** for real-time decisions and **cloud AI** for fleet-wide intelligence. Our architecture scales from single vehicles to thousands.
 
 ---
 
-## Spatial Applications
+### [Agriculture & Farming]({{< relref "/applications/fleet-agriculture" >}})
+Precision agriculture at scale. Crop monitoring, pest detection, and variable-rate spraying with AI that understands your fields.
 
-**For industries working in three dimensions.**
+### [Construction & Infrastructure]({{< relref "/applications/fleet-construction" >}})
+Site surveys, progress tracking, and infrastructure inspection. Digital twin comparison with real-world conditions.
 
-### [Robotics & Automation](/applications/robotics)
-Spatial reasoning for the machines that will shape our world. Work cell design, path planning, and multi-robot coordination.
+### [Public Safety & Emergency]({{< relref "/applications/fleet-safety" >}})
+Search and rescue, disaster response, and situational awareness. Thermal imaging, person detection, and coordinated response.
 
-### [Simulation & Training](/applications/simulation)
-Where AI learns in virtual space before acting in the real world. Synthetic environments, training data at scale, sim-to-real pipelines.
+### [Logistics & Delivery]({{< relref "/applications/fleet-logistics" >}})
+Last-mile delivery, warehouse operations, and inventory management. Autonomous navigation with fleet-wide optimization.
 
-### [Digital Twins](/applications/digital-twins)
-Bridge design and reality. Living models connected to sensors, predictive maintenance, facility management with spatial intelligence.
+### [Energy & Utilities]({{< relref "/applications/fleet-energy" >}})
+Power line inspection, solar panel analysis, and pipeline monitoring. Detect defects before they become failures.
 
-### [Manufacturing](/applications/manufacturing)
-From design to fabrication with AI that understands production constraints. CAM, process planning, quality integration.
+### [Mining & Resources]({{< relref "/applications/fleet-mining" >}})
+Stockpile measurement, site surveying, and safety monitoring. Accurate volume calculations and progress tracking.
 
-### [Construction](/applications/construction)
-Modular, prefabricated, intelligent building design. Global teams, real-time collaboration, factory integration.
+### [Environmental Monitoring]({{< relref "/applications/fleet-environment" >}})
+Wildlife surveys, pollution detection, and forestry management. Long-term trend analysis with automated compliance reporting.
 
 ---
 
-## Publish Applications
+## The AI Advantage
 
-**For industries managing content across channels.**
+Every drone fleet solution combines two AI layers:
 
-### [Government & Public Sector](/applications/government)
-Serve every citizen. Paper and digital unified. Accessible formats, archival compliance, legacy system integration.
+| Layer | Location | Capability |
+|-------|----------|------------|
+| **Onboard AI** | NVIDIA Jetson on each drone | Real-time inference, object detection, immediate decisions without connectivity |
+| **Cloud AI** | NATS JetStream backend | Fleet-wide analytics, historical trends, predictive maintenance, coordination |
 
-### [Healthcare](/applications/healthcare)
-Less administration, fewer errors, better care. Patient intake, consent management, EMR integration.
+Edge processing handles the millisecond decisions. Cloud processing handles the fleet-wide intelligence.
 
-### [Financial Services](/applications/financial)
+[Technical Architecture →]({{< relref "/fleet" >}})
+
+---
+
+## Enterprise Platforms
+
+Beyond drone fleets, we provide document and data management for regulated industries.
+
+---
+
+### [Manufacturing]({{< relref "/applications/manufacturing" >}})
+From design to fabrication with AI that understands production constraints. CAM integration, process planning, quality tracking.
+
+### [Robotics & Simulation]({{< relref "/applications/robotics" >}})
+Spatial reasoning for robots. Work cell design, path planning, and simulation-to-reality pipelines.
+
+### [Financial Services]({{< relref "/applications/financial" >}})
 Compliance without complexity. Loan applications, disclosures, regulatory documentation with complete audit trails.
 
-### [Education](/applications/education)
+### [Government & Public Sector]({{< relref "/applications/government" >}})
+Serve every citizen. Paper and digital unified. Accessible formats, archival compliance, legacy system integration.
+
+### [Healthcare]({{< relref "/applications/healthcare" >}})
+Less administration, fewer errors, better care. Patient intake, consent management, EMR integration.
+
+### [Education]({{< relref "/applications/education" >}})
 Modern administration, traditional options. Enrollment, permissions, student records—paper and portal unified.
 
-### [Insurance](/applications/insurance)
+### [Insurance]({{< relref "/applications/insurance" >}})
 Every channel, one system. Field agents, online customers, mailed claims—all processed uniformly.
 
 ---
 
-## Shared Foundation
+## Built on Open Standards
 
-Both platforms are built on the same core technology:
+All solutions share our core foundation:
 
-| Capability | How It Helps |
-|------------|--------------|
-| **AI Assistance** | Natural language interaction with your documents or designs |
-| **Offline-First** | Work without connectivity, sync automatically when reconnected |
-| **Automerge Sync** | Real-time collaboration without conflicts |
-| **Open Standards** | No lock-in, export everything, own your work |
-
----
-
-## Find Your Fit
-
-**Working in 3D?** Start with [Spatial](/platform/spatial/).
-
-**Working with documents?** Start with [Publish](/platform/publish/).
-
-**Need both?** They integrate seamlessly. Technical drawings from 3D models. BOMs flowing to forms. Documentation aligned with design.
+| Capability | Benefit |
+|------------|---------|
+| **NATS JetStream** | Real-time messaging, persistent streams, offline resilience |
+| **Open Protocols** | MAVLink, STEP, IFC—no vendor lock-in |
+| **Self-Sovereign** | Deploy on your infrastructure, own your data |
+| **AI-Native** | Model Context Protocol for intelligent assistance |
 
 ---
 
-## Let's Talk
+## Get Started
 
-[Contact us](/contact) to discuss which applications fit your organization.
+[Contact us](/contact) to discuss which solutions fit your organization.
