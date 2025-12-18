@@ -1,14 +1,26 @@
 ---
 title: "Public Safety & Emergency"
-meta_title: "Drone Fleet for Public Safety | Ubuntu Software"
-description: "Search and rescue, disaster response, and situational awareness with autonomous drone fleets. Thermal imaging, person detection, and coordinated response."
+meta_title: "IoT Fleet for Public Safety | Ubuntu Software"
+description: "Public safety with IoT fleets: drones for aerial surveillance, emergency vehicles with real-time dispatch, and building sensors for threat detection. Unified architecture for coordinated response."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## When Minutes Matter
 
-Emergency response depends on information. Drone fleets provide situational awareness when responders need it most—faster deployment, better coverage, safer operations.
+Emergency response depends on information. IoT fleets provide situational awareness when responders need it most—faster deployment, better coverage, safer operations.
+
+---
+
+## Fleet Types in Public Safety
+
+| Fleet Type | Devices | Role |
+|------------|---------|------|
+| **Aerial** | Surveillance drones, search drones | Search and rescue, incident overwatch, fire mapping |
+| **Ground Vehicles** | Emergency vehicles, patrol cars | Real-time dispatch, telematics, asset tracking |
+| **Fixed IoT** | Building alarms, traffic sensors, gunshot detectors | Threat detection, situational awareness, evidence |
+
+All device types share the same architecture: edge AI, NATS JetStream messaging, and unified fleet management.
 
 ---
 
@@ -26,9 +38,9 @@ Ground-based assessment is slow and puts responders at risk. Helicopters are exp
 
 ---
 
-## How Drone Fleets Solve This
+## How IoT Fleets Solve This
 
-### Rapid Deployment
+### Aerial: Rapid Deployment
 
 Pre-positioned drones launch immediately:
 
@@ -36,6 +48,24 @@ Pre-positioned drones launch immediately:
 - **First on scene** — Visual assessment before personnel arrive
 - **Live streaming** — Command sees what the drone sees
 - **Night capability** — Thermal imaging in total darkness
+
+### Ground: Vehicle Intelligence
+
+Emergency vehicles with real-time coordination:
+
+- **Automatic dispatch** — Closest available unit based on live positions
+- **Route optimization** — Real-time traffic, fastest path to scene
+- **Telematics** — Vehicle status, fuel, maintenance alerts
+- **Resource tracking** — Who has what equipment, where
+
+### Fixed IoT: Threat Detection
+
+Sensors providing continuous awareness:
+
+- **Gunshot detection** — Acoustic sensors pinpoint location
+- **Traffic sensors** — Congestion, accidents, signal priority
+- **Building alarms** — Fire, intrusion, elevator emergency
+- **Weather stations** — Local conditions affecting response
 
 ### Area Coverage
 

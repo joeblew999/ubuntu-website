@@ -186,7 +186,24 @@ Robotics isn't just 3D models—it's documentation, too.
 
 All from single source. All aligned with your 3D work cell design.
 
-[Explore Publish →](/platform/publish/)
+[Explore Publish →]({{< relref "/platform/publish" >}})
+
+---
+
+## Data Sovereignty
+
+Your robotics data stays yours:
+
+| Traditional Approach | With WellKnown |
+|---------------------|----------------|
+| Work cell designs in vendor cloud | Designs on your infrastructure |
+| Robot OEM owns integration data | You own your automation IP |
+| Switching platforms = rebuilding | Switching = reconnect gateway |
+| IP scattered across vendors | You control your competitive advantage |
+
+Export to STEP. Publish TO platforms. Never locked IN.
+
+[Learn more about WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
 
 ---
 

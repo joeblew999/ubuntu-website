@@ -200,6 +200,52 @@ Surveys. Comments. Service requests.
 
 ---
 
+## AI-Powered Processing
+
+Serve every citizen efficiently:
+
+| Capability | Government Application |
+|------------|----------------------|
+| **Eligibility Screening** | Auto-validate against program rules |
+| **Form Validation** | Catch errors before submission |
+| **Translation** | Every language your citizens speak |
+| **Document OCR** | Process paper submissions, legacy records |
+| **Accessibility** | Screen reader compatible, plain language |
+
+AI runs offline. Works in field offices. Works during outages.
+
+---
+
+## Field Operations
+
+Inspectors, census workers, social services in the field:
+
+- **Offline capable** — Rural areas, buildings without signal
+- **Voice notes** — Document findings hands-free
+- **Photo capture** — Evidence attached to case files
+- **Real-time lookup** — Access records in the field
+
+[See Human-in-Loop details →]({{< relref "/platform/publish#human-in-loop-real-time-field-operations" >}})
+
+---
+
+## Data Sovereignty
+
+Your data stays yours:
+
+| Traditional Approach | With WellKnown |
+|---------------------|----------------|
+| Data in vendor portals | Data on your infrastructure |
+| Vendor owns citizen relationship | You own citizen relationship |
+| Switching vendors = rebuilding | Switching = reconnect gateway |
+| Compliance depends on vendor | You control compliance |
+
+Publish TO external platforms when needed. Never locked IN.
+
+[Learn more about WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
+
+---
+
 ## Complete the Loop with Spatial
 
 Some government work is inherently spatial:
@@ -211,7 +257,7 @@ Some government work is inherently spatial:
 
 When your needs extend to 3D, Spatial is ready.
 
-[Explore Spatial →](/platform/spatial/)
+[Explore Spatial →]({{< relref "/platform/spatial" >}})
 
 ---
 

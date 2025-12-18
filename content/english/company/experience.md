@@ -65,7 +65,11 @@ Complex data, complex rules, global operations.
 
 ---
 
-### Government
+### Government & Public Health
+
+**European Centre for Disease Prevention and Control (ECDC)** — Security Architect in Solna, Sweden (2006–2008). Responsible for the security architecture of a global disease surveillance and data collection system. Real-time reporting from health agencies across Europe and partner nations. Where security architecture meets public health emergency response. [View contract →](/projects/ecdc-contract-2006.pdf)
+
+This role started our government practice and shaped our approach to secure, mission-critical data systems.
 
 **European Union** — Systems at continental scale. Multi-language. Multi-jurisdiction. Compliance-critical.
 

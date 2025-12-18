@@ -1,14 +1,26 @@
 ---
 title: "Construction & Infrastructure"
-meta_title: "Drone Fleet for Construction | Ubuntu Software"
-description: "Construction site monitoring and infrastructure inspection with autonomous drone fleets. Progress tracking, safety compliance, and digital twin comparison."
+meta_title: "IoT Fleet for Construction | Ubuntu Software"
+description: "Construction site monitoring with IoT fleets: drones for surveys, excavators and loaders with telematics, site sensors for safety and environmental compliance. All managed with unified architecture."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## Eyes on Every Site, Every Day
 
-Construction projects fail when visibility fails. Drone fleets provide continuous awareness—tracking progress, documenting conditions, and catching problems before they become costly.
+Construction projects fail when visibility fails. IoT fleets provide continuous awareness—tracking progress, documenting conditions, and catching problems before they become costly.
+
+---
+
+## Fleet Types in Construction
+
+| Fleet Type | Devices | Role |
+|------------|---------|------|
+| **Aerial** | Survey drones, inspection drones | Progress tracking, site mapping, structural inspection |
+| **Ground Vehicles** | Excavators, loaders, material trucks | Equipment tracking, telematics, utilization monitoring |
+| **Fixed IoT** | Site sensors, access control, equipment monitors | Safety compliance, environmental monitoring, security |
+
+All device types share the same architecture: edge AI, NATS JetStream messaging, and unified fleet management.
 
 ---
 
@@ -26,16 +38,34 @@ Traditional methods involve people climbing structures, driving routes, or relyi
 
 ---
 
-## How Drone Fleets Solve This
+## How IoT Fleets Solve This
 
-### Continuous Site Monitoring
+### Aerial: Continuous Site Monitoring
 
-Automated daily flights capture:
+Automated daily drone flights capture:
 
 - **Orthomosaic maps** — Centimeter-accurate site imagery
 - **3D point clouds** — Volumetric data for earthwork tracking
 - **Thermal imaging** — Detect moisture, insulation issues, equipment heat
 - **360° documentation** — Complete visual record with timestamps
+
+### Ground: Equipment Intelligence
+
+Telematics from every machine on site:
+
+- **Utilization tracking** — Hours worked, idle time, fuel consumption
+- **Location awareness** — Real-time position of all equipment
+- **Maintenance alerts** — Engine codes, service intervals, fault detection
+- **Geofencing** — Equipment boundary compliance, theft prevention
+
+### Fixed IoT: Site Awareness
+
+Sensors throughout the project:
+
+- **Air quality monitors** — Dust, emissions, compliance tracking
+- **Noise sensors** — Regulatory compliance, neighbor relations
+- **Access control** — Who's on site, when, for how long
+- **Structural monitors** — Settlement, vibration, movement detection
 
 ### Infrastructure Inspection
 

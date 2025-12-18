@@ -234,6 +234,8 @@ kv: fleet/prod/veh/*/desired
 
 This ensures **vehicles can't impersonate other vehicles** or publish unauthorized commands.
 
+For detailed coverage of the authorization model, including third-party grants and credential management, see [Authorization & Grants]({{< relref "/fleet/authorization" >}}).
+
 ---
 
 ## Subject Design Tradeoffs

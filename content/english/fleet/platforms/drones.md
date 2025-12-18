@@ -1,20 +1,35 @@
 ---
-title: "Hardware Stack"
-meta_title: "Drone Fleet Hardware Specifications | Ubuntu Software"
-description: "Production hardware specifications for 1,000-drone fleet: Holybro X500 airframe, Pixhawk 6X flight controller, Raspberry Pi and Jetson companion computers."
+title: "Drone Platform"
+meta_title: "Drone Fleet Hardware & Protocols | Ubuntu Software"
+description: "Production hardware specifications for drone fleets: Holybro X500 airframe, Pixhawk 6X flight controller, PX4, MAVLink protocol, and NVIDIA Jetson companion computers."
 image: "/images/robotics.svg"
 draft: false
-aliases:
-  - "/fleet/hardware/"
 ---
 
-{{< notice "info" >}}
-**Looking for other vehicle types?** This page covers drone hardware. For ground vehicles (cars, trucks, AGVs), see [Ground Vehicle Platform]({{< relref "/fleet/platforms/ground" >}}). For a complete overview, see [Supported Platforms]({{< relref "/fleet/platforms" >}}).
-{{< /notice >}}
-
-## Hardware for Fleet-Scale Operations
+## Hardware for Fleet-Scale Drone Operations
 
 Fleet operations demand hardware that balances capability with maintainability. Every component in this stack was chosen for production reliability, parts availability, and serviceability in the field.
+
+---
+
+## Protocol: MAVLink
+
+Drones in our fleet communicate using **MAVLink** (Micro Air Vehicle Link):
+
+| Aspect | Details |
+|--------|---------|
+| **Version** | MAVLink 2.0 |
+| **Transport** | Serial (UART), UDP, TCP |
+| **Message Rate** | 1-50Hz depending on message type |
+| **Encryption** | MAVLink 2.0 signing (optional) |
+
+**MAVLink provides:**
+- Standardized telemetry (position, attitude, battery, sensors)
+- Command protocol (arm, takeoff, waypoints, RTL)
+- Parameter management
+- File transfer (logs, missions)
+
+The [Vehicle Gateway]({{< relref "/fleet/gateway" >}}) translates MAVLink messages to NATS subjects, enabling fleet-wide telemetry aggregation and command distribution.
 
 ---
 
@@ -207,7 +222,20 @@ Each Jetson connects via cellular modem:
 - Carrier switching for coverage optimization
 - Centralized subscription management
 
-See [Sensing platform](/platform/sensing/) for details on 5G/LTE connectivity architecture.
+---
+
+## Safety Model
+
+Drone-specific safety features are enforced at multiple levels:
+
+| Level | Mechanism | Behavior |
+|-------|-----------|----------|
+| **RC Override** | ExpressLRS | Pilot always has manual control |
+| **Flight Controller** | PX4 failsafes | RTL, land, geofence enforcement |
+| **Companion** | Vehicle Gateway | Command validation, safety checks |
+| **Network** | NATS never in control loop | Monitoring only, not flight-critical |
+
+See [Safety Model]({{< relref "/fleet/safety" >}}) for complete safety architecture.
 
 ---
 
@@ -223,6 +251,7 @@ See [Sensing platform](/platform/sensing/) for details on 5G/LTE connectivity ar
 | **Telemetry** | SiK 915MHz | Backup link, debugging |
 | **Power** | 4S LiPo 5000mAh | Fleet standardization |
 | **Cellular** | 4G/5G + eSIM | OTA provisioning, coverage |
+| **Protocol** | MAVLink 2.0 | Industry standard, PX4 native |
 
 ---
 
@@ -241,6 +270,10 @@ Purchase from a [certified partner]({{< relref "/partners" >}}) and get:
 
 ---
 
-## Next
+## Related Documentation
 
-[Software Stack →]({{< relref "/fleet/software" >}})
+- [Supported Platforms]({{< relref "/fleet/platforms" >}}) — Overview of all vehicle types
+- [Ground Vehicles]({{< relref "/fleet/platforms/ground" >}}) — Cars, trucks, and AGVs
+- [Vehicle Gateway]({{< relref "/fleet/gateway" >}}) — MAVLink-to-NATS bridge
+- [Safety Model]({{< relref "/fleet/safety" >}}) — Failsafe architecture
+- [Software Stack]({{< relref "/fleet/software" >}}) — Operating systems and middleware

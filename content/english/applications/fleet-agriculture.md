@@ -1,14 +1,26 @@
 ---
 title: "Agriculture & Farming"
-meta_title: "Drone Fleet for Agriculture | Ubuntu Software"
-description: "Precision agriculture with autonomous drone fleets. Crop monitoring, pest detection, variable-rate spraying with onboard AI and fleet-wide analytics."
+meta_title: "IoT Fleet for Agriculture | Ubuntu Software"
+description: "Precision agriculture with IoT fleets: drones for monitoring, tractors and harvesters with autonomous guidance, and field sensors for continuous data. All managed with unified architecture."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## Precision Agriculture at Scale
 
-Modern farming demands precision—applying exactly what's needed, exactly where it's needed, exactly when it's needed. Drone fleets transform agriculture from calendar-based operations to data-driven decisions.
+Modern farming demands precision—applying exactly what's needed, exactly where it's needed, exactly when it's needed. IoT fleets transform agriculture from calendar-based operations to data-driven decisions.
+
+---
+
+## Fleet Types in Agriculture
+
+| Fleet Type | Devices | Role |
+|------------|---------|------|
+| **Aerial** | Survey drones, spray drones | Crop monitoring, pest detection, precision spraying |
+| **Ground Vehicles** | Tractors, harvesters, irrigation robots | Autonomous guidance, variable-rate application, harvesting |
+| **Fixed IoT** | Weather stations, soil sensors, water meters | Continuous environmental monitoring, irrigation control |
+
+All device types share the same architecture: edge AI, NATS JetStream messaging, and unified fleet management.
 
 ---
 
@@ -26,25 +38,34 @@ Satellite imagery helps, but resolution is low and timing unpredictable. Ground 
 
 ---
 
-## How Drone Fleets Solve This
+## How IoT Fleets Solve This
 
-### Continuous Monitoring
+### Aerial: Continuous Monitoring
 
-Automated flights cover every acre on schedule:
+Automated drone flights cover every acre on schedule:
 
 - **Daily or weekly surveys** — Catch problems early
 - **Consistent coverage** — No gaps, no missed areas
 - **Weather-adaptive** — Fly when conditions allow
 - **Multi-spectral imaging** — See what eyes can't
 
-### Precision Application
+### Ground: Precision Application
 
-Variable-rate spraying based on real detection:
+Tractors and sprayers with variable-rate control:
 
 - **Spot treatment** — Spray weeds, not crops
 - **Targeted pest control** — Apply only where infestations exist
 - **Fertilizer optimization** — Match application to plant needs
-- **Water management** — Identify irrigation issues
+- **Autonomous guidance** — RTK-GPS precision for row alignment
+
+### Fixed IoT: Environmental Intelligence
+
+Sensors throughout the operation:
+
+- **Soil moisture** — Real-time irrigation decisions
+- **Weather stations** — Local microclimate data
+- **Water flow meters** — Usage tracking, leak detection
+- **Grain bin monitors** — Temperature and moisture alerts
 
 ---
 

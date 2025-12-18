@@ -1,14 +1,23 @@
 ---
 title: "Solutions"
-meta_title: "Drone Fleet & Enterprise Solutions | Ubuntu Software"
-description: "Drone fleet solutions for agriculture, construction, public safety, and logistics. Enterprise platforms for manufacturing, government, healthcare, and financial services."
+meta_title: "IoT Fleet & Enterprise Solutions | Ubuntu Software"
+description: "IoT fleet solutions for agriculture, construction, public safety, and logistics. Drones, vehicles, building systems—all managed with unified architecture. Enterprise platforms for manufacturing, government, healthcare, and financial services."
 image: "/images/applications.svg"
 draft: false
 ---
 
-## Drone Fleet Solutions
+## IoT Fleet Solutions
 
-Deploy autonomous drone fleets with **onboard AI** for real-time decisions and **cloud AI** for fleet-wide intelligence. Our architecture scales from single vehicles to thousands.
+Deploy autonomous fleets—**drones, vehicles, building systems, industrial equipment**—with **onboard AI** for real-time decisions and **cloud AI** for fleet-wide intelligence. The architecture is device-agnostic: same patterns for aerial, ground, and fixed IoT.
+
+| Fleet Type | Examples |
+|------------|----------|
+| **Aerial** | Drones, UAVs, inspection aircraft |
+| **Ground Vehicles** | Trucks, AGVs, forklifts, tractors |
+| **Building IoT** | HVAC, access control, sensors, meters |
+| **Industrial** | Manufacturing equipment, robotics, conveyors |
+
+All device types share the same architecture: edge AI, NATS JetStream messaging, digital twins, and unified fleet management. The pages below show how this applies to specific industries.
 
 ---
 
@@ -37,14 +46,14 @@ Wildlife surveys, pollution detection, and forestry management. Long-term trend 
 
 ## The AI Advantage
 
-Every drone fleet solution combines two AI layers:
+Every IoT fleet solution combines two AI layers:
 
 | Layer | Location | Capability |
 |-------|----------|------------|
-| **Onboard AI** | NVIDIA Jetson on each drone | Real-time inference, object detection, immediate decisions without connectivity |
+| **Edge AI** | On-device (Jetson, Pi, embedded) | Real-time inference, object detection, immediate decisions without connectivity |
 | **Cloud AI** | NATS JetStream backend | Fleet-wide analytics, historical trends, predictive maintenance, coordination |
 
-Edge processing handles the millisecond decisions. Cloud processing handles the fleet-wide intelligence.
+Edge processing handles the millisecond decisions. Cloud processing handles the fleet-wide intelligence. Same pattern whether the device is airborne, on wheels, or bolted to a wall.
 
 [Technical Architecture →]({{< relref "/fleet" >}})
 

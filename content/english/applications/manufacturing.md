@@ -270,7 +270,24 @@ Manufacturing runs on paperwork as much as machines.
 
 All from single source. All connected to your manufacturing data.
 
-[Explore Publish →](/platform/publish/)
+[Explore Publish →]({{< relref "/platform/publish" >}})
+
+---
+
+## Data Sovereignty
+
+Your manufacturing data stays yours:
+
+| Traditional Approach | With WellKnown |
+|---------------------|----------------|
+| Designs in vendor cloud | Designs on your infrastructure |
+| Vendor owns relationship | You own customer relationship |
+| Switching CAD = rebuilding | Switching = reconnect gateway |
+| IP exposure to vendors | You control IP protection |
+
+Export to STEP. Publish TO platforms. Never locked IN.
+
+[Learn more about WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
 
 ---
 

@@ -1,23 +1,23 @@
 ---
 title: "Vehicle Gateway"
-meta_title: "Vehicle Gateway Design for Drone Fleets | Ubuntu Software"
-description: "Go-based Vehicle Gateway architecture: MAVLink ingestion, state downsampling, event extraction, command execution, and shadow reconciliation."
+meta_title: "Vehicle Gateway Design for Autonomous Fleets | Ubuntu Software"
+description: "Vehicle Gateway architecture: protocol translation (MAVLink, CAN, ROS 2), state downsampling, event extraction, command execution, and shadow reconciliation."
 image: "/images/robotics.svg"
 draft: false
 ---
 
-## The Bridge Between MAVLink and NATS
+## The Bridge Between Vehicle Protocols and NATS
 
-The Vehicle Gateway is a Go service running on each Jetson that translates between the MAVLink protocol spoken by PX4 and the NATS messaging system used for fleet coordination.
+The Vehicle Gateway is a service running on each vehicle's edge computer that translates between vehicle-native protocols (MAVLink, CAN bus, ROS 2) and the NATS messaging system used for fleet coordination.
 
 ---
 
 ## Why a Gateway?
 
-MAVLink and NATS serve different purposes:
+Vehicle protocols and fleet messaging serve different purposes:
 
-| Aspect | MAVLink | NATS |
-|--------|---------|------|
+| Aspect | Vehicle Protocol | NATS |
+|--------|------------------|------|
 | **Scope** | Single vehicle | Fleet-wide |
 | **Protocol** | Binary, compact | JSON, human-readable |
 | **Rate** | 100+ Hz telemetry | Downsampled for WAN |
@@ -28,11 +28,24 @@ The Gateway bridges these worlds, handling protocol translation, rate limiting, 
 
 ---
 
+## Supported Protocols
+
+| Protocol | Vehicle Type | Integration |
+|----------|--------------|-------------|
+| **MAVLink** | Drones (PX4, ArduPilot) | UDP/Serial, message parsing |
+| **CAN bus** | Cars, trucks | SocketCAN, DBC decoding |
+| **J1939** | Heavy vehicles | PGN/SPN mapping |
+| **ROS 2** | Autonomous platforms | Topic subscription |
+
+Each protocol requires a protocol-specific adapter, but the gateway's core logic (downsampling, events, commands, shadow) is shared.
+
+---
+
 ## Core Responsibilities
 
-### 1. MAVLink Ingest
+### 1. Protocol Ingest
 
-Receive and parse MAVLink messages from the flight controller:
+Receive and parse vehicle-native protocol messages. Example for MAVLink (drones):
 
 ```go
 // Receive MAVLink frames from mavlink-router
@@ -56,7 +69,7 @@ for {
 }
 ```
 
-**Key message types:**
+**Key message types (MAVLink example):**
 
 | MAVLink Message | Content |
 |-----------------|---------|
@@ -66,6 +79,16 @@ for {
 | `BATTERY_STATUS` | Voltage, current, remaining |
 | `GPS_RAW_INT` | GPS fix, satellites, HDOP |
 | `SYS_STATUS` | CPU load, errors, health |
+
+**CAN bus equivalent (ground vehicles):**
+
+| CAN Signal | Content |
+|------------|---------|
+| Engine RPM | Current engine speed |
+| Vehicle Speed | Ground speed from wheel sensors |
+| GPS Position | Lat/lon from telematics module |
+| Fuel Level | Tank fill percentage |
+| DTC Codes | Diagnostic trouble codes |
 
 ### 2. State Downsampling
 
@@ -274,8 +297,8 @@ func (g *Gateway) reconcile(desired, actual *State) []*Command {
 │                         Vehicle Gateway                             │
 │                                                                     │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐     │
-│  │   MAVLink    │    │    State     │    │    NATS Client   │     │
-│  │   Receiver   │───▶│   Machine    │───▶│    Publisher     │     │
+│  │   Protocol   │    │    State     │    │    NATS Client   │     │
+│  │   Adapter    │───▶│   Machine    │───▶│    Publisher     │     │
 │  └──────────────┘    └──────────────┘    └──────────────────┘     │
 │         │                   │                      │               │
 │         │            ┌──────▼──────┐               │               │
@@ -293,17 +316,23 @@ func (g *Gateway) reconcile(desired, actual *State) []*Command {
 │         │◀───────────│  Executor   │◀───│   Subscriber     │      │
 │         │            └─────────────┘    └──────────────────┘      │
 │  ┌──────▼──────┐                                                   │
-│  │   MAVLink   │                                                   │
+│  │   Protocol  │                                                   │
 │  │   Sender    │                                                   │
 │  └─────────────┘                                                   │
 └────────────────────────────────────────────────────────────────────┘
          │                                           │
          ▼                                           ▼
 ┌─────────────────┐                       ┌─────────────────┐
-│   Pixhawk 6X    │                       │   NATS Leaf     │
-│   (via serial)  │                       │   (localhost)   │
+│  Vehicle Control│                       │   NATS Leaf     │
+│ (Pixhawk/ECU/   │                       │   (localhost)   │
+│  ROS 2 node)    │                       │                 │
 └─────────────────┘                       └─────────────────┘
 ```
+
+**Protocol adapters:**
+- **MAVLink Adapter** — For drones (PX4, ArduPilot)
+- **CAN Adapter** — For cars/trucks (SocketCAN + DBC)
+- **ROS 2 Adapter** — For ROS-based platforms
 
 ---
 
@@ -432,13 +461,21 @@ gateway_shadow_commands_issued_total
 
 | Responsibility | Input | Output |
 |----------------|-------|--------|
-| **MAVLink Ingest** | UDP packets | Parsed messages |
+| **Protocol Ingest** | Vehicle messages | Parsed telemetry |
 | **State Downsampling** | 100Hz telemetry | 1Hz state |
 | **Event Extraction** | State transitions | Discrete events |
-| **Command Execution** | NATS commands | MAVLink commands |
+| **Command Execution** | NATS commands | Vehicle commands |
 | **Shadow Reconciliation** | Desired state | Convergence commands |
 
-The Vehicle Gateway is the critical component that makes fleet-scale operations possible while preserving the safety guarantees of the underlying PX4 autopilot.
+The Vehicle Gateway is the critical component that makes fleet-scale operations possible while preserving the safety guarantees of the underlying vehicle control system.
+
+---
+
+## Related Documentation
+
+- [Supported Platforms]({{< relref "/fleet/platforms" >}}) — Overview of all vehicle types
+- [Drone Platform]({{< relref "/fleet/platforms/drones" >}}) — MAVLink integration details
+- [Ground Vehicles]({{< relref "/fleet/platforms/ground" >}}) — CAN bus and J1939 integration
 
 ---
 

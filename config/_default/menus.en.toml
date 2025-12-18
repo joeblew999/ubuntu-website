@@ -52,7 +52,7 @@ url = "/applications"
 parent = "Solutions"
 weight = 1
 
-# Drone Fleet Applications
+# IoT Fleet Applications (Drones, Vehicles, Building IoT, Industrial)
 [[main]]
 name = "Agriculture"
 url = "/applications/fleet-agriculture"
@@ -94,6 +94,13 @@ name = "Environment"
 url = "/applications/fleet-environment"
 parent = "Solutions"
 weight = 8
+
+# AI-Driven Field Operations (Human + Fleet + Publish + Foundation)
+[[main]]
+name = "Field Operations"
+url = "/applications/logistics"
+parent = "Solutions"
+weight = 9
 
 # Enterprise Platforms
 [[main]]
@@ -208,22 +215,28 @@ parent = "Company"
 weight = 3
 
 [[main]]
+name = "Surveillance"
+url = "/company/surveillance"
+parent = "Company"
+weight = 4
+
+[[main]]
 name = "History"
 url = "/company-history"
 parent = "Company"
-weight = 4
+weight = 5
 
 [[main]]
 name = "Blog"
 url = "/blog"
 parent = "Company"
-weight = 5
+weight = 6
 
 [[main]]
 name = "Contact"
 url = "/contact"
 parent = "Company"
-weight = 6
+weight = 7
 
 
 # Footer menu - organized by section for discoverability

@@ -23,6 +23,9 @@ Meet the person building Ubuntu Software—from Flame on SGI to spatial AI.
 ### [Advisors](/company/advisors)
 Industry leaders who share our vision and collaborate with us.
 
+### [Surveillance](/company/surveillance)
+Real-time situational awareness from drones, satellites, and sensors—with AI that surfaces what matters.
+
 ---
 
 ## Get in Touch

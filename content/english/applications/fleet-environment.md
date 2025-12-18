@@ -1,14 +1,26 @@
 ---
 title: "Environmental Monitoring"
-meta_title: "Drone Fleet for Environmental Monitoring | Ubuntu Software"
-description: "Wildlife surveys, pollution detection, and forestry management with autonomous drone fleets. Long-term trend analysis with automated compliance reporting."
+meta_title: "IoT Fleet for Environmental Monitoring | Ubuntu Software"
+description: "Environmental monitoring with IoT fleets: drones for wildlife surveys, research vehicles and boats for field work, weather stations and water sensors for continuous data. Unified architecture for long-term analysis."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## See the Whole Picture
 
-Environmental monitoring demands coverage that humans can't achieve on foot. Drone fleets deliver consistent, repeatable observation across vast areas.
+Environmental monitoring demands coverage that humans can't achieve on foot. IoT fleets deliver consistent, repeatable observation across vast areas.
+
+---
+
+## Fleet Types in Environmental Monitoring
+
+| Fleet Type | Devices | Role |
+|------------|---------|------|
+| **Aerial** | Survey drones, thermal drones | Wildlife census, habitat mapping, pollution detection |
+| **Ground/Water Vehicles** | Research vehicles, boats, ROVs | Field sampling, aquatic surveys, specimen transport |
+| **Fixed IoT** | Weather stations, water sensors, seismic monitors | Continuous environmental data, long-term trends |
+
+All device types share the same architecture: edge AI, NATS JetStream messaging, and unified fleet management.
 
 ---
 
@@ -26,9 +38,9 @@ Ground teams can't cover enough area. Satellite imagery lacks resolution. Manned
 
 ---
 
-## How Drone Fleets Solve This
+## How IoT Fleets Solve This
 
-### Non-Invasive Observation
+### Aerial: Non-Invasive Observation
 
 Monitor without disturbance:
 
@@ -37,9 +49,27 @@ Monitor without disturbance:
 - **No ground presence** — Access sensitive areas without trampling or trail-building
 - **Scheduled surveys** — Consistent timing reduces behavioral artifacts
 
+### Ground/Water: Field Operations
+
+Research vehicles and boats with real-time tracking:
+
+- **Sample tracking** — GPS-stamped collection points, chain of custody
+- **Researcher safety** — Location tracking in remote areas
+- **Equipment monitoring** — Boat systems, vehicle diagnostics
+- **Data relay** — Upload field data when connectivity available
+
+### Fixed IoT: Continuous Monitoring
+
+Sensors providing long-term data:
+
+- **Weather stations** — Temperature, precipitation, wind, humidity
+- **Water quality** — pH, dissolved oxygen, turbidity, conductivity
+- **Acoustic monitors** — Bird calls, bat echolocation, marine mammals
+- **Seismic sensors** — Ground movement, volcanic activity
+
 ### Comprehensive Coverage
 
-See everything that matters:
+All fleet types see everything that matters:
 
 - **Systematic grids** — Complete coverage with known sampling density
 - **Repeatable paths** — Same flight lines enable temporal comparison

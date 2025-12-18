@@ -1,14 +1,26 @@
 ---
 title: "Energy & Utilities"
-meta_title: "Drone Fleet for Energy & Utilities | Ubuntu Software"
-description: "Power line inspection, solar panel analysis, and pipeline monitoring with autonomous drone fleets. Detect defects before they become failures."
+meta_title: "IoT Fleet for Energy & Utilities | Ubuntu Software"
+description: "Energy infrastructure with IoT fleets: drones for line inspection, service trucks with telematics, smart meters and substation sensors. Unified architecture for grid-wide intelligence."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## Inspect What Matters Most
 
-Energy infrastructure spans thousands of kilometers. Traditional inspection is slow, dangerous, and misses problems. Drone fleets change everything.
+Energy infrastructure spans thousands of kilometers. Traditional inspection is slow, dangerous, and misses problems. IoT fleets change everything.
+
+---
+
+## Fleet Types in Energy
+
+| Fleet Type | Devices | Role |
+|------------|---------|------|
+| **Aerial** | Inspection drones, survey drones | Line inspection, thermal analysis, solar farm surveys |
+| **Ground Vehicles** | Service trucks, inspection vehicles | Crew dispatch, equipment transport, field maintenance |
+| **Fixed IoT** | Smart meters, substation monitors, pipeline sensors | Real-time grid monitoring, fault detection, usage analytics |
+
+All device types share the same architecture: edge AI, NATS JetStream messaging, and unified fleet management.
 
 ---
 
@@ -26,20 +38,38 @@ Manual inspection teams can't cover enough ground. Helicopter surveys are expens
 
 ---
 
-## How Drone Fleets Solve This
+## How IoT Fleets Solve This
 
-### Systematic Coverage
+### Aerial: Systematic Coverage
 
-Cover more ground with consistent quality:
+Drones covering more ground with consistent quality:
 
 - **Automated flight paths** — Follow transmission lines, pipeline routes, and perimeters
 - **Consistent inspection** — Same angles, same resolution, every time
 - **Parallel operation** — Multiple drones covering different segments simultaneously
 - **All-weather capable** — Operate in conditions that ground crews can't
 
+### Ground: Service Fleet Intelligence
+
+Trucks and crews with real-time coordination:
+
+- **Dispatch optimization** — Route technicians based on skill, location, and priority
+- **Telematics** — Vehicle status, fuel, safety compliance
+- **Work order integration** — Digital work orders, completion tracking
+- **Parts inventory** — What's on each truck, what's needed where
+
+### Fixed IoT: Grid Awareness
+
+Sensors throughout the network:
+
+- **Smart meters** — Usage patterns, outage detection, load forecasting
+- **Substation monitors** — Transformer health, fault detection, SCADA integration
+- **Pipeline sensors** — Pressure, flow, leak detection
+- **Weather stations** — Local conditions affecting operations
+
 ### Detailed Analysis
 
-See what humans miss:
+All fleet types see what humans miss:
 
 - **Thermal imaging** — Detect hot spots indicating electrical faults
 - **High-resolution visual** — Identify corrosion, damage, vegetation encroachment

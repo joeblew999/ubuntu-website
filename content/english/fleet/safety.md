@@ -1,14 +1,16 @@
 ---
 title: "Safety Model"
-meta_title: "Drone Fleet Safety Architecture | Ubuntu Software"
-description: "Safety model for 1,000-drone fleet: RC authority, PX4 failsafes, network isolation from control loops, and graceful degradation."
+meta_title: "Autonomous Fleet Safety Architecture | Ubuntu Software"
+description: "Safety model for autonomous vehicle fleets: manual override authority, vehicle failsafes, network isolation from control loops, and graceful degradation."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## Safety by Design
 
-Fleet-scale drone operations demand rigorous safety architecture. This design ensures that **network failures, software bugs, and system malfunctions never compromise flight safety**.
+Fleet-scale autonomous vehicle operations demand rigorous safety architecture. This design ensures that **network failures, software bugs, and system malfunctions never compromise vehicle safety**.
+
+The core safety principles apply to **all vehicle types**—drones, cars, trucks, and AGVs. The specifics differ (RC vs steering wheel, RTL vs stop-in-place), but the architecture is consistent.
 
 ---
 
@@ -21,10 +23,10 @@ Fleet-scale drone operations demand rigorous safety architecture. This design en
 │                         SAFETY HIERARCHY                             │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│   1. RC OVERRIDE          ─────────────────────────▶  HIGHEST       │
-│      Manual pilot control, always available                          │
+│   1. MANUAL OVERRIDE      ─────────────────────────▶  HIGHEST       │
+│      Human control (RC, steering, e-stop), always available          │
 │                                                                      │
-│   2. PX4 FAILSAFES        ─────────────────────────▶  HIGH          │
+│   2. VEHICLE FAILSAFES    ─────────────────────────▶  HIGH          │
 │      Hardware-enforced, local to vehicle                             │
 │                                                                      │
 │   3. GATEWAY POLICY       ─────────────────────────▶  MEDIUM        │
@@ -40,9 +42,11 @@ Higher layers can always override lower layers. Network-dependent commands are t
 
 ---
 
-## RC is Primary Authority
+## Manual Override is Primary Authority
 
-The pilot's RC transmitter has **unconditional override**:
+The human operator has **unconditional override**—whether via RC transmitter, steering wheel, or e-stop button.
+
+### Drone Override (RC)
 
 | Aspect | Implementation |
 |--------|----------------|
@@ -60,7 +64,7 @@ The pilot's RC transmitter has **unconditional override**:
 
 If every computer fails, the pilot retains full manual control.
 
-### ExpressLRS Failsafe
+#### ExpressLRS Failsafe
 
 When RC signal is lost:
 
@@ -73,27 +77,48 @@ When RC signal is lost:
 
 Failsafe behavior is configured in PX4, not dependent on any fleet software.
 
+### Ground Vehicle Override
+
+| Aspect | Cars/Trucks | AGVs |
+|--------|-------------|------|
+| **Primary** | Steering wheel + pedals | E-stop button |
+| **Path** | Physical connection to actuators | Hardware interrupt to motors |
+| **Backup** | Key-off / gear neutral | Wireless e-stop |
+| **Network** | Never in control path | Never in control path |
+
+**Ground vehicle override never depends on:**
+
+- Onboard computer being online
+- NATS connection
+- Any autonomous software
+
+If every computer fails, the driver/operator retains physical control or the vehicle stops safely.
+
 ---
 
-## PX4 Enforces Failsafes
+## Vehicle Control System Enforces Failsafes
+
+The vehicle's control system implements failsafes locally—no network required.
+
+### Drone Failsafes (PX4)
 
 The flight controller implements multiple failsafes:
 
-### RC Loss Failsafe
+#### RC Loss Failsafe
 
 | Parameter | Value | Action |
 |-----------|-------|--------|
 | `COM_RC_LOSS_T` | 0.5s | Timeout before failsafe |
 | `NAV_RCL_ACT` | 2 | RTL on RC loss |
 
-### Data Link Loss
+#### Data Link Loss
 
 | Parameter | Value | Action |
 |-----------|-------|--------|
 | `COM_DL_LOSS_T` | 10s | GCS connection timeout |
 | `NAV_DLL_ACT` | 0 | Continue mission (link not critical) |
 
-### Battery Failsafes
+#### Battery Failsafes
 
 | Level | Parameter | Value | Action |
 |-------|-----------|-------|--------|
@@ -101,7 +126,7 @@ The flight controller implements multiple failsafes:
 | Critical | `BAT_CRIT_THR` | 0.15 | RTL |
 | Emergency | `BAT_EMERGEN_THR` | 0.07 | Land immediately |
 
-### Geofence
+#### Geofence
 
 | Parameter | Value | Action |
 |-----------|-------|--------|
@@ -109,7 +134,7 @@ The flight controller implements multiple failsafes:
 | `GF_MAX_HOR_DIST` | varies | Horizontal limit |
 | `GF_MAX_VER_DIST` | 120m | Altitude limit |
 
-### Position Loss
+#### Position Loss
 
 | Parameter | Value | Action |
 |-----------|-------|--------|
@@ -117,6 +142,29 @@ The flight controller implements multiple failsafes:
 | `COM_POSCTL_NAVL` | 0 | Land on position loss |
 
 **All failsafes execute on the Pixhawk**—no external dependency.
+
+### Ground Vehicle Failsafes
+
+Ground vehicles implement equivalent safety mechanisms:
+
+| Trigger | Drone Response | Ground Vehicle Response |
+|---------|---------------|------------------------|
+| **Comms loss** | Return-to-Launch | Stop in place / pull over |
+| **Sensor failure** | Land immediately | Stop safely, engage parking |
+| **Geofence breach** | RTL at boundary | Stop at boundary |
+| **E-stop activated** | Motor cutoff | Immediate braking |
+| **Low battery/fuel** | RTL then land | Return to depot / stop safely |
+| **Obstacle detected** | Avoid or hover | Stop and wait |
+
+**Ground vehicle failsafes typically include:**
+
+- **Lidar/radar obstacles** — Emergency stop if path blocked
+- **Speed limiting** — Max speed based on environment
+- **Zone restrictions** — No-go areas enforced locally
+- **Watchdog timers** — Stop if autonomy software hangs
+- **Brake redundancy** — Multiple independent brake systems
+
+**All failsafes execute locally**—no network dependency.
 
 ---
 
@@ -331,20 +379,28 @@ Before fleet deployment:
 
 ## Summary
 
-| Layer | Authority | Failure Mode |
-|-------|-----------|--------------|
-| **RC** | Highest | Direct pilot control |
-| **PX4** | High | Autonomous failsafe |
-| **Gateway** | Medium | Policy enforcement |
-| **Fleet** | Lowest | Coordination only |
+| Layer | Authority | Drones | Ground Vehicles |
+|-------|-----------|--------|-----------------|
+| **Manual** | Highest | RC transmitter | Steering / E-stop |
+| **Vehicle** | High | PX4 failsafes | ECU / safety controller |
+| **Gateway** | Medium | Policy enforcement | Policy enforcement |
+| **Fleet** | Lowest | Coordination only | Coordination only |
 
 The safety model ensures:
 
 - **Network is never safety-critical**
-- **Pilot always has override authority**
+- **Operator always has override authority**
 - **Hardware failsafes execute locally**
 - **Failures degrade gracefully**
 - **No single point causes fleet-wide impact**
+
+---
+
+## Related Documentation
+
+- [Supported Platforms]({{< relref "/fleet/platforms" >}}) — Overview of all vehicle types
+- [Drone Platform]({{< relref "/fleet/platforms/drones" >}}) — Drone-specific safety details
+- [Ground Vehicles]({{< relref "/fleet/platforms/ground" >}}) — Ground vehicle safety details
 
 ---
 
@@ -358,4 +414,4 @@ The safety model ensures:
 
 ## Back to Overview
 
-[← Drone Fleet Architecture]({{< relref "/fleet" >}})
+[← Autonomous Vehicle Fleet Architecture]({{< relref "/fleet" >}})

@@ -195,6 +195,39 @@ Newsletters. Announcements. Report cards. Transcripts.
 
 ---
 
+## AI-Powered Processing
+
+Modern systems for all students:
+
+| Capability | Education Application |
+|------------|----------------------|
+| **Transcript Processing** | Parse incoming records automatically |
+| **Enrollment Validation** | Check requirements, prerequisites, eligibility |
+| **Translation** | Parent communications in home languages |
+| **Accessibility** | WCAG compliance, screen reader compatible |
+| **Form OCR** | Paper applications, permission slips |
+
+AI runs on your infrastructure. Student data stays in your control.
+
+---
+
+## Data Sovereignty
+
+Your data stays yours:
+
+| Traditional Approach | With WellKnown |
+|---------------------|----------------|
+| Data in vendor portals | Data on your infrastructure |
+| Vendor owns family relationship | You own family relationship |
+| Switching vendors = rebuilding | Switching = reconnect gateway |
+| FERPA compliance depends on vendor | You control compliance |
+
+Publish TO external platforms when needed. Never locked IN.
+
+[Learn more about WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
+
+---
+
 ## Complete the Loop with Spatial
 
 Some education work involves physical space:
@@ -206,7 +239,7 @@ Some education work involves physical space:
 
 When your needs extend to 3D, Spatial is ready.
 
-[Explore Spatial →](/platform/spatial/)
+[Explore Spatial →]({{< relref "/platform/spatial" >}})
 
 ---
 

@@ -1,28 +1,30 @@
 ---
-title: "Drone Fleet Architecture"
-meta_title: "1,000-Drone Fleet Reference Architecture | Ubuntu Software"
-description: "Production-grade reference architecture for running 1,000 Holybro X500 drones using PX4, Pixhawk 6X, dual companion computers, and NATS JetStream for fleet-scale digital twinning."
+title: "Autonomous Vehicle Fleet Architecture"
+meta_title: "Fleet Architecture for Drones, Cars & Trucks | Ubuntu Software"
+description: "Production-grade reference architecture for managing autonomous vehicle fleets—drones, cars, trucks, AGVs—using NATS JetStream for fleet-scale digital twinning."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## Production-Grade Fleet Management at Scale
 
-This reference architecture demonstrates how to deploy and manage **1,000 autonomous drones** using open-source components and proven patterns. Every design decision targets real-world production requirements: reliability, observability, and graceful degradation.
+This reference architecture demonstrates how to deploy and manage **fleets of autonomous vehicles**—drones, cars, trucks, AGVs—using open-source components and proven patterns. Every design decision targets real-world production requirements: reliability, observability, and graceful degradation.
+
+The core architecture is **vehicle-agnostic**. NATS JetStream, digital twin patterns, and the authorization model work identically whether you're managing drones or delivery trucks. Only the edge hardware and protocols change.
 
 ---
 
 ## The Challenge
 
-Fleet-scale drone operations require solving problems that don't exist at hobby scale:
+Fleet-scale operations require solving problems that don't exist at small scale:
 
-- **Thousands of concurrent telemetry streams** — Every vehicle reporting position, attitude, battery, and sensor data
+- **Thousands of concurrent telemetry streams** — Every vehicle reporting position, velocity, health, and sensor data
 - **Command and control at scale** — Sending instructions to specific vehicles or groups without flooding the network
 - **Digital twin synchronization** — Maintaining accurate state representation for every vehicle in real-time
 - **Offline resilience** — Vehicles that continue operating when connectivity drops
-- **Safety guarantees** — Ensuring network failures never compromise flight safety
+- **Safety guarantees** — Ensuring network failures never compromise vehicle safety
 
-Traditional approaches—direct MAVLink connections, centralized databases, polling architectures—collapse under these requirements.
+Traditional approaches—direct protocol connections, centralized databases, polling architectures—collapse under these requirements.
 
 ---
 
@@ -32,17 +34,29 @@ The architecture combines three proven technologies:
 
 | Layer | Technology | Role |
 |-------|------------|------|
-| **Flight Control** | PX4 + Pixhawk 6X | Autonomous flight, failsafes, RC override |
-| **Edge Computing** | Raspberry Pi + Jetson | Sensor processing, AI inference, local decisions |
+| **Vehicle Control** | Platform-specific (PX4, ECU, ROS 2) | Autonomous operation, failsafes, manual override |
+| **Edge Computing** | Jetson + Industrial PC | Sensor processing, AI inference, local decisions |
 | **Fleet Messaging** | NATS JetStream | Pub/sub, persistence, digital twin state |
 
-Each layer operates independently. Network failures degrade gracefully—vehicles continue flying, edge computers continue processing, and state synchronizes when connectivity returns.
+Each layer operates independently. Network failures degrade gracefully—vehicles continue operating, edge computers continue processing, and state synchronizes when connectivity returns.
 
 ---
 
 ## Architecture Components
 
-### Hardware Stack
+### Supported Platforms
+
+The architecture supports multiple vehicle types with platform-specific hardware and protocols:
+
+| Platform | Protocol | Control System | Use Cases |
+|----------|----------|----------------|-----------|
+| **Drones** | MAVLink | PX4/ArduPilot | Inspection, mapping, delivery |
+| **Ground Vehicles** | CAN bus / J1939 | ECU / Autoware | Logistics, mining, agriculture |
+| **ROS 2 Robots** | ROS 2 topics | Custom | Warehouse, research, AGVs |
+
+[Supported Platforms →]({{< relref "/fleet/platforms" >}})
+
+### Hardware Stack (Drones)
 
 Standard hardware choices that balance capability, availability, and maintainability:
 
@@ -51,7 +65,7 @@ Standard hardware choices that balance capability, availability, and maintainabi
 - **Sensor Companion**: Raspberry Pi 4 / CM4 for lightweight sensor integration
 - **AI Companion**: NVIDIA Jetson (Orin/Xavier/Nano) for computer vision and inference
 
-[Hardware Details →]({{< relref "/fleet/hardware" >}})
+[Drone Hardware Details →]({{< relref "/fleet/platforms/drones" >}}) | [Ground Vehicle Details →]({{< relref "/fleet/platforms/ground" >}})
 
 ### Software Stack
 
@@ -87,9 +101,9 @@ JetStream streams and KV stores maintain fleet state:
 
 ### Vehicle Gateway
 
-Go service running on each Jetson that bridges MAVLink to NATS:
+Service running on each vehicle's edge computer that bridges native protocols to NATS:
 
-- MAVLink protocol handling
+- Protocol translation (MAVLink, CAN bus, ROS 2)
 - State downsampling and aggregation
 - Event extraction from telemetry
 - Command execution with policy enforcement
@@ -99,10 +113,10 @@ Go service running on each Jetson that bridges MAVLink to NATS:
 
 ### Safety Model
 
-Network connectivity is never trusted for flight safety:
+Network connectivity is never trusted for vehicle safety:
 
-- **RC is primary authority** — Pilot always has override
-- **PX4 enforces failsafes** — Return-to-launch, land, geofence
+- **Manual override is primary authority** — Operator always has control (RC for drones, steering/e-stop for ground)
+- **Vehicle control system enforces failsafes** — RTL/stop-in-place, geofence
 - **NATS is never in the control loop** — Monitoring and coordination only
 - **Graceful degradation** — Loss of AI or network triggers safe modes
 
@@ -156,18 +170,21 @@ Explore each component in detail:
 
 | Section | Description |
 |---------|-------------|
-| [Hardware]({{< relref "/fleet/hardware" >}}) | Airframe, flight controller, companion computers |
+| [Supported Platforms]({{< relref "/fleet/platforms" >}}) | Drones, ground vehicles, AGVs |
+| [Drone Platform]({{< relref "/fleet/platforms/drones" >}}) | Airframe, flight controller, MAVLink |
+| [Ground Vehicles]({{< relref "/fleet/platforms/ground" >}}) | Cars, trucks, CAN bus, J1939 |
 | [Software]({{< relref "/fleet/software" >}}) | Operating systems, middleware, applications |
 | [NATS Topology]({{< relref "/fleet/nats-topology" >}}) | Leaf nodes, hubs, WAN connectivity |
 | [Subject Naming]({{< relref "/fleet/subjects" >}}) | Hierarchical subject structure |
 | [Stream Configuration]({{< relref "/fleet/streams" >}}) | JetStream setup for digital twins |
-| [Vehicle Gateway]({{< relref "/fleet/gateway" >}}) | MAVLink-to-NATS bridge |
+| [Vehicle Gateway]({{< relref "/fleet/gateway" >}}) | Protocol-to-NATS bridge |
+| [Authorization & Grants]({{< relref "/fleet/authorization" >}}) | Decentralized security, third-party access |
 | [Safety Model]({{< relref "/fleet/safety" >}}) | Failsafes and graceful degradation |
 
 ---
 
 ## Get Started
 
-Building a drone fleet? Deploying autonomous vehicles at scale? We can help with architecture, implementation, and operations.
+Building an autonomous vehicle fleet? Deploying drones, trucks, or AGVs at scale? We can help with architecture, implementation, and operations.
 
 [Contact Us →](/contact)

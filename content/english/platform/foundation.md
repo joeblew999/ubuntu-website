@@ -202,6 +202,21 @@ For teams evaluating our architecture:
 | **AI Integration** | Model Context Protocol (MCP) |
 | **Auth** | OIDC-compatible, bring your own IdP |
 
+### NATS JetStream
+
+Our messaging backbone is a **CNCF (Cloud Native Computing Foundation)** incubating project—the same foundation that governs Kubernetes.
+
+| Property | Detail |
+|----------|--------|
+| **Governance** | CNCF incubating project |
+| **License** | Apache 2.0 (100% open source) |
+| **Certification** | Synadia maintains SOC 2 Type II |
+| **Community** | Thousands of production deployments globally |
+
+Open source. Enterprise-hardened. Audited.
+
+[Security & Compliance Details →]({{< relref "/technology/security" >}})
+
 ### Distributed SQLite
 
 Every node—your laptop, your phone, your servers—runs SQLite. Changes replicate via NATS JetStream using CRDT semantics.

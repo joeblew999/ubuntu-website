@@ -198,6 +198,39 @@ Investment policy statements. Suitability forms. Client agreements.
 
 ---
 
+## AI-Powered Processing
+
+Document intelligence for compliance:
+
+| Capability | Financial Application |
+|------------|----------------------|
+| **Document Classification** | Auto-sort applications, disclosures, correspondence |
+| **Fraud Detection** | Anomaly patterns in application data |
+| **Compliance Validation** | Check disclosures against current regulations |
+| **Translation** | Serve customers in their language—instantly |
+| **OCR Extraction** | Process paper applications, checks, signed documents |
+
+All AI runs on your infrastructure. Sensitive financial data never leaves your environment.
+
+---
+
+## Data Sovereignty
+
+Your data stays yours:
+
+| Traditional Approach | With WellKnown |
+|---------------------|----------------|
+| Data in vendor portals | Data on your infrastructure |
+| Vendor owns customer relationship | You own customer relationship |
+| Switching vendors = rebuilding | Switching = reconnect gateway |
+| Compliance depends on vendor | You control compliance |
+
+Publish TO external platforms when needed. Never locked IN.
+
+[Learn more about WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
+
+---
+
 ## Complete the Loop with Spatial
 
 Some financial work involves physical space:
@@ -209,7 +242,7 @@ Some financial work involves physical space:
 
 When your needs extend to 3D, Spatial is ready.
 
-[Explore Spatial →](/platform/spatial/)
+[Explore Spatial →]({{< relref "/platform/spatial" >}})
 
 ---
 

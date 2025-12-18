@@ -288,6 +288,8 @@ Credentials are provisioned per-vehicle, enabling:
 - Audit trails per vehicle
 - Rate limiting per connection
 
+The authorization model supports **decentralized security with grants**—third parties can receive scoped, time-bounded access without central coordination. See [Authorization & Grants]({{< relref "/fleet/authorization" >}}) for details on credential management and third-party integration.
+
 ---
 
 ## Summary

@@ -1,14 +1,26 @@
 ---
 title: "Logistics & Delivery"
-meta_title: "Drone Fleet for Logistics | Ubuntu Software"
-description: "Last-mile delivery, warehouse operations, and inventory management with autonomous drone fleets. Route optimization and fleet-wide coordination."
+meta_title: "IoT Fleet for Logistics | Ubuntu Software"
+description: "Logistics with IoT fleets: delivery drones, trucks and AGVs with telematics, warehouse sensors for inventory and dock operations. Unified architecture for fleet-wide optimization."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## The Future of Fulfillment
 
-Last-mile delivery is the most expensive part of logistics. Drone fleets change the economics—faster delivery, lower cost, reduced congestion.
+Last-mile delivery is the most expensive part of logistics. IoT fleets change the economics—faster delivery, lower cost, reduced congestion.
+
+---
+
+## Fleet Types in Logistics
+
+| Fleet Type | Devices | Role |
+|------------|---------|------|
+| **Aerial** | Delivery drones, inventory drones | Last-mile delivery, warehouse cycle counts |
+| **Ground Vehicles** | Trucks, forklifts, AGVs | Transportation, material handling, warehouse automation |
+| **Fixed IoT** | Dock sensors, conveyor systems, inventory tags | Facility operations, throughput monitoring, asset tracking |
+
+All device types share the same architecture: edge AI, NATS JetStream messaging, and unified fleet management.
 
 ---
 
@@ -26,9 +38,9 @@ Ground-based delivery scales poorly. Every additional package adds another stop,
 
 ---
 
-## How Drone Fleets Solve This
+## How IoT Fleets Solve This
 
-### Direct Point-to-Point
+### Aerial: Direct Point-to-Point
 
 Skip the road network entirely:
 
@@ -37,9 +49,27 @@ Skip the road network entirely:
 - **Access anywhere** — Rural areas, gated communities, rooftops
 - **Predictable timing** — No traffic variability
 
+### Ground: Fleet Intelligence
+
+Trucks, forklifts, and AGVs with real-time coordination:
+
+- **Route optimization** — Dynamic routing based on traffic, deliveries, capacity
+- **Telematics** — Fuel, maintenance, driver hours, load status
+- **AGV coordination** — Warehouse robots working in harmony
+- **Proof of delivery** — GPS-stamped confirmation with photos
+
+### Fixed IoT: Facility Operations
+
+Sensors throughout the supply chain:
+
+- **Dock door sensors** — Truck arrivals, departure timing
+- **Conveyor monitoring** — Throughput, jams, sorting accuracy
+- **Inventory tags** — Real-time stock levels, location tracking
+- **Environmental sensors** — Temperature, humidity for perishables
+
 ### Warehouse Integration
 
-Drones extend warehouse reach:
+All fleet types extend warehouse reach:
 
 - **Distribution hub to customer** — Skip the truck entirely for lightweight packages
 - **Micro-fulfillment** — Stock forward positions, replenish by drone

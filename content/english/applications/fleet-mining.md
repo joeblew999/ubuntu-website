@@ -1,14 +1,26 @@
 ---
 title: "Mining & Resources"
-meta_title: "Drone Fleet for Mining & Resources | Ubuntu Software"
-description: "Stockpile measurement, site surveying, and safety monitoring with autonomous drone fleets. Accurate volume calculations and real-time progress tracking."
+meta_title: "IoT Fleet for Mining & Resources | Ubuntu Software"
+description: "Mining operations with IoT fleets: drones for surveys, haul trucks and loaders with telematics, pit sensors for safety and ventilation. Unified architecture for site-wide intelligence."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## Measure What Moves
 
-Mining operations move massive volumes daily. Accurate measurement is essential for inventory, planning, and compliance. Drone fleets deliver precision at scale.
+Mining operations move massive volumes daily. Accurate measurement is essential for inventory, planning, and compliance. IoT fleets deliver precision at scale.
+
+---
+
+## Fleet Types in Mining
+
+| Fleet Type | Devices | Role |
+|------------|---------|------|
+| **Aerial** | Survey drones, inspection drones | Stockpile measurement, pit surveys, blast analysis |
+| **Ground Vehicles** | Haul trucks, loaders, drills | Equipment tracking, telematics, production monitoring |
+| **Fixed IoT** | Pit sensors, ventilation monitors, gas detectors | Safety monitoring, environmental compliance |
+
+All device types share the same architecture: edge AI, NATS JetStream messaging, and unified fleet management.
 
 ---
 
@@ -26,9 +38,9 @@ Quarterly ground surveys can't keep pace with daily operations. Satellite imager
 
 ---
 
-## How Drone Fleets Solve This
+## How IoT Fleets Solve This
 
-### High-Frequency Measurement
+### Aerial: High-Frequency Measurement
 
 Survey more often with better accuracy:
 
@@ -36,6 +48,24 @@ Survey more often with better accuracy:
 - **Centimeter accuracy** — RTK GPS and photogrammetry deliver sub-2% volume error
 - **Complete coverage** — Survey entire site, not just accessible areas
 - **Consistent methodology** — Same process every time, comparable results
+
+### Ground: Equipment Intelligence
+
+Haul trucks, loaders, and drills with real-time tracking:
+
+- **Fleet telematics** — Location, speed, fuel, engine hours, payload
+- **Production tracking** — Tons moved, cycles completed, efficiency metrics
+- **Maintenance alerts** — Engine codes, service intervals, tire pressure
+- **Collision avoidance** — Proximity detection, personnel safety
+
+### Fixed IoT: Safety & Environment
+
+Sensors throughout the operation:
+
+- **Gas detectors** — Methane, CO, oxygen levels in confined spaces
+- **Ventilation monitors** — Airflow in underground operations
+- **Ground movement** — Slope stability, settlement detection
+- **Dust monitors** — Environmental compliance, worker safety
 
 ### Operational Intelligence
 

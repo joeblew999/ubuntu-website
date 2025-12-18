@@ -196,6 +196,52 @@ Discharge instructions. Care plans. Educational materials.
 
 ---
 
+## AI-Powered Processing
+
+Less time on paperwork, more time on care:
+
+| Capability | Healthcare Application |
+|------------|----------------------|
+| **Medical Terminology** | Contextual translation for clinical language |
+| **Form Validation** | Required fields, format checking, completeness |
+| **OCR for Paper** | Legacy records, signed consent, insurance cards |
+| **HIPAA Compliance** | Audit trails, access logging, encryption |
+| **Multi-language** | Patient forms in 100+ languages |
+
+All processing on your infrastructure. PHI never leaves your environment.
+
+---
+
+## Home Health & Mobile Clinics
+
+Care delivery in the field:
+
+- **Offline capable** — Patient homes, rural clinics, disaster response
+- **Voice documentation** — Clinical notes without typing
+- **Photo/video** — Wound care, medication reconciliation
+- **Real-time sync** — Records update when connected
+
+[See Human-in-Loop details →]({{< relref "/platform/publish#human-in-loop-real-time-field-operations" >}})
+
+---
+
+## Data Sovereignty
+
+Your data stays yours:
+
+| Traditional Approach | With WellKnown |
+|---------------------|----------------|
+| Data in vendor portals | Data on your infrastructure |
+| Vendor owns patient relationship | You own patient relationship |
+| Switching vendors = rebuilding | Switching = reconnect gateway |
+| HIPAA compliance depends on vendor | You control compliance |
+
+Publish TO external platforms when needed. Never locked IN.
+
+[Learn more about WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
+
+---
+
 ## Complete the Loop with Spatial
 
 Some healthcare work is inherently spatial:
@@ -207,7 +253,7 @@ Some healthcare work is inherently spatial:
 
 When your needs extend to 3D, Spatial is ready.
 
-[Explore Spatial →](/platform/spatial/)
+[Explore Spatial →]({{< relref "/platform/spatial" >}})
 
 ---
 
