@@ -1,12 +1,12 @@
 Category,Component,SKU,Image,Seller1,Seller1_URL,Seller2,Seller2_URL,Seller3,Seller3_URL
 Airframe,Holybro X500 V2 ARF Kit,SKU30125,x500-v2.svg,Holybro Store,https://holybro.com/products/x500-v2-kits,GetFPV,https://www.getfpv.com/search?q=x500,NewBeeDrone,https://newbeedrone.com/products/holybro-x500-v2-kits
-Flight Control,Pixhawk 6X,SKU11073,pixhawk-6x.svg,Holybro Store,https://holybro.com/collections/pixhawk-6x-series,,,,,
-Flight Control,Pixhawk 6X Baseboard,SKU18117,pixhawk-6x-baseboard.svg,Holybro Store,https://holybro.com/collections/pixhawk-6x-series,,,,,
-Flight Control,Pixhawk 6X Accessories,SKU15011,pixhawk-6x-accessories.svg,Holybro Store,https://holybro.com/collections/pixhawk-6x-series,,,,,
-Power,PM06 V2 Power Module,SKU15019,pm06-v2.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,,
-Navigation,Holybro M9N GPS,SKU12027,m9n-gps.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,,
-Navigation,GPS Mast,SKU12033,gps-mast.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,,
-Safety,Safety Switch & Buzzer,SKU12007,safety-switch.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,,
+Flight Control,Pixhawk 6X,SKU11073,pixhawk-6x.svg,Holybro Store,https://holybro.com/collections/pixhawk-6x-series,,,,
+Flight Control,Pixhawk 6X Baseboard,SKU18117,pixhawk-6x-baseboard.svg,Holybro Store,https://holybro.com/collections/pixhawk-6x-series,,,,
+Flight Control,Pixhawk 6X Accessories,SKU15011,pixhawk-6x-accessories.svg,Holybro Store,https://holybro.com/collections/pixhawk-6x-series,,,,
+Power,PM06 V2 Power Module,SKU15019,pm06-v2.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,
+Navigation,Holybro M9N GPS,SKU12027,m9n-gps.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,
+Navigation,GPS Mast,SKU12033,gps-mast.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,
+Safety,Safety Switch & Buzzer,SKU12007,safety-switch.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,
 Companion,Raspberry Pi 4 8GB,RPI4-MODEL-B-8GB,raspberry-pi-4.svg,Raspberry Pi,https://www.raspberrypi.com/products/raspberry-pi-4-model-b/,Digi-Key,https://www.digikey.com/en/products/filter/embedded-system-on-module/660,Mouser,https://www.mouser.com/c/embedded-solutions/computing/single-board-computers-sbcs/?m=Raspberry%20Pi
 Storage,Industrial microSD 128GB,SDSDQED-128G-GNSIN,microsd-128gb.svg,Amazon,https://www.amazon.com/s?k=sandisk+128gb+high+endurance+microsd,Digi-Key,https://www.digikey.com,Mouser,https://www.mouser.com
 Companion,Jetson Orin Nano 8GB,900-13767-0000-000,jetson-orin-nano.svg,NVIDIA Store,https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/,SparkFun,https://www.sparkfun.com/categories/399,Seeed Studio,https://www.seeedstudio.com/NVIDIAr-Jetson-Orintm-Nano-Developer-Kit-p-5617.html
@@ -15,6 +15,6 @@ RC,ExpressLRS EP1,HM-EP1-2400,expresslrs-ep1.svg,HappyModel,https://www.happymod
 Telemetry,SiK Telemetry Radio V3,SKU17012,sik-radio-v3.svg,Holybro Store,https://holybro.com/products/sik-telemetry-radio-v3,SparkFun,https://www.sparkfun.com/search/results?term=sik+radio,GetFPV,https://www.getfpv.com/search?q=sik+telemetry
 Networking,Industrial Ethernet Switch,USR-ES105,ethernet-switch.svg,PUSR Shop,https://shop.usriot.com/commercial-switch.html,AliExpress,https://www.aliexpress.com/w/wholesale-industrial-ethernet-switch-5-port.html,Amazon,https://www.amazon.com/s?k=industrial+ethernet+switch+5+port
 Power,LiPo Battery 4S 6000mAh,TAA60004S35,lipo-4s-6000mah.svg,GetFPV,https://www.getfpv.com/search?q=4s+6000mah,RaceDayQuads,https://www.racedayquads.com/search?q=4s+6000mah,Amazon,https://www.amazon.com/s?k=4s+6000mah+lipo
-Mounting,Pixhawk Vibration Mount,SKU12010,vibration-mount.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,,
-Cabling,Holybro Cable Kit,SKU12055,cable-kit.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,,
+Mounting,Pixhawk Vibration Mount,SKU12010,vibration-mount.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,
+Cabling,Holybro Cable Kit,SKU12055,cable-kit.svg,Holybro Store,https://holybro.com/collections/pixhawk-accessories,,,,
 Connectivity,Quectel RM520N-GL 5G Modem,RM520NGLAA-M20-SGASA,quectel-rm520n.svg,Quectel,https://www.quectel.com/product/5g-rm520n-gl,Digi-Key,https://www.digikey.com/en/products/filter/rf-transceiver-modules/872,Mouser,https://www.mouser.com/c/rf-wireless/rf-transceiver-modules/?m=Quectel
