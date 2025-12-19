@@ -1,4 +1,4 @@
-{{/* BOM Sellers Table - renders CSV data as interactive table with purchase links */}}
+{{/* BOM Sellers Table - renders CSV data as interactive table with purchase links and images */}}
 {{ $file := .Get 0 | default "data/x500_fleet_sellers.csv" }}
 {{ with resources.Get $file }}
   {{ $csv := . | transform.Unmarshal }}
@@ -6,11 +6,13 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-gray-100 dark:bg-gray-800">
-          {{ range index $csv 0 }}
-            {{ if not (or (eq . "Seller1_URL") (eq . "Seller2_URL") (eq . "Seller3_URL")) }}
-              <th class="p-3 border-b font-semibold">{{ . }}</th>
-            {{ end }}
-          {{ end }}
+          <th class="p-3 border-b font-semibold w-16"></th>
+          <th class="p-3 border-b font-semibold">Category</th>
+          <th class="p-3 border-b font-semibold">Component</th>
+          <th class="p-3 border-b font-semibold">SKU</th>
+          <th class="p-3 border-b font-semibold">Seller 1</th>
+          <th class="p-3 border-b font-semibold">Seller 2</th>
+          <th class="p-3 border-b font-semibold">Seller 3</th>
         </tr>
       </thead>
       <tbody>
@@ -20,13 +22,26 @@
               {{ $category := index $row 0 }}
               {{ $component := index $row 1 }}
               {{ $sku := index $row 2 }}
-              {{ $seller1 := index $row 3 }}
-              {{ $seller1URL := index $row 4 }}
-              {{ $seller2 := index $row 5 }}
-              {{ $seller2URL := index $row 6 }}
-              {{ $seller3 := index $row 7 }}
-              {{ $seller3URL := index $row 8 }}
+              {{ $image := index $row 3 }}
+              {{ $seller1 := index $row 4 }}
+              {{ $seller1URL := index $row 5 }}
+              {{ $seller2 := index $row 6 }}
+              {{ $seller2URL := index $row 7 }}
+              {{ $seller3 := index $row 8 }}
+              {{ $seller3URL := index $row 9 }}
 
+              <td class="p-2">
+                {{ if $image }}
+                  {{ $imgPath := printf "images/bom/%s" $image }}
+                  {{ with resources.Get $imgPath }}
+                    <img src="{{ .RelPermalink }}" alt="{{ $component }}" class="w-12 h-12 object-contain rounded" loading="lazy">
+                  {{ else }}
+                    <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">—</div>
+                  {{ end }}
+                {{ else }}
+                  <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">—</div>
+                {{ end }}
+              </td>
               <td class="p-3"><strong>{{ $category }}</strong></td>
               <td class="p-3">{{ $component }}</td>
               <td class="p-3"><code>{{ $sku }}</code></td>
