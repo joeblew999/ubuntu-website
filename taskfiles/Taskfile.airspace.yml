@@ -266,6 +266,202 @@ tasks:
         fi
 
   # ===========================================================================
+  # Manifest Generation (auto-updates timestamps and file sizes)
+  # ===========================================================================
+
+  manifest:update:
+    desc: Update manifest files with current timestamps and file sizes
+    cmds:
+      - |
+        echo "Updating airspace manifests..."
+        TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        echo "Timestamp: $TIMESTAMP"
+
+        # Get PMTiles file sizes (in MB)
+        get_size_mb() {
+          if [ -f "$1" ]; then
+            size=$(stat -f%z "$1" 2>/dev/null || stat -c%s "$1" 2>/dev/null)
+            echo "scale=1; $size / 1048576" | bc
+          else
+            echo "0"
+          fi
+        }
+
+        # Get feature count from GeoJSON (approximate)
+        get_features() {
+          if [ -f "$1" ]; then
+            grep -o '"type":"Feature"' "$1" 2>/dev/null | wc -l | tr -d ' '
+          else
+            echo "0"
+          fi
+        }
+
+        # Collect sizes
+        BOUNDARY_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_airspace_boundary.pmtiles")
+        SUA_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_special_use_airspace.pmtiles")
+        LAANC_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_uas_facility_map.pmtiles")
+        AIRPORTS_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_airports.pmtiles")
+        NAVAIDS_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_navaids.pmtiles")
+
+        # Collect feature counts from GeoJSON
+        BOUNDARY_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_airspace_boundary.geojson")
+        SUA_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_special_use_airspace.geojson")
+        LAANC_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_uas_facility_map.geojson")
+        AIRPORTS_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_airports.geojson")
+        NAVAIDS_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_navaids.geojson")
+
+        echo "File sizes (MB): boundary=$BOUNDARY_MB, sua=$SUA_MB, laanc=$LAANC_MB, airports=$AIRPORTS_MB, navaids=$NAVAIDS_MB"
+        echo "Feature counts: boundary=$BOUNDARY_FEATURES, sua=$SUA_FEATURES, laanc=$LAANC_FEATURES, airports=$AIRPORTS_FEATURES, navaids=$NAVAIDS_FEATURES"
+
+        # Update global manifest
+        cat > data/airspace/manifest.json << MANIFEST_EOF
+        {
+          "version": 1,
+          "updated": "$TIMESTAMP",
+          "regions": {
+            "usa": {
+              "name": "United States",
+              "bbox": [-125, 24, -66, 50],
+              "tiles_path": "tiles",
+              "manifest_file": "usa-manifest.json",
+              "default_layers": ["boundary", "sua"]
+            }
+          },
+          "notes": {
+            "bbox_format": "[west, south, east, north]",
+            "tiles_path": "Relative to /airspace/ in R2",
+            "future_regions": ["europe", "canada", "australia", "japan"]
+          }
+        }
+        MANIFEST_EOF
+
+        # Update USA regional manifest
+        cat > data/airspace/usa-manifest.json << USA_MANIFEST_EOF
+        {
+          "region": "usa",
+          "name": "United States",
+          "version": 1,
+          "updated": "$TIMESTAMP",
+          "bbox": [-125, 24, -66, 50],
+          "layers": {
+            "boundary": {
+              "name": "Airspace Boundary",
+              "file": "faa_airspace_boundary.pmtiles",
+              "pmtiles_layer": "boundary",
+              "size_mb": $BOUNDARY_MB,
+              "features": $BOUNDARY_FEATURES,
+              "zoom_range": [4, 14],
+              "default_visible": true,
+              "style": {
+                "Class_B": { "fill": "#0066cc", "opacity": 0.3 },
+                "Class_C": { "fill": "#cc00cc", "opacity": 0.3 },
+                "Class_D": { "fill": "#0099cc", "opacity": 0.3 },
+                "Class_E": { "fill": "#00cc99", "opacity": 0.3 }
+              }
+            },
+            "sua": {
+              "name": "Special Use Airspace",
+              "file": "faa_special_use_airspace.pmtiles",
+              "pmtiles_layer": "sua",
+              "size_mb": $SUA_MB,
+              "features": $SUA_FEATURES,
+              "zoom_range": [4, 14],
+              "default_visible": true,
+              "style": {
+                "R": { "fill": "#cc0000", "opacity": 0.3 },
+                "MOA": { "fill": "#ff9900", "opacity": 0.3 }
+              }
+            },
+            "laanc": {
+              "name": "LAANC/UAS Facility Map",
+              "file": "faa_uas_facility_map.pmtiles",
+              "pmtiles_layer": "uas",
+              "size_mb": $LAANC_MB,
+              "features": $LAANC_FEATURES,
+              "zoom_range": [6, 14],
+              "default_visible": false,
+              "style": {
+                "default": { "fill": "#ffff00", "opacity": 0.5, "stroke": "#cc9900" }
+              }
+            },
+            "airports": {
+              "name": "Airports",
+              "file": "faa_airports.pmtiles",
+              "pmtiles_layer": "airports",
+              "size_mb": $AIRPORTS_MB,
+              "features": $AIRPORTS_FEATURES,
+              "zoom_range": [0, 10],
+              "default_visible": false,
+              "style": {
+                "default": { "fill": "#00ff00", "stroke": "#006600", "radius": 5 }
+              }
+            },
+            "navaids": {
+              "name": "Navigation Aids",
+              "file": "faa_navaids.pmtiles",
+              "pmtiles_layer": "navaids",
+              "size_mb": $NAVAIDS_MB,
+              "features": $NAVAIDS_FEATURES,
+              "zoom_range": [0, 10],
+              "default_visible": false,
+              "style": {
+                "default": { "fill": "#ff00ff", "stroke": "#660066", "radius": 4 }
+              }
+            }
+          },
+          "source": {
+            "authority": "FAA",
+            "urls": {
+              "adds": "https://adds-faa.opendata.arcgis.com",
+              "udds": "https://udds-faa.opendata.arcgis.com"
+            },
+            "update_cycle": "28-day AIRAC"
+          }
+        }
+        USA_MANIFEST_EOF
+
+        # Copy to static for local dev
+        cp data/airspace/manifest.json static/airspace/manifest.json
+        cp data/airspace/usa-manifest.json static/airspace/usa-manifest.json
+
+        echo "Manifests updated:"
+        echo "  - data/airspace/manifest.json"
+        echo "  - data/airspace/usa-manifest.json"
+        echo "  - static/airspace/manifest.json"
+        echo "  - static/airspace/usa-manifest.json"
+
+  manifest:upload:
+    desc: Upload manifests to R2
+    cmds:
+      - task: manifest:update
+      - |
+        echo "Uploading manifests to R2..."
+        source .env 2>/dev/null || true
+        {{.HOME}}/.bun/bin/wrangler r2 object put ubuntu-website-assets/airspace/manifest.json --file data/airspace/manifest.json --remote
+        {{.HOME}}/.bun/bin/wrangler r2 object put ubuntu-website-assets/airspace/usa-manifest.json --file data/airspace/usa-manifest.json --remote
+        echo "Manifests uploaded to R2"
+
+  # ===========================================================================
+  # Full Pipeline (sync + tile + manifest + upload)
+  # ===========================================================================
+
+  pipeline:
+    desc: Full pipeline - sync data, convert to PMTiles, update manifests, upload to R2
+    cmds:
+      - task: sync
+      - task: tile
+      - task: manifest:update
+      - echo "Pipeline complete. Run 'task r2:airspace:upload' to push to R2"
+
+  pipeline:full:
+    desc: Full pipeline including R2 upload
+    cmds:
+      - task: sync
+      - task: tile
+      - task: manifest:upload
+      - task: r2:airspace:upload
+
+  # ===========================================================================
   # Checks
   # ===========================================================================
 
