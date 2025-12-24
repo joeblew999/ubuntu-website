@@ -1,9 +1,10 @@
-{{/* Airspace Demo - Full-screen interactive map */}}
-{{/* Uses PMTiles from R2 for efficient progressive loading */}}
-{{/* Configuration: Manifest-driven - fetches manifest.json and regional manifests from R2 */}}
-{{/* Supports multiple regions with automatic detection based on viewport */}}
-
 {{ define "main" }}
+{{/* Airspace Demo - Full-screen interactive map */}}
+{{/* Hugo reads data/airspace/manifest_usa.json at build time */}}
+{{/* To add a new dataset: update Go code → regenerate manifest → Hugo rebuilds */}}
+
+{{ $manifest := site.Data.airspace.manifest_usa }}
+
 <style>
     /* Override theme styles for full-screen map */
     main { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
@@ -41,6 +42,7 @@
     .legend { font-size: 12px; }
     .legend-item { display: flex; align-items: center; margin: 5px 0; }
     .legend-color { width: 20px; height: 14px; margin-right: 8px; border: 1px solid #666; }
+    .legend-color.point { border-radius: 50%; }
     .loading-overlay {
         position: absolute;
         top: 50%;
@@ -107,27 +109,38 @@
     <div id="loading" class="loading-overlay">Loading airspace data...</div>
 
     <div class="info-panel" id="info-panel">
-        <h2><span>US Airspace Viewer</span><button class="panel-toggle" id="panel-toggle" aria-label="Toggle panel">▼</button></h2>
+        <h2>
+            <span>{{ $manifest.name }} Airspace</span>
+            <button class="panel-toggle" id="panel-toggle" aria-label="Toggle panel">▼</button>
+        </h2>
         <div class="panel-content">
+            {{/* Legend - generated from manifest at build time */}}
             <div class="legend">
-                <div class="legend-item"><div class="legend-color" style="background: #0066cc;"></div> Class B</div>
-                <div class="legend-item"><div class="legend-color" style="background: #cc00cc;"></div> Class C</div>
-                <div class="legend-item"><div class="legend-color" style="background: #0099cc;"></div> Class D</div>
-                <div class="legend-item"><div class="legend-color" style="background: #00cc99;"></div> Class E</div>
-                <div class="legend-item"><div class="legend-color" style="background: #cc0000;"></div> Restricted</div>
-                <div class="legend-item"><div class="legend-color" style="background: #ff9900;"></div> MOA</div>
-                <div class="legend-item" id="laanc-legend" style="display:none;"><div class="legend-color" style="background: rgba(255,255,0,0.5);"></div> LAANC</div>
-                <div class="legend-item"><div class="legend-color" style="background: #00ff00; border-radius: 50%;"></div> Airports</div>
-                <div class="legend-item"><div class="legend-color" style="background: #ff00ff; border-radius: 50%;"></div> Navaids</div>
+                {{- range $layerId, $layer := $manifest.layers }}
+                {{- range $layer.legend }}
+                <div class="legend-item">
+                    <div class="legend-color{{ if eq $layer.geom_type "point" }} point{{ end }}" style="background: {{ .color }};"></div>
+                    {{ .label }}
+                </div>
+                {{- end }}
+                {{- end }}
             </div>
+
+            {{/* Layer toggles - generated from manifest at build time */}}
             <div class="layer-toggle">
-                <label><input type="checkbox" id="toggle-boundary" checked> Boundaries</label>
-                <label><input type="checkbox" id="toggle-sua" checked> Special Use</label>
-                <label id="laanc-toggle-label" style="display:none;"><input type="checkbox" id="toggle-laanc"> LAANC</label>
-                <label><input type="checkbox" id="toggle-airports"> Airports</label>
-                <label><input type="checkbox" id="toggle-navaids"> Navaids</label>
+                {{- range $layerId, $layer := $manifest.layers }}
+                <label>
+                    <input type="checkbox" data-layer="{{ $layerId }}" {{ if $layer.default_visible }}checked{{ end }}>
+                    {{ $layer.name }}
+                </label>
+                {{- end }}
             </div>
-            <div class="data-mode" id="data-mode">Loading...</div>
+
+            <div class="data-mode">
+                Region: {{ $manifest.name }}<br>
+                Updated: {{ $manifest.updated | time.Format "2006-01-02" }}<br>
+                Source: {{ $manifest.source.authority }}
+            </div>
         </div>
     </div>
 </div>
@@ -137,17 +150,36 @@
 <script src="https://unpkg.com/protomaps-leaflet@5.1.0/dist/protomaps-leaflet.js"></script>
 <script>
     // Data URL - local for dev, R2 for production
-    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const DATA_BASE = isLocalDev ? '/airspace' : '{{ site.Params.r2.public_url }}/airspace';
-    const TILES_BASE = DATA_BASE + '/tiles';
-    const MANIFEST_URL = DATA_BASE + '/manifest.json';
+    // Detect Hugo dev server by port 1313 (works with localhost, 127.0.0.1, or LAN IPs)
+    const isLocalDev = window.location.port === '1313';
+    const TILES_BASE = isLocalDev ? '/airspace/tiles' : '{{ site.Params.r2.public_url }}/airspace/tiles';
 
-    console.log('Airspace Demo:', isLocalDev ? 'LOCAL mode' : 'R2 mode', '- Data from:', DATA_BASE);
+    console.log('Airspace Demo:', isLocalDev ? 'LOCAL mode' : 'R2 mode', '- Tiles from:', TILES_BASE);
 
-    // Global state for manifest-driven loading
-    let globalManifest = null;
-    let activeRegion = null;
-    let regionManifest = null;
+    // Layer configuration - generated by Hugo from manifest at build time
+    const LAYERS = {
+        {{- range $layerId, $layer := $manifest.layers }}
+        "{{ $layerId }}": {
+            file: "{{ $layer.file }}",
+            pmtilesLayer: "{{ $layer.pmtiles_layer }}",
+            geomType: "{{ $layer.geom_type }}",
+            defaultVisible: {{ $layer.default_visible }},
+            renderRules: [
+                {{- range $layer.render_rules }}
+                {
+                    {{- if .filter_prop }}filterProp: "{{ .filter_prop }}",{{ end }}
+                    {{- if .filter_value }}filterValue: "{{ .filter_value }}",{{ end }}
+                    fill: "{{ .fill }}",
+                    {{- if .stroke }}stroke: "{{ .stroke }}",{{ end }}
+                    {{- if .opacity }}opacity: {{ .opacity }},{{ end }}
+                    {{- if .width }}width: {{ .width }},{{ end }}
+                    {{- if .radius }}radius: {{ .radius }},{{ end }}
+                },
+                {{- end }}
+            ],
+        },
+        {{- end }}
+    };
 
     // Initialize map centered on continental US
     const map = L.map('airspace-map').setView([39.8, -98.5], 5);
@@ -157,332 +189,74 @@
         attribution: '© OpenStreetMap | Airspace data: FAA'
     }).addTo(map);
 
-    // Track layers and loading mode
-    let usePMTiles = false;
-    let boundaryLayer = null;
-    let suaLayer = null;
-    let laancLayer = null;
-    let airportsLayer = null;
-    let navaidsLayer = null;
+    // Store layer references
+    const mapLayers = {};
 
-    // PMTiles style rules for airspace classes
-    // Note: Boundary data uses CLASS (A/C/D/E/G) and TYPE_CODE (CTA, TMA, SATA, etc.)
-    const boundaryRules = [
-        // Class A (high altitude controlled)
-        { dataLayer: 'boundary', filter: (z, f) => f.props.CLASS === 'A',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#0066cc', opacity: 0.15, stroke: '#0066cc', width: 1 }) },
-        // Class C (terminal areas)
-        { dataLayer: 'boundary', filter: (z, f) => f.props.CLASS === 'C',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#cc00cc', opacity: 0.2, stroke: '#cc00cc', width: 2 }) },
-        // Class D (smaller towered)
-        { dataLayer: 'boundary', filter: (z, f) => f.props.CLASS === 'D',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#0099cc', opacity: 0.15, stroke: '#0099cc', width: 2 }) },
-        // Class E (controlled airspace)
-        { dataLayer: 'boundary', filter: (z, f) => f.props.CLASS === 'E',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#00cc99', opacity: 0.1, stroke: '#00cc99', width: 1 }) },
-        // Class G (uncontrolled)
-        { dataLayer: 'boundary', filter: (z, f) => f.props.CLASS === 'G',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#999999', opacity: 0.05, stroke: '#999999', width: 1 }) },
-        // Fallback for all other boundary features (null CLASS, TYPE_CODE based)
-        { dataLayer: 'boundary',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#666666', opacity: 0.1, stroke: '#666666', width: 1 }) },
-    ];
+    // Convert render rules to protomaps-leaflet paint rules
+    function buildPaintRules(layerId, config) {
+        const rules = [];
+        for (const rule of config.renderRules) {
+            const ruleObj = { dataLayer: config.pmtilesLayer };
 
-    // SUA uses TYPE_CODE: R (Restricted), P (Prohibited), MOA, A (Alert), W (Warning), D
-    const suaRules = [
-        { dataLayer: 'sua', filter: (z, f) => f.props.TYPE_CODE === 'R',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#cc0000', opacity: 0.3, stroke: '#cc0000', width: 2 }) },
-        { dataLayer: 'sua', filter: (z, f) => f.props.TYPE_CODE === 'P',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#ff0000', opacity: 0.4, stroke: '#ff0000', width: 2 }) },
-        { dataLayer: 'sua', filter: (z, f) => f.props.TYPE_CODE === 'MOA',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#ff9900', opacity: 0.2, stroke: '#ff9900', width: 1 }) },
-        { dataLayer: 'sua', filter: (z, f) => f.props.TYPE_CODE === 'A',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#ffcc00', opacity: 0.2, stroke: '#ffcc00', width: 1 }) },
-        { dataLayer: 'sua', filter: (z, f) => f.props.TYPE_CODE === 'W',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#996600', opacity: 0.15, stroke: '#996600', width: 1 }) },
-        { dataLayer: 'sua',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#666666', opacity: 0.1, stroke: '#666666', width: 1 }) },
-    ];
+            // Add filter if specified
+            if (rule.filterProp && rule.filterValue) {
+                const prop = rule.filterProp;
+                const value = rule.filterValue;
+                ruleObj.filter = (z, f) => f.props[prop] === value;
+            }
 
-    const airportsRules = [
-        { dataLayer: 'airports',
-          symbolizer: new protomapsL.CircleSymbolizer({ fill: '#00ff00', stroke: '#006600', width: 1, radius: 5 }) },
-    ];
+            // Create symbolizer based on geometry type
+            const style = {
+                fill: rule.fill,
+                stroke: rule.stroke || rule.fill,
+                opacity: rule.opacity || 0.3,
+                width: rule.width || 1,
+            };
 
-    const navaidsRules = [
-        { dataLayer: 'navaids',
-          symbolizer: new protomapsL.CircleSymbolizer({ fill: '#ff00ff', stroke: '#660066', width: 1, radius: 4 }) },
-    ];
+            if (config.geomType === 'point') {
+                style.radius = rule.radius || 5;
+                ruleObj.symbolizer = new protomapsL.CircleSymbolizer(style);
+            } else {
+                ruleObj.symbolizer = new protomapsL.PolygonSymbolizer(style);
+            }
 
-    const laancRules = [
-        { dataLayer: 'uas',
-          symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#ffff00', opacity: 0.5, stroke: '#cc9900', width: 1 }) },
-    ];
-
-    // Manifest-driven loading functions
-    async function loadGlobalManifest() {
-        try {
-            const resp = await fetch(MANIFEST_URL);
-            if (!resp.ok) throw new Error(`Manifest fetch failed: ${resp.status}`);
-            globalManifest = await resp.json();
-            console.log('Global manifest loaded:', globalManifest);
-            return globalManifest;
-        } catch (e) {
-            console.warn('Could not load global manifest, using legacy mode:', e.message);
-            return null;
+            rules.push(ruleObj);
         }
+        return rules;
     }
 
-    async function loadRegionManifest(regionId) {
-        if (!globalManifest || !globalManifest.regions[regionId]) {
-            console.warn(`Region ${regionId} not found in manifest`);
-            return null;
-        }
+    // Load all layers
+    function loadLayers() {
+        for (const [layerId, config] of Object.entries(LAYERS)) {
+            const pmtilesUrl = `${TILES_BASE}/${config.file}`;
+            const paintRules = buildPaintRules(layerId, config);
 
-        const region = globalManifest.regions[regionId];
-        const manifestFile = region.manifest_file;
+            console.log(`Loading layer: ${layerId} from ${config.file}`);
 
-        try {
-            const resp = await fetch(`${DATA_BASE}/${manifestFile}`);
-            if (!resp.ok) throw new Error(`Region manifest fetch failed: ${resp.status}`);
-            regionManifest = await resp.json();
-            activeRegion = regionId;
-            console.log(`Region manifest loaded for ${regionId}:`, regionManifest);
-            return regionManifest;
-        } catch (e) {
-            console.warn(`Could not load region manifest for ${regionId}:`, e.message);
-            return null;
-        }
-    }
+            const layer = protomapsL.leafletLayer({
+                url: pmtilesUrl,
+                paintRules: paintRules,
+            });
 
-    // Detect which region the viewport is in based on bounding boxes
-    function detectRegion(bounds) {
-        if (!globalManifest) return null;
+            mapLayers[layerId] = layer;
 
-        const center = bounds.getCenter();
-        const lat = center.lat;
-        const lng = center.lng;
-
-        for (const [regionId, region] of Object.entries(globalManifest.regions)) {
-            const [west, south, east, north] = region.bbox;
-            if (lng >= west && lng <= east && lat >= south && lat <= north) {
-                return regionId;
+            if (config.defaultVisible) {
+                layer.addTo(map);
             }
         }
-        return null;
-    }
-
-    // Check data availability: individual PMTiles (best for filtering) > GeoJSON fallback
-    // Note: Combined PMTiles removed - doesn't support per-layer filtering
-    async function checkDataMode() {
-        try {
-            // Check individual PMTiles (allows per-layer toggling)
-            const boundaryResp = await fetch(`${TILES_BASE}/faa_airspace_boundary.pmtiles`, { method: 'HEAD' });
-            if (boundaryResp.ok) return 'individual';
-
-            // Fallback to GeoJSON
-            return 'geojson';
-        } catch (e) {
-            return 'geojson';
-        }
-    }
-
-    // Load individual PMTiles (separate files per layer - supports filtering)
-    async function loadIndividualPMTiles() {
-        console.log('Loading individual PMTiles from:', TILES_BASE);
-
-        // Boundary layer
-        boundaryLayer = protomapsL.leafletLayer({
-            url: `${TILES_BASE}/faa_airspace_boundary.pmtiles`,
-            paintRules: boundaryRules,
-        });
-        boundaryLayer.addTo(map);
-
-        // SUA layer
-        suaLayer = protomapsL.leafletLayer({
-            url: `${TILES_BASE}/faa_special_use_airspace.pmtiles`,
-            paintRules: suaRules,
-        });
-        suaLayer.addTo(map);
-
-        // Airports layer (not shown by default)
-        airportsLayer = protomapsL.leafletLayer({
-            url: `${TILES_BASE}/faa_airports.pmtiles`,
-            paintRules: airportsRules,
-        });
-
-        // Navaids layer (not shown by default)
-        navaidsLayer = protomapsL.leafletLayer({
-            url: `${TILES_BASE}/faa_navaids.pmtiles`,
-            paintRules: navaidsRules,
-        });
-
-        // LAANC layer (not shown by default)
-        laancLayer = protomapsL.leafletLayer({
-            url: `${TILES_BASE}/faa_uas_facility_map.pmtiles`,
-            paintRules: laancRules,
-        });
-
-        // Show LAANC toggle in PMTiles mode
-        document.getElementById('laanc-toggle-label').style.display = 'flex';
-        document.getElementById('laanc-legend').style.display = 'flex';
-
         document.getElementById('loading').style.display = 'none';
-
-        // Only update data-mode if not already set by manifest loader
-        if (!regionManifest) {
-            document.getElementById('data-mode').textContent = '⚡ PMTiles (per-layer files)';
-        }
     }
 
-    // GeoJSON fallback functions
-    function getAirspaceStyle(feature) {
-        const props = feature.properties;
-        const classType = props.CLASS || props.TYPE_CODE || '';
-        const styles = {
-            'B': { color: '#0066cc', fillColor: '#0066cc', weight: 2, fillOpacity: 0.2 },
-            'C': { color: '#cc00cc', fillColor: '#cc00cc', weight: 2, fillOpacity: 0.2 },
-            'D': { color: '#0099cc', fillColor: '#0099cc', weight: 2, fillOpacity: 0.15 },
-            'E': { color: '#00cc99', fillColor: '#00cc99', weight: 1, fillOpacity: 0.1 },
-            'E2': { color: '#00cc99', fillColor: '#00cc99', weight: 1, fillOpacity: 0.1 },
-            'E3': { color: '#00cc99', fillColor: '#00cc99', weight: 1, fillOpacity: 0.1 },
-            'E4': { color: '#00cc99', fillColor: '#00cc99', weight: 1, fillOpacity: 0.1 },
-        };
-        return styles[classType] || { color: '#666', fillColor: '#666', weight: 1, fillOpacity: 0.1 };
-    }
-
-    function getSUAStyle(feature) {
-        const typeCode = feature.properties.TYPE_CODE || '';
-        if (typeCode === 'R' || typeCode === 'P') {
-            return { color: '#cc0000', fillColor: '#cc0000', weight: 2, fillOpacity: 0.3 };
-        }
-        if (typeCode === 'M' || typeCode === 'MOA') {
-            return { color: '#ff9900', fillColor: '#ff9900', weight: 1, fillOpacity: 0.2 };
-        }
-        if (typeCode === 'A' || typeCode === 'W') {
-            return { color: '#996600', fillColor: '#996600', weight: 1, fillOpacity: 0.15 };
-        }
-        return { color: '#666', fillColor: '#666', weight: 1, fillOpacity: 0.1 };
-    }
-
-    function getLAANCStyle(feature) {
-        const ceiling = feature.properties.CEILING || 0;
-        const opacity = Math.min(0.1 + (ceiling / 400) * 0.3, 0.4);
-        return { color: '#ffcc00', fillColor: '#ffff00', weight: 0.5, fillOpacity: opacity };
-    }
-
-    function onEachFeature(feature, layer) {
-        const props = feature.properties;
-        let content = '<div style="font-size:12px;">';
-        if (props.NAME) content += `<b>${props.NAME}</b><br>`;
-        if (props.CLASS) content += `Class: ${props.CLASS}<br>`;
-        if (props.TYPE_CODE) content += `Type: ${props.TYPE_CODE}<br>`;
-        if (props.CEILING) content += `LAANC Ceiling: ${props.CEILING} ft<br>`;
-        if (props.APT1_NAME) content += `Airport: ${props.APT1_NAME} (${props.APT1_ICAO})<br>`;
-        if (props.UPPER_VAL) content += `Upper: ${props.UPPER_VAL} ${props.UPPER_UOM || 'ft'}<br>`;
-        if (props.LOWER_VAL) content += `Lower: ${props.LOWER_VAL} ${props.LOWER_UOM || 'ft'}<br>`;
-        content += '</div>';
-        layer.bindPopup(content);
-    }
-
-    // Load GeoJSON fallback
-    async function loadGeoJSON() {
-        console.log('Loading GeoJSON from:', DATA_BASE);
-
-        // Create layer groups
-        boundaryLayer = L.layerGroup().addTo(map);
-        suaLayer = L.layerGroup().addTo(map);
-        laancLayer = L.layerGroup();
-        airportsLayer = L.layerGroup();
-        navaidsLayer = L.layerGroup();
-
-        try {
-            // Load airspace boundaries
-            const boundaryResp = await fetch(`${DATA_BASE}/faa_airspace_boundary.geojson`);
-            const boundaryData = await boundaryResp.json();
-            L.geoJSON(boundaryData, { style: getAirspaceStyle, onEachFeature }).addTo(boundaryLayer);
-
-            // Load Special Use Airspace
-            const suaResp = await fetch(`${DATA_BASE}/faa_special_use_airspace.geojson`);
-            const suaData = await suaResp.json();
-            L.geoJSON(suaData, { style: getSUAStyle, onEachFeature }).addTo(suaLayer);
-
-            // Load LAANC grid
-            const laancResp = await fetch(`${DATA_BASE}/faa_uas_facility_map.geojson`);
-            const laancData = await laancResp.json();
-            L.geoJSON(laancData, { style: getLAANCStyle, onEachFeature }).addTo(laancLayer);
-
-            // Load Airports
-            const airportsResp = await fetch(`${DATA_BASE}/faa_airports.geojson`);
-            const airportsData = await airportsResp.json();
-            L.geoJSON(airportsData, {
-                pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
-                    radius: 5, fillColor: '#00ff00', color: '#006600', weight: 1, opacity: 1, fillOpacity: 0.8
-                }),
-                onEachFeature: (feature, layer) => {
-                    const props = feature.properties;
-                    let content = '<div style="font-size:12px;">';
-                    if (props.SITE_NO) content += `<b>${props.SITE_NO}</b><br>`;
-                    if (props.CITY) content += `City: ${props.CITY}<br>`;
-                    if (props.STATE_NAME) content += `State: ${props.STATE_NAME}<br>`;
-                    if (props.OWNER_TYPE) content += `Type: ${props.OWNER_TYPE}<br>`;
-                    content += '</div>';
-                    layer.bindPopup(content);
-                }
-            }).addTo(airportsLayer);
-
-            // Load Navigation Aids
-            const navaidsResp = await fetch(`${DATA_BASE}/faa_navaids.geojson`);
-            const navaidsData = await navaidsResp.json();
-            L.geoJSON(navaidsData, {
-                pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
-                    radius: 4, fillColor: '#ff00ff', color: '#660066', weight: 1, opacity: 1, fillOpacity: 0.8
-                }),
-                onEachFeature: (feature, layer) => {
-                    const props = feature.properties;
-                    let content = '<div style="font-size:12px;">';
-                    if (props.NAVAID_ID) content += `<b>${props.NAVAID_ID}</b><br>`;
-                    if (props.NAVAID_NAME) content += `Name: ${props.NAVAID_NAME}<br>`;
-                    if (props.NAVAID_TYPE) content += `Type: ${props.NAVAID_TYPE}<br>`;
-                    if (props.CITY) content += `City: ${props.CITY}<br>`;
-                    content += '</div>';
-                    layer.bindPopup(content);
-                }
-            }).addTo(navaidsLayer);
-
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('data-mode').textContent = '📦 GeoJSON (full download)';
-        } catch (err) {
-            document.getElementById('loading').textContent = 'Error loading data: ' + err.message;
-        }
-    }
-
-    // Layer toggles
+    // Setup layer toggle handlers
     function setupToggles() {
-        document.getElementById('toggle-boundary').addEventListener('change', (e) => {
-            if (boundaryLayer) {
-                e.target.checked ? map.addLayer(boundaryLayer) : map.removeLayer(boundaryLayer);
-            }
-        });
-        document.getElementById('toggle-sua').addEventListener('change', (e) => {
-            if (suaLayer) {
-                e.target.checked ? map.addLayer(suaLayer) : map.removeLayer(suaLayer);
-            }
-        });
-        document.getElementById('toggle-laanc').addEventListener('change', (e) => {
-            if (laancLayer) {
-                e.target.checked ? map.addLayer(laancLayer) : map.removeLayer(laancLayer);
-            }
-        });
-        document.getElementById('toggle-airports').addEventListener('change', (e) => {
-            if (airportsLayer) {
-                e.target.checked ? map.addLayer(airportsLayer) : map.removeLayer(airportsLayer);
-            }
-        });
-        document.getElementById('toggle-navaids').addEventListener('change', (e) => {
-            if (navaidsLayer) {
-                e.target.checked ? map.addLayer(navaidsLayer) : map.removeLayer(navaidsLayer);
-            }
+        document.querySelectorAll('.layer-toggle input[data-layer]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const layerId = e.target.dataset.layer;
+                const layer = mapLayers[layerId];
+                if (layer) {
+                    e.target.checked ? map.addLayer(layer) : map.removeLayer(layer);
+                }
+            });
         });
     }
 
@@ -496,52 +270,9 @@
         });
     }
 
-    // Initialize with manifest-driven loading
-    async function init() {
-        setupToggles();
-        setupPanelToggle();
-
-        // Try manifest-driven loading first
-        const manifest = await loadGlobalManifest();
-
-        if (manifest) {
-            // Detect region from initial viewport
-            const bounds = map.getBounds();
-            const detectedRegion = detectRegion(bounds);
-
-            if (detectedRegion) {
-                console.log(`Detected region: ${detectedRegion}`);
-                const regionData = await loadRegionManifest(detectedRegion);
-
-                if (regionData) {
-                    // Update panel title with region name
-                    document.querySelector('.info-panel h2 span').textContent =
-                        `${regionData.name} Airspace Viewer`;
-
-                    // Update data mode indicator
-                    document.getElementById('data-mode').innerHTML =
-                        `⚡ Manifest-driven<br>Region: ${regionData.name}<br>Updated: ${regionData.updated.split('T')[0]}`;
-
-                    // Load PMTiles using manifest layer info
-                    await loadIndividualPMTiles();
-                    return;
-                }
-            }
-        }
-
-        // Fallback: legacy mode (direct PMTiles check)
-        console.log('Using legacy mode (no manifest or region not detected)');
-        const dataMode = await checkDataMode();
-
-        if (dataMode === 'individual') {
-            await loadIndividualPMTiles();
-        } else {
-            await loadGeoJSON();
-            document.getElementById('laanc-toggle-label').style.display = 'flex';
-            document.getElementById('laanc-legend').style.display = 'flex';
-        }
-    }
-
-    init();
+    // Initialize
+    setupToggles();
+    setupPanelToggle();
+    loadLayers();
 </script>
 {{ end }}

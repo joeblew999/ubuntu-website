@@ -6,12 +6,14 @@
 //	airspace download -dataset uas
 //	airspace sync                 # Smart sync (only download if changed)
 //	airspace status               # Show data file status
+//	airspace pipeline             # Full pipeline: sync → tile → manifest
+//	airspace manifest             # Generate manifest files
+//	airspace tile                 # Convert GeoJSON to PMTiles (requires tippecanoe)
 //
 // Configuration:
 //
-//	The dataset definitions below MUST stay in sync with data/airspace/datasets.json
-//	which is the single source of truth for all airspace constants.
-//	See also: taskfiles/Taskfile.airspace.yml, layouts/fleet/airspace-demo.html
+//	All file paths are defined as constants below - no external dependencies.
+//	See also: layouts/fleet/airspace-demo.html
 package main
 
 import (
@@ -22,58 +24,149 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
+)
+
+// =============================================================================
+// File Path Constants - Single source of truth for all file locations
+// =============================================================================
+
+const (
+	// Directory paths
+	DirGeoJSON   = "static/airspace"          // GeoJSON output directory
+	DirPMTiles   = "static/airspace/tiles"    // PMTiles output directory
+	DirData      = "data/airspace"            // Data/metadata directory
+
+	// Data files (in DirData) - use underscores for Hugo data access compatibility
+	FileSyncETags   = "sync_etags.json"       // ETag cache for change detection
+	FileSyncResult  = "sync_result.json"      // Last sync result (for pipeline idempotency)
+	FileSyncHistory = "sync_history.json"     // Rolling sync history
+
+	// Manifest files (in DirData, copied to static) - prefix with "manifest_" for alphabetical grouping
+	FileManifest    = "manifest.json"         // Global manifest
+	FileUSAManifest = "manifest_usa.json"     // USA regional manifest
+
+	// GeoJSON files (in DirGeoJSON)
+	GeoJSONBoundary = "faa_airspace_boundary.geojson"
+	GeoJSONSUA      = "faa_special_use_airspace.geojson"
+	GeoJSONUAS      = "faa_uas_facility_map.geojson"
+	GeoJSONAirports = "faa_airports.geojson"
+	GeoJSONNavaids  = "faa_navaids.geojson"
+	GeoJSONObstacles = "faa_obstacles.geojson"
+
+	// PMTiles files (in DirPMTiles)
+	PMTilesBoundary = "faa_airspace_boundary.pmtiles"
+	PMTilesSUA      = "faa_special_use_airspace.pmtiles"
+	PMTilesUAS      = "faa_uas_facility_map.pmtiles"
+	PMTilesAirports = "faa_airports.pmtiles"
+	PMTilesNavaids  = "faa_navaids.pmtiles"
+	PMTilesObstacles = "faa_obstacles.pmtiles"
+	PMTilesCombined = "faa_airspace_combined.pmtiles"
+
+	// PMTiles layer names (used in tippecanoe and map rendering)
+	LayerBoundary = "boundary"
+	LayerSUA      = "sua"
+	LayerUAS      = "uas"
+	LayerAirports = "airports"
+	LayerNavaids  = "navaids"
+	LayerObstacles = "obstacles"
 )
 
 // Dataset configuration
 type Dataset struct {
-	Name     string
-	Filename string
-	BaseURL  string
-	// For FeatureServer APIs that require pagination
-	IsPaginated bool
+	Name        string
+	Key         string // Dataset key (uas, boundary, etc.)
+	GeoJSON     string // GeoJSON filename (uses constants above)
+	PMTiles     string // PMTiles filename (uses constants above)
+	Layer       string // PMTiles layer name
+	BaseURL     string
+	IsPaginated bool   // For FeatureServer APIs that require pagination
 	PageSize    int
-	// ETagURL is the URL to check for ETag/Last-Modified (for paginated APIs, this is the layer URL not the query URL)
-	ETagURL string
+	ETagURL     string // URL to check for ETag/Last-Modified (for paginated APIs)
+}
+
+// TileConfig holds tippecanoe settings per dataset
+type TileConfig struct {
+	MinZoom          int
+	MaxZoom          int
+	DropDensest      bool   // --drop-densest-as-needed
+	NoFeatureLimit   bool   // --no-feature-limit
+	NoTileSizeLimit  bool   // --no-tile-size-limit
+	ReduceRate       int    // -r rate (1 = no reduction)
 }
 
 var datasets = map[string]Dataset{
 	"uas": {
 		Name:        "UAS Facility Map",
-		Filename:    "faa_uas_facility_map.geojson",
+		Key:         "uas",
+		GeoJSON:     GeoJSONUAS,
+		PMTiles:     PMTilesUAS,
+		Layer:       LayerUAS,
 		BaseURL:     "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/FAA_UAS_FacilityMap_Data/FeatureServer/0/query",
 		IsPaginated: true,
 		PageSize:    2000,
-		// ETagURL points to the layer (not /query) which returns proper ETag/Last-Modified headers
-		ETagURL: "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/FAA_UAS_FacilityMap_Data/FeatureServer/0",
+		ETagURL:     "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/FAA_UAS_FacilityMap_Data/FeatureServer/0",
 	},
 	"boundary": {
-		Name:     "Airspace Boundary",
-		Filename: "faa_airspace_boundary.geojson",
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/67885972e4e940b2aa6d74024901c561/geojson?layers=0",
+		Name:    "Airspace Boundary",
+		Key:     "boundary",
+		GeoJSON: GeoJSONBoundary,
+		PMTiles: PMTilesBoundary,
+		Layer:   LayerBoundary,
+		BaseURL: "https://adds-faa.opendata.arcgis.com/api/download/v1/items/67885972e4e940b2aa6d74024901c561/geojson?layers=0",
 	},
 	"sua": {
-		Name:     "Special Use Airspace",
-		Filename: "faa_special_use_airspace.geojson",
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/dd0d1b726e504137ab3c41b21835d05b/geojson?layers=0",
+		Name:    "Special Use Airspace",
+		Key:     "sua",
+		GeoJSON: GeoJSONSUA,
+		PMTiles: PMTilesSUA,
+		Layer:   LayerSUA,
+		BaseURL: "https://adds-faa.opendata.arcgis.com/api/download/v1/items/dd0d1b726e504137ab3c41b21835d05b/geojson?layers=0",
 	},
 	"airports": {
-		Name:     "Airports",
-		Filename: "faa_airports.geojson",
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/e747ab91a11045e8b3f8a3efd093d3b5/geojson?layers=0",
+		Name:    "Airports",
+		Key:     "airports",
+		GeoJSON: GeoJSONAirports,
+		PMTiles: PMTilesAirports,
+		Layer:   LayerAirports,
+		BaseURL: "https://adds-faa.opendata.arcgis.com/api/download/v1/items/e747ab91a11045e8b3f8a3efd093d3b5/geojson?layers=0",
 	},
 	"navaids": {
-		Name:     "Navigation Aids",
-		Filename: "faa_navaids.geojson",
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/990e238991b44dd08af27d7b43e70b92/geojson?layers=0",
+		Name:    "Navigation Aids",
+		Key:     "navaids",
+		GeoJSON: GeoJSONNavaids,
+		PMTiles: PMTilesNavaids,
+		Layer:   LayerNavaids,
+		BaseURL: "https://adds-faa.opendata.arcgis.com/api/download/v1/items/990e238991b44dd08af27d7b43e70b92/geojson?layers=0",
 	},
 	"obstacles": {
-		Name:     "Obstacles",
-		Filename: "faa_obstacles.geojson",
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/c6a62360338e408cb1512366ad61559e/geojson?layers=0",
+		Name:    "Obstacles",
+		Key:     "obstacles",
+		GeoJSON: GeoJSONObstacles,
+		PMTiles: PMTilesObstacles,
+		Layer:   LayerObstacles,
+		BaseURL: "https://adds-faa.opendata.arcgis.com/api/download/v1/items/c6a62360338e408cb1512366ad61559e/geojson?layers=0",
 	},
 }
+
+// tileConfigs holds tippecanoe configuration per dataset
+var tileConfigs = map[string]TileConfig{
+	"boundary": {MinZoom: -1, MaxZoom: -1, DropDensest: false},  // -zg (auto zoom)
+	"sua":      {MinZoom: -1, MaxZoom: -1, DropDensest: false},  // -zg
+	"uas":      {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
+	"airports": {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
+	"navaids":  {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
+	"obstacles": {MinZoom: -1, MaxZoom: -1, DropDensest: true},  // -zg --drop-densest-as-needed
+}
+
+// datasetOrder defines the processing order (consistent ordering)
+var datasetOrder = []string{"uas", "boundary", "sua", "airports", "navaids"}
+
+// datasetOrderWithObstacles includes obstacles (large file, skipped by default)
+var datasetOrderWithObstacles = []string{"uas", "boundary", "sua", "airports", "navaids", "obstacles"}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -89,6 +182,12 @@ func main() {
 		runDownload()
 	case "sync":
 		runSync()
+	case "tile":
+		runTile()
+	case "manifest":
+		runManifest()
+	case "pipeline":
+		runPipeline()
 	case "status":
 		runStatus()
 	case "history":
@@ -106,8 +205,11 @@ func printUsage() {
 	fmt.Println("Usage: airspace <command> [options]")
 	fmt.Println()
 	fmt.Println("Commands:")
-	fmt.Println("  download    Download FAA airspace data from ArcGIS APIs")
-	fmt.Println("  sync        Smart sync (only download if source changed)")
+	fmt.Println("  sync        Smart sync FAA data (only download if source changed)")
+	fmt.Println("  tile        Convert GeoJSON to PMTiles (requires tippecanoe)")
+	fmt.Println("  manifest    Generate manifest files with file sizes and metadata")
+	fmt.Println("  pipeline    Full pipeline: sync → tile (if changed) → manifest")
+	fmt.Println("  download    Download FAA airspace data (use sync instead)")
 	fmt.Println("  status      Show data file status and age")
 	fmt.Println("  history     Show sync history and change patterns")
 	fmt.Println()
@@ -120,11 +222,12 @@ func printUsage() {
 	fmt.Println("  obstacles   Obstacles (towers, buildings, etc.)")
 	fmt.Println()
 	fmt.Println("Examples:")
-	fmt.Println("  airspace download                       # Download all datasets")
-	fmt.Println("  airspace download -dataset uas          # Download only UAS Facility Map")
-	fmt.Println("  airspace download -dataset airports     # Download only Airports")
+	fmt.Println("  airspace pipeline                       # Full idempotent pipeline")
 	fmt.Println("  airspace sync                           # Sync only changed datasets")
 	fmt.Println("  airspace sync -force                    # Force re-download all")
+	fmt.Println("  airspace tile                           # Convert all GeoJSON to PMTiles")
+	fmt.Println("  airspace tile -dataset uas              # Convert single dataset")
+	fmt.Println("  airspace manifest                       # Generate manifest files")
 	fmt.Println("  airspace status                         # Show data status")
 }
 
@@ -134,7 +237,7 @@ func printUsage() {
 
 func runDownload() {
 	fs := flag.NewFlagSet("download", flag.ExitOnError)
-	outputDir := fs.String("output", "static/airspace", "Output directory for GeoJSON files")
+	outputDir := fs.String("output", DirGeoJSON, "Output directory for GeoJSON files")
 	datasetFlag := fs.String("dataset", "", "Specific dataset (uas, boundary, sua). Empty = all")
 	timeout := fs.Duration("timeout", 5*time.Minute, "HTTP request timeout")
 	fs.Parse(os.Args[1:])
@@ -168,7 +271,7 @@ func runDownload() {
 
 	for _, ds := range toDownload {
 		fmt.Printf("Downloading %s...\n", ds.Name)
-		outPath := filepath.Join(*outputDir, ds.Filename)
+		outPath := filepath.Join(*outputDir, ds.GeoJSON)
 
 		var err error
 		if ds.IsPaginated {
@@ -184,7 +287,7 @@ func runDownload() {
 
 		// Report file size
 		if info, err := os.Stat(outPath); err == nil {
-			fmt.Printf("  ✓ %s (%.1f MB)\n", ds.Filename, float64(info.Size())/(1024*1024))
+			fmt.Printf("  ✓ %s (%.1f MB)\n", ds.GeoJSON, float64(info.Size())/(1024*1024))
 		}
 	}
 
@@ -279,7 +382,7 @@ func downloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 
 func runStatus() {
 	fs := flag.NewFlagSet("status", flag.ExitOnError)
-	outputDir := fs.String("output", "static/airspace", "Data directory")
+	outputDir := fs.String("output", DirGeoJSON, "Data directory")
 	fs.Parse(os.Args[1:])
 
 	fmt.Println("Airspace Data Status")
@@ -290,7 +393,7 @@ func runStatus() {
 	found := 0
 	for _, key := range datasetOrder {
 		ds := datasets[key]
-		path := filepath.Join(*outputDir, ds.Filename)
+		path := filepath.Join(*outputDir, ds.GeoJSON)
 		info, err := os.Stat(path)
 		if err != nil {
 			fmt.Printf("  [%s] %s: NOT FOUND\n", key, ds.Name)
@@ -324,10 +427,10 @@ func formatAge(d time.Duration) string {
 
 func runHistory() {
 	fs := flag.NewFlagSet("history", flag.ExitOnError)
-	dataDir := fs.String("data-dir", "data/airspace", "Data directory")
+	dataDir := fs.String("data-dir", DirData, "Data directory")
 	fs.Parse(os.Args[1:])
 
-	historyFile := filepath.Join(*dataDir, "sync-history.json")
+	historyFile := filepath.Join(*dataDir, FileSyncHistory)
 	history := loadSyncHistory(historyFile)
 
 	fmt.Println("FAA Airspace Sync History")
@@ -435,16 +538,16 @@ func runSync() {
 	syncStart := time.Now()
 
 	fs := flag.NewFlagSet("sync", flag.ExitOnError)
-	outputDir := fs.String("output", "static/airspace", "Output directory for GeoJSON files")
-	dataDir := fs.String("data-dir", "data/airspace", "Data directory for ETags and history")
+	outputDir := fs.String("output", DirGeoJSON, "Output directory for GeoJSON files")
+	dataDir := fs.String("data-dir", DirData, "Data directory for ETags and history")
 	force := fs.Bool("force", false, "Force re-download even if unchanged")
 	timeout := fs.Duration("timeout", 5*time.Minute, "HTTP request timeout")
 	skipLarge := fs.Bool("skip-large", true, "Skip datasets >100MB (obstacles)")
 	fs.Parse(os.Args[1:])
 
-	etagFile := filepath.Join(*dataDir, "etags.json")
-	historyFile := filepath.Join(*dataDir, "sync-history.json")
-	resultFile := filepath.Join(*dataDir, "sync-result.json")
+	etagFile := filepath.Join(*dataDir, FileSyncETags)
+	historyFile := filepath.Join(*dataDir, FileSyncHistory)
+	resultFile := filepath.Join(*dataDir, FileSyncResult)
 
 	// Create directories
 	if err := os.MkdirAll(*outputDir, 0755); err != nil {
@@ -486,7 +589,7 @@ func runSync() {
 	for _, key := range datasetOrder {
 		dsStart := time.Now()
 		ds := datasets[key]
-		outPath := filepath.Join(*outputDir, ds.Filename)
+		outPath := filepath.Join(*outputDir, ds.GeoJSON)
 		dsResult := DatasetSync{}
 
 		// Check if we need to download
@@ -564,7 +667,7 @@ func runSync() {
 			totalBytes += sizeBytes
 			dsResult.SizeBytes = sizeBytes
 			dsResult.SizeMB = sizeMB
-			fmt.Printf("  ✓ %s (%.1f MB)\n", ds.Filename, sizeMB)
+			fmt.Printf("  ✓ %s (%.1f MB)\n", ds.GeoJSON, sizeMB)
 		}
 
 		dsResult.Status = "updated"
@@ -725,4 +828,525 @@ func saveETags(path string, store ETagStore) error {
 		return err
 	}
 	return os.WriteFile(path, data, 0644)
+}
+
+// ============================================================================
+// Tile Command - Convert GeoJSON to PMTiles using tippecanoe
+// ============================================================================
+
+func runTile() {
+	fs := flag.NewFlagSet("tile", flag.ExitOnError)
+	datasetFlag := fs.String("dataset", "", "Specific dataset to tile (empty = all)")
+	force := fs.Bool("force", false, "Force regenerate even if PMTiles is newer than GeoJSON")
+	fs.Parse(os.Args[1:])
+
+	// Check tippecanoe is installed
+	if _, err := exec.LookPath("tippecanoe"); err != nil {
+		fmt.Fprintln(os.Stderr, "Error: tippecanoe not found in PATH")
+		fmt.Fprintln(os.Stderr, "Install with: brew install tippecanoe (macOS) or apt install tippecanoe (Ubuntu)")
+		os.Exit(1)
+	}
+
+	// Create tiles directory
+	if err := os.MkdirAll(DirPMTiles, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating tiles dir: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Determine which datasets to tile
+	toTile := datasetOrder
+	if *datasetFlag != "" {
+		if _, ok := datasets[*datasetFlag]; !ok {
+			fmt.Fprintf(os.Stderr, "Unknown dataset: %s\n", *datasetFlag)
+			os.Exit(1)
+		}
+		toTile = []string{*datasetFlag}
+	}
+
+	fmt.Println("Converting GeoJSON to PMTiles")
+	fmt.Println("=============================")
+	fmt.Println()
+
+	tiled := 0
+	skipped := 0
+	for _, key := range toTile {
+		ds := datasets[key]
+		geoJSONPath := filepath.Join(DirGeoJSON, ds.GeoJSON)
+		pmTilesPath := filepath.Join(DirPMTiles, ds.PMTiles)
+
+		// Check if GeoJSON exists
+		geoJSONInfo, err := os.Stat(geoJSONPath)
+		if err != nil {
+			fmt.Printf("[%s] SKIP: GeoJSON not found (%s)\n", key, ds.GeoJSON)
+			skipped++
+			continue
+		}
+
+		// Check if PMTiles is newer than GeoJSON (skip if up-to-date)
+		if !*force {
+			if pmTilesInfo, err := os.Stat(pmTilesPath); err == nil {
+				if pmTilesInfo.ModTime().After(geoJSONInfo.ModTime()) {
+					fmt.Printf("[%s] unchanged (PMTiles newer than GeoJSON)\n", key)
+					skipped++
+					continue
+				}
+			}
+		}
+
+		// Run tippecanoe
+		fmt.Printf("[%s] Converting %s → %s\n", key, ds.GeoJSON, ds.PMTiles)
+		if err := runTippecanoe(key, geoJSONPath, pmTilesPath, ds.Layer); err != nil {
+			fmt.Fprintf(os.Stderr, "[%s] ERROR: %v\n", key, err)
+			continue
+		}
+
+		// Report size
+		if info, err := os.Stat(pmTilesPath); err == nil {
+			fmt.Printf("[%s] ✓ %.1f MB\n", key, float64(info.Size())/(1024*1024))
+		}
+		tiled++
+	}
+
+	fmt.Println()
+	fmt.Printf("Done: %d tiled, %d skipped\n", tiled, skipped)
+}
+
+func runTippecanoe(key, inputPath, outputPath, layer string) error {
+	config := tileConfigs[key]
+
+	args := []string{
+		"-o", outputPath,
+		"--layer=" + layer,
+		"--force",
+	}
+
+	// Zoom settings
+	if config.MinZoom >= 0 && config.MaxZoom >= 0 {
+		args = append(args, fmt.Sprintf("-Z%d", config.MinZoom))
+		args = append(args, fmt.Sprintf("-z%d", config.MaxZoom))
+	} else {
+		args = append(args, "-zg") // Auto-detect zoom
+	}
+
+	// Feature reduction
+	if config.ReduceRate > 0 {
+		args = append(args, fmt.Sprintf("-r%d", config.ReduceRate))
+	}
+	if config.DropDensest {
+		args = append(args, "--drop-densest-as-needed")
+	}
+	if config.NoFeatureLimit {
+		args = append(args, "--no-feature-limit")
+	}
+	if config.NoTileSizeLimit {
+		args = append(args, "--no-tile-size-limit")
+	}
+
+	args = append(args, inputPath)
+
+	cmd := exec.Command("tippecanoe", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// ============================================================================
+// Manifest Command - Generate manifest files
+// ============================================================================
+
+// ManifestGlobal is the top-level manifest structure
+type ManifestGlobal struct {
+	Version int                       `json:"version"`
+	Updated string                    `json:"updated"`
+	Regions map[string]ManifestRegion `json:"regions"`
+	Notes   map[string]string         `json:"notes,omitempty"`
+}
+
+type ManifestRegion struct {
+	Name          string   `json:"name"`
+	BBox          []float64 `json:"bbox"`
+	TilesPath     string   `json:"tiles_path"`
+	ManifestFile  string   `json:"manifest_file"`
+	DefaultLayers []string `json:"default_layers"`
+}
+
+// ManifestUSA is the USA regional manifest structure
+type ManifestUSA struct {
+	Region  string                    `json:"region"`
+	Name    string                    `json:"name"`
+	Version int                       `json:"version"`
+	Updated string                    `json:"updated"`
+	BBox    []float64                 `json:"bbox"`
+	Layers  map[string]ManifestLayer  `json:"layers"`
+	Source  ManifestSource            `json:"source"`
+}
+
+type ManifestLayer struct {
+	Name           string          `json:"name"`
+	File           string          `json:"file"`
+	PMTilesLayer   string          `json:"pmtiles_layer"`
+	GeomType       string          `json:"geom_type"`       // polygon, point, line
+	SizeMB         float64         `json:"size_mb"`
+	Features       int             `json:"features"`
+	ZoomRange      []int           `json:"zoom_range"`
+	DefaultVisible bool            `json:"default_visible"`
+	RenderRules    []RenderRule    `json:"render_rules"`    // Ordered paint rules
+	Legend         []LegendEntry   `json:"legend,omitempty"` // For UI display
+}
+
+// RenderRule defines how to style features (evaluated in order, first match wins)
+type RenderRule struct {
+	FilterProp  string  `json:"filter_prop,omitempty"`  // Property to filter on (e.g., "CLASS", "TYPE_CODE")
+	FilterValue string  `json:"filter_value,omitempty"` // Value to match (empty = default/fallback)
+	Fill        string  `json:"fill"`
+	Stroke      string  `json:"stroke,omitempty"`
+	Opacity     float64 `json:"opacity,omitempty"`
+	Width       float64 `json:"width,omitempty"`
+	Radius      float64 `json:"radius,omitempty"` // For points
+}
+
+// LegendEntry for UI layer toggles
+type LegendEntry struct {
+	Label string `json:"label"`
+	Color string `json:"color"`
+}
+
+type ManifestSource struct {
+	Authority   string            `json:"authority"`
+	URLs        map[string]string `json:"urls"`
+	UpdateCycle string            `json:"update_cycle"`
+}
+
+func runManifest() {
+	fs := flag.NewFlagSet("manifest", flag.ExitOnError)
+	fs.Parse(os.Args[1:])
+
+	timestamp := time.Now().UTC().Format(time.RFC3339)
+
+	fmt.Println("Generating Airspace Manifests")
+	fmt.Println("=============================")
+	fmt.Printf("Timestamp: %s\n\n", timestamp)
+
+	// Collect metrics for each layer
+	layerMetrics := make(map[string]struct {
+		SizeMB   float64
+		Features int
+	})
+
+	for _, key := range datasetOrder {
+		ds := datasets[key]
+		pmTilesPath := filepath.Join(DirPMTiles, ds.PMTiles)
+		geoJSONPath := filepath.Join(DirGeoJSON, ds.GeoJSON)
+
+		var sizeMB float64
+		var features int
+
+		// Get PMTiles size
+		if info, err := os.Stat(pmTilesPath); err == nil {
+			sizeMB = float64(info.Size()) / (1024 * 1024)
+		}
+
+		// Count features in GeoJSON (approximate)
+		features = countGeoJSONFeatures(geoJSONPath)
+
+		layerMetrics[key] = struct {
+			SizeMB   float64
+			Features int
+		}{sizeMB, features}
+
+		fmt.Printf("  [%s] %.1f MB, %d features\n", key, sizeMB, features)
+	}
+
+	// Create global manifest
+	globalManifest := ManifestGlobal{
+		Version: 1,
+		Updated: timestamp,
+		Regions: map[string]ManifestRegion{
+			"usa": {
+				Name:          "United States",
+				BBox:          []float64{-125, 24, -66, 50},
+				TilesPath:     "tiles",
+				ManifestFile:  FileUSAManifest,
+				DefaultLayers: []string{"boundary", "sua"},
+			},
+		},
+		Notes: map[string]string{
+			"bbox_format":    "[west, south, east, north]",
+			"tiles_path":     "Relative to /airspace/ in R2",
+			"future_regions": "europe, canada, australia, japan",
+		},
+	}
+
+	// Create USA manifest with all layers
+	usaManifest := ManifestUSA{
+		Region:  "usa",
+		Name:    "United States",
+		Version: 1,
+		Updated: timestamp,
+		BBox:    []float64{-125, 24, -66, 50},
+		Layers:  make(map[string]ManifestLayer),
+		Source: ManifestSource{
+			Authority:   "FAA",
+			URLs:        map[string]string{"adds": "https://adds-faa.opendata.arcgis.com", "udds": "https://udds-faa.opendata.arcgis.com"},
+			UpdateCycle: "28-day AIRAC",
+		},
+	}
+
+	// Add layer definitions with full render rules
+	usaManifest.Layers["boundary"] = ManifestLayer{
+		Name:           "Airspace Boundary",
+		File:           PMTilesBoundary,
+		PMTilesLayer:   LayerBoundary,
+		GeomType:       "polygon",
+		SizeMB:         layerMetrics["boundary"].SizeMB,
+		Features:       layerMetrics["boundary"].Features,
+		ZoomRange:      []int{4, 14},
+		DefaultVisible: true,
+		RenderRules: []RenderRule{
+			{FilterProp: "CLASS", FilterValue: "A", Fill: "#0066cc", Stroke: "#0066cc", Opacity: 0.15, Width: 1},
+			{FilterProp: "CLASS", FilterValue: "C", Fill: "#cc00cc", Stroke: "#cc00cc", Opacity: 0.2, Width: 2},
+			{FilterProp: "CLASS", FilterValue: "D", Fill: "#0099cc", Stroke: "#0099cc", Opacity: 0.15, Width: 2},
+			{FilterProp: "CLASS", FilterValue: "E", Fill: "#00cc99", Stroke: "#00cc99", Opacity: 0.1, Width: 1},
+			{FilterProp: "CLASS", FilterValue: "G", Fill: "#999999", Stroke: "#999999", Opacity: 0.05, Width: 1},
+			{Fill: "#666666", Stroke: "#666666", Opacity: 0.1, Width: 1}, // fallback
+		},
+		Legend: []LegendEntry{
+			{Label: "Class A", Color: "#0066cc"},
+			{Label: "Class C", Color: "#cc00cc"},
+			{Label: "Class D", Color: "#0099cc"},
+			{Label: "Class E", Color: "#00cc99"},
+		},
+	}
+
+	usaManifest.Layers["sua"] = ManifestLayer{
+		Name:           "Special Use Airspace",
+		File:           PMTilesSUA,
+		PMTilesLayer:   LayerSUA,
+		GeomType:       "polygon",
+		SizeMB:         layerMetrics["sua"].SizeMB,
+		Features:       layerMetrics["sua"].Features,
+		ZoomRange:      []int{4, 14},
+		DefaultVisible: true,
+		RenderRules: []RenderRule{
+			{FilterProp: "TYPE_CODE", FilterValue: "R", Fill: "#cc0000", Stroke: "#cc0000", Opacity: 0.3, Width: 2},
+			{FilterProp: "TYPE_CODE", FilterValue: "P", Fill: "#ff0000", Stroke: "#ff0000", Opacity: 0.4, Width: 2},
+			{FilterProp: "TYPE_CODE", FilterValue: "MOA", Fill: "#ff9900", Stroke: "#ff9900", Opacity: 0.2, Width: 1},
+			{FilterProp: "TYPE_CODE", FilterValue: "A", Fill: "#ffcc00", Stroke: "#ffcc00", Opacity: 0.2, Width: 1},
+			{FilterProp: "TYPE_CODE", FilterValue: "W", Fill: "#996600", Stroke: "#996600", Opacity: 0.15, Width: 1},
+			{Fill: "#666666", Stroke: "#666666", Opacity: 0.1, Width: 1}, // fallback
+		},
+		Legend: []LegendEntry{
+			{Label: "Restricted", Color: "#cc0000"},
+			{Label: "Prohibited", Color: "#ff0000"},
+			{Label: "MOA", Color: "#ff9900"},
+			{Label: "Alert", Color: "#ffcc00"},
+			{Label: "Warning", Color: "#996600"},
+		},
+	}
+
+	usaManifest.Layers["laanc"] = ManifestLayer{
+		Name:           "LAANC/UAS Facility Map",
+		File:           PMTilesUAS,
+		PMTilesLayer:   LayerUAS,
+		GeomType:       "polygon",
+		SizeMB:         layerMetrics["uas"].SizeMB,
+		Features:       layerMetrics["uas"].Features,
+		ZoomRange:      []int{6, 14},
+		DefaultVisible: false,
+		RenderRules: []RenderRule{
+			{Fill: "#ffff00", Stroke: "#cc9900", Opacity: 0.5, Width: 1},
+		},
+		Legend: []LegendEntry{
+			{Label: "LAANC Grid", Color: "#ffff00"},
+		},
+	}
+
+	usaManifest.Layers["airports"] = ManifestLayer{
+		Name:           "Airports",
+		File:           PMTilesAirports,
+		PMTilesLayer:   LayerAirports,
+		GeomType:       "point",
+		SizeMB:         layerMetrics["airports"].SizeMB,
+		Features:       layerMetrics["airports"].Features,
+		ZoomRange:      []int{0, 10},
+		DefaultVisible: false,
+		RenderRules: []RenderRule{
+			{Fill: "#00ff00", Stroke: "#006600", Width: 1, Radius: 5},
+		},
+		Legend: []LegendEntry{
+			{Label: "Airport", Color: "#00ff00"},
+		},
+	}
+
+	usaManifest.Layers["navaids"] = ManifestLayer{
+		Name:           "Navigation Aids",
+		File:           PMTilesNavaids,
+		PMTilesLayer:   LayerNavaids,
+		GeomType:       "point",
+		SizeMB:         layerMetrics["navaids"].SizeMB,
+		Features:       layerMetrics["navaids"].Features,
+		ZoomRange:      []int{0, 10},
+		DefaultVisible: false,
+		RenderRules: []RenderRule{
+			{Fill: "#ff00ff", Stroke: "#660066", Width: 1, Radius: 4},
+		},
+		Legend: []LegendEntry{
+			{Label: "VOR/NDB", Color: "#ff00ff"},
+		},
+	}
+
+	// Ensure data directory exists
+	if err := os.MkdirAll(DirData, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating data dir: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Write manifests
+	globalPath := filepath.Join(DirData, FileManifest)
+	usaPath := filepath.Join(DirData, FileUSAManifest)
+
+	if err := writeJSON(globalPath, globalManifest); err != nil {
+		fmt.Fprintf(os.Stderr, "Error writing global manifest: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("\n✓ %s\n", globalPath)
+
+	if err := writeJSON(usaPath, usaManifest); err != nil {
+		fmt.Fprintf(os.Stderr, "Error writing USA manifest: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("✓ %s\n", usaPath)
+
+	// Copy to static directory for local dev
+	staticGlobal := filepath.Join(DirGeoJSON, FileManifest)
+	staticUSA := filepath.Join(DirGeoJSON, FileUSAManifest)
+
+	if err := copyFile(globalPath, staticGlobal); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: could not copy to static: %v\n", err)
+	} else {
+		fmt.Printf("✓ %s (copy)\n", staticGlobal)
+	}
+
+	if err := copyFile(usaPath, staticUSA); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: could not copy to static: %v\n", err)
+	} else {
+		fmt.Printf("✓ %s (copy)\n", staticUSA)
+	}
+
+	fmt.Println("\nManifests updated.")
+}
+
+func countGeoJSONFeatures(path string) int {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0
+	}
+	// Count '"type":"Feature"' occurrences (same as shell grep)
+	return strings.Count(string(data), `"type":"Feature"`)
+}
+
+func writeJSON(path string, v interface{}) error {
+	data, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
+}
+
+func copyFile(src, dst string) error {
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(dst, data, 0644)
+}
+
+// ============================================================================
+// Pipeline Command - Full idempotent pipeline: sync → tile → manifest
+// ============================================================================
+
+func runPipeline() {
+	fs := flag.NewFlagSet("pipeline", flag.ExitOnError)
+	force := fs.Bool("force", false, "Force all steps even if no changes")
+	fs.Parse(os.Args[1:])
+
+	fmt.Println("╔════════════════════════════════════════╗")
+	fmt.Println("║   FAA Airspace Pipeline (Idempotent)   ║")
+	fmt.Println("╚════════════════════════════════════════╝")
+	fmt.Println()
+
+	// Step 1: Sync
+	fmt.Println("▶ Step 1: Sync FAA Data")
+	fmt.Println("------------------------")
+	runSyncInternal(*force)
+
+	// Check if changes were detected
+	resultPath := filepath.Join(DirData, FileSyncResult)
+	result := loadSyncResult(resultPath)
+
+	if !result.HasChanges && !*force {
+		fmt.Println()
+		fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+		fmt.Println("✓ No changes detected - pipeline complete (idempotent)")
+		fmt.Println("  Skipped: tile generation, manifest update")
+		fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+		return
+	}
+
+	fmt.Println()
+	fmt.Printf("▶ Step 2: Generate PMTiles (%d datasets changed)\n", result.Updated)
+	fmt.Println("------------------------------------------------")
+	runTileInternal(false) // Don't force - rely on file timestamps
+
+	fmt.Println()
+	fmt.Println("▶ Step 3: Update Manifests")
+	fmt.Println("---------------------------")
+	runManifestInternal()
+
+	fmt.Println()
+	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	fmt.Println("✓ Pipeline complete")
+	fmt.Println("  Next: Run 'task r2:airspace:upload' to push to R2")
+	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+}
+
+func loadSyncResult(path string) SyncResult {
+	var result SyncResult
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return result
+	}
+	json.Unmarshal(data, &result)
+	return result
+}
+
+// Internal versions that don't parse args (for pipeline use)
+func runSyncInternal(force bool) {
+	// Save current args and restore after
+	oldArgs := os.Args
+	if force {
+		os.Args = []string{"airspace", "-force"}
+	} else {
+		os.Args = []string{"airspace"}
+	}
+	runSync()
+	os.Args = oldArgs
+}
+
+func runTileInternal(force bool) {
+	oldArgs := os.Args
+	if force {
+		os.Args = []string{"airspace", "-force"}
+	} else {
+		os.Args = []string{"airspace"}
+	}
+	runTile()
+	os.Args = oldArgs
+}
+
+func runManifestInternal() {
+	oldArgs := os.Args
+	os.Args = []string{"airspace"}
+	runManifest()
+	os.Args = oldArgs
 }

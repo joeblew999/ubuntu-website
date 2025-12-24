@@ -1,18 +1,26 @@
 {
   "version": 1,
-  "updated": "2025-12-24T07:03:55Z",
+  "updated": "2025-12-24T07:56:51Z",
   "regions": {
     "usa": {
       "name": "United States",
-      "bbox": [-125, 24, -66, 50],
+      "bbox": [
+        -125,
+        24,
+        -66,
+        50
+      ],
       "tiles_path": "tiles",
       "manifest_file": "usa-manifest.json",
-      "default_layers": ["boundary", "sua"]
+      "default_layers": [
+        "boundary",
+        "sua"
+      ]
     }
   },
   "notes": {
     "bbox_format": "[west, south, east, north]",
-    "tiles_path": "Relative to /airspace/ in R2",
-    "future_regions": ["europe", "canada", "australia", "japan"]
+    "future_regions": "europe, canada, australia, japan",
+    "tiles_path": "Relative to /airspace/ in R2"
   }
 }

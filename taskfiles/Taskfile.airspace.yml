@@ -1,533 +1,81 @@
-# Airspace Demo Tasks
+# Airspace Pipeline - FAA data sync and tile generation
 #
-# Interactive map showing FAA airspace data for BVLOS development.
-# Serves as demo/proof-of-capability for data provider applications.
+# All logic is in Go: cmd/airspace/main.go
+# All file paths are constants in the Go code.
 #
 # Usage:
-#   task airspace:open      - Open demo in browser (via Hugo dev server)
-#   task airspace:sync      - Smart sync (only downloads changed data)
-#   task airspace:tile      - Convert GeoJSON to PMTiles (requires tippecanoe)
-#   task airspace:install   - Install tippecanoe and go-pmtiles
-#
-# The demo is a Hugo page at /fleet/airspace-demo/ - run `task dev` first.
-# Data URL (R2) is configured in config/_default/params.toml
-#
-# Configuration:
-#   Single source of truth: data/airspace/datasets.json
-#   Filenames and layer names here MUST match that file.
-#   See also: cmd/airspace/main.go, layouts/fleet/airspace-demo.html
+#   task airspace:pipeline   - Full idempotent pipeline (sync → tile → manifest)
+#   task airspace:status     - Show current data status
 
 version: '3'
 
-vars:
-  AIRSPACE_DATA_DIR: static/airspace
-  PMTILES_DIR: static/airspace/tiles
-
 tasks:
-  # ===========================================================================
-  # Demo Access
-  # ===========================================================================
-
-  open:
-    desc: Open airspace demo in browser (requires Hugo dev server)
+  # Primary commands - everything else is in Go
+  pipeline:
+    desc: Full idempotent pipeline (sync → tile → manifest)
     cmds:
-      - open http://localhost:1313/fleet/airspace-demo/
+      - go run ./cmd/airspace pipeline
 
-  # ===========================================================================
-  # Data Management
-  # ===========================================================================
+  pipeline:force:
+    desc: Force full pipeline even if no changes
+    cmds:
+      - go run ./cmd/airspace pipeline -force
 
+  pipeline:upload:
+    desc: Pipeline + R2 upload (idempotent)
+    cmds:
+      - go run ./cmd/airspace pipeline
+      - |
+        if [ -f "data/airspace/sync_result.json" ]; then
+          HAS_CHANGES=$(jq -r '.has_changes' data/airspace/sync_result.json)
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "Uploading to R2..."
+            task r2:airspace:upload
+          else
+            echo "No changes - skipping R2 upload"
+          fi
+        fi
+
+  # Individual commands (for debugging/manual use)
   sync:
-    desc: Smart sync FAA data (only downloads if changed)
+    desc: Sync FAA data (ETag-based change detection)
     cmds:
-      - go run ./cmd/airspace sync -output {{.AIRSPACE_DATA_DIR}}
+      - go run ./cmd/airspace sync
 
-  sync:force:
-    desc: Force re-download all FAA data
+  tile:
+    desc: Convert GeoJSON to PMTiles (skips unchanged)
     cmds:
-      - go run ./cmd/airspace sync -output {{.AIRSPACE_DATA_DIR}} -force
+      - go run ./cmd/airspace tile
 
-  download:
-    desc: Download/refresh FAA airspace data (use sync instead)
+  manifest:
+    desc: Generate manifest files
     cmds:
-      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}}
-
-  download:uas:
-    desc: Download only UAS Facility Map (LAANC)
-    cmds:
-      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset uas
-
-  download:boundary:
-    desc: Download only Airspace Boundary
-    cmds:
-      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset boundary
-
-  download:sua:
-    desc: Download only Special Use Airspace
-    cmds:
-      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset sua
-
-  download:airports:
-    desc: Download only Airports
-    cmds:
-      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset airports
-
-  download:navaids:
-    desc: Download only Navigation Aids
-    cmds:
-      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset navaids
-
-  download:obstacles:
-    desc: Download only Obstacles
-    cmds:
-      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset obstacles
+      - go run ./cmd/airspace manifest
 
   status:
-    desc: Show airspace data status
+    desc: Show data file status
     cmds:
-      - go run ./cmd/airspace status -output {{.AIRSPACE_DATA_DIR}}
+      - go run ./cmd/airspace status
 
-  # ===========================================================================
-  # Tool Installation (OS-aware)
-  # ===========================================================================
+  history:
+    desc: Show sync history (for cron tuning)
+    cmds:
+      - go run ./cmd/airspace history
 
+  # Tool installation
   install:
-    desc: Install tippecanoe and go-pmtiles (OS-aware)
-    cmds:
-      - task: install:tippecanoe
-      - task: install:pmtiles
-
-  install:tippecanoe:
-    desc: Install tippecanoe (GeoJSON to vector tiles)
+    desc: Install tippecanoe
     status:
       - which tippecanoe
     cmds:
       - |
-        echo "Installing tippecanoe..."
-        case "{{OS}}" in
-          darwin)
-            brew install tippecanoe
-            ;;
-          linux)
-            # Ubuntu/Debian
-            if command -v apt-get &> /dev/null; then
-              sudo apt-get update && sudo apt-get install -y tippecanoe
-            # Fedora/RHEL
-            elif command -v dnf &> /dev/null; then
-              sudo dnf install -y tippecanoe
-            else
-              echo "Building from source..."
-              cd /tmp
-              git clone https://github.com/felt/tippecanoe.git
-              cd tippecanoe
-              make -j
-              sudo make install
-            fi
-            ;;
-          *)
-            echo "Unsupported OS: {{OS}}"
-            echo "Install manually from: https://github.com/felt/tippecanoe"
-            exit 1
-            ;;
+        case "$(uname)" in
+          Darwin) brew install tippecanoe ;;
+          Linux) sudo apt-get update && sudo apt-get install -y tippecanoe ;;
         esac
-      - tippecanoe --version
 
-  install:pmtiles:
-    desc: Install go-pmtiles CLI
-    status:
-      - which go-pmtiles
+  # Demo
+  open:
+    desc: Open airspace demo in browser
     cmds:
-      - go install github.com/protomaps/go-pmtiles@latest
-      - go-pmtiles version
-
-  # ===========================================================================
-  # Vector Tile Generation
-  # ===========================================================================
-
-  tile:
-    desc: Convert all GeoJSON to PMTiles (individual files)
-    deps: [install:tippecanoe]
-    cmds:
-      - mkdir -p {{.PMTILES_DIR}}
-      - task: tile:boundary
-      - task: tile:sua
-      - task: tile:airports
-      - task: tile:navaids
-      - task: tile:uas
-      - echo "Done. PMTiles at {{.PMTILES_DIR}}/"
-
-  tile:combined:
-    desc: Create single combined PMTiles with all layers
-    deps: [install:tippecanoe]
-    cmds:
-      - mkdir -p {{.PMTILES_DIR}}
-      - |
-        echo "Creating combined airspace PMTiles..."
-        tippecanoe -zg -o {{.PMTILES_DIR}}/faa_airspace_combined.pmtiles \
-          --force \
-          --named-layer=boundary:{{.AIRSPACE_DATA_DIR}}/faa_airspace_boundary.geojson \
-          --named-layer=sua:{{.AIRSPACE_DATA_DIR}}/faa_special_use_airspace.geojson \
-          --named-layer=airports:{{.AIRSPACE_DATA_DIR}}/faa_airports.geojson \
-          --named-layer=navaids:{{.AIRSPACE_DATA_DIR}}/faa_navaids.geojson \
-          --drop-densest-as-needed
-      - |
-        echo ""
-        echo "Combined PMTiles created:"
-        ls -lh {{.PMTILES_DIR}}/faa_airspace_combined.pmtiles
-        echo ""
-        echo "Layers included: boundary, sua, airports, navaids"
-
-  tile:boundary:
-    desc: Convert airspace boundary to PMTiles
-    cmds:
-      - |
-        tippecanoe -zg -o {{.PMTILES_DIR}}/faa_airspace_boundary.pmtiles \
-          --layer=boundary \
-          --force \
-          {{.AIRSPACE_DATA_DIR}}/faa_airspace_boundary.geojson
-    status:
-      - test {{.PMTILES_DIR}}/faa_airspace_boundary.pmtiles -nt {{.AIRSPACE_DATA_DIR}}/faa_airspace_boundary.geojson
-
-  tile:sua:
-    desc: Convert special use airspace to PMTiles
-    cmds:
-      - |
-        tippecanoe -zg -o {{.PMTILES_DIR}}/faa_special_use_airspace.pmtiles \
-          --layer=sua \
-          --force \
-          {{.AIRSPACE_DATA_DIR}}/faa_special_use_airspace.geojson
-    status:
-      - test {{.PMTILES_DIR}}/faa_special_use_airspace.pmtiles -nt {{.AIRSPACE_DATA_DIR}}/faa_special_use_airspace.geojson
-
-  tile:airports:
-    desc: Convert airports to PMTiles
-    cmds:
-      - |
-        tippecanoe -Z0 -z10 -o {{.PMTILES_DIR}}/faa_airports.pmtiles \
-          --layer=airports \
-          --force \
-          --no-feature-limit \
-          --no-tile-size-limit \
-          -r1 \
-          {{.AIRSPACE_DATA_DIR}}/faa_airports.geojson
-    status:
-      - test {{.PMTILES_DIR}}/faa_airports.pmtiles -nt {{.AIRSPACE_DATA_DIR}}/faa_airports.geojson
-
-  tile:navaids:
-    desc: Convert navaids to PMTiles
-    cmds:
-      - |
-        tippecanoe -Z0 -z10 -o {{.PMTILES_DIR}}/faa_navaids.pmtiles \
-          --layer=navaids \
-          --force \
-          --no-feature-limit \
-          --no-tile-size-limit \
-          -r1 \
-          {{.AIRSPACE_DATA_DIR}}/faa_navaids.geojson
-    status:
-      - test {{.PMTILES_DIR}}/faa_navaids.pmtiles -nt {{.AIRSPACE_DATA_DIR}}/faa_navaids.geojson
-
-  tile:uas:
-    desc: Convert UAS Facility Map (LAANC) to PMTiles
-    cmds:
-      - |
-        tippecanoe -Z0 -z10 -r1 -o {{.PMTILES_DIR}}/faa_uas_facility_map.pmtiles \
-          --layer=uas \
-          --force \
-          --no-feature-limit \
-          --no-tile-size-limit \
-          {{.AIRSPACE_DATA_DIR}}/faa_uas_facility_map.geojson
-    status:
-      - test {{.PMTILES_DIR}}/faa_uas_facility_map.pmtiles -nt {{.AIRSPACE_DATA_DIR}}/faa_uas_facility_map.geojson
-
-  tile:obstacles:
-    desc: Convert obstacles to PMTiles (large file - 575MB)
-    cmds:
-      - |
-        echo "Converting obstacles (this may take a while)..."
-        tippecanoe -zg -o {{.PMTILES_DIR}}/faa_obstacles.pmtiles \
-          --layer=obstacles \
-          --force \
-          --drop-densest-as-needed \
-          {{.AIRSPACE_DATA_DIR}}/faa_obstacles.geojson
-    status:
-      - test {{.PMTILES_DIR}}/faa_obstacles.pmtiles -nt {{.AIRSPACE_DATA_DIR}}/faa_obstacles.geojson
-
-  tile:status:
-    desc: Show PMTiles file status
-    cmds:
-      - |
-        echo "PMTiles Status"
-        echo "=============="
-        if [ -d "{{.PMTILES_DIR}}" ]; then
-          ls -lh {{.PMTILES_DIR}}/*.pmtiles 2>/dev/null || echo "No PMTiles files"
-        else
-          echo "No tiles directory. Run: task airspace:tile"
-        fi
-
-  # ===========================================================================
-  # Manifest Generation (auto-updates timestamps and file sizes)
-  # ===========================================================================
-
-  manifest:update:
-    desc: Update manifest files with current timestamps and file sizes
-    cmds:
-      - |
-        echo "Updating airspace manifests..."
-        TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-        echo "Timestamp: $TIMESTAMP"
-
-        # Get PMTiles file sizes (in MB)
-        get_size_mb() {
-          if [ -f "$1" ]; then
-            size=$(stat -f%z "$1" 2>/dev/null || stat -c%s "$1" 2>/dev/null)
-            echo "scale=1; $size / 1048576" | bc
-          else
-            echo "0"
-          fi
-        }
-
-        # Get feature count from GeoJSON (approximate)
-        get_features() {
-          if [ -f "$1" ]; then
-            grep -o '"type":"Feature"' "$1" 2>/dev/null | wc -l | tr -d ' '
-          else
-            echo "0"
-          fi
-        }
-
-        # Collect sizes
-        BOUNDARY_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_airspace_boundary.pmtiles")
-        SUA_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_special_use_airspace.pmtiles")
-        LAANC_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_uas_facility_map.pmtiles")
-        AIRPORTS_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_airports.pmtiles")
-        NAVAIDS_MB=$(get_size_mb "{{.PMTILES_DIR}}/faa_navaids.pmtiles")
-
-        # Collect feature counts from GeoJSON
-        BOUNDARY_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_airspace_boundary.geojson")
-        SUA_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_special_use_airspace.geojson")
-        LAANC_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_uas_facility_map.geojson")
-        AIRPORTS_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_airports.geojson")
-        NAVAIDS_FEATURES=$(get_features "{{.AIRSPACE_DATA_DIR}}/faa_navaids.geojson")
-
-        echo "File sizes (MB): boundary=$BOUNDARY_MB, sua=$SUA_MB, laanc=$LAANC_MB, airports=$AIRPORTS_MB, navaids=$NAVAIDS_MB"
-        echo "Feature counts: boundary=$BOUNDARY_FEATURES, sua=$SUA_FEATURES, laanc=$LAANC_FEATURES, airports=$AIRPORTS_FEATURES, navaids=$NAVAIDS_FEATURES"
-
-        # Update global manifest
-        cat > data/airspace/manifest.json << MANIFEST_EOF
-        {
-          "version": 1,
-          "updated": "$TIMESTAMP",
-          "regions": {
-            "usa": {
-              "name": "United States",
-              "bbox": [-125, 24, -66, 50],
-              "tiles_path": "tiles",
-              "manifest_file": "usa-manifest.json",
-              "default_layers": ["boundary", "sua"]
-            }
-          },
-          "notes": {
-            "bbox_format": "[west, south, east, north]",
-            "tiles_path": "Relative to /airspace/ in R2",
-            "future_regions": ["europe", "canada", "australia", "japan"]
-          }
-        }
-        MANIFEST_EOF
-
-        # Update USA regional manifest
-        cat > data/airspace/usa-manifest.json << USA_MANIFEST_EOF
-        {
-          "region": "usa",
-          "name": "United States",
-          "version": 1,
-          "updated": "$TIMESTAMP",
-          "bbox": [-125, 24, -66, 50],
-          "layers": {
-            "boundary": {
-              "name": "Airspace Boundary",
-              "file": "faa_airspace_boundary.pmtiles",
-              "pmtiles_layer": "boundary",
-              "size_mb": $BOUNDARY_MB,
-              "features": $BOUNDARY_FEATURES,
-              "zoom_range": [4, 14],
-              "default_visible": true,
-              "style": {
-                "Class_B": { "fill": "#0066cc", "opacity": 0.3 },
-                "Class_C": { "fill": "#cc00cc", "opacity": 0.3 },
-                "Class_D": { "fill": "#0099cc", "opacity": 0.3 },
-                "Class_E": { "fill": "#00cc99", "opacity": 0.3 }
-              }
-            },
-            "sua": {
-              "name": "Special Use Airspace",
-              "file": "faa_special_use_airspace.pmtiles",
-              "pmtiles_layer": "sua",
-              "size_mb": $SUA_MB,
-              "features": $SUA_FEATURES,
-              "zoom_range": [4, 14],
-              "default_visible": true,
-              "style": {
-                "R": { "fill": "#cc0000", "opacity": 0.3 },
-                "MOA": { "fill": "#ff9900", "opacity": 0.3 }
-              }
-            },
-            "laanc": {
-              "name": "LAANC/UAS Facility Map",
-              "file": "faa_uas_facility_map.pmtiles",
-              "pmtiles_layer": "uas",
-              "size_mb": $LAANC_MB,
-              "features": $LAANC_FEATURES,
-              "zoom_range": [6, 14],
-              "default_visible": false,
-              "style": {
-                "default": { "fill": "#ffff00", "opacity": 0.5, "stroke": "#cc9900" }
-              }
-            },
-            "airports": {
-              "name": "Airports",
-              "file": "faa_airports.pmtiles",
-              "pmtiles_layer": "airports",
-              "size_mb": $AIRPORTS_MB,
-              "features": $AIRPORTS_FEATURES,
-              "zoom_range": [0, 10],
-              "default_visible": false,
-              "style": {
-                "default": { "fill": "#00ff00", "stroke": "#006600", "radius": 5 }
-              }
-            },
-            "navaids": {
-              "name": "Navigation Aids",
-              "file": "faa_navaids.pmtiles",
-              "pmtiles_layer": "navaids",
-              "size_mb": $NAVAIDS_MB,
-              "features": $NAVAIDS_FEATURES,
-              "zoom_range": [0, 10],
-              "default_visible": false,
-              "style": {
-                "default": { "fill": "#ff00ff", "stroke": "#660066", "radius": 4 }
-              }
-            }
-          },
-          "source": {
-            "authority": "FAA",
-            "urls": {
-              "adds": "https://adds-faa.opendata.arcgis.com",
-              "udds": "https://udds-faa.opendata.arcgis.com"
-            },
-            "update_cycle": "28-day AIRAC"
-          }
-        }
-        USA_MANIFEST_EOF
-
-        # Copy to static for local dev
-        cp data/airspace/manifest.json static/airspace/manifest.json
-        cp data/airspace/usa-manifest.json static/airspace/usa-manifest.json
-
-        echo "Manifests updated:"
-        echo "  - data/airspace/manifest.json"
-        echo "  - data/airspace/usa-manifest.json"
-        echo "  - static/airspace/manifest.json"
-        echo "  - static/airspace/usa-manifest.json"
-
-  manifest:upload:
-    desc: Upload manifests to R2
-    cmds:
-      - task: manifest:update
-      - |
-        echo "Uploading manifests to R2..."
-        source .env 2>/dev/null || true
-        {{.HOME}}/.bun/bin/wrangler r2 object put ubuntu-website-assets/airspace/manifest.json --file data/airspace/manifest.json --remote
-        {{.HOME}}/.bun/bin/wrangler r2 object put ubuntu-website-assets/airspace/usa-manifest.json --file data/airspace/usa-manifest.json --remote
-        echo "Manifests uploaded to R2"
-
-  # ===========================================================================
-  # Full Pipeline (sync + tile + manifest + upload) - IDEMPOTENT
-  # ===========================================================================
-  # Only runs downstream steps if sync detected changes.
-  # This ensures re-running the pipeline produces no changes if FAA data is unchanged.
-
-  pipeline:
-    desc: Full pipeline - sync data, convert to PMTiles, update manifests (idempotent)
-    cmds:
-      - task: sync
-      - |
-        # Check sync-result.json for changes (written by Go sync command)
-        if [ -f "data/airspace/sync-result.json" ]; then
-          HAS_CHANGES=$(cat data/airspace/sync-result.json | jq -r '.has_changes')
-          DURATION=$(cat data/airspace/sync-result.json | jq -r '.duration')
-          if [ "$HAS_CHANGES" = "true" ]; then
-            echo "Changes detected (sync took $DURATION) - running tile and manifest update..."
-            task airspace:tile
-            task airspace:manifest:update
-            echo "Pipeline complete. Run 'task r2:airspace:upload' to push to R2"
-          else
-            echo "No changes detected (sync took $DURATION) - skipping tile/manifest steps (idempotent)"
-          fi
-        else
-          echo "No sync-result.json found - running full pipeline..."
-          task airspace:tile
-          task airspace:manifest:update
-        fi
-
-  pipeline:full:
-    desc: Full pipeline including R2 upload (idempotent)
-    cmds:
-      - task: sync
-      - |
-        # Check sync-result.json for changes (written by Go sync command)
-        if [ -f "data/airspace/sync-result.json" ]; then
-          HAS_CHANGES=$(cat data/airspace/sync-result.json | jq -r '.has_changes')
-          DURATION=$(cat data/airspace/sync-result.json | jq -r '.duration')
-          if [ "$HAS_CHANGES" = "true" ]; then
-            echo "Changes detected (sync took $DURATION) - running full upload pipeline..."
-            task airspace:tile
-            task airspace:manifest:upload
-            task r2:airspace:upload
-            echo "Pipeline complete - data uploaded to R2"
-          else
-            echo "No changes detected (sync took $DURATION) - nothing to upload (idempotent)"
-          fi
-        else
-          echo "No sync-result.json found - running full pipeline..."
-          task airspace:tile
-          task airspace:manifest:upload
-          task r2:airspace:upload
-        fi
-
-  history:
-    desc: Show sync history and change patterns (for cron tuning)
-    cmds:
-      - go run ./cmd/airspace history
-
-  # ===========================================================================
-  # Checks
-  # ===========================================================================
-
-  check:deps:
-    desc: Check airspace data and R2 config
-    cmds:
-      - |
-        echo "Checking airspace setup..."
-
-        # Check R2 config in params.toml
-        if grep -q "r2.public_url" config/_default/params.toml 2>/dev/null; then
-          echo "OK: R2 URL configured in params.toml"
-        else
-          echo "WARNING: R2 URL not found in params.toml"
-        fi
-
-        # Check Hugo layout
-        if [ -f "layouts/fleet/airspace-demo.html" ]; then
-          echo "OK: Hugo layout exists"
-        else
-          echo "ERROR: Missing layouts/fleet/airspace-demo.html"
-          exit 1
-        fi
-
-        # Check local data (for downloads)
-        if [ -d "{{.AIRSPACE_DATA_DIR}}" ]; then
-          echo "OK: Local data present at {{.AIRSPACE_DATA_DIR}}"
-        else
-          echo "INFO: No local data. Run: task airspace:download"
-        fi
+      - open http://localhost:1313/fleet/airspace-demo/
