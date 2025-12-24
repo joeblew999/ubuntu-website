@@ -541,6 +541,191 @@ Current workaround: Serve terrain and airspace as separate PMTiles files, load b
 
 ---
 
+## Phase 5: Global Regional Architecture
+
+**Goal:** Scale to worldwide airspace data (EU, Asia-Pacific, etc.) without massive single files.
+
+### The Problem at Scale
+
+| Region | Datasets | Est. Total Size |
+|--------|----------|-----------------|
+| USA (current) | 6 layers | ~700 MB GeoJSON |
+| Europe (EUROCONTROL) | Similar structure | ~500 MB |
+| Asia-Pacific | Varies by country | ~300 MB |
+| **Total** | | **~1.5 GB+** |
+
+A single PMTiles file would be too large. Need regional organization.
+
+### Hierarchical Regional Architecture
+
+```
+R2 Storage Layout:
+/airspace/
+├── manifest.json           <- Global index
+├── global/
+│   └── world_boundaries.pmtiles   <- Low-res boundaries (z0-z6)
+├── usa/
+│   ├── manifest.json       <- Regional index
+│   ├── airspace.pmtiles    <- Class B/C/D (z4-z14)
+│   ├── laanc.pmtiles       <- UAS facility map (z6-z14)
+│   ├── airports.pmtiles    <- All 19K airports
+│   └── obstacles.pmtiles   <- Towers, etc.
+├── europe/
+│   ├── manifest.json
+│   ├── airspace.pmtiles    <- EUROCONTROL data
+│   └── airports.pmtiles
+├── asia_pacific/
+│   ├── manifest.json
+│   ├── japan/
+│   │   └── airspace.pmtiles
+│   └── australia/
+│       └── airspace.pmtiles
+```
+
+### Global Manifest Schema
+
+```json
+{
+  "version": 1,
+  "updated": "2024-12-24T00:00:00Z",
+  "regions": {
+    "usa": {
+      "name": "United States",
+      "bbox": [-125, 24, -66, 50],
+      "manifest_url": "/airspace/usa/manifest.json",
+      "default_layers": ["airspace", "laanc"]
+    },
+    "europe": {
+      "name": "Europe",
+      "bbox": [-10, 35, 40, 72],
+      "manifest_url": "/airspace/europe/manifest.json",
+      "default_layers": ["airspace"]
+    }
+  }
+}
+```
+
+### Regional Manifest Schema
+
+```json
+{
+  "region": "usa",
+  "version": 1,
+  "updated": "2024-12-24T00:00:00Z",
+  "layers": {
+    "airspace": {
+      "name": "Airspace Boundary",
+      "file": "airspace.pmtiles",
+      "size_mb": 45,
+      "zoom_range": [4, 14],
+      "style": {
+        "Class_B": { "fill": "#0066ff", "opacity": 0.3 },
+        "Class_C": { "fill": "#9933ff", "opacity": 0.3 },
+        "Class_D": { "fill": "#0099ff", "opacity": 0.3 }
+      }
+    },
+    "laanc": {
+      "name": "LAANC/UAS Facility Map",
+      "file": "laanc.pmtiles",
+      "size_mb": 25,
+      "zoom_range": [6, 14],
+      "style": { "fill": "#ffff00", "opacity": 0.4 }
+    }
+  }
+}
+```
+
+### Smart Loading Strategy
+
+```javascript
+// 1. Load global manifest on page load
+const globalManifest = await fetch('/airspace/manifest.json');
+
+// 2. Determine visible region from viewport
+function getVisibleRegion(map) {
+    const bounds = map.getBounds();
+    for (const [key, region] of Object.entries(globalManifest.regions)) {
+        if (boundsIntersect(bounds, region.bbox)) {
+            return key;
+        }
+    }
+    return null;
+}
+
+// 3. Load regional manifest when user pans to region
+map.on('moveend', async () => {
+    const region = getVisibleRegion(map);
+    if (region && !loadedRegions.has(region)) {
+        const manifest = await fetch(globalManifest.regions[region].manifest_url);
+        await loadRegionLayers(manifest);
+        loadedRegions.add(region);
+    }
+});
+
+// 4. Unload regions that are no longer visible (memory management)
+function unloadDistantRegions() {
+    for (const region of loadedRegions) {
+        if (!isRegionVisible(region)) {
+            unloadRegionLayers(region);
+            loadedRegions.delete(region);
+        }
+    }
+}
+```
+
+### Level of Detail (LOD) Strategy
+
+| Zoom Level | Data Loaded | Use Case |
+|------------|-------------|----------|
+| z0-z3 | World boundaries only | Overview |
+| z4-z6 | Regional boundaries + Class B | Country view |
+| z7-z10 | + Class C/D + Major airports | State view |
+| z11-z14 | + LAANC grid + All airports | City view |
+| z15+ | + Obstacles + Detailed boundaries | Site planning |
+
+### Data Source Registry
+
+| Region | Authority | Data Format | Update Cycle |
+|--------|-----------|-------------|--------------|
+| USA | FAA | ArcGIS FeatureServer | 28-day AIRAC |
+| Europe | EUROCONTROL | AIM XML | 28-day AIRAC |
+| Canada | NAV CANADA | GeoJSON | 28-day AIRAC |
+| Australia | CASA | Shapefile | Varies |
+| Japan | JCAB | PDF (manual) | 28-day AIRAC |
+
+### Implementation Phases
+
+#### Phase 5A: USA Regional Cleanup (Current)
+- [x] Fix LAANC layer (full 378K features)
+- [ ] Organize USA files under `/airspace/usa/`
+- [ ] Create USA regional manifest
+- [ ] Update demo to use regional loading
+
+#### Phase 5B: Global Manifest System
+- [ ] Create global manifest schema
+- [ ] Add region detection to demo
+- [ ] Add lazy loading for regions
+- [ ] Add memory management for distant regions
+
+#### Phase 5C: Additional Regions
+- [ ] Add EUROCONTROL data pipeline
+- [ ] Add Canada (NAV CANADA)
+- [ ] Add Australia (CASA)
+- [ ] Add Japan (JCAB) - manual for now
+
+### Benefits of Regional Architecture
+
+| Benefit | Impact |
+|---------|--------|
+| **Smaller initial load** | Only load visible region (~50MB vs 1.5GB) |
+| **Incremental updates** | Update USA without touching Europe |
+| **Memory efficiency** | Unload distant regions |
+| **Parallel downloads** | Fetch multiple regions simultaneously |
+| **Offline support** | Pre-cache specific regions |
+| **Data sovereignty** | Keep EU data in EU R2 bucket (future) |
+
+---
+
 ## Decision Log
 
 | Date | Decision | Rationale |
@@ -551,3 +736,5 @@ Current workaround: Serve terrain and airspace as separate PMTiles files, load b
 | 2024-12-24 | Use Protomaps stack | bdon already solved this; don't reinvent |
 | 2024-12-24 | R2 for storage | Zero egress costs, HTTP Range support for PMTiles |
 | 2024-12-24 | Mapterhorn for 3D terrain | PMTiles format, R2 mirrors, regional extracts |
+| 2024-12-24 | Regional PMTiles architecture | Global data too large for single file; enables incremental loading |
+| 2024-12-24 | Hierarchical manifests | Region → Layer organization scales to worldwide data |
