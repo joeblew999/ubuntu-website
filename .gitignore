@@ -54,6 +54,7 @@ static/videos/cache/
 # Large static assets (served from R2 instead of Pages)
 # Run: task r2:airspace:upload to sync to R2
 static/airspace/*.geojson
+static/airspace/tiles/
 
 # Wrangler cache
 .wrangler/
