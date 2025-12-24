@@ -225,6 +225,49 @@ tasks:
       - open "{{.CF_R2_DASH_SETTINGS}}"
 
   # ===========================================================================
+  # CORS Configuration
+  # ===========================================================================
+
+  cors:set:
+    desc: Apply CORS rules to R2 bucket (required for browser access)
+    cmds:
+      - '{{.WRANGLER}} r2 bucket cors set {{.R2_BUCKET}} --file ./r2-cors.json --force'
+      - 'echo "CORS rules applied. Test with task r2:cors:test"'
+
+  cors:get:
+    desc: Show current CORS configuration
+    cmds:
+      - '{{.WRANGLER}} r2 bucket cors list {{.R2_BUCKET}}'
+
+  cors:delete:
+    desc: Remove CORS configuration
+    cmds:
+      - '{{.WRANGLER}} r2 bucket cors delete {{.R2_BUCKET}} --force'
+
+  cors:test:
+    desc: Test CORS headers from allowed origins
+    cmds:
+      - |
+        echo "Testing CORS headers..."
+        echo ""
+
+        test_cors() {
+          ORIGIN="$1"
+          echo "Origin: $ORIGIN"
+          HEADERS=$(curl -sI -H "Origin: $ORIGIN" "{{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson" 2>/dev/null | grep -i "access-control")
+          if [ -n "$HEADERS" ]; then
+            echo "  ✓ CORS enabled"
+            echo "$HEADERS" | sed 's/^/    /'
+          else
+            echo "  ✗ No CORS headers"
+          fi
+          echo ""
+        }
+
+        test_cors "https://www.ubuntusoftware.net"
+        test_cors "http://localhost:1313"
+
+  # ===========================================================================
   # Checks
   # ===========================================================================
 

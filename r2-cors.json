@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "https://www.ubuntusoftware.net",
+          "https://ubuntusoftware.net",
+          "http://localhost:1313"
+        ],
+        "methods": ["GET", "HEAD"],
+        "headers": ["*"]
+      },
+      "maxAgeSeconds": 86400
+    }
+  ]
+}
