@@ -7,7 +7,7 @@
 #   task airspace:open      - Open demo in browser (via Hugo dev server)
 #   task airspace:download  - Refresh FAA data
 #
-# The demo is a Hugo page at /airspace-demo/ - run `task dev` first.
+# The demo is a Hugo page at /fleet/airspace-demo/ - run `task dev` first.
 # Data URL (R2) is configured in config/_default/params.toml
 
 version: '3'
@@ -23,7 +23,7 @@ tasks:
   open:
     desc: Open airspace demo in browser (requires Hugo dev server)
     cmds:
-      - open http://localhost:1313/airspace-demo/
+      - open http://localhost:1313/fleet/airspace-demo/
 
   # ===========================================================================
   # Data Management
