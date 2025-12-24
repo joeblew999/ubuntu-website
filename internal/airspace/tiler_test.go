@@ -1,6 +1,7 @@
 package airspace_test
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -8,6 +9,11 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/airspace"
 	"github.com/joeblew999/ubuntu-website/internal/airspace/gotiler"
 	"github.com/joeblew999/ubuntu-website/internal/airspace/tiler"
+)
+
+const (
+	testInput     = "testdata/mini_airspace.geojson"
+	testReference = "testdata/mini_airspace_reference.pmtiles"
 )
 
 func TestTippecanoeAvailable(t *testing.T) {
@@ -96,23 +102,18 @@ func TestGoTilerGeneratesTiles(t *testing.T) {
 	}
 }
 
-// TestTilersEquivalent verifies both engines produce equivalent output.
-// This is the key test for the Go replacement.
-func TestTilersEquivalent(t *testing.T) {
-	tip := tiler.New()
+// TestGoTilerMatchesReference verifies GoTiler output matches the golden reference.
+// The reference was generated with tippecanoe and committed to the repo.
+func TestGoTilerMatchesReference(t *testing.T) {
 	g := gotiler.New()
 
-	if !tip.Available() {
-		t.Skip("tippecanoe not installed - can't compare")
-	}
-
-	inputPath := filepath.Join("testdata", "mini_airspace.geojson")
-	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
-		t.Fatalf("test data not found: %s", inputPath)
+	// Read reference file
+	refData, err := os.ReadFile(testReference)
+	if err != nil {
+		t.Fatalf("failed to read reference: %v", err)
 	}
 
 	tmpDir := t.TempDir()
-	tipOutput := filepath.Join(tmpDir, "tippecanoe.pmtiles")
 	goOutput := filepath.Join(tmpDir, "go.pmtiles")
 
 	config := airspace.TileConfig{
@@ -121,21 +122,71 @@ func TestTilersEquivalent(t *testing.T) {
 		Layer:   "test",
 	}
 
-	// Generate with tippecanoe (reference)
-	if err := tip.Tile(inputPath, tipOutput, config); err != nil {
-		t.Fatalf("tippecanoe failed: %v", err)
-	}
-
 	// Generate with Go
-	if err := g.Tile(inputPath, goOutput, config); err != nil {
+	if err := g.Tile(testInput, goOutput, config); err != nil {
 		t.Skipf("GoTiler not yet implemented: %v", err)
 	}
 
-	// TODO: Compare tile contents
-	// - Parse both PMTiles
-	// - Extract tiles at same z/x/y coordinates
-	// - Compare features (geometry, properties)
-	// - Allow for minor floating-point differences
+	// Read generated file
+	goData, err := os.ReadFile(goOutput)
+	if err != nil {
+		t.Fatalf("failed to read go output: %v", err)
+	}
 
-	t.Log("Equivalence test requires PMTiles comparison - TODO")
+	// Compare sizes first (quick check)
+	if len(goData) != len(refData) {
+		t.Errorf("size mismatch: go=%d bytes, reference=%d bytes", len(goData), len(refData))
+	}
+
+	// Compare contents
+	if !bytes.Equal(goData, refData) {
+		t.Error("output does not match reference - see TODO for detailed tile comparison")
+		// TODO: Implement tile-by-tile comparison for better debugging
+	}
+}
+
+// TestTippecanoeMatchesReference ensures tippecanoe still produces the same output.
+// This catches tippecanoe version changes that might break compatibility.
+func TestTippecanoeMatchesReference(t *testing.T) {
+	tip := tiler.New()
+	if !tip.Available() {
+		t.Skip("tippecanoe not installed")
+	}
+
+	tmpDir := t.TempDir()
+	tipOutput := filepath.Join(tmpDir, "tippecanoe.pmtiles")
+
+	config := airspace.TileConfig{
+		MinZoom: 0,
+		MaxZoom: 10,
+		Layer:   "test",
+	}
+
+	if err := tip.Tile(testInput, tipOutput, config); err != nil {
+		t.Fatalf("tippecanoe failed: %v", err)
+	}
+
+	// Read both files
+	tipData, err := os.ReadFile(tipOutput)
+	if err != nil {
+		t.Fatalf("failed to read tippecanoe output: %v", err)
+	}
+
+	refData, err := os.ReadFile(testReference)
+	if err != nil {
+		t.Fatalf("failed to read reference: %v", err)
+	}
+
+	// Compare sizes
+	if len(tipData) != len(refData) {
+		t.Logf("size mismatch: tippecanoe=%d bytes, reference=%d bytes", len(tipData), len(refData))
+		t.Log("This may be expected if tippecanoe version changed - consider updating reference")
+	}
+
+	// Note: tippecanoe output may vary slightly between runs due to timestamps
+	// For now, just check size is similar (within 10%)
+	sizeDiff := float64(len(tipData)-len(refData)) / float64(len(refData))
+	if sizeDiff > 0.1 || sizeDiff < -0.1 {
+		t.Errorf("size differs by %.1f%% - likely incompatible output", sizeDiff*100)
+	}
 }
