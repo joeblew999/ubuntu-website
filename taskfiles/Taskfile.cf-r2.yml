@@ -141,20 +141,41 @@ tasks:
   # ===========================================================================
 
   airspace:upload:
-    desc: Upload airspace GeoJSON files to R2
+    desc: Upload airspace GeoJSON files to R2 (skips files >100MB)
+    vars:
+      MAX_SIZE_MB: 100
     cmds:
-      - task: sync
-        vars:
-          DIR: static/airspace
-          PREFIX: airspace/
+      - |
+        echo "Syncing static/airspace to r2://{{.R2_BUCKET}}/airspace/"
+        echo "Skipping files larger than {{.MAX_SIZE_MB}}MB..."
+        echo ""
+
+        for file in static/airspace/*.geojson; do
+          if [ -f "$file" ]; then
+            filename=$(basename "$file")
+            # Get file size in bytes
+            size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+            size_mb=$((size / 1024 / 1024))
+
+            if [ "$size_mb" -gt "{{.MAX_SIZE_MB}}" ]; then
+              echo "  SKIP: $filename (${size_mb}MB > {{.MAX_SIZE_MB}}MB)"
+            else
+              echo "  Uploading: $filename (${size_mb}MB)"
+              {{.WRANGLER}} r2 object put "{{.R2_BUCKET}}/airspace/$filename" --file "$file" --remote
+            fi
+          fi
+        done
+
+        echo ""
+        echo "Done. Files available at: {{.R2_PUBLIC_URL}}/airspace/"
       - |
         echo ""
-        echo "Airspace data uploaded to R2."
-        echo ""
-        echo "Update static/airspace-demo/index.html to use:"
+        echo "Available endpoints:"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_uas_facility_map.geojson"
         echo "  {{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson"
         echo "  {{.R2_PUBLIC_URL}}/airspace/faa_special_use_airspace.geojson"
-        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_uas_facility_map.geojson"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_airports.geojson"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_navaids.geojson"
 
   # ===========================================================================
   # Endpoint Registry

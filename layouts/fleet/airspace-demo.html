@@ -56,11 +56,15 @@
             <div class="legend-item"><div class="legend-color" style="background: #cc0000;"></div> Restricted/Prohibited</div>
             <div class="legend-item"><div class="legend-color" style="background: #ff9900;"></div> MOA (Military)</div>
             <div class="legend-item"><div class="legend-color" style="background: rgba(255,255,0,0.5);"></div> LAANC Grid</div>
+            <div class="legend-item"><div class="legend-color" style="background: #00ff00; border-radius: 50%;"></div> Airports</div>
+            <div class="legend-item"><div class="legend-color" style="background: #ff00ff; border-radius: 50%;"></div> Navigation Aids</div>
         </div>
         <div class="layer-toggle">
             <label><input type="checkbox" id="toggle-boundary" checked> Airspace Boundaries</label>
             <label><input type="checkbox" id="toggle-sua" checked> Special Use Airspace</label>
             <label><input type="checkbox" id="toggle-laanc"> LAANC Ceilings</label>
+            <label><input type="checkbox" id="toggle-airports"> Airports</label>
+            <label><input type="checkbox" id="toggle-navaids"> Navigation Aids</label>
         </div>
     </div>
 </div>
@@ -82,6 +86,8 @@
     let boundaryLayer = L.layerGroup().addTo(map);
     let suaLayer = L.layerGroup().addTo(map);
     let laancLayer = L.layerGroup();
+    let airportsLayer = L.layerGroup();
+    let navaidsLayer = L.layerGroup();
 
     // Color by airspace class
     function getAirspaceStyle(feature) {
@@ -174,6 +180,58 @@
                 onEachFeature: onEachFeature
             }).addTo(laancLayer);
 
+            // Load Airports (point data)
+            const airportsResp = await fetch(`${DATA_BASE}/faa_airports.geojson`);
+            const airportsData = await airportsResp.json();
+            L.geoJSON(airportsData, {
+                pointToLayer: function(feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 5,
+                        fillColor: '#00ff00',
+                        color: '#006600',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    let content = '<div style="font-size:12px;">';
+                    if (props.SITE_NO) content += `<b>${props.SITE_NO}</b><br>`;
+                    if (props.CITY) content += `City: ${props.CITY}<br>`;
+                    if (props.STATE_NAME) content += `State: ${props.STATE_NAME}<br>`;
+                    if (props.OWNER_TYPE) content += `Type: ${props.OWNER_TYPE}<br>`;
+                    content += '</div>';
+                    layer.bindPopup(content);
+                }
+            }).addTo(airportsLayer);
+
+            // Load Navigation Aids (point data)
+            const navaidsResp = await fetch(`${DATA_BASE}/faa_navaids.geojson`);
+            const navaidsData = await navaidsResp.json();
+            L.geoJSON(navaidsData, {
+                pointToLayer: function(feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 4,
+                        fillColor: '#ff00ff',
+                        color: '#660066',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    let content = '<div style="font-size:12px;">';
+                    if (props.NAVAID_ID) content += `<b>${props.NAVAID_ID}</b><br>`;
+                    if (props.NAVAID_NAME) content += `Name: ${props.NAVAID_NAME}<br>`;
+                    if (props.NAVAID_TYPE) content += `Type: ${props.NAVAID_TYPE}<br>`;
+                    if (props.CITY) content += `City: ${props.CITY}<br>`;
+                    content += '</div>';
+                    layer.bindPopup(content);
+                }
+            }).addTo(navaidsLayer);
+
             document.getElementById('loading').style.display = 'none';
         } catch (err) {
             document.getElementById('loading').textContent = 'Error loading data: ' + err.message;
@@ -189,6 +247,12 @@
     });
     document.getElementById('toggle-laanc').addEventListener('change', (e) => {
         e.target.checked ? map.addLayer(laancLayer) : map.removeLayer(laancLayer);
+    });
+    document.getElementById('toggle-airports').addEventListener('change', (e) => {
+        e.target.checked ? map.addLayer(airportsLayer) : map.removeLayer(airportsLayer);
+    });
+    document.getElementById('toggle-navaids').addEventListener('change', (e) => {
+        e.target.checked ? map.addLayer(navaidsLayer) : map.removeLayer(navaidsLayer);
     });
 
     loadData();

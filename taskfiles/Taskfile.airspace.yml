@@ -49,6 +49,21 @@ tasks:
     cmds:
       - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset sua
 
+  download:airports:
+    desc: Download only Airports
+    cmds:
+      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset airports
+
+  download:navaids:
+    desc: Download only Navigation Aids
+    cmds:
+      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset navaids
+
+  download:obstacles:
+    desc: Download only Obstacles
+    cmds:
+      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset obstacles
+
   status:
     desc: Show airspace data status
     cmds:
