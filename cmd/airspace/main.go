@@ -4,7 +4,14 @@
 //
 //	airspace download             # Download all datasets
 //	airspace download -dataset uas
+//	airspace sync                 # Smart sync (only download if changed)
 //	airspace status               # Show data file status
+//
+// Configuration:
+//
+//	The dataset definitions below MUST stay in sync with data/airspace/datasets.json
+//	which is the single source of truth for all airspace constants.
+//	See also: taskfiles/Taskfile.airspace.yml, layouts/fleet/airspace-demo.html
 package main
 
 import (
@@ -76,6 +83,8 @@ func main() {
 	switch cmd {
 	case "download":
 		runDownload()
+	case "sync":
+		runSync()
 	case "status":
 		runStatus()
 	case "help", "-h", "--help":
@@ -92,6 +101,7 @@ func printUsage() {
 	fmt.Println()
 	fmt.Println("Commands:")
 	fmt.Println("  download    Download FAA airspace data from ArcGIS APIs")
+	fmt.Println("  sync        Smart sync (only download if source changed)")
 	fmt.Println("  status      Show data file status and age")
 	fmt.Println()
 	fmt.Println("Datasets:")
@@ -106,6 +116,8 @@ func printUsage() {
 	fmt.Println("  airspace download                       # Download all datasets")
 	fmt.Println("  airspace download -dataset uas          # Download only UAS Facility Map")
 	fmt.Println("  airspace download -dataset airports     # Download only Airports")
+	fmt.Println("  airspace sync                           # Sync only changed datasets")
+	fmt.Println("  airspace sync -force                    # Force re-download all")
 	fmt.Println("  airspace status                         # Show data status")
 }
 
@@ -297,4 +309,190 @@ func formatAge(d time.Duration) string {
 		return fmt.Sprintf("%d hours", int(d.Hours()))
 	}
 	return fmt.Sprintf("%d days", int(d.Hours()/24))
+}
+
+// ============================================================================
+// Sync Command - Smart download with ETag tracking
+// ============================================================================
+
+// ETagStore holds ETags for each dataset to detect changes
+type ETagStore struct {
+	ETags     map[string]string `json:"etags"`
+	UpdatedAt time.Time         `json:"updated_at"`
+}
+
+func runSync() {
+	fs := flag.NewFlagSet("sync", flag.ExitOnError)
+	outputDir := fs.String("output", "static/airspace", "Output directory for GeoJSON files")
+	etagFile := fs.String("etag-file", "data/airspace/etags.json", "ETag storage file")
+	force := fs.Bool("force", false, "Force re-download even if unchanged")
+	timeout := fs.Duration("timeout", 5*time.Minute, "HTTP request timeout")
+	skipLarge := fs.Bool("skip-large", true, "Skip datasets >100MB (obstacles)")
+	fs.Parse(os.Args[1:])
+
+	// Create directories
+	if err := os.MkdirAll(*outputDir, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating output dir: %v\n", err)
+		os.Exit(1)
+	}
+	if err := os.MkdirAll(filepath.Dir(*etagFile), 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating etag dir: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Load existing ETags
+	store := loadETags(*etagFile)
+	client := &http.Client{Timeout: *timeout}
+
+	// Datasets to sync (exclude obstacles by default - too large for GeoJSON)
+	datasetOrder := []string{"uas", "boundary", "sua", "airports", "navaids"}
+	if !*skipLarge {
+		datasetOrder = append(datasetOrder, "obstacles")
+	}
+
+	fmt.Println("Syncing FAA Airspace Data")
+	fmt.Println("=========================")
+	if *force {
+		fmt.Println("Mode: FORCE (re-downloading all)")
+	} else {
+		fmt.Println("Mode: Smart (ETag-based diff)")
+	}
+	fmt.Println()
+
+	updated := 0
+	skipped := 0
+
+	for _, key := range datasetOrder {
+		ds := datasets[key]
+		outPath := filepath.Join(*outputDir, ds.Filename)
+
+		// Check if we need to download
+		needsDownload := *force
+		var newETag string
+
+		if !needsDownload {
+			// Check if file exists locally
+			if _, err := os.Stat(outPath); os.IsNotExist(err) {
+				needsDownload = true
+				fmt.Printf("[%s] %s: MISSING\n", key, ds.Name)
+			}
+		}
+
+		if !needsDownload && !ds.IsPaginated {
+			// HEAD request to check ETag (only for direct downloads)
+			newETag, needsDownload = checkETag(client, ds.BaseURL, store.ETags[key])
+			if needsDownload {
+				fmt.Printf("[%s] %s: CHANGED\n", key, ds.Name)
+			} else {
+				fmt.Printf("[%s] %s: unchanged\n", key, ds.Name)
+				skipped++
+				continue
+			}
+		} else if !needsDownload && ds.IsPaginated {
+			// For paginated APIs, we can't easily check ETag
+			// Check file age instead - re-download if older than 7 days
+			if info, err := os.Stat(outPath); err == nil {
+				age := time.Since(info.ModTime())
+				if age < 7*24*time.Hour {
+					fmt.Printf("[%s] %s: recent (%.0f days old)\n", key, ds.Name, age.Hours()/24)
+					skipped++
+					continue
+				}
+				fmt.Printf("[%s] %s: STALE (%.0f days old)\n", key, ds.Name, age.Hours()/24)
+				needsDownload = true
+			}
+		}
+
+		if !needsDownload {
+			skipped++
+			continue
+		}
+
+		// Download the dataset
+		fmt.Printf("  Downloading %s...\n", ds.Name)
+		var err error
+		if ds.IsPaginated {
+			err = downloadPaginated(client, ds, outPath)
+		} else {
+			err = downloadDirect(client, ds.BaseURL, outPath)
+		}
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ERROR: %v\n", err)
+			continue
+		}
+
+		// Update ETag
+		if newETag != "" {
+			store.ETags[key] = newETag
+		}
+
+		// Report file size
+		if info, err := os.Stat(outPath); err == nil {
+			fmt.Printf("  ✓ %s (%.1f MB)\n", ds.Filename, float64(info.Size())/(1024*1024))
+		}
+		updated++
+	}
+
+	// Save ETags
+	store.UpdatedAt = time.Now()
+	saveETags(*etagFile, store)
+
+	fmt.Println()
+	fmt.Printf("Done: %d updated, %d unchanged\n", updated, skipped)
+	if updated > 0 {
+		fmt.Println("Run 'task r2:airspace:upload' to sync to R2.")
+	}
+}
+
+// checkETag does a HEAD request and compares ETag
+// Returns (newETag, needsDownload)
+func checkETag(client *http.Client, url, oldETag string) (string, bool) {
+	req, err := http.NewRequest("HEAD", url, nil)
+	if err != nil {
+		return "", true // Download on error
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", true // Download on error
+	}
+	defer resp.Body.Close()
+
+	newETag := resp.Header.Get("ETag")
+	if newETag == "" {
+		// No ETag support, check Last-Modified instead
+		newETag = resp.Header.Get("Last-Modified")
+	}
+
+	if newETag == "" {
+		return "", true // No way to check, always download
+	}
+
+	return newETag, newETag != oldETag
+}
+
+func loadETags(path string) ETagStore {
+	store := ETagStore{
+		ETags: make(map[string]string),
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return store // Return empty store if file doesn't exist
+	}
+
+	json.Unmarshal(data, &store)
+	if store.ETags == nil {
+		store.ETags = make(map[string]string)
+	}
+	return store
+}
+
+func saveETags(path string, store ETagStore) error {
+	data, err := json.MarshalIndent(store, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
 }

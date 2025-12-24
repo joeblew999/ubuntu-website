@@ -461,14 +461,15 @@ pmtiles extract source.pmtiles subset.pmtiles --bbox=-122.5,37.5,-122.0,38.0
 
 ### Revised Implementation Roadmap
 
-| Phase | Task | Tools |
-|-------|------|-------|
-| **1A** | Add `sync` command with ETag tracking | Go, R2 API |
-| **1B** | GitHub Actions for FAA→R2 sync | GH Actions |
-| **2A** | Install tippecanoe in CI | `brew install tippecanoe` |
-| **2B** | Convert large datasets to PMTiles | tippecanoe, go-pmtiles |
-| **2C** | Update web GUI to protomaps-leaflet | protomaps-leaflet |
-| **3** | Combine all layers into single PMTiles | tippecanoe --layer flag |
+| Phase | Task | Tools | Status |
+|-------|------|-------|--------|
+| **1A** | Add `sync` command with ETag tracking | Go, R2 API | ✅ Done |
+| **1B** | GitHub Actions for FAA→R2 sync | GH Actions | ✅ Done |
+| **2A** | Install tippecanoe in CI | `brew install tippecanoe` | ✅ Done |
+| **2B** | Convert large datasets to PMTiles | tippecanoe, go-pmtiles | ✅ Done |
+| **2C** | Update web GUI to protomaps-leaflet | protomaps-leaflet | ✅ Done |
+| **3** | Combine all layers into single PMTiles | tippecanoe --layer flag | ✅ Done |
+| **4** | Mapterhorn 3D terrain integration | Mapterhorn API | Future |
 
 ### Resources
 
@@ -476,6 +477,67 @@ pmtiles extract source.pmtiles subset.pmtiles --bbox=-122.5,37.5,-122.0,38.0
 - PMTiles Spec: https://github.com/protomaps/PMTiles/blob/main/spec/v3/spec.md
 - Cloud Storage Guide: https://bdon.github.io/cng-storage-guide/
 - Tippecanoe: https://github.com/felt/tippecanoe
+
+---
+
+## Phase 4: Mapterhorn 3D Terrain (Future)
+
+**Goal:** Add 3D terrain visualization for better BVLOS flight planning.
+
+### Mapterhorn Overview
+
+[Mapterhorn](https://mapterhorn.com/data-access/) provides:
+- **Terrarium-encoded RGB terrain tiles** (WebP, 512px)
+- **PMTiles archives** for efficient R2 hosting
+- **Global coverage** z0-z17 with regional extracts
+
+### Data Access
+
+```bash
+# Single tile HTTP
+https://tiles.mapterhorn.com/{z}/{x}/{y}.webp
+
+# TileJSON metadata
+https://tiles.mapterhorn.com/tilejson.json
+
+# PMTiles extract for specific region (using go-pmtiles)
+pmtiles extract planet.pmtiles us-airspace.pmtiles --bbox=-125,24,-66,50
+```
+
+### Integration with PMTiles Merge
+
+See [go-pmtiles#105](https://github.com/protomaps/go-pmtiles/issues/105) for discussion on merging PMTiles files:
+
+```bash
+# Proposed syntax (not yet implemented)
+pmtiles merge terrain.pmtiles airspace.pmtiles -o combined.pmtiles
+```
+
+Current workaround: Serve terrain and airspace as separate PMTiles files, load both in client.
+
+### Why Mapterhorn?
+
+| Feature | Benefit |
+|---------|---------|
+| Terrarium encoding | Standard RGB elevation format |
+| PMTiles format | Same as our airspace data |
+| R2 mirrors | Zero egress, same as our stack |
+| Regional extracts | Only download CONUS, not planet |
+
+### 3D Visualization Libraries
+
+| Library | Use Case |
+|---------|----------|
+| [deck.gl](https://deck.gl) | WebGL 3D overlays on Mapbox/Leaflet |
+| [Cesium](https://cesium.com) | Full 3D globe (heavy) |
+| [Three.js + mapbox-gl](https://github.com/peterqliu/threebox) | Custom 3D on Mapbox |
+
+### Implementation Notes
+
+1. Download CONUS terrain extract from Mapterhorn (~2GB)
+2. Host on R2 alongside airspace PMTiles
+3. Use deck.gl TerrainLayer for 3D rendering
+4. Overlay airspace boundaries on terrain
 
 ---
 
@@ -488,3 +550,4 @@ pmtiles extract source.pmtiles subset.pmtiles --bbox=-122.5,37.5,-122.0,38.0
 | 2024-12-24 | GitHub Actions first | Simpler than CF Worker; already have CI |
 | 2024-12-24 | Use Protomaps stack | bdon already solved this; don't reinvent |
 | 2024-12-24 | R2 for storage | Zero egress costs, HTTP Range support for PMTiles |
+| 2024-12-24 | Mapterhorn for 3D terrain | PMTiles format, R2 mirrors, regional extracts |
