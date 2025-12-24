@@ -70,45 +70,54 @@ jobs:
             task airspace:sync
           fi
 
-      - name: Convert to PMTiles
+      - name: Check for changes
+        id: check_changes
         run: |
-          # Check if any GeoJSON files exist
-          if [ -d "static/airspace" ] && [ "$(ls -A static/airspace/*.geojson 2>/dev/null)" ]; then
-            echo "Converting GeoJSON to PMTiles..."
-            task airspace:tile
-            echo ""
-            echo "Creating combined PMTiles..."
-            task airspace:tile:combined
+          # Sync writes data/airspace/sync-changes.json with has_changes flag
+          if [ -f "data/airspace/sync-changes.json" ]; then
+            HAS_CHANGES=$(cat data/airspace/sync-changes.json | jq -r '.has_changes')
+            UPDATED=$(cat data/airspace/sync-changes.json | jq -r '.updated')
+            echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+            echo "updated_count=$UPDATED" >> $GITHUB_OUTPUT
+            echo "Sync result: has_changes=$HAS_CHANGES, updated=$UPDATED"
           else
-            echo "No GeoJSON files to convert"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "updated_count=0" >> $GITHUB_OUTPUT
+            echo "No sync-changes.json found"
           fi
+
+      - name: Convert to PMTiles
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "Changes detected (${{ steps.check_changes.outputs.updated_count }} datasets) - converting to PMTiles..."
+          task airspace:tile
+          echo ""
+          echo "Creating combined PMTiles..."
+          task airspace:tile:combined
 
       - name: Update manifests
+        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
-          # Generate manifests with current timestamps and actual file sizes
-          if [ -d "static/airspace/tiles" ] && [ "$(ls -A static/airspace/tiles/*.pmtiles 2>/dev/null)" ]; then
-            echo "Updating manifests with current data..."
-            task airspace:manifest:update
-          else
-            echo "No PMTiles - skipping manifest update"
-          fi
+          echo "Updating manifests with current data..."
+          task airspace:manifest:update
 
       - name: Upload to R2
+        if: steps.check_changes.outputs.has_changes == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          # Check if any PMTiles were created
-          if [ -d "static/airspace/tiles" ] && [ "$(ls -A static/airspace/tiles/*.pmtiles 2>/dev/null)" ]; then
-            echo "Uploading PMTiles to R2..."
-            task r2:airspace:upload
+          echo "Uploading PMTiles to R2..."
+          task r2:airspace:upload
 
-            echo ""
-            echo "Uploading manifests to R2..."
-            wrangler r2 object put ubuntu-website-assets/airspace/manifest.json --file data/airspace/manifest.json --remote
-            wrangler r2 object put ubuntu-website-assets/airspace/usa-manifest.json --file data/airspace/usa-manifest.json --remote
-          else
-            echo "No PMTiles to upload"
-          fi
+          echo ""
+          echo "Uploading manifests to R2..."
+          wrangler r2 object put ubuntu-website-assets/airspace/manifest.json --file data/airspace/manifest.json --remote
+          wrangler r2 object put ubuntu-website-assets/airspace/usa-manifest.json --file data/airspace/usa-manifest.json --remote
+
+      - name: Skip notification
+        if: steps.check_changes.outputs.has_changes != 'true'
+        run: |
+          echo "No changes detected from FAA sources - skipping tile/manifest/upload (idempotent)"
 
       - name: Save ETag cache
         uses: actions/cache/save@v4

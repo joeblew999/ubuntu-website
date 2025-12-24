@@ -442,24 +442,56 @@ tasks:
         echo "Manifests uploaded to R2"
 
   # ===========================================================================
-  # Full Pipeline (sync + tile + manifest + upload)
+  # Full Pipeline (sync + tile + manifest + upload) - IDEMPOTENT
   # ===========================================================================
+  # Only runs downstream steps if sync detected changes.
+  # This ensures re-running the pipeline produces no changes if FAA data is unchanged.
 
   pipeline:
-    desc: Full pipeline - sync data, convert to PMTiles, update manifests, upload to R2
+    desc: Full pipeline - sync data, convert to PMTiles, update manifests (idempotent)
     cmds:
       - task: sync
-      - task: tile
-      - task: manifest:update
-      - echo "Pipeline complete. Run 'task r2:airspace:upload' to push to R2"
+      - |
+        # Check if sync detected any changes
+        if [ -f "data/airspace/sync-changes.json" ]; then
+          HAS_CHANGES=$(cat data/airspace/sync-changes.json | grep -o '"has_changes": *[^,}]*' | grep -o 'true\|false')
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "Changes detected - running tile and manifest update..."
+            task airspace:tile
+            task airspace:manifest:update
+            echo "Pipeline complete. Run 'task r2:airspace:upload' to push to R2"
+          else
+            echo "No changes detected - skipping tile/manifest steps (idempotent)"
+          fi
+        else
+          echo "No sync-changes.json found - running full pipeline..."
+          task airspace:tile
+          task airspace:manifest:update
+        fi
 
   pipeline:full:
-    desc: Full pipeline including R2 upload
+    desc: Full pipeline including R2 upload (idempotent)
     cmds:
       - task: sync
-      - task: tile
-      - task: manifest:upload
-      - task: r2:airspace:upload
+      - |
+        # Check if sync detected any changes
+        if [ -f "data/airspace/sync-changes.json" ]; then
+          HAS_CHANGES=$(cat data/airspace/sync-changes.json | grep -o '"has_changes": *[^,}]*' | grep -o 'true\|false')
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "Changes detected - running full upload pipeline..."
+            task airspace:tile
+            task airspace:manifest:upload
+            task r2:airspace:upload
+            echo "Pipeline complete - data uploaded to R2"
+          else
+            echo "No changes detected - nothing to upload (idempotent)"
+          fi
+        else
+          echo "No sync-changes.json found - running full pipeline..."
+          task airspace:tile
+          task airspace:manifest:upload
+          task r2:airspace:upload
+        fi
 
   # ===========================================================================
   # Checks

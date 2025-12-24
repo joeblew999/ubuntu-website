@@ -440,8 +440,23 @@ func runSync() {
 
 	fmt.Println()
 	fmt.Printf("Done: %d updated, %d unchanged\n", updated, skipped)
+
+	// Write a flag file to signal if changes occurred (for idempotent pipelines)
+	changesFile := filepath.Join(filepath.Dir(*etagFile), "sync-changes.json")
+	changesData := map[string]interface{}{
+		"updated":    updated,
+		"skipped":    skipped,
+		"has_changes": updated > 0,
+		"timestamp":  time.Now().UTC().Format(time.RFC3339),
+	}
+	if data, err := json.MarshalIndent(changesData, "", "  "); err == nil {
+		os.WriteFile(changesFile, data, 0644)
+	}
+
 	if updated > 0 {
-		fmt.Println("Run 'task r2:airspace:upload' to sync to R2.")
+		fmt.Println("Changes detected. Run 'task airspace:tile' then 'task r2:airspace:upload'.")
+	} else {
+		fmt.Println("No changes. Pipeline can skip tile/manifest/upload steps.")
 	}
 }
 
