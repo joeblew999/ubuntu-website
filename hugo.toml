@@ -42,6 +42,9 @@ pagerSize = 10
 path = 'page'
 
 
+# Don't watch large static files (served from R2, not Pages)
+ignoreFiles = ['static/airspace/.*\.geojson$']
+
 ############################# Build ##############################
 [build]
 [build.buildStats]
