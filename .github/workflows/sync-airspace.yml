@@ -73,17 +73,19 @@ jobs:
       - name: Check for changes
         id: check_changes
         run: |
-          # Sync writes data/airspace/sync-changes.json with has_changes flag
-          if [ -f "data/airspace/sync-changes.json" ]; then
-            HAS_CHANGES=$(cat data/airspace/sync-changes.json | jq -r '.has_changes')
-            UPDATED=$(cat data/airspace/sync-changes.json | jq -r '.updated')
+          # Sync writes data/airspace/sync-result.json with full metrics
+          if [ -f "data/airspace/sync-result.json" ]; then
+            HAS_CHANGES=$(cat data/airspace/sync-result.json | jq -r '.has_changes')
+            UPDATED=$(cat data/airspace/sync-result.json | jq -r '.updated')
+            DURATION=$(cat data/airspace/sync-result.json | jq -r '.duration')
             echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
             echo "updated_count=$UPDATED" >> $GITHUB_OUTPUT
-            echo "Sync result: has_changes=$HAS_CHANGES, updated=$UPDATED"
+            echo "duration=$DURATION" >> $GITHUB_OUTPUT
+            echo "Sync result: has_changes=$HAS_CHANGES, updated=$UPDATED, duration=$DURATION"
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "updated_count=0" >> $GITHUB_OUTPUT
-            echo "No sync-changes.json found"
+            echo "No sync-result.json found"
           fi
 
       - name: Convert to PMTiles

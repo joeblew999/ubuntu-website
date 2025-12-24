@@ -361,41 +361,81 @@ curl http://localhost:8088/today
 
 **Process Compose:** Add `calendar-server` to dev workflow by enabling in `process-compose.yaml`.
 
-### Airspace Demo (BVLOS)
+### Airspace Data Pipeline (BVLOS)
 
 Interactive US airspace visualization for drone fleet operations. Displays FAA controlled airspace, special use airspace (MOAs, restricted areas), and LAANC ceiling altitudes.
 
-**Demo:** `/airspace-demo/` (static HTML + Leaflet.js)
+**Demo:** `/airspace-demo/` (static HTML + Leaflet.js + PMTiles)
 **Content Page:** `content/english/fleet/airspace-demo.md`
-**Data:** FAA UDDS GeoJSON files stored in Cloudflare R2
-
-**Architecture:**
-- Development: Loads from local `static/airspace/*.geojson` (if present)
-- Production: Loads from R2 (`https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/airspace/`)
-- Auto-detects environment via `window.location.hostname`
-
 **CLI:** `cmd/airspace/main.go`
 
-**Taskfile Commands:**
-```bash
-task airspace:demo              # Start standalone server (port 9091)
-task airspace:status            # Show data file status and age
-task airspace:download          # Refresh all FAA data
-task airspace:download:uas      # Download only UAS Facility Map (LAANC)
-task airspace:download:boundary # Download only Airspace Boundary
-task airspace:download:sua      # Download only Special Use Airspace
-task r2:airspace:upload         # Sync data to R2
-task r2:endpoints               # List all R2 asset URLs
-task r2:endpoints:test          # Verify R2 endpoints accessible
+**Architecture:**
+```
+FAA ArcGIS APIs → Go sync → GeoJSON → tippecanoe → PMTiles → R2 → Frontend
+                     ↓
+              ETag tracking (idempotent)
+                     ↓
+              sync-history.json (cron tuning)
 ```
 
-**Data Files (44MB total, gitignored):**
-- `faa_airspace_boundary.geojson` (14MB) - Class B/C/D/E
-- `faa_special_use_airspace.geojson` (28MB) - MOAs, Restricted
-- `faa_uas_facility_map.geojson` (2.2MB) - LAANC grid
+**Data Flow:**
+1. `airspace sync` checks ETags against FAA sources
+2. If changed: downloads GeoJSON (378K features for UAS = 422MB)
+3. `airspace:tile` converts to PMTiles (123MB for UAS)
+4. `r2:airspace:upload` pushes to Cloudflare R2
+5. Frontend loads PMTiles progressively (manifest-driven)
+
+**Key Commands:**
+```bash
+# Sync pipeline (idempotent - skips if no FAA changes)
+task airspace:sync              # Check for changes, download if needed
+task airspace:pipeline          # Sync + tile + manifest (no upload)
+task airspace:pipeline:full     # Sync + tile + manifest + R2 upload
+
+# Data inspection
+task airspace:status            # Show local data files
+task airspace:history           # Show sync history (for cron tuning)
+go run ./cmd/airspace history   # Same, direct
+
+# Manual operations
+task airspace:download          # Force download all
+task airspace:tile              # Convert GeoJSON to PMTiles
+task r2:airspace:upload         # Upload PMTiles to R2
+```
+
+**Files:**
+| File | Purpose |
+|------|---------|
+| `data/airspace/etags.json` | ETag cache for change detection |
+| `data/airspace/sync-result.json` | Last sync result (for pipeline idempotency) |
+| `data/airspace/sync-history.json` | Rolling history of sync runs |
+| `data/airspace/manifest.json` | Global manifest (regions) |
+| `data/airspace/usa-manifest.json` | USA regional manifest (layers) |
+| `static/airspace/*.geojson` | Downloaded FAA data (gitignored) |
+| `static/airspace/tiles/*.pmtiles` | Generated tiles (gitignored) |
+
+**Sync Timing:**
+- No changes: ~7-10 seconds (HEAD requests only)
+- UAS changed: ~5-10 minutes (422MB download + tile gen)
+- All changed: ~10-15 minutes
+
+**GitHub Actions:** `.github/workflows/sync-airspace.yml`
+- Runs weekly (Thursday 06:00 UTC, aligned with AIRAC cycle)
+- Caches ETags between runs
+- Only tiles/uploads if changes detected
+
+**Why PMTiles?**
+- Single-file format for vector tiles (no tile server needed)
+- Progressive loading (browser fetches only visible tiles)
+- 422MB GeoJSON → 123MB PMTiles (compression + tiling)
+
+**Limitations:**
+- FAA only supports Query API (no sync/change tracking)
+- Must download ALL features even for 1 change
+- PMTiles regeneration is full rebuild (no incremental)
 
 **R2 Bucket:** `ubuntu-website-assets`
-**R2 Dashboard:** `task r2:open:bucket`
+**R2 Public URL:** `https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/airspace/`
 
 ### Cloudflare R2 (Large Assets)
 
