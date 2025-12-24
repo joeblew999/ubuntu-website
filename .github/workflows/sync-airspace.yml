@@ -53,100 +53,69 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y tippecanoe
 
-      - name: Restore ETag cache
+      - name: Restore sync cache
         uses: actions/cache@v4
         with:
-          path: data/airspace/etags.json
-          key: airspace-etags-${{ github.run_id }}
+          path: data/airspace/sync_etags.json
+          key: airspace-sync-${{ github.run_id }}
           restore-keys: |
-            airspace-etags-
+            airspace-sync-
 
-      - name: Sync FAA data
+      - name: Run pipeline
+        id: pipeline
         run: |
+          # Single command does: sync → tile (if changed) → manifest
+          # Same command used locally: task airspace:pipeline
           if [ "${{ inputs.force }}" = "true" ]; then
-            echo "Force sync requested..."
-            task airspace:sync:force
+            task airspace:pipeline:force
           else
-            task airspace:sync
+            task airspace:pipeline
           fi
 
       - name: Check for changes
         id: check_changes
         run: |
-          # Sync writes data/airspace/sync-result.json with full metrics
-          if [ -f "data/airspace/sync-result.json" ]; then
-            HAS_CHANGES=$(cat data/airspace/sync-result.json | jq -r '.has_changes')
-            UPDATED=$(cat data/airspace/sync-result.json | jq -r '.updated')
-            DURATION=$(cat data/airspace/sync-result.json | jq -r '.duration')
+          if [ -f "data/airspace/sync_result.json" ]; then
+            HAS_CHANGES=$(jq -r '.has_changes' data/airspace/sync_result.json)
+            UPDATED=$(jq -r '.updated' data/airspace/sync_result.json)
             echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
             echo "updated_count=$UPDATED" >> $GITHUB_OUTPUT
-            echo "duration=$DURATION" >> $GITHUB_OUTPUT
-            echo "Sync result: has_changes=$HAS_CHANGES, updated=$UPDATED, duration=$DURATION"
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "updated_count=0" >> $GITHUB_OUTPUT
-            echo "No sync-result.json found"
           fi
-
-      - name: Convert to PMTiles
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: |
-          echo "Changes detected (${{ steps.check_changes.outputs.updated_count }} datasets) - converting to PMTiles..."
-          task airspace:tile
-          echo ""
-          echo "Creating combined PMTiles..."
-          task airspace:tile:combined
-
-      - name: Update manifests
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: |
-          echo "Updating manifests with current data..."
-          task airspace:manifest:update
 
       - name: Upload to R2
         if: steps.check_changes.outputs.has_changes == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          echo "Uploading PMTiles to R2..."
-          task r2:airspace:upload
-
-          echo ""
-          echo "Uploading manifests to R2..."
-          wrangler r2 object put ubuntu-website-assets/airspace/manifest.json --file data/airspace/manifest.json --remote
-          wrangler r2 object put ubuntu-website-assets/airspace/usa-manifest.json --file data/airspace/usa-manifest.json --remote
+        run: task r2:airspace:upload
 
       - name: Skip notification
         if: steps.check_changes.outputs.has_changes != 'true'
-        run: |
-          echo "No changes detected from FAA sources - skipping tile/manifest/upload (idempotent)"
+        run: echo "No changes detected - pipeline skipped tile/manifest/upload (idempotent)"
 
-      - name: Save ETag cache
+      - name: Save sync cache
         uses: actions/cache/save@v4
         if: always()
         with:
-          path: data/airspace/etags.json
-          key: airspace-etags-${{ github.run_id }}
+          path: data/airspace/sync_etags.json
+          key: airspace-sync-${{ github.run_id }}
 
       - name: Summary
         run: |
           echo "## Airspace Sync Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### GeoJSON Files" >> $GITHUB_STEP_SUMMARY
-          if [ -d "static/airspace" ]; then
-            ls -lh static/airspace/*.geojson 2>/dev/null | while read line; do
-              echo "- $line" >> $GITHUB_STEP_SUMMARY
-            done
+
+          if [ -f "data/airspace/sync_result.json" ]; then
+            echo "### Sync Result" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat data/airspace/sync_result.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
           fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### PMTiles Files" >> $GITHUB_STEP_SUMMARY
           if [ -d "static/airspace/tiles" ]; then
-            ls -lh static/airspace/tiles/*.pmtiles 2>/dev/null | while read line; do
-              echo "- $line" >> $GITHUB_STEP_SUMMARY
-            done
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ETag Status" >> $GITHUB_STEP_SUMMARY
-          if [ -f "data/airspace/etags.json" ]; then
-            cat data/airspace/etags.json >> $GITHUB_STEP_SUMMARY
-          fi
+            ls -lh static/airspace/tiles/*.pmtiles 2>/dev/null || echo "No PMTiles found"
+          fi >> $GITHUB_STEP_SUMMARY
