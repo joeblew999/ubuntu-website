@@ -1,0 +1,81 @@
+# Airspace Demo Tasks
+#
+# Interactive map showing FAA airspace data for BVLOS development.
+# Serves as demo/proof-of-capability for data provider applications.
+#
+# Usage:
+#   task airspace:demo      - Start demo server (standalone)
+#   task airspace:open      - Open demo in browser
+#   task airspace:download  - Refresh FAA data
+#
+# The demo is also available via Hugo at /airspace-demo/ when running `task dev`
+
+version: '3'
+
+vars:
+  AIRSPACE_PORT: 9091
+  AIRSPACE_DATA_DIR: static/airspace
+  AIRSPACE_DEMO_DIR: static/airspace-demo
+
+tasks:
+  # ===========================================================================
+  # Demo Server
+  # ===========================================================================
+
+  demo:
+    desc: Start standalone airspace demo server
+    cmds:
+      - go run ./cmd/airspace serve -port {{.AIRSPACE_PORT}}
+
+  open:
+    desc: Open airspace demo in browser
+    cmds:
+      - open http://localhost:{{.AIRSPACE_PORT}}/airspace-demo/
+
+  # ===========================================================================
+  # Data Management
+  # ===========================================================================
+
+  download:
+    desc: Download/refresh FAA airspace data
+    cmds:
+      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}}
+
+  download:uas:
+    desc: Download only UAS Facility Map (LAANC)
+    cmds:
+      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset uas
+
+  download:boundary:
+    desc: Download only Airspace Boundary
+    cmds:
+      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset boundary
+
+  download:sua:
+    desc: Download only Special Use Airspace
+    cmds:
+      - go run ./cmd/airspace download -output {{.AIRSPACE_DATA_DIR}} -dataset sua
+
+  status:
+    desc: Show airspace data status
+    cmds:
+      - go run ./cmd/airspace status -output {{.AIRSPACE_DATA_DIR}}
+
+  # ===========================================================================
+  # Checks
+  # ===========================================================================
+
+  check:deps:
+    desc: Check airspace demo dependencies
+    cmds:
+      - |
+        echo "Checking airspace demo..."
+        if [ ! -f "{{.AIRSPACE_DEMO_DIR}}/index.html" ]; then
+          echo "ERROR: Demo not found at {{.AIRSPACE_DEMO_DIR}}/index.html"
+          exit 1
+        fi
+        if [ ! -d "{{.AIRSPACE_DATA_DIR}}" ]; then
+          echo "WARNING: No data. Run: task airspace:download"
+        else
+          echo "OK: Demo and data present"
+        fi

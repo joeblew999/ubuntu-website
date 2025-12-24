@@ -1,7 +1,11 @@
 ############# English navigation ##############
 
-# Main menu - 4 items + Get Started CTA button
-# Simplified for two audiences: Users (Platform, Solutions, Company) and Developers
+# Main menu - 5 items + Get Started CTA button
+# Platform | Fleet | Solutions | Developers | Company
+
+# ═══════════════════════════════════════════════════════════════
+# 1. PLATFORM - Core Technology
+# ═══════════════════════════════════════════════════════════════
 
 [[main]]
 name = "Platform"
@@ -10,39 +14,145 @@ weight = 1
 hasChildren = true
 
 [[main]]
+name = "Overview"
+identifier = "platform-overview"
+url = "/platform"
+parent = "Platform"
+weight = 1
+
+[[main]]
 name = "Publish"
 url = "/platform/publish"
 parent = "Platform"
-weight = 1
+weight = 2
 
 [[main]]
 name = "Spatial"
 url = "/platform/spatial"
 parent = "Platform"
-weight = 2
+weight = 3
 
 [[main]]
 name = "Foundation"
 url = "/platform/foundation"
 parent = "Platform"
-weight = 3
+weight = 4
 
 [[main]]
 name = "Sensing"
 url = "/platform/sensing"
 parent = "Platform"
+weight = 5
+
+# ═══════════════════════════════════════════════════════════════
+# 2. FLEET - Vehicle/IoT Management (NEW top-level)
+# ═══════════════════════════════════════════════════════════════
+
+[[main]]
+name = "Fleet"
+url = "/fleet"
+weight = 2
+hasChildren = true
+
+[[main]]
+name = "Overview"
+identifier = "fleet-overview"
+url = "/fleet"
+parent = "Fleet"
+weight = 1
+
+# Platforms
+[[main]]
+name = "Drones"
+url = "/fleet/platforms/drones"
+parent = "Fleet"
+weight = 2
+
+[[main]]
+name = "Ground Vehicles"
+url = "/fleet/platforms/ground"
+parent = "Fleet"
+weight = 3
+
+# Hardware & Software
+[[main]]
+name = "Hardware (BOM)"
+url = "/fleet/hardware"
+parent = "Fleet"
 weight = 4
 
 [[main]]
-name = "Drone Fleet"
-url = "/fleet"
-parent = "Platform"
+name = "Software Stack"
+url = "/fleet/software"
+parent = "Fleet"
 weight = 5
+
+# Architecture
+[[main]]
+name = "NATS Topology"
+url = "/fleet/nats-topology"
+parent = "Fleet"
+weight = 6
+
+[[main]]
+name = "Subject Design"
+url = "/fleet/subjects"
+parent = "Fleet"
+weight = 7
+
+[[main]]
+name = "Streams & Events"
+url = "/fleet/streams"
+parent = "Fleet"
+weight = 8
+
+[[main]]
+name = "Vehicle Gateway"
+url = "/fleet/gateway"
+parent = "Fleet"
+weight = 9
+
+# Migration
+[[main]]
+name = "DJI Migration"
+url = "/fleet/dji-migration"
+parent = "Fleet"
+weight = 10
+
+# Compliance
+[[main]]
+name = "BVLOS Regulations"
+url = "/fleet/bvlos-regulations"
+parent = "Fleet"
+weight = 11
+
+[[main]]
+name = "Airspace Viewer"
+url = "/fleet/airspace-demo"
+parent = "Fleet"
+weight = 12
+
+# Security
+[[main]]
+name = "Authorization"
+url = "/fleet/authorization"
+parent = "Fleet"
+weight = 13
+
+[[main]]
+name = "Safety Model"
+url = "/fleet/safety"
+parent = "Fleet"
+weight = 14
+
+# ═══════════════════════════════════════════════════════════════
+# 3. SOLUTIONS - Industry Applications
+# ═══════════════════════════════════════════════════════════════
 
 [[main]]
 name = "Solutions"
 url = "/applications"
-weight = 2
+weight = 3
 hasChildren = true
 
 [[main]]
@@ -52,7 +162,7 @@ url = "/applications"
 parent = "Solutions"
 weight = 1
 
-# IoT Fleet Applications (Drones, Vehicles, Building IoT, Industrial)
+# IoT Fleet Applications
 [[main]]
 name = "Agriculture"
 url = "/applications/fleet-agriculture"
@@ -95,7 +205,6 @@ url = "/applications/fleet-environment"
 parent = "Solutions"
 weight = 8
 
-# AI-Driven Field Operations (Human + Fleet + Publish + Foundation)
 [[main]]
 name = "Field Operations"
 url = "/applications/logistics"
@@ -122,14 +231,14 @@ parent = "Solutions"
 weight = 12
 
 [[main]]
-name = "Financial"
-url = "/applications/financial"
+name = "Healthcare"
+url = "/applications/healthcare"
 parent = "Solutions"
 weight = 13
 
 [[main]]
-name = "Healthcare"
-url = "/applications/healthcare"
+name = "Financial"
+url = "/applications/financial"
 parent = "Solutions"
 weight = 14
 
@@ -145,10 +254,14 @@ url = "/applications/insurance"
 parent = "Solutions"
 weight = 16
 
+# ═══════════════════════════════════════════════════════════════
+# 4. DEVELOPERS - Technical Resources
+# ═══════════════════════════════════════════════════════════════
+
 [[main]]
 name = "Developers"
 url = "/pkg"
-weight = 3
+weight = 4
 hasChildren = true
 
 [[main]]
@@ -159,41 +272,32 @@ parent = "Developers"
 weight = 1
 
 [[main]]
-name = "Technology Stack"
+name = "Technology"
 url = "/technology"
 parent = "Developers"
 weight = 2
 
 [[main]]
-name = "GitHub"
-url = "https://github.com/joeblew999/ubuntu-website"
+name = "Security"
+url = "/security"
 parent = "Developers"
 weight = 3
 
 [[main]]
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "Developers"
+weight = 4
+
+# ═══════════════════════════════════════════════════════════════
+# 5. COMPANY - About Us
+# ═══════════════════════════════════════════════════════════════
+
+[[main]]
 name = "Company"
 url = "/company"
-weight = 4
-hasChildren = true
-
-[[main]]
-name = "Partners"
-url = "/partners"
 weight = 5
 hasChildren = true
-
-[[main]]
-name = "Partner Program"
-identifier = "partners-program"
-url = "/partners"
-parent = "Partners"
-weight = 1
-
-[[main]]
-name = "Become a Partner"
-url = "/partners/become-partner"
-parent = "Partners"
-weight = 2
 
 [[main]]
 name = "About"
@@ -209,37 +313,50 @@ parent = "Company"
 weight = 2
 
 [[main]]
+name = "Advisors"
+url = "/company/advisors"
+parent = "Company"
+weight = 3
+
+[[main]]
 name = "Experience"
 url = "/company/experience"
 parent = "Company"
-weight = 3
+weight = 4
 
 [[main]]
 name = "Surveillance"
 url = "/company/surveillance"
 parent = "Company"
-weight = 4
+weight = 5
 
 [[main]]
 name = "History"
 url = "/company-history"
 parent = "Company"
-weight = 5
+weight = 6
+
+[[main]]
+name = "Partners"
+url = "/partners"
+parent = "Company"
+weight = 7
 
 [[main]]
 name = "Blog"
 url = "/blog"
 parent = "Company"
-weight = 6
+weight = 8
 
 [[main]]
 name = "Contact"
 url = "/contact"
 parent = "Company"
-weight = 7
+weight = 9
 
-
-# Footer menu - organized by section for discoverability
+# ═══════════════════════════════════════════════════════════════
+# FOOTER MENU
+# ═══════════════════════════════════════════════════════════════
 
 [[footer]]
 name = "Platform"
@@ -247,18 +364,18 @@ url = "/platform"
 weight = 1
 
 [[footer]]
+name = "Fleet"
+url = "/fleet"
+weight = 2
+
+[[footer]]
 name = "Solutions"
 url = "/applications"
-weight = 2
+weight = 3
 
 [[footer]]
 name = "Developers"
 url = "/pkg"
-weight = 3
-
-[[footer]]
-name = "Drone Fleet"
-url = "/fleet"
 weight = 4
 
 [[footer]]
@@ -284,11 +401,6 @@ weight = 8
 [[footer]]
 name = "Security"
 url = "/security"
-weight = 8
-
-[[footer]]
-name = "Company History"
-url = "/company-history"
 weight = 9
 
 [[footer]]

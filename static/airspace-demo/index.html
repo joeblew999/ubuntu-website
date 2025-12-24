@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Airspace Viewer - Ubuntu Software</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        #map { height: 100vh; width: 100%; }
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .info-panel h2 { font-size: 14px; margin-bottom: 10px; color: #333; }
+        .legend { font-size: 12px; }
+        .legend-item { display: flex; align-items: center; margin: 5px 0; }
+        .legend-color { width: 20px; height: 14px; margin-right: 8px; border: 1px solid #666; }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 2000;
+            font-size: 14px;
+        }
+        .layer-toggle { margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; }
+        .layer-toggle label { display: flex; align-items: center; margin: 5px 0; font-size: 12px; cursor: pointer; }
+        .layer-toggle input { margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="loading" class="loading">Loading airspace data...</div>
+
+    <div class="info-panel">
+        <h2>US Airspace Viewer</h2>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #0066cc;"></div> Class B (Busiest airports)</div>
+            <div class="legend-item"><div class="legend-color" style="background: #cc00cc;"></div> Class C (Towered airports)</div>
+            <div class="legend-item"><div class="legend-color" style="background: #0099cc;"></div> Class D (Smaller towered)</div>
+            <div class="legend-item"><div class="legend-color" style="background: #00cc99;"></div> Class E (Controlled)</div>
+            <div class="legend-item"><div class="legend-color" style="background: #cc0000;"></div> Restricted/Prohibited</div>
+            <div class="legend-item"><div class="legend-color" style="background: #ff9900;"></div> MOA (Military)</div>
+            <div class="legend-item"><div class="legend-color" style="background: rgba(255,255,0,0.5);"></div> LAANC Grid</div>
+        </div>
+        <div class="layer-toggle">
+            <label><input type="checkbox" id="toggle-boundary" checked> Airspace Boundaries</label>
+            <label><input type="checkbox" id="toggle-sua" checked> Special Use Airspace</label>
+            <label><input type="checkbox" id="toggle-laanc"> LAANC Ceilings</label>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map centered on continental US
+        const map = L.map('map').setView([39.8, -98.5], 5);
+
+        // Add base layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap | Airspace data: FAA UDDS'
+        }).addTo(map);
+
+        // Layer groups
+        let boundaryLayer = L.layerGroup().addTo(map);
+        let suaLayer = L.layerGroup().addTo(map);
+        let laancLayer = L.layerGroup();
+
+        // Color by airspace class
+        function getAirspaceStyle(feature) {
+            const props = feature.properties;
+            const classType = props.CLASS || props.TYPE_CODE || '';
+
+            const styles = {
+                'B': { color: '#0066cc', fillColor: '#0066cc', weight: 2, fillOpacity: 0.2 },
+                'C': { color: '#cc00cc', fillColor: '#cc00cc', weight: 2, fillOpacity: 0.2 },
+                'D': { color: '#0099cc', fillColor: '#0099cc', weight: 2, fillOpacity: 0.15 },
+                'E': { color: '#00cc99', fillColor: '#00cc99', weight: 1, fillOpacity: 0.1 },
+                'E2': { color: '#00cc99', fillColor: '#00cc99', weight: 1, fillOpacity: 0.1 },
+                'E3': { color: '#00cc99', fillColor: '#00cc99', weight: 1, fillOpacity: 0.1 },
+                'E4': { color: '#00cc99', fillColor: '#00cc99', weight: 1, fillOpacity: 0.1 },
+            };
+            return styles[classType] || { color: '#666', fillColor: '#666', weight: 1, fillOpacity: 0.1 };
+        }
+
+        // Color for Special Use Airspace
+        function getSUAStyle(feature) {
+            const typeCode = feature.properties.TYPE_CODE || '';
+
+            if (typeCode === 'R' || typeCode === 'P') {
+                return { color: '#cc0000', fillColor: '#cc0000', weight: 2, fillOpacity: 0.3 };
+            }
+            if (typeCode === 'M' || typeCode === 'MOA') {
+                return { color: '#ff9900', fillColor: '#ff9900', weight: 1, fillOpacity: 0.2 };
+            }
+            if (typeCode === 'A' || typeCode === 'W') {
+                return { color: '#996600', fillColor: '#996600', weight: 1, fillOpacity: 0.15 };
+            }
+            return { color: '#666', fillColor: '#666', weight: 1, fillOpacity: 0.1 };
+        }
+
+        // LAANC ceiling style
+        function getLAANCStyle(feature) {
+            const ceiling = feature.properties.CEILING || 0;
+            const opacity = Math.min(0.1 + (ceiling / 400) * 0.3, 0.4);
+            return {
+                color: '#ffcc00',
+                fillColor: '#ffff00',
+                weight: 0.5,
+                fillOpacity: opacity
+            };
+        }
+
+        // Popup content
+        function onEachFeature(feature, layer) {
+            const props = feature.properties;
+            let content = '<div style="font-size:12px;">';
+
+            if (props.NAME) content += `<b>${props.NAME}</b><br>`;
+            if (props.CLASS) content += `Class: ${props.CLASS}<br>`;
+            if (props.TYPE_CODE) content += `Type: ${props.TYPE_CODE}<br>`;
+            if (props.CEILING) content += `LAANC Ceiling: ${props.CEILING} ft<br>`;
+            if (props.APT1_NAME) content += `Airport: ${props.APT1_NAME} (${props.APT1_ICAO})<br>`;
+            if (props.UPPER_VAL) content += `Upper: ${props.UPPER_VAL} ${props.UPPER_UOM || 'ft'}<br>`;
+            if (props.LOWER_VAL) content += `Lower: ${props.LOWER_VAL} ${props.LOWER_UOM || 'ft'}<br>`;
+
+            content += '</div>';
+            layer.bindPopup(content);
+        }
+
+        // Data source: Use R2 in production, local files in development
+        // Production: www.ubuntusoftware.net loads from R2 (files too large for Pages)
+        // Development: localhost loads from local static/airspace/ (if available)
+        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        const DATA_BASE = isProduction
+            ? 'https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/airspace'
+            : '/airspace';
+
+        // Load data
+        async function loadData() {
+            try {
+                console.log(`Loading airspace data from: ${DATA_BASE} (${isProduction ? 'production' : 'development'})`);
+
+                // Load airspace boundaries
+                const boundaryResp = await fetch(`${DATA_BASE}/faa_airspace_boundary.geojson`);
+                const boundaryData = await boundaryResp.json();
+                L.geoJSON(boundaryData, {
+                    style: getAirspaceStyle,
+                    onEachFeature: onEachFeature
+                }).addTo(boundaryLayer);
+
+                // Load Special Use Airspace
+                const suaResp = await fetch(`${DATA_BASE}/faa_special_use_airspace.geojson`);
+                const suaData = await suaResp.json();
+                L.geoJSON(suaData, {
+                    style: getSUAStyle,
+                    onEachFeature: onEachFeature
+                }).addTo(suaLayer);
+
+                // Load LAANC grid (but don't display by default - too dense)
+                const laancResp = await fetch(`${DATA_BASE}/faa_uas_facility_map.geojson`);
+                const laancData = await laancResp.json();
+                L.geoJSON(laancData, {
+                    style: getLAANCStyle,
+                    onEachFeature: onEachFeature
+                }).addTo(laancLayer);
+
+                document.getElementById('loading').style.display = 'none';
+            } catch (err) {
+                document.getElementById('loading').textContent = 'Error loading data: ' + err.message;
+            }
+        }
+
+        // Layer toggles
+        document.getElementById('toggle-boundary').addEventListener('change', (e) => {
+            e.target.checked ? map.addLayer(boundaryLayer) : map.removeLayer(boundaryLayer);
+        });
+        document.getElementById('toggle-sua').addEventListener('change', (e) => {
+            e.target.checked ? map.addLayer(suaLayer) : map.removeLayer(suaLayer);
+        });
+        document.getElementById('toggle-laanc').addEventListener('change', (e) => {
+            e.target.checked ? map.addLayer(laancLayer) : map.removeLayer(laancLayer);
+        });
+
+        loadData();
+    </script>
+</body>
+</html>

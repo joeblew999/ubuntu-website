@@ -25,6 +25,8 @@ version: '3'
 #   mailerlite:* - MailerLite subscriber management (cmd/mailerlite)
 #   vanityimport:* - Go vanity import packages (cmd/vanityimport)
 #   google:*    - All Google services unified (cmd/google)
+#   airspace:*  - Airspace demo and FAA data tools (cmd/airspace)
+#   r2:*        - R2 object storage for large static assets
 #   env:*       - Environment management
 #   url:*       - URL shortcuts + SEO dashboards
 #   tools:*     - Tools (gh, task, etc.)
@@ -87,6 +89,12 @@ includes:
   # Go vanity imports (/pkg/)
   vanityimport: ./taskfiles/Taskfile.vanityimport.yml
 
+  # Airspace demo (BVLOS development)
+  airspace: ./taskfiles/Taskfile.airspace.yml
+
+  # R2 object storage (large static assets)
+  r2: ./taskfiles/Taskfile.cf-r2.yml
+
   # Toki i18n toolkit (fork: joeblew999/toki)
   toki: ./taskfiles/Taskfile.toki.yml
 
@@ -115,12 +123,6 @@ vars:
   URL_PRODUCTION: https://www.ubuntusoftware.net
   URL_PREVIEW: https://ubuntu-website.pages.dev
   URL_DEV: http://localhost:1313
-
-  # Cloudflare Dashboard URLs
-  CF_DASH_BASE: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}
-  CF_DASH_DOMAIN: '{{.CF_DASH_BASE}}/ubuntusoftware.net'
-  CF_DASH_PAGES: '{{.CF_DASH_BASE}}/pages/view/{{.PROJECT_NAME}}'
-  CF_DASH_PAGES_SETTINGS: '{{.CF_DASH_PAGES}}/settings/production'
 
   # Commands
   ENV_CMD: cmd/env/main.go
@@ -223,9 +225,9 @@ tasks:
           echo ""
         fi
         echo "Cloudflare Dashboards:"
-        echo "  Domain: {{.CF_DASH_DOMAIN}}"
-        echo "  Pages: {{.CF_DASH_PAGES}}"
-        echo "  Settings: {{.CF_DASH_PAGES_SETTINGS}}"
+        echo "  Domain: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/ubuntusoftware.net"
+        echo "  Pages: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/pages/view/{{.PROJECT_NAME}}"
+        echo "  Settings: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/pages/view/{{.PROJECT_NAME}}/settings/production"
         echo ""
         echo "Quick Commands:"
         echo "  task setup             - Install Hugo, Bun, dependencies"

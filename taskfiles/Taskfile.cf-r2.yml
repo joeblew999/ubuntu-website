@@ -1,0 +1,242 @@
+# R2 Object Storage Taskfile
+#
+# Cloudflare R2 for static assets that exceed Pages limits (25MB per file).
+# Uses wrangler CLI for bucket management and file sync.
+#
+# Bucket: ubuntu-assets (public read via custom domain or R2.dev URL)
+#
+# Usage:
+#   task r2:status          - Show bucket status and usage
+#   task r2:upload FILE=x   - Upload single file
+#   task r2:sync DIR=x      - Sync directory to R2
+#   task r2:list            - List bucket contents
+#
+# Setup:
+#   1. Ensure CLOUDFLARE_API_TOKEN has R2 permissions
+#   2. Run: task r2:bucket:create
+#   3. Enable public access: task r2:bucket:public
+
+version: '3'
+
+vars:
+  # Bucket name - used for all R2 operations
+  R2_BUCKET: ubuntu-website-assets
+
+  # Public URL prefix (R2.dev subdomain - auto-generated)
+  # Alternative: Custom domain via DNS CNAME to bucket
+  R2_PUBLIC_URL: 'https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev'
+
+  # Cloudflare Dashboard URLs
+  CF_R2_DASH: 'https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/r2/overview'
+  CF_R2_DASH_BUCKET: 'https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/r2/default/buckets/{{.R2_BUCKET}}'
+  CF_R2_DASH_SETTINGS: 'https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/r2/default/buckets/{{.R2_BUCKET}}/settings'
+
+  # Wrangler path
+  WRANGLER: '{{.HOME}}/.bun/bin/wrangler'
+
+tasks:
+  # ===========================================================================
+  # Bucket Management
+  # ===========================================================================
+
+  bucket:create:
+    desc: Create R2 bucket
+    cmds:
+      - '{{.WRANGLER}} r2 bucket create {{.R2_BUCKET}}'
+      - echo "Bucket created. Run 'task r2:bucket:public' to enable public access."
+
+  bucket:delete:
+    desc: Delete R2 bucket (destructive!)
+    prompt: This will delete the bucket and ALL contents. Are you sure?
+    cmds:
+      - '{{.WRANGLER}} r2 bucket delete {{.R2_BUCKET}}'
+
+  bucket:public:
+    desc: Enable public access for R2 bucket
+    cmds:
+      - |
+        echo "To enable public access:"
+        echo ""
+        echo "Option 1 - R2.dev subdomain (quick):"
+        echo "  1. Go to: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/r2/overview/buckets/{{.R2_BUCKET}}/settings"
+        echo "  2. Enable 'R2.dev subdomain'"
+        echo "  3. Copy the generated URL"
+        echo ""
+        echo "Option 2 - Custom domain (recommended for production):"
+        echo "  1. Add CNAME: assets.ubuntusoftware.net -> your-bucket.r2.cloudflarestorage.com"
+        echo "  2. Configure custom domain in R2 settings"
+        echo ""
+        echo "After enabling, update R2_PUBLIC_URL in this taskfile."
+
+  # ===========================================================================
+  # Status & Listing
+  # ===========================================================================
+
+  status:
+    desc: Show R2 bucket status
+    cmds:
+      - |
+        echo "========================================"
+        echo "R2 Bucket Status"
+        echo "========================================"
+        echo "Bucket: {{.R2_BUCKET}}"
+        echo "Public URL: {{.R2_PUBLIC_URL}}"
+        echo ""
+        echo "Dashboards:"
+        echo "  R2 Overview: {{.CF_R2_DASH}}"
+        echo "  Bucket: {{.CF_R2_DASH_BUCKET}}"
+        echo "  Settings: {{.CF_R2_DASH_SETTINGS}}"
+        echo ""
+        echo "Checking bucket..."
+      - '{{.WRANGLER}} r2 bucket list | grep -E "{{.R2_BUCKET}}|Name" || echo "Bucket not found. Run: task r2:bucket:create"'
+
+  list:
+    desc: List bucket contents
+    cmds:
+      - '{{.WRANGLER}} r2 object list {{.R2_BUCKET}}'
+
+  list:airspace:
+    desc: List airspace data files in R2
+    cmds:
+      - '{{.WRANGLER}} r2 object list {{.R2_BUCKET}} --prefix airspace/'
+
+  # ===========================================================================
+  # Upload Operations
+  # ===========================================================================
+
+  upload:
+    desc: Upload single file to R2
+    requires:
+      vars: [FILE]
+    vars:
+      KEY: '{{.KEY | default .FILE}}'
+    cmds:
+      - '{{.WRANGLER}} r2 object put {{.R2_BUCKET}}/{{.KEY}} --file {{.FILE}} --remote'
+      - echo "Uploaded to {{.R2_PUBLIC_URL}}/{{.KEY}}"
+
+  sync:
+    desc: Sync directory to R2 (uploads new/changed files)
+    requires:
+      vars: [DIR]
+    vars:
+      PREFIX: '{{.PREFIX | default ""}}'
+    cmds:
+      - |
+        echo "Syncing {{.DIR}} to r2://{{.R2_BUCKET}}/{{.PREFIX}}"
+
+        # Upload each file
+        for file in {{.DIR}}/*; do
+          if [ -f "$file" ]; then
+            filename=$(basename "$file")
+            echo "  Uploading: $filename"
+            {{.WRANGLER}} r2 object put "{{.R2_BUCKET}}/{{.PREFIX}}$filename" --file "$file" --remote
+          fi
+        done
+
+        echo ""
+        echo "Done. Files available at: {{.R2_PUBLIC_URL}}/{{.PREFIX}}"
+
+  # ===========================================================================
+  # Airspace Data (specific workflow)
+  # ===========================================================================
+
+  airspace:upload:
+    desc: Upload airspace GeoJSON files to R2
+    cmds:
+      - task: sync
+        vars:
+          DIR: static/airspace
+          PREFIX: airspace/
+      - |
+        echo ""
+        echo "Airspace data uploaded to R2."
+        echo ""
+        echo "Update static/airspace-demo/index.html to use:"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_special_use_airspace.geojson"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_uas_facility_map.geojson"
+
+  # ===========================================================================
+  # Endpoint Registry
+  # ===========================================================================
+  # Documents all R2 assets and their public URLs
+
+  endpoints:
+    desc: List all R2 asset endpoints
+    cmds:
+      - |
+        echo "========================================"
+        echo "R2 Asset Endpoints"
+        echo "========================================"
+        echo ""
+        echo "Base URL: {{.R2_PUBLIC_URL}}"
+        echo ""
+        echo "Airspace Data (FAA UDDS):"
+        echo "  /airspace/faa_airspace_boundary.geojson     - Class B/C/D/E airspace (14MB)"
+        echo "  /airspace/faa_special_use_airspace.geojson  - MOAs, Restricted (28MB)"
+        echo "  /airspace/faa_uas_facility_map.geojson      - LAANC grid ceilings (2.2MB)"
+        echo ""
+        echo "Full URLs:"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_special_use_airspace.geojson"
+        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_uas_facility_map.geojson"
+
+  endpoints:test:
+    desc: Test that all R2 endpoints are accessible
+    cmds:
+      - |
+        echo "Testing R2 endpoints..."
+        echo ""
+
+        test_url() {
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$1")
+          SIZE=$(curl -sI "$1" | grep -i content-length | awk '{print $2}' | tr -d '\r')
+          if [ "$STATUS" = "200" ]; then
+            echo "  ✓ $2 ($STATUS, ${SIZE:-?} bytes)"
+          else
+            echo "  ✗ $2 ($STATUS)"
+          fi
+        }
+
+        test_url "{{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson" "Airspace Boundary"
+        test_url "{{.R2_PUBLIC_URL}}/airspace/faa_special_use_airspace.geojson" "Special Use Airspace"
+        test_url "{{.R2_PUBLIC_URL}}/airspace/faa_uas_facility_map.geojson" "UAS Facility Map"
+
+        echo ""
+        echo "Done."
+
+  # ===========================================================================
+  # Dashboard URLs
+  # ===========================================================================
+
+  open:
+    desc: Open R2 dashboard in browser
+    cmds:
+      - open "{{.CF_R2_DASH}}"
+
+  open:bucket:
+    desc: Open R2 bucket in browser
+    cmds:
+      - open "{{.CF_R2_DASH_BUCKET}}"
+
+  open:settings:
+    desc: Open R2 bucket settings in browser
+    cmds:
+      - open "{{.CF_R2_DASH_SETTINGS}}"
+
+  # ===========================================================================
+  # Checks
+  # ===========================================================================
+
+  check:deps:
+    desc: Ensure R2 access is configured
+    cmds:
+      - |
+        if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+          echo "ERROR: CLOUDFLARE_API_TOKEN not set"
+          echo "Run: source .env"
+          exit 1
+        fi
+      - '{{.WRANGLER}} r2 bucket list > /dev/null 2>&1 || (echo "ERROR: API token may not have R2 permissions. Update at: https://dash.cloudflare.com/profile/api-tokens" && exit 1)'
+      - 'echo "OK: R2 access configured"'
+

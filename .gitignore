@@ -50,3 +50,14 @@ lib/codecs/
 
 # Downloaded videos - originals not committed, edited tracked via LFS
 static/videos/cache/
+
+# Large static assets (served from R2 instead of Pages)
+# Run: task r2:airspace:upload to sync to R2
+static/airspace/*.geojson
+
+# Wrangler cache
+.wrangler/
+
+# Compiled Go binaries (use go run instead)
+/claude
+/airspace

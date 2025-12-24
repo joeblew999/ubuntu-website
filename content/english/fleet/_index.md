@@ -180,6 +180,8 @@ Explore each component in detail:
 | [Vehicle Gateway]({{< relref "/fleet/gateway" >}}) | Protocol-to-NATS bridge |
 | [Authorization & Grants]({{< relref "/fleet/authorization" >}}) | Decentralized security, third-party access |
 | [Safety Model]({{< relref "/fleet/safety" >}}) | Failsafes and graceful degradation |
+| [BVLOS Regulations]({{< relref "/fleet/bvlos-regulations" >}}) | Global Beyond Visual Line of Sight regulations |
+| [Airspace Viewer]({{< relref "/fleet/airspace-demo" >}}) | Interactive US airspace visualization |
 
 ---
 
