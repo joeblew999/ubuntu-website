@@ -44,14 +44,14 @@ func DefaultConfig() *Config {
 
 // File represents a Google Drive file or folder
 type File struct {
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	MimeType    string   `json:"mimeType"`
-	Size        int64    `json:"size,omitempty"`
-	CreatedTime string   `json:"createdTime,omitempty"`
-	ModifiedTime string  `json:"modifiedTime,omitempty"`
-	Parents     []string `json:"parents,omitempty"`
-	WebViewLink string   `json:"webViewLink,omitempty"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	MimeType     string   `json:"mimeType"`
+	Size         string   `json:"size,omitempty"` // String because Google API returns it as string
+	CreatedTime  string   `json:"createdTime,omitempty"`
+	ModifiedTime string   `json:"modifiedTime,omitempty"`
+	Parents      []string `json:"parents,omitempty"`
+	WebViewLink  string   `json:"webViewLink,omitempty"`
 }
 
 // IsFolder returns true if the file is a folder

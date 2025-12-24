@@ -13,6 +13,13 @@
 
 version: '3'
 
+vars:
+  # Cloudflare Dashboard URLs
+  CF_DASH_BASE: 'https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}'
+  CF_DASH_DOMAIN: '{{.CF_DASH_BASE}}/ubuntusoftware.net'
+  CF_DASH_PAGES: '{{.CF_DASH_BASE}}/pages/view/{{.PROJECT_NAME}}'
+  CF_DASH_PAGES_SETTINGS: '{{.CF_DASH_PAGES}}/settings/production'
+
 tasks:
   # ===========================================================================
   # Checks
@@ -169,6 +176,11 @@ tasks:
     desc: Open Cloudflare AI Crawl Control (configure AI bot access)
     cmds:
       - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/ubuntusoftware.net/ai"
+
+  open:r2:
+    desc: Open Cloudflare R2 dashboard
+    cmds:
+      - open "https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/r2/overview"
 
   # ===========================================================================
   # Deprecated (kept for reference)

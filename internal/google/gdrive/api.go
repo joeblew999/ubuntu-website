@@ -278,6 +278,62 @@ func (c *APIClient) CreateFolder(name, parentID string) (*UploadResult, error) {
 	}, nil
 }
 
+// Search searches for files by name
+func (c *APIClient) Search(query string, maxResults int) (*ListResult, error) {
+	if maxResults <= 0 {
+		maxResults = 20
+	}
+
+	// Build the query - search by name containing the query
+	q := fmt.Sprintf("name contains '%s' and trashed = false", query)
+
+	params := url.Values{}
+	params.Set("q", q)
+	params.Set("pageSize", fmt.Sprintf("%d", maxResults))
+	params.Set("fields", "nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, parents, webViewLink)")
+	params.Set("orderBy", "modifiedTime desc")
+
+	apiURL := "https://www.googleapis.com/drive/v3/files?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return &ListResult{Success: false, Error: err.Error()}, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+c.token)
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return &ListResult{Success: false, Error: err.Error()}, err
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return &ListResult{
+			Success: false,
+			Error:   fmt.Sprintf("API error %d: %s", resp.StatusCode, string(respBody)),
+		}, fmt.Errorf("API error: %s", string(respBody))
+	}
+
+	var apiResp struct {
+		Files         []*File `json:"files"`
+		NextPageToken string  `json:"nextPageToken"`
+	}
+
+	if err := json.Unmarshal(respBody, &apiResp); err != nil {
+		return &ListResult{Success: false, Error: err.Error()}, err
+	}
+
+	return &ListResult{
+		Success:       true,
+		Files:         apiResp.Files,
+		NextPageToken: apiResp.NextPageToken,
+	}, nil
+}
+
 // Delete deletes a file (moves to trash)
 func (c *APIClient) Delete(fileID string) error {
 	apiURL := fmt.Sprintf("https://www.googleapis.com/drive/v3/files/%s",

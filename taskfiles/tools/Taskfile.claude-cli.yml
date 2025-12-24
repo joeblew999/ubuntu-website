@@ -1,49 +1,128 @@
 # Claude CLI - Anthropic Claude Code Taskfile
 #
-# Installs and manages Claude CLI via Bun.
-# Used by autotranslate.yml for Claude-based translations using your subscription.
+# Manages Claude CLI native binary installation.
+# Uses the official native binary from Anthropic (not npm/bun).
 #
-# Claude CLI is npm-only (no standalone binaries), so we install via Bun globally.
-# Uses full path to bun global bin dir since it may not be in PATH.
+# Native binary is faster, more reliable, and signed by Anthropic.
+# Installed at ~/.local/bin/claude
+#
+# This taskfile uses Go code for robust detection and version management.
+# See: internal/claude/ and cmd/claude/
 
 version: '3'
 
 vars:
-  # Binary name - npm/bun handles platform-specific shims (.cmd on Windows)
-  CLAUDE_CLI_BIN: 'claude'
-  # Bun global bin directory (consistent location)
-  BUN_GLOBAL_BIN: '{{.HOME}}/.bun/bin'
+  # Native binary location (Anthropic's official installer puts it here)
+  CLAUDE_CLI_BIN: '{{.HOME}}/.local/bin/claude'
+
+  # Minimum supported version (semver: major.minor.patch)
+  # Update this when new features are required
+  MIN_VERSION: '2.0.0'
+
+  # Go CLI for robust detection
+  # Use --dev for developer mode, --ci for CI mode, --user for user mode (default)
+  GO_CLI: 'go run ./cmd/claude'
+  GO_CLI_DEV: 'go run ./cmd/claude --dev'
+  GO_CLI_CI: 'go run ./cmd/claude --ci'
 
 tasks:
   # ===========================================================================
-  # Checks
+  # Status & Checks (uses Go CLI for robust detection)
   # ===========================================================================
 
-  check:deps:
-    desc: Ensure Claude CLI is installed via Bun
-    status:
-      - test -f "{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}"
+  status:
+    desc: Show Claude CLI installation status with version info
     cmds:
-      - 'command -v bun >/dev/null 2>&1 || (echo "ERROR: Bun not installed. Install from https://bun.sh" && exit 1)'
-      - task: install
+      - '{{.GO_CLI}} status'
 
-  install:
-    desc: Install Claude CLI globally via Bun
+  status:dev:
+    desc: Show Claude CLI status (developer mode with test commands)
     cmds:
-      - 'echo "Installing Claude CLI via Bun..."'
-      - bun add -g @anthropic-ai/claude-code
-      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" --version'
-      - 'echo "OK: Claude CLI installed to {{.BUN_GLOBAL_BIN}}"'
-      - 'echo ""'
-      - 'echo "Next: Run \"claude auth login\" to authenticate"'
+      - '{{.GO_CLI_DEV}} status'
 
-  check:validate:
-    desc: Validate Claude CLI works
-    deps: [check:deps]
+  check:
+    desc: Check if native Claude CLI is properly installed
     cmds:
       - |
-        VERSION=$("{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" --version 2>/dev/null | head -1)
-        echo "OK: Claude CLI $VERSION"
+        if {{.GO_CLI}} check >/dev/null 2>&1; then
+          echo "✅ Native Claude CLI is installed"
+          {{.GO_CLI}} check
+        else
+          echo "❌ Native Claude CLI not installed"
+          echo ""
+          echo "Run 'task claude-cli:setup' to install"
+          exit 1
+        fi
+
+  check:deps:
+    desc: Ensure Claude CLI native binary is installed (for deps)
+    status:
+      - '{{.GO_CLI}} check >/dev/null 2>&1'
+    cmds:
+      - task: install
+
+  check:version:
+    desc: Check if installed version meets minimum requirement
+    cmds:
+      - |
+        RESULT=$({{.GO_CLI}} version-check {{.MIN_VERSION}} 2>&1)
+        if echo "$RESULT" | grep -q "^ok:"; then
+          VERSION=$(echo "$RESULT" | cut -d: -f2)
+          echo "✅ Version $VERSION meets minimum {{.MIN_VERSION}}"
+        elif echo "$RESULT" | grep -q "upgrade-needed"; then
+          CURRENT=$(echo "$RESULT" | cut -d: -f2)
+          echo "⚠️  Version $CURRENT is below minimum {{.MIN_VERSION}}"
+          echo ""
+          echo "Run 'task claude-cli:upgrade' to update"
+          exit 1
+        else
+          echo "❌ Claude CLI not installed"
+          exit 1
+        fi
+
+  check:native:
+    desc: Verify the binary is native (not npm/bun script)
+    cmds:
+      - |
+        TYPE=$(file "{{.CLAUDE_CLI_BIN}}" 2>/dev/null | grep -o "Mach-O\|ELF" | head -1)
+        if [ -n "$TYPE" ]; then
+          echo "✅ Native binary detected ($TYPE)"
+        else
+          echo "❌ Not a native binary - may be npm/bun script"
+          echo ""
+          echo "Run 'task claude-cli:setup' to install native version"
+          exit 1
+        fi
+
+  # ===========================================================================
+  # Installation
+  # ===========================================================================
+
+  install:
+    desc: Install Claude CLI native binary
+    cmds:
+      - 'echo "Installing Claude CLI native binary..."'
+      - 'curl -fsSL https://claude.ai/install.sh | bash'
+      - '"{{.CLAUDE_CLI_BIN}}" --version'
+      - 'echo ""'
+      - 'echo "OK: Claude CLI installed to {{.CLAUDE_CLI_BIN}}"'
+
+  setup:
+    desc: Full setup - cleanup old versions and install native binary
+    cmds:
+      - task: cleanup:all
+      - task: install
+      - task: check:version
+      - |
+        echo ""
+        echo "🎉 Claude CLI setup complete!"
+        echo ""
+        echo "Native binary: {{.CLAUDE_CLI_BIN}}"
+        echo "Minimum version: {{.MIN_VERSION}}"
+        echo ""
+        echo "Next steps:"
+        echo "  task claude-cli:auth:login   # Login to Claude"
+        echo "  task claude-cli:status       # Check status"
 
   # ===========================================================================
   # Authentication
@@ -53,13 +132,13 @@ tasks:
     desc: Login to Claude (opens browser)
     deps: [check:deps]
     cmds:
-      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" auth login'
+      - '"{{.CLAUDE_CLI_BIN}}" auth login'
 
   auth:status:
     desc: Check authentication status
     deps: [check:deps]
     cmds:
-      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" auth status'
+      - '"{{.CLAUDE_CLI_BIN}}" auth status'
 
   # ===========================================================================
   # Version Management
@@ -69,13 +148,215 @@ tasks:
     desc: Show installed Claude CLI version
     deps: [check:deps]
     cmds:
-      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" --version'
+      - '"{{.CLAUDE_CLI_BIN}}" --version'
 
   upgrade:
     desc: Upgrade Claude CLI to latest version
     cmds:
-      - 'command -v bun >/dev/null 2>&1 || (echo "ERROR: Bun not installed" && exit 1)'
       - 'echo "Upgrading Claude CLI to latest..."'
-      - bun add -g @anthropic-ai/claude-code@latest
-      - '"{{.BUN_GLOBAL_BIN}}/{{.CLAUDE_CLI_BIN}}" --version'
+      - 'curl -fsSL https://claude.ai/install.sh | bash -s latest'
+      - '"{{.CLAUDE_CLI_BIN}}" --version'
+      - 'echo ""'
       - 'echo "OK: Claude CLI upgraded"'
+      - task: check:version
+
+  # ===========================================================================
+  # Cleanup & Migration
+  # ===========================================================================
+
+  cleanup:check:
+    desc: Check for old Claude CLI installations that should be removed
+    cmds:
+      - '{{.GO_CLI}} cleanup'
+
+  cleanup:all:
+    desc: Remove ALL old Claude CLI installations (npm, bun, etc.)
+    cmds:
+      - |
+        echo "🧹 Cleaning up old Claude CLI installations..."
+        echo ""
+
+        # Remove via package managers first (safer)
+        echo "Removing via package managers..."
+        bun remove -g @anthropic-ai/claude-code 2>/dev/null && echo "  ✓ Removed via bun" || true
+        npm uninstall -g @anthropic-ai/claude-code 2>/dev/null && echo "  ✓ Removed via npm" || true
+
+        # Remove bun global binary and symlink
+        if [ -f "{{.HOME}}/.bun/bin/claude" ] || [ -L "{{.HOME}}/.bun/bin/claude" ]; then
+          rm -f "{{.HOME}}/.bun/bin/claude"
+          echo "  ✓ Removed ~/.bun/bin/claude"
+        fi
+
+        # Remove bun node_modules
+        if [ -d "{{.HOME}}/.bun/install/global/node_modules/@anthropic-ai/claude-code" ]; then
+          rm -rf "{{.HOME}}/.bun/install/global/node_modules/@anthropic-ai/claude-code"
+          echo "  ✓ Removed ~/.bun/install/global/node_modules/@anthropic-ai/claude-code"
+        fi
+
+        # Remove homebrew npm binary
+        if [ -f "/opt/homebrew/bin/claude" ] || [ -L "/opt/homebrew/bin/claude" ]; then
+          rm -f "/opt/homebrew/bin/claude"
+          echo "  ✓ Removed /opt/homebrew/bin/claude"
+        fi
+
+        # Remove homebrew node_modules
+        if [ -d "/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code" ]; then
+          rm -rf "/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code"
+          echo "  ✓ Removed /opt/homebrew/lib/node_modules/@anthropic-ai/claude-code"
+        fi
+
+        # Remove standard npm global (Linux)
+        if [ -d "/usr/local/lib/node_modules/@anthropic-ai/claude-code" ]; then
+          sudo rm -rf "/usr/local/lib/node_modules/@anthropic-ai/claude-code" 2>/dev/null && echo "  ✓ Removed /usr/local/lib/node_modules/@anthropic-ai/claude-code" || true
+        fi
+
+        if [ -L "/usr/local/bin/claude" ]; then
+          TARGET=$(readlink "/usr/local/bin/claude" 2>/dev/null || echo "")
+          if echo "$TARGET" | grep -q "node_modules"; then
+            sudo rm -f "/usr/local/bin/claude" 2>/dev/null && echo "  ✓ Removed /usr/local/bin/claude" || true
+          fi
+        fi
+
+        echo ""
+        echo "✅ Cleanup complete"
+
+  cleanup:npm:
+    desc: Remove npm/bun Claude CLI (alias for cleanup:all)
+    cmds:
+      - task: cleanup:all
+
+  # ===========================================================================
+  # Testing & Validation (for CI and migration testing)
+  # ===========================================================================
+
+  test:install-npm:
+    desc: "[TEST] Install old npm version (for migration testing)"
+    cmds:
+      - |
+        echo "⚠️  Installing npm version of Claude CLI for testing..."
+        echo "    This is intentionally installing the OLD way to test migration."
+        echo ""
+        npm install -g @anthropic-ai/claude-code
+        echo ""
+        echo "✅ npm version installed. Now test migration with:"
+        echo "   task claude-cli:status"
+        echo "   task claude-cli:cleanup:check"
+        echo "   task claude-cli:setup"
+
+  test:install-bun:
+    desc: "[TEST] Install old bun version (for migration testing)"
+    cmds:
+      - |
+        echo "⚠️  Installing bun version of Claude CLI for testing..."
+        echo "    This is intentionally installing the OLD way to test migration."
+        echo ""
+        bun add -g @anthropic-ai/claude-code
+        echo ""
+        echo "✅ bun version installed. Now test migration with:"
+        echo "   task claude-cli:status"
+        echo "   task claude-cli:cleanup:check"
+        echo "   task claude-cli:setup"
+
+  test:migration:
+    desc: "[TEST] Full migration test - install npm, verify detection, cleanup, install native"
+    cmds:
+      - |
+        echo "=========================================="
+        echo "  Claude CLI Migration Test"
+        echo "=========================================="
+        echo ""
+
+        # Step 1: Record current state
+        echo "📋 Step 1: Recording current state..."
+        NATIVE_EXISTS="no"
+        if [ -f "{{.CLAUDE_CLI_BIN}}" ]; then
+          NATIVE_VERSION=$("{{.CLAUDE_CLI_BIN}}" --version 2>/dev/null || echo "unknown")
+          NATIVE_EXISTS="yes"
+          echo "   Native binary exists: $NATIVE_VERSION"
+        else
+          echo "   Native binary: not installed"
+        fi
+        echo ""
+
+        # Step 2: Install npm version
+        echo "📦 Step 2: Installing npm version (old way)..."
+        npm install -g @anthropic-ai/claude-code 2>/dev/null || echo "   (npm install may have failed - continuing)"
+        echo ""
+
+        # Step 3: Verify detection
+        echo "🔍 Step 3: Verifying detection..."
+        {{.GO_CLI}} status
+        echo ""
+
+        # Step 4: Check cleanup needed
+        echo "🧹 Step 4: Checking what needs cleanup..."
+        {{.GO_CLI}} cleanup || true
+        echo ""
+
+        # Step 5: Run cleanup
+        echo "🧹 Step 5: Running cleanup..."
+        task claude-cli:cleanup:all
+        echo ""
+
+        # Step 6: Ensure native is installed
+        echo "📥 Step 6: Ensuring native binary is installed..."
+        if [ "$NATIVE_EXISTS" = "no" ]; then
+          task claude-cli:install
+        else
+          echo "   Native binary already exists, skipping install"
+        fi
+        echo ""
+
+        # Step 7: Final verification
+        echo "✅ Step 7: Final verification..."
+        {{.GO_CLI}} status
+        echo ""
+
+        # Step 8: Check cleanup is clean
+        echo "🔍 Step 8: Verifying no cleanup needed..."
+        if {{.GO_CLI}} cleanup; then
+          echo ""
+          echo "=========================================="
+          echo "  ✅ Migration test PASSED"
+          echo "=========================================="
+        else
+          echo ""
+          echo "=========================================="
+          echo "  ⚠️  Migration test completed with warnings"
+          echo "=========================================="
+        fi
+
+  test:detect-json:
+    desc: "[TEST] Output detection as JSON (for debugging)"
+    cmds:
+      - '{{.GO_CLI}} detect --json'
+
+  # ===========================================================================
+  # CI/Automation helpers
+  # ===========================================================================
+
+  ci:ensure:
+    desc: Ensure Claude CLI is ready for CI (install if needed, check version)
+    cmds:
+      - '{{.GO_CLI_CI}} ensure {{.MIN_VERSION}}'
+
+  ci:status:
+    desc: Machine-readable status for CI scripts
+    cmds:
+      - '{{.GO_CLI_CI}} status'
+
+  ci:version:
+    desc: Output just the version number (for scripts)
+    cmds:
+      - |
+        VERSION=$("{{.CLAUDE_CLI_BIN}}" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+        echo "$VERSION"
+
+  # ===========================================================================
+  # One-command setup for users
+  # ===========================================================================
+
+  ensure:
+    desc: Ensure Claude CLI is properly installed (auto-fix any issues)
+    cmds:
+      - '{{.GO_CLI}} ensure {{.MIN_VERSION}}'

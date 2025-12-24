@@ -3,6 +3,8 @@ title: "Company History"
 meta_title: "Company History | Ubuntu Software - Established 1999"
 description: "Ubuntu Software has been operating since 1999, predating Ubuntu Linux by five years. Official UK Companies House records document our history."
 draft: false
+aliases:
+  - "/company-history/"
 ---
 
 **Ubuntu Software** has been operating in the IT industry since **1999** - five years before Ubuntu Linux was released.
@@ -19,6 +21,8 @@ draft: false
 | **2004** | Operating as IT consultancy | First release (October) |
 | 2005-2012 | Continued operations | Growing popularity |
 | 2012 | UK company voluntarily dissolved | - |
+| **2012-2017** | Security Architect at ECDC (European Centre for Disease Prevention and Control) | - |
+| **2017-2021** | Earth Observation systems for European Climate Foundation | - |
 | **2024** | Relaunched as Ubuntu Software (Australia) | - |
 
 ## UK Company Record (1999-2012)
@@ -62,6 +66,45 @@ We maintain copies of key documents proving our company history:
 "Ubuntu" is a Nguni Bantu term from Southern Africa, often translated as "I am because we are" or "humanity towards others." It represents a philosophy of human interconnectedness.
 
 We chose this name in 1999 because it reflects our belief in technology that serves humanity - building software that empowers people and communities.
+
+## ECDC Work (2012-2017)
+
+Following the UK company dissolution, Gerard served as **Security Architect** at the **European Centre for Disease Prevention and Control** ([ECDC](https://www.ecdc.europa.eu/en/about-ecdc)) in Stockholm, Sweden.
+
+| Field | Value |
+|-------|-------|
+| **Duration** | 5 years (2012-2017) |
+| **Organization** | European Centre for Disease Prevention and Control |
+| **Role** | Security Architect |
+| **Location** | Stockholm, Sweden |
+| **Focus** | Security architecture for disease surveillance systems |
+
+ECDC is an EU agency protecting over 500 million people from infectious diseases. The agency operates the **European Surveillance System (TESSy)**, collecting and analyzing data on 52 communicable diseases from all EU member states. Gerard's role as Security Architect involved protecting these critical public health information systems and ensuring secure data exchange between 27+ national health authorities.
+
+---
+
+## Earth Observation Work (2017-2021)
+
+Following ECDC, Gerard worked on Earth observation systems for the **European Climate Foundation** (ECF).
+
+| Field | Value |
+|-------|-------|
+| **Duration** | 4 years (2017-2021) |
+| **Organization** | European Climate Foundation |
+| **Technical Lead** | Tom Brookes (Executive Director, Strategic Communications) |
+| **Focus** | Satellite data processing, remote sensing analysis |
+| **Technology** | Golang, geospatial data pipelines |
+| **Reference** | [Work Reference Letter (PDF)](/projects/ecf-reference-letter.pdf) |
+
+**Project Scope:**
+- Pollution monitoring and visualization
+- Methane detection systems
+- Atmospheric analysis tools
+- Multi-source satellite data integration
+
+This work applied the same spatial reasoning principles—processing geometry at scale—that later informed Ubuntu Software's approach to 3D design and sensor fusion systems.
+
+---
 
 ## Current Operations (Australia)
 

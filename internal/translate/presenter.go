@@ -612,14 +612,16 @@ func (p *MarkdownPresenter) Diff(r DiffResult) {
 	}
 
 	if r.IsNew {
-		fmt.Fprintln(p.w, "**Status:** New file\n")
+		fmt.Fprintln(p.w, "**Status:** New file")
+		fmt.Fprintln(p.w)
 		fmt.Fprintln(p.w, "```")
 		fmt.Fprint(p.w, r.DiffOutput)
 		fmt.Fprintln(p.w, "```")
 	} else if r.DiffOutput == "" {
 		fmt.Fprintln(p.w, "**Status:** No changes")
 	} else {
-		fmt.Fprintln(p.w, "**Status:** Modified\n")
+		fmt.Fprintln(p.w, "**Status:** Modified")
+		fmt.Fprintln(p.w)
 		fmt.Fprintln(p.w, "```diff")
 		fmt.Fprint(p.w, r.DiffOutput)
 		fmt.Fprintln(p.w, "```")

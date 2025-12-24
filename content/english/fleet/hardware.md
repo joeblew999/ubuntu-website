@@ -12,6 +12,41 @@ aliases:
 **Looking for other vehicle types?** This page covers drone hardware. For ground vehicles (cars, trucks, AGVs), see [Ground Vehicle Platform]({{< relref "/fleet/platforms/ground" >}}). For a complete overview, see [Supported Platforms]({{< relref "/fleet/platforms" >}}).
 {{< /notice >}}
 
+## Buy from a Local Shop
+
+Drone building has a learning curve. **Buy from a shop that can help you**—they stock the hardware, we provide the fleet software.
+
+When you purchase from a partner shop, you get:
+- Pre-tested hardware ready to connect
+- Local support from people who know drones
+- Access to our managed fleet infrastructure
+
+---
+
+## Shops with Physical Locations
+
+Visit a shop in person for hands-on help with your build:
+
+{{< featured-shops >}}
+
+**Are you a drone shop?** [Join our partner program]({{< relref "/partners/become-partner" >}}) to offer fleet infrastructure with your hardware sales.
+
+---
+
+## What You Need
+
+| Kit | Components | Typical Sources |
+|-----|------------|-----------------|
+| **Complete Drone** | X500 frame, Pixhawk 6X, GPS, motors, ESCs, props | GetFPV, NewBeeDrone, Holybro |
+| **Companion Computers** | Raspberry Pi 4 + Jetson Orin Nano | Digi-Key, Mouser, SparkFun |
+| **Power & Batteries** | 4S LiPo 6000mAh, power module | GetFPV, Tattu, Amazon |
+| **Radios** | ExpressLRS receiver, SiK telemetry | GetFPV, HappyModel, Holybro |
+| **Networking** | Industrial ethernet switch, 5G modem | PUSR, Quectel |
+
+[View complete component list ↓](#full-bill-of-materials)
+
+---
+
 ## Hardware for Fleet-Scale Operations
 
 Fleet operations demand hardware that balances capability with maintainability. Every component in this stack was chosen for production reliability, parts availability, and serviceability in the field.
@@ -33,8 +68,6 @@ The **Holybro X500 V2** provides an ideal platform for fleet deployment:
 | **Flight Time** | 15-20 min (with standard payload) |
 | **Motor Mount** | 16x16mm / 19x19mm |
 | **Included** | Motors (2216 KV920), ESCs (20A BLHeli S), Props (1045) |
-
-**Purchase:** [Holybro Store](https://holybro.com/products/x500-v2-kits) | [GetFPV](https://www.getfpv.com/holybro-x500-v2-arf-kit.html) | [NewBeeDrone](https://newbeedrone.com/products/holybro-x500-v2-kits)
 
 **Why X500:**
 
@@ -64,8 +97,6 @@ The **Pixhawk 6X** running **PX4 v1.14 LTS** handles all flight-critical functio
 | **Magnetometer** | IST8310 |
 | **Interfaces** | 3x CAN, 6x UART, SPI, I2C, PWM |
 
-**Purchase:** [Holybro Store](https://holybro.com/collections/pixhawk-6x-series) | [Documentation](https://docs.holybro.com/autopilot/pixhawk-6x)
-
 ### Flight Controller Accessories
 
 | Component | SKU | Purpose |
@@ -76,8 +107,6 @@ The **Pixhawk 6X** running **PX4 v1.14 LTS** handles all flight-critical functio
 | **Safety Switch & Buzzer** | 12007 | Arm safety + audio alerts |
 | **Vibration Mount** | 12010 | Anti-vibration damping |
 | **Cable Kit** | 12055 | JST-GH/CAN cables |
-
-**Purchase:** [Holybro Store](https://holybro.com/collections/pixhawk-accessories)
 
 **Why Pixhawk 6X:**
 
@@ -113,8 +142,6 @@ Handles lightweight sensor integration and data collection:
 | **Storage** | Industrial microSD 128GB (SDSDQED-128G-GNSIN) |
 | **Power** | 5V @ 3A typical |
 
-**Purchase:** [Raspberry Pi](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | [Digi-Key](https://www.digikey.com/en/products/filter/embedded-system-on-module/660?s=N4IgTCBcDaIIwFYwA4C0SA7ALvAxgYwEsAnAcw1wEMAXfAIxAF0BfIA) | [Mouser](https://www.mouser.com/c/embedded-solutions/computing/single-board-computers-sbcs/?m=Raspberry%20Pi)
-
 **Responsibilities:**
 
 - Environmental sensor drivers (temperature, humidity, air quality)
@@ -139,8 +166,6 @@ Handles compute-intensive workloads:
 | Storage | SKU | Capacity |
 |---------|-----|----------|
 | **NVMe SSD** | WD-SN530-256G | 256GB |
-
-**Purchase:** [NVIDIA Store](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/) | [SparkFun](https://www.sparkfun.com/nvidia-jetson-orin-nano-developer-kit.html) | [Seeed Studio](https://www.seeedstudio.com/NVIDIAr-Jetson-Orintm-Nano-Developer-Kit-p-5617.html)
 
 **Responsibilities:**
 
@@ -169,8 +194,6 @@ Fleet deployments typically use **Jetson Orin Nano** for cost-effective inferenc
 | **Latency** | <5ms |
 | **Protocol** | Open-source (CRSF) |
 
-**Purchase:** [HappyModel](https://www.happymodel.cn/index.php/product-category/elrs/) | [GetFPV](https://www.getfpv.com/search?q=expresslrs+ep1) | [Pyrodrone](https://pyrodrone.com/products?q=expresslrs)
-
 **Why ExpressLRS:**
 
 - **Open-source** — No vendor lock-in, community-driven development
@@ -190,8 +213,6 @@ Fleet deployments typically use **Jetson Orin Nano** for cost-effective inferenc
 | **Data Rate** | Up to 250kbps |
 | **Interface** | Serial (UART) |
 | **Protocol** | MAVLink framing, FHSS |
-
-**Purchase:** [Holybro Store](https://holybro.com/products/sik-telemetry-radio-v3) | [SparkFun](https://www.sparkfun.com/sik-telemetry-radio-v3-915mhz-100mw.html) | [GetFPV](https://www.getfpv.com/holybro-sik-telemetry-radio-v3-500mw-915mhz-2pcs.html)
 
 **Role in Fleet:**
 
@@ -256,8 +277,6 @@ Each Jetson connects via cellular modem:
 | **Interface** | M.2 (USB 3.0 / PCIe) |
 | **Form Factor** | M.2 NGFF |
 
-**Purchase:** [Quectel](https://www.quectel.com/product/5g-rm520n-gl) | [Digi-Key](https://www.digikey.com/en/products/filter/rf-transceiver-modules/872?s=N4IgTCBcDaICwFYEFoDMBGBAGAHNqBOIAugL5A) | [Mouser](https://www.mouser.com/c/rf-wireless/rf-transceiver-modules/?m=Quectel)
-
 **eSIM Benefits:**
 
 - No physical SIM swapping across large fleet
@@ -269,7 +288,7 @@ See [Sensing platform](/platform/sensing/) for details on 5G/LTE connectivity ar
 
 ---
 
-## Complete Bill of Materials
+## Full Bill of Materials
 
 | Category | Component | SKU |
 |----------|-----------|-----|
@@ -291,31 +310,18 @@ See [Sensing platform](/platform/sensing/) for details on 5G/LTE connectivity ar
 | **Power** | LiPo Battery 4S 6000mAh | TAA60004S35 |
 | **Mounting** | Pixhawk Vibration Mount | SKU12010 |
 | **Cabling** | Holybro Cable Kit | SKU12055 |
-
-**[Download Complete BOM (CSV) →](/x500_fleet_bom.csv)** | **[BOM with Sellers (CSV) →](/x500_fleet_sellers.csv)**
-
----
-
-## Where to Buy
-
-We don't sell hardware—our partners do. **Certified drone shops** can supply complete kits with fleet infrastructure included.
-
-**For drone buyers:**
-Purchase from a [certified partner]({{< relref "/partners" >}}) and get:
-- Pre-configured hardware ready to connect
-- Credentials for our managed infrastructure
-- Local support from your shop
-
-**For drone shops:**
-[Join our partner program]({{< relref "/partners/become-partner" >}}) to offer fleet infrastructure with your hardware sales.
+| **Connectivity** | Quectel RM520N-GL 5G Modem | RM520NGLAA-M20-SGASA |
 
 ---
 
 ## Component Sellers
 
-Direct purchase links for each BOM component:
+<details>
+<summary><strong>View all sellers by component (57 items)</strong></summary>
 
 {{< bom-sellers >}}
+
+</details>
 
 ---
 

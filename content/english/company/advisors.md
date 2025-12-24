@@ -18,6 +18,17 @@ Dixon leads Archethought's pioneering "Internet of Relationships™" platform—
 
 ---
 
+## Tom Brookes
+**Executive Director of Strategic Communications, European Climate Foundation**
+
+Tom leads strategic communications at the European Climate Foundation and serves as Senior Advisor at ClimateWorks Foundation. Previously held senior roles at Microsoft (political advisor during EU antitrust proceedings) and Apple (Head of Government Relations, Europe).
+
+Gerard worked under Tom's organization on Earth observation systems (2017-2021)—building Golang-based satellite data pipelines for pollution monitoring, methane detection, and atmospheric analysis. Tom's network of communications professionals and his work on ECF's landmark Roadmap 2050 report demonstrated the power of making complex data accessible and actionable.
+
+[europeanclimate.org](https://europeanclimate.org)
+
+---
+
 ## Dr. Rupert Soar
 **CEO, Freeform Construction Ltd | Associate Professor, Nottingham Trent University**
 

@@ -1,0 +1,1466 @@
+[
+  {
+    "id": "holybro-store",
+    "name": "Holybro Store",
+    "homepage": "https://holybro.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://holybro.com/products/x500-v2-kits",
+      "SKU30126": "https://holybro.com/products/s500-v2-kit",
+      "SKU11073": "https://holybro.com/collections/pixhawk-6x-series",
+      "SKU18117": "https://holybro.com/collections/pixhawk-6x-series",
+      "SKU15011": "https://holybro.com/collections/pixhawk-6x-series",
+      "SKU-PX6C": "https://holybro.com/collections/pixhawk-6c-series",
+      "SKU-CUAV-X7": "https://holybro.com/collections/autopilot-systems",
+      "SKU15019": "https://holybro.com/collections/pixhawk-accessories",
+      "SKU15020": "https://holybro.com/collections/pixhawk-accessories",
+      "SKU12027": "https://holybro.com/collections/pixhawk-accessories",
+      "SKU12028": "https://holybro.com/collections/pixhawk-accessories",
+      "SKU12033": "https://holybro.com/collections/pixhawk-accessories",
+      "SKU12007": "https://holybro.com/collections/pixhawk-accessories",
+      "SKU17012": "https://holybro.com/products/sik-telemetry-radio-v3",
+      "SKU17013": "https://holybro.com/products/sik-telemetry-radio-v3",
+      "SKU12010": "https://holybro.com/collections/pixhawk-accessories",
+      "SKU12055": "https://holybro.com/collections/pixhawk-accessories"
+    },
+    "featured": true,
+    "contact": "",
+    "notes": "X500 and Pixhawk manufacturer"
+  },
+  {
+    "id": "raspberry-pi",
+    "name": "Raspberry Pi",
+    "homepage": "https://www.raspberrypi.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "RPI4-MODEL-B-8GB": "https://www.raspberrypi.com/products/raspberry-pi-4-model-b/",
+      "RPI-CM4-8GB": "https://www.raspberrypi.com/products/compute-module-4/",
+      "RPI5-8GB": "https://www.raspberrypi.com/products/raspberry-pi-5/"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Official Raspberry Pi store"
+  },
+  {
+    "id": "nvidia-store",
+    "name": "NVIDIA Store",
+    "homepage": "https://www.nvidia.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "900-13767-0000-000": "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/",
+      "945-13766-0000-000": "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/",
+      "900-13767-0040-000": "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/",
+      "900-13701-0000-000": "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Official NVIDIA Jetson store"
+  },
+  {
+    "id": "quectel",
+    "name": "Quectel",
+    "homepage": "https://www.quectel.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "RM520NGLAA-M20-SGASA": "https://www.quectel.com/product/5g-rm520n-gl",
+      "RM500Q-GL": "https://www.quectel.com/product/5g-rm500q-gl",
+      "EC25-G": "https://www.quectel.com/product/lte-ec25-g"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "5G/LTE modem manufacturer"
+  },
+  {
+    "id": "happymodel",
+    "name": "HappyModel",
+    "homepage": "https://www.happymodel.cn",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.happymodel.cn/index.php/product-category/elrs/",
+      "HM-EP2-2400": "https://www.happymodel.cn/index.php/product-category/elrs/",
+      "HM-ES900RX": "https://www.happymodel.cn/index.php/product-category/elrs/"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "ExpressLRS manufacturer"
+  },
+  {
+    "id": "betafpv",
+    "name": "BetaFPV",
+    "homepage": "https://betafpv.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://betafpv.com/collections/expresslrs-series",
+      "HM-EP2-2400": "https://betafpv.com/collections/expresslrs-series"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "ExpressLRS and micro drone manufacturer"
+  },
+  {
+    "id": "radiomaster",
+    "name": "RadioMaster",
+    "homepage": "https://www.radiomasterrc.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "RM-TX16S": "https://www.radiomasterrc.com/products/tx16s-mark-ii-radio-controller",
+      "RM-BOXER": "https://www.radiomasterrc.com/products/boxer-radio-controller",
+      "HM-EP1-2400": "https://www.radiomasterrc.com/collections/expresslrs"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "RC transmitter and ExpressLRS manufacturer"
+  },
+  {
+    "id": "cubepilot",
+    "name": "CubePilot",
+    "homepage": "https://www.cubepilot.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "CUBE-ORANGE": "https://www.cubepilot.com/#/cube/features",
+      "HERE3-GPS": "https://www.cubepilot.com/#/here/here3"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Cube autopilot and Here GPS manufacturer"
+  },
+  {
+    "id": "matek",
+    "name": "Matek Systems",
+    "homepage": "https://www.mateksys.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "MATEK-PMHV": "https://www.mateksys.com/?portfolio=pm"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Flight controllers and power systems manufacturer"
+  },
+  {
+    "id": "rfd",
+    "name": "RFDesign",
+    "homepage": "https://rfdesign.com.au",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global", "au"],
+    "location": null,
+    "products": {
+      "RFD900X": "https://rfdesign.com.au/products/rfd900x-modem/"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Long-range telemetry modem manufacturer"
+  },
+  {
+    "id": "benewake",
+    "name": "Benewake",
+    "homepage": "https://www.benewake.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global", "cn"],
+    "location": null,
+    "products": {
+      "TF-LUNA": "https://www.benewake.com/TFLuna/index.html"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "LiDAR sensor manufacturer"
+  },
+  {
+    "id": "lightware",
+    "name": "LightWare",
+    "homepage": "https://lightwarelidar.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global", "za"],
+    "location": null,
+    "products": {
+      "LIGHTWARE-SF45": "https://lightwarelidar.com/products/sf45-b-50m"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Professional LiDAR manufacturer, South Africa"
+  },
+  {
+    "id": "digi-key",
+    "name": "Digi-Key",
+    "homepage": "https://www.digikey.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "RPI4-MODEL-B-8GB": "https://www.digikey.com/en/products/filter/embedded-system-on-module/660",
+      "RPI-CM4-8GB": "https://www.digikey.com/en/products/filter/embedded-system-on-module/660",
+      "RPI5-8GB": "https://www.digikey.com/en/products/filter/embedded-system-on-module/660",
+      "SDSDQED-128G-GNSIN": "https://www.digikey.com",
+      "SDSDQED-256G-GNSIN": "https://www.digikey.com",
+      "WD-SN530-256G": "https://www.digikey.com/en/products/filter/solid-state-drives-ssd/321",
+      "WD-SN530-512G": "https://www.digikey.com/en/products/filter/solid-state-drives-ssd/321",
+      "RM520NGLAA-M20-SGASA": "https://www.digikey.com/en/products/filter/rf-transceiver-modules/872",
+      "RM500Q-GL": "https://www.digikey.com/en/products/filter/rf-transceiver-modules/872",
+      "EC25-G": "https://www.digikey.com/en/products/filter/rf-transceiver-modules/872",
+      "900-13767-0000-000": "https://www.digikey.com/en/products/filter/embedded-system-on-module/660",
+      "900-13767-0040-000": "https://www.digikey.com/en/products/filter/embedded-system-on-module/660",
+      "TF-LUNA": "https://www.digikey.com/en/products/filter/optical-sensors/518",
+      "LIDAR-LITE-V3": "https://www.digikey.com/en/products/filter/optical-sensors/518"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Global electronics distributor"
+  },
+  {
+    "id": "mouser",
+    "name": "Mouser",
+    "homepage": "https://www.mouser.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "RPI4-MODEL-B-8GB": "https://www.mouser.com/c/embedded-solutions/computing/single-board-computers-sbcs/?m=Raspberry%20Pi",
+      "RPI-CM4-8GB": "https://www.mouser.com/c/embedded-solutions/computing/single-board-computers-sbcs/?m=Raspberry%20Pi",
+      "RPI5-8GB": "https://www.mouser.com/c/embedded-solutions/computing/single-board-computers-sbcs/?m=Raspberry%20Pi",
+      "SDSDQED-128G-GNSIN": "https://www.mouser.com",
+      "WD-SN530-256G": "https://www.mouser.com",
+      "RM520NGLAA-M20-SGASA": "https://www.mouser.com/c/rf-wireless/rf-transceiver-modules/?m=Quectel",
+      "900-13767-0000-000": "https://www.mouser.com",
+      "TF-LUNA": "https://www.mouser.com"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Global electronics distributor"
+  },
+  {
+    "id": "arrow",
+    "name": "Arrow Electronics",
+    "homepage": "https://www.arrow.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "RPI4-MODEL-B-8GB": "https://www.arrow.com/en/products/search?q=raspberry+pi+4",
+      "RPI5-8GB": "https://www.arrow.com/en/products/search?q=raspberry+pi+5",
+      "900-13767-0000-000": "https://www.arrow.com/en/products/search?q=jetson+orin",
+      "900-13767-0040-000": "https://www.arrow.com/en/products/search?q=jetson+orin+nx",
+      "RM520NGLAA-M20-SGASA": "https://www.arrow.com/en/products/search?q=quectel"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Global electronics distributor"
+  },
+  {
+    "id": "getfpv",
+    "name": "GetFPV",
+    "homepage": "https://www.getfpv.com",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["us"],
+    "location": {
+      "city": "Orlando",
+      "state": "Florida",
+      "country": "us"
+    },
+    "products": {
+      "SKU30125": "https://www.getfpv.com/holybro-x500-v2-arf-kit.html",
+      "SKU11073": "https://www.getfpv.com/search?q=pixhawk+6x",
+      "SKU-PX6C": "https://www.getfpv.com/search?q=pixhawk+6c",
+      "HM-EP1-2400": "https://www.getfpv.com/search?q=expresslrs+ep1",
+      "HM-EP2-2400": "https://www.getfpv.com/search?q=expresslrs+ep2",
+      "SKU17012": "https://www.getfpv.com/holybro-sik-telemetry-radio-v3-500mw-915mhz-2pcs.html",
+      "TAA60004S35": "https://www.getfpv.com/search?q=tattu+4s+6000mah",
+      "TAA45004S45": "https://www.getfpv.com/search?q=tattu+4s+4500mah",
+      "RM-TX16S": "https://www.getfpv.com/search?q=radiomaster+tx16s",
+      "RM-BOXER": "https://www.getfpv.com/search?q=radiomaster+boxer",
+      "CADDX-VISTA": "https://www.getfpv.com/search?q=caddx+vista",
+      "DJI-O3": "https://www.getfpv.com/search?q=dji+o3",
+      "RUNCAM-PHOENIX2": "https://www.getfpv.com/search?q=runcam+phoenix",
+      "ISDT-Q6": "https://www.getfpv.com/search?q=isdt+q6"
+    },
+    "featured": true,
+    "contact": "",
+    "notes": "Largest US FPV retailer. Physical store in Orlando."
+  },
+  {
+    "id": "newbeedrone",
+    "name": "NewBeeDrone",
+    "homepage": "https://newbeedrone.com",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["us"],
+    "location": {
+      "city": "San Diego",
+      "state": "California",
+      "country": "us"
+    },
+    "products": {
+      "SKU30125": "https://newbeedrone.com/products/holybro-x500-v2-kits",
+      "HM-EP1-2400": "https://newbeedrone.com/search?q=expresslrs",
+      "TAA60004S35": "https://newbeedrone.com/search?q=tattu+4s",
+      "RM-TX16S": "https://newbeedrone.com/search?q=radiomaster"
+    },
+    "featured": true,
+    "contact": "",
+    "notes": "Holybro authorized reseller. San Diego showroom."
+  },
+  {
+    "id": "readymaderc",
+    "name": "ReadyMadeRC",
+    "homepage": "https://readymaderc.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["us"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://www.readymaderc.com/products/details/85914-holybro-x500-v2-kit-pixhawk-6x-standard-433mhz-radio",
+      "SKU11073": "https://www.readymaderc.com/search?q=pixhawk+6x",
+      "SKU17012": "https://www.readymaderc.com/search?q=sik+telemetry",
+      "RFD900X": "https://www.readymaderc.com/search?q=rfd900"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Holybro reseller. Schools and govt buyers."
+  },
+  {
+    "id": "rotorriot",
+    "name": "Rotor Riot",
+    "homepage": "https://rotorriot.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["us"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://rotorriot.com/search?q=expresslrs",
+      "TAA60004S35": "https://rotorriot.com/search?q=tattu+4s",
+      "RM-TX16S": "https://rotorriot.com/search?q=radiomaster",
+      "RM-BOXER": "https://rotorriot.com/search?q=boxer",
+      "CADDX-VISTA": "https://rotorriot.com/search?q=caddx",
+      "DJI-O3": "https://rotorriot.com/search?q=dji+o3"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "FPV community brand. Racing and freestyle focus."
+  },
+  {
+    "id": "pyrodrone",
+    "name": "Pyrodrone",
+    "homepage": "https://pyrodrone.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["us"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://pyrodrone.com/search?q=expresslrs",
+      "TAA60004S35": "https://pyrodrone.com/search?q=tattu+lipo",
+      "RUNCAM-PHOENIX2": "https://pyrodrone.com/search?q=runcam",
+      "ISDT-Q6": "https://pyrodrone.com/search?q=isdt"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Racing/hobby focus. ExpressLRS parts."
+  },
+  {
+    "id": "racedayquads",
+    "name": "RaceDayQuads",
+    "homepage": "https://www.racedayquads.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["us"],
+    "location": null,
+    "products": {
+      "TAA60004S35": "https://www.racedayquads.com/search?q=4s+6000mah",
+      "TAA45004S45": "https://www.racedayquads.com/search?q=4s+4500mah",
+      "HM-EP1-2400": "https://www.racedayquads.com/search?q=expresslrs",
+      "ISDT-Q6": "https://www.racedayquads.com/search?q=isdt"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Racing/hobby. LiPo batteries, parts."
+  },
+  {
+    "id": "fpvcrate",
+    "name": "FPV Crate",
+    "homepage": "https://www.fpvcrate.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["us"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.fpvcrate.com/search?q=expresslrs",
+      "TAA60004S35": "https://www.fpvcrate.com/search?q=tattu"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "FPV subscription boxes and parts."
+  },
+  {
+    "id": "dronenerds",
+    "name": "Drone Nerds",
+    "homepage": "https://www.dronenerds.com",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "enterprise",
+    "status": "prospect",
+    "regions": ["us"],
+    "location": {
+      "city": "Miami",
+      "state": "Florida",
+      "country": "us"
+    },
+    "products": {},
+    "featured": false,
+    "contact": "",
+    "notes": "Enterprise and commercial drones. Physical showroom in Miami."
+  },
+  {
+    "id": "sparkfun",
+    "name": "SparkFun",
+    "homepage": "https://www.sparkfun.com",
+    "type": "reseller",
+    "channel": "both",
+    "tier": null,
+    "status": "active",
+    "regions": ["us"],
+    "location": {
+      "city": "Boulder",
+      "state": "Colorado",
+      "country": "us"
+    },
+    "products": {
+      "900-13767-0000-000": "https://www.sparkfun.com/categories/399",
+      "SKU17012": "https://www.sparkfun.com/search/results?term=sik+radio",
+      "RPI4-MODEL-B-8GB": "https://www.sparkfun.com/products/15447",
+      "RPI5-8GB": "https://www.sparkfun.com/search/results?term=raspberry+pi+5",
+      "TF-LUNA": "https://www.sparkfun.com/search/results?term=tf+luna",
+      "LIDAR-LITE-V3": "https://www.sparkfun.com/products/14599"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Maker-focused electronics. Boulder storefront."
+  },
+  {
+    "id": "adafruit",
+    "name": "Adafruit",
+    "homepage": "https://www.adafruit.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["us"],
+    "location": null,
+    "products": {
+      "RPI4-MODEL-B-8GB": "https://www.adafruit.com/category/105",
+      "RPI-CM4-8GB": "https://www.adafruit.com/category/105",
+      "RPI5-8GB": "https://www.adafruit.com/category/105",
+      "SDSDQED-128G-GNSIN": "https://www.adafruit.com/category/786",
+      "TF-LUNA": "https://www.adafruit.com/search?q=lidar"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Maker electronics. NYC-based."
+  },
+  {
+    "id": "amain-hobbies",
+    "name": "AMain Hobbies",
+    "homepage": "https://www.amainhobbies.com",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["us"],
+    "location": {
+      "city": "Chico",
+      "state": "California",
+      "country": "us"
+    },
+    "products": {
+      "TAA60004S35": "https://www.amainhobbies.com/search?q=tattu+4s",
+      "ISDT-Q6": "https://www.amainhobbies.com/search?q=isdt"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Large hobby retailer. Warehouse in California."
+  },
+  {
+    "id": "dronefly",
+    "name": "DroneFly",
+    "homepage": "https://www.dronefly.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "enterprise",
+    "status": "active",
+    "regions": ["us"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://www.dronefly.com/search?q=holybro",
+      "SKU11073": "https://www.dronefly.com/search?q=pixhawk"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Commercial drone focus. Enterprise solutions."
+  },
+  {
+    "id": "seeed-studio",
+    "name": "Seeed Studio",
+    "homepage": "https://www.seeedstudio.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global", "cn"],
+    "location": null,
+    "products": {
+      "900-13767-0000-000": "https://www.seeedstudio.com/NVIDIAr-Jetson-Orintm-Nano-Developer-Kit-p-5617.html",
+      "945-13766-0000-000": "https://www.seeedstudio.com/search/jetson+orin+nano+super.html",
+      "RPI-CM4-8GB": "https://www.seeedstudio.com/Raspberry-Pi-Compute-Module-4-c-2018.html",
+      "RPI5-8GB": "https://www.seeedstudio.com/search/raspberry+pi+5.html"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "IoT and embedded systems. Shenzhen-based."
+  },
+  {
+    "id": "unmanned-tech",
+    "name": "Unmanned Tech",
+    "homepage": "https://www.unmannedtechshop.co.uk",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["uk", "eu"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://www.unmannedtechshop.co.uk/product-category/holybro/",
+      "SKU11073": "https://www.unmannedtechshop.co.uk/product-category/holybro/",
+      "SKU-PX6C": "https://www.unmannedtechshop.co.uk/product-category/holybro/",
+      "CUBE-ORANGE": "https://www.unmannedtechshop.co.uk/product-category/cubepilot/",
+      "HERE3-GPS": "https://www.unmannedtechshop.co.uk/product-category/cubepilot/",
+      "HM-EP1-2400": "https://www.unmannedtechshop.co.uk/product-category/expresslrs/",
+      "SKU17012": "https://www.unmannedtechshop.co.uk/product-category/telemetry/",
+      "RFD900X": "https://www.unmannedtechshop.co.uk/product-category/telemetry/"
+    },
+    "featured": true,
+    "contact": "",
+    "notes": "UK's leading drone parts supplier. PX4/ArduPilot specialists."
+  },
+  {
+    "id": "drone-fpv-racer",
+    "name": "Drone-FPV-Racer",
+    "homepage": "https://www.drone-fpv-racer.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["fr", "eu"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://www.drone-fpv-racer.com/en/search?s=holybro+x500",
+      "HM-EP1-2400": "https://www.drone-fpv-racer.com/en/search?s=expresslrs",
+      "TAA60004S35": "https://www.drone-fpv-racer.com/en/search?s=tattu+4s",
+      "RM-TX16S": "https://www.drone-fpv-racer.com/en/search?s=radiomaster",
+      "DJI-O3": "https://www.drone-fpv-racer.com/en/search?s=dji+o3"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "France-based. Ships across EU."
+  },
+  {
+    "id": "n-factory",
+    "name": "n-Factory.de",
+    "homepage": "https://n-factory.de",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["de", "eu"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://n-factory.de/search?sSearch=holybro",
+      "HM-EP1-2400": "https://n-factory.de/search?sSearch=expresslrs",
+      "SKU11073": "https://n-factory.de/search?sSearch=pixhawk",
+      "TAA60004S35": "https://n-factory.de/search?sSearch=tattu"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "German FPV shop. Fast EU shipping."
+  },
+  {
+    "id": "copterfarm",
+    "name": "Copterfarm",
+    "homepage": "https://www.copterfarm.de",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "professional",
+    "status": "prospect",
+    "regions": ["de", "eu"],
+    "location": {
+      "city": "Berlin",
+      "state": null,
+      "country": "de"
+    },
+    "products": {},
+    "featured": false,
+    "contact": "",
+    "notes": "Berlin-based. Commercial and enterprise focus."
+  },
+  {
+    "id": "droneparts-de",
+    "name": "Droneparts.de",
+    "homepage": "https://www.droneparts.de",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["de", "eu"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://www.droneparts.de/search?sSearch=holybro",
+      "SKU11073": "https://www.droneparts.de/search?sSearch=pixhawk",
+      "CUBE-ORANGE": "https://www.droneparts.de/search?sSearch=cube+orange"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "German drone parts specialist."
+  },
+  {
+    "id": "multirotorparts-nl",
+    "name": "MultiRotorParts",
+    "homepage": "https://www.multirotorparts.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["nl", "eu"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.multirotorparts.com/search?q=expresslrs",
+      "SKU30125": "https://www.multirotorparts.com/search?q=holybro",
+      "TAA60004S35": "https://www.multirotorparts.com/search?q=tattu"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Netherlands-based. Fast EU shipping."
+  },
+  {
+    "id": "fpvdrone-it",
+    "name": "FPVDrone.it",
+    "homepage": "https://www.fpvdrone.it",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["it", "eu"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.fpvdrone.it/search?q=expresslrs",
+      "TAA60004S35": "https://www.fpvdrone.it/search?q=tattu"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Italy-based FPV shop."
+  },
+  {
+    "id": "rctech-es",
+    "name": "RCTecnic",
+    "homepage": "https://www.rctecnic.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["es", "eu"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.rctecnic.com/search?q=expresslrs",
+      "TAA60004S35": "https://www.rctecnic.com/search?q=tattu"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Spain-based RC and drone shop."
+  },
+  {
+    "id": "quadcopters-uk",
+    "name": "Quadcopters.co.uk",
+    "homepage": "https://www.quadcopters.co.uk",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["uk"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://www.quadcopters.co.uk/search?q=holybro",
+      "HM-EP1-2400": "https://www.quadcopters.co.uk/search?q=expresslrs",
+      "SKU11073": "https://www.quadcopters.co.uk/search?q=pixhawk",
+      "TAA60004S35": "https://www.quadcopters.co.uk/search?q=tattu"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "UK FPV and drone retailer."
+  },
+  {
+    "id": "flyingtech",
+    "name": "FlyingTech",
+    "homepage": "https://www.flyingtech.co.uk",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "enterprise",
+    "status": "prospect",
+    "regions": ["uk"],
+    "location": {
+      "city": "London",
+      "state": null,
+      "country": "uk"
+    },
+    "products": {},
+    "featured": false,
+    "contact": "",
+    "notes": "Enterprise drone solutions. London showroom."
+  },
+  {
+    "id": "copter-source",
+    "name": "Copter Source",
+    "homepage": "https://www.coptersource.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "prospect",
+    "regions": ["uk", "eu"],
+    "location": null,
+    "products": {},
+    "featured": false,
+    "contact": "",
+    "notes": "UK-based. Commercial drone focus."
+  },
+  {
+    "id": "elefun-se",
+    "name": "Elefun.se",
+    "homepage": "https://www.elefun.se",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["se", "eu"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.elefun.se/search?q=expresslrs",
+      "TAA60004S35": "https://www.elefun.se/search?q=lipo"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Swedish RC and FPV shop."
+  },
+  {
+    "id": "team-blacksheep",
+    "name": "Team BlackSheep",
+    "homepage": "https://www.team-blacksheep.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "TBS-CROSSFIRE": "https://www.team-blacksheep.com/products/prod:crossfire_tx"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "RC link manufacturer. Crossfire systems."
+  },
+  {
+    "id": "hobbyking",
+    "name": "HobbyKing",
+    "homepage": "https://hobbyking.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "TAA60004S35": "https://hobbyking.com/en_us/batteries/lipo.html",
+      "TAA45004S45": "https://hobbyking.com/en_us/batteries/lipo.html",
+      "HM-EP1-2400": "https://hobbyking.com/en_us/search?q=expresslrs",
+      "ISDT-Q6": "https://hobbyking.com/en_us/search?q=isdt"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Global hobby retailer. Multiple warehouses worldwide."
+  },
+  {
+    "id": "banggood",
+    "name": "Banggood",
+    "homepage": "https://www.banggood.com",
+    "type": "marketplace",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.banggood.com/search/expresslrs.html",
+      "TAA60004S35": "https://www.banggood.com/search/tattu-4s-lipo.html",
+      "RM-TX16S": "https://www.banggood.com/search/radiomaster-tx16s.html",
+      "RM-BOXER": "https://www.banggood.com/search/radiomaster-boxer.html"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Marketplace. Verify seller reputation."
+  },
+  {
+    "id": "aliexpress",
+    "name": "AliExpress",
+    "homepage": "https://www.aliexpress.com",
+    "type": "marketplace",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "USR-ES105": "https://www.aliexpress.com/w/wholesale-industrial-ethernet-switch-5-port.html",
+      "USR-ES108": "https://www.aliexpress.com/w/wholesale-industrial-ethernet-switch-8-port.html",
+      "HM-EP1-2400": "https://www.aliexpress.com/w/wholesale-expresslrs-ep1.html",
+      "TAA60004S35": "https://www.aliexpress.com/w/wholesale-tattu-4s-lipo.html",
+      "TF-LUNA": "https://www.aliexpress.com/w/wholesale-tf-luna-lidar.html"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Marketplace. Verify seller reputation."
+  },
+  {
+    "id": "amazon",
+    "name": "Amazon",
+    "homepage": "https://www.amazon.com",
+    "type": "marketplace",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "SDSDQED-128G-GNSIN": "https://www.amazon.com/s?k=sandisk+128gb+high+endurance+microsd",
+      "SDSDQED-256G-GNSIN": "https://www.amazon.com/s?k=sandisk+256gb+high+endurance+microsd",
+      "WD-SN530-256G": "https://www.amazon.com/Western-Digital-SDBPTPZ-256G-Surface-Ultrabook/dp/B0BCQ59XRF",
+      "WD-SN530-512G": "https://www.amazon.com/s?k=wd+sn530+512gb",
+      "USR-ES105": "https://www.amazon.com/s?k=industrial+ethernet+switch+5+port",
+      "TAA60004S35": "https://www.amazon.com/s?k=tattu+4s+6000mah+lipo",
+      "RPI4-MODEL-B-8GB": "https://www.amazon.com/s?k=raspberry+pi+4+8gb",
+      "RPI5-8GB": "https://www.amazon.com/s?k=raspberry+pi+5+8gb",
+      "ISDT-Q6": "https://www.amazon.com/s?k=isdt+q6+pro"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Marketplace. Verify seller reputation."
+  },
+  {
+    "id": "pusr-shop",
+    "name": "PUSR Shop",
+    "homepage": "https://shop.usriot.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "USR-ES105": "https://shop.usriot.com/commercial-switch.html",
+      "USR-ES108": "https://shop.usriot.com/commercial-switch.html"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Industrial networking equipment"
+  },
+  {
+    "id": "tattu",
+    "name": "Tattu / Gens Ace",
+    "homepage": "https://www.gensace.de",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "TAA60004S35": "https://www.gensace.de/tattu-6000mah-14-8v-35c-4s1p-lipo-battery-pack-with-ec5.html",
+      "TAA45004S45": "https://www.gensace.de/lipo-batteries/tattu.html",
+      "TAA80006S25": "https://www.gensace.de/lipo-batteries/tattu.html"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Official Tattu/Gens Ace LiPo manufacturer"
+  },
+  {
+    "id": "isdt",
+    "name": "ISDT",
+    "homepage": "https://www.isdt.co",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "ISDT-Q6": "https://www.isdt.co/q6-pro.html"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "LiPo charger manufacturer"
+  },
+  {
+    "id": "hglrc",
+    "name": "HGLRC",
+    "homepage": "https://www.hglrc.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.hglrc.com/collections/expresslrs"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Flight controllers and ExpressLRS manufacturer"
+  },
+  {
+    "id": "iflight",
+    "name": "iFlight",
+    "homepage": "https://shop.iflight-rc.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "IFLIGHT-XL5": "https://shop.iflight-rc.com/index.php?route=product/search&search=nazgul5",
+      "HM-EP1-2400": "https://shop.iflight-rc.com/index.php?route=product/search&search=expresslrs"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Drone frames and flight systems manufacturer"
+  },
+  {
+    "id": "dji-store",
+    "name": "DJI Store",
+    "homepage": "https://store.dji.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "DJI-O3": "https://store.dji.com/product/dji-o3-air-unit"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "DJI official store. O3 Air Unit for digital FPV."
+  },
+  {
+    "id": "caddxfpv",
+    "name": "Caddx FPV",
+    "homepage": "https://caddxfpv.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "CADDX-VISTA": "https://caddxfpv.com/products/caddx-vista",
+      "CADDX-POLAR": "https://caddxfpv.com/products/polar-starlight"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Digital and analog FPV camera manufacturer."
+  },
+  {
+    "id": "runcam",
+    "name": "RunCam",
+    "homepage": "https://shop.runcam.com",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "RUNCAM-THUMB": "https://shop.runcam.com/runcam-thumb/",
+      "RUNCAM-PHOENIX2": "https://shop.runcam.com/runcam-phoenix-2/"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "FPV and action camera manufacturer."
+  },
+  {
+    "id": "aliexpress-foxeer",
+    "name": "Foxeer Official Store",
+    "homepage": "https://www.aliexpress.com/store/4439060",
+    "type": "manufacturer",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global"],
+    "location": null,
+    "products": {
+      "FOXEER-DIGISIGHT": "https://www.aliexpress.com/store/4439060"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "FPV cameras and video systems."
+  },
+  {
+    "id": "helipal",
+    "name": "HeliPal",
+    "homepage": "https://www.helipal.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["global", "cn", "hk"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.helipal.com/search.php?search_query=expresslrs",
+      "TAA60004S35": "https://www.helipal.com/search.php?search_query=tattu",
+      "SKU30125": "https://www.helipal.com/search.php?search_query=holybro"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Hong Kong-based. Ships globally."
+  },
+  {
+    "id": "foxtech",
+    "name": "Foxtech",
+    "homepage": "https://www.foxtechfpv.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["global", "cn"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://www.foxtechfpv.com/search.php?search_query=holybro",
+      "SKU11073": "https://www.foxtechfpv.com/search.php?search_query=pixhawk",
+      "CUBE-ORANGE": "https://www.foxtechfpv.com/search.php?search_query=cube"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "China-based. Industrial drones and components."
+  },
+  {
+    "id": "phaser-fpv",
+    "name": "Phaser FPV",
+    "homepage": "https://www.phaserfpv.com.au",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["au"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.phaserfpv.com.au/search?q=expresslrs",
+      "TAA60004S35": "https://www.phaserfpv.com.au/search?q=tattu",
+      "RM-TX16S": "https://www.phaserfpv.com.au/search?q=radiomaster",
+      "DJI-O3": "https://www.phaserfpv.com.au/search?q=dji+o3"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Australian FPV specialist."
+  },
+  {
+    "id": "rc-innovations",
+    "name": "RC Innovations",
+    "homepage": "https://www.rcinnovations.com.au",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["au"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.rcinnovations.com.au/search?q=expresslrs",
+      "TAA60004S35": "https://www.rcinnovations.com.au/search?q=tattu"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Australian RC retailer."
+  },
+  {
+    "id": "sphere-drones",
+    "name": "Sphere Drones",
+    "homepage": "https://spheredrones.com.au",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "enterprise",
+    "status": "prospect",
+    "regions": ["au"],
+    "location": {
+      "city": "Sydney",
+      "state": "NSW",
+      "country": "au"
+    },
+    "products": {},
+    "featured": false,
+    "contact": "",
+    "notes": "Enterprise drone solutions. Sydney showroom."
+  },
+  {
+    "id": "prisma-technologies",
+    "name": "Prisma Technologies",
+    "homepage": "https://prismatech.com.au",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "enterprise",
+    "status": "prospect",
+    "regions": ["au"],
+    "location": {
+      "city": "Melbourne",
+      "state": "VIC",
+      "country": "au"
+    },
+    "products": {},
+    "featured": false,
+    "contact": "",
+    "notes": "DJI Enterprise certified. Melbourne office."
+  },
+  {
+    "id": "auav",
+    "name": "AUAV (Australian UAV)",
+    "homepage": "https://auav.com.au",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "professional",
+    "status": "prospect",
+    "regions": ["au", "uk"],
+    "location": {
+      "city": "Brisbane",
+      "state": "QLD",
+      "country": "au"
+    },
+    "products": {},
+    "featured": false,
+    "contact": "",
+    "notes": "Only AU company in global top 20. Brisbane HQ."
+  },
+  {
+    "id": "uavme",
+    "name": "UAV ME",
+    "homepage": "https://uavme.com.au",
+    "type": "reseller",
+    "channel": "physical",
+    "tier": "starter",
+    "status": "prospect",
+    "regions": ["au"],
+    "location": {
+      "city": "Sydney",
+      "state": "NSW",
+      "country": "au"
+    },
+    "products": {},
+    "featured": false,
+    "contact": "",
+    "notes": "DJI authorized. Physical shop in Sydney."
+  },
+  {
+    "id": "nz-drones",
+    "name": "NZ Drones",
+    "homepage": "https://www.nzdrones.co.nz",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["nz"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.nzdrones.co.nz/search?q=expresslrs",
+      "TAA60004S35": "https://www.nzdrones.co.nz/search?q=lipo"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "New Zealand drone shop."
+  },
+  {
+    "id": "sekido",
+    "name": "SEKIDO",
+    "homepage": "https://sekido.jp",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "enterprise",
+    "status": "active",
+    "regions": ["jp"],
+    "location": {
+      "city": "Tokyo",
+      "state": null,
+      "country": "jp"
+    },
+    "products": {
+      "SKU11073": "https://sekido.jp/search?q=pixhawk"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Japan's leading drone retailer. Tokyo showroom."
+  },
+  {
+    "id": "rc-mart-kr",
+    "name": "RC Mart Korea",
+    "homepage": "https://www.rcmart.co.kr",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["kr"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.rcmart.co.kr/search?q=expresslrs",
+      "TAA60004S35": "https://www.rcmart.co.kr/search?q=lipo"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "South Korea RC and drone retailer."
+  },
+  {
+    "id": "drone-world-sg",
+    "name": "DroneWorld Singapore",
+    "homepage": "https://www.droneworld.sg",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["sg"],
+    "location": {
+      "city": "Singapore",
+      "state": null,
+      "country": "sg"
+    },
+    "products": {
+      "SKU11073": "https://www.droneworld.sg/search?q=pixhawk",
+      "TAA60004S35": "https://www.droneworld.sg/search?q=lipo"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Singapore drone shop with showroom."
+  },
+  {
+    "id": "lazada-th",
+    "name": "Lazada Thailand",
+    "homepage": "https://www.lazada.co.th",
+    "type": "marketplace",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["th"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://www.lazada.co.th/catalog/?q=expresslrs",
+      "TAA60004S35": "https://www.lazada.co.th/catalog/?q=lipo+drone"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Thai marketplace. Verify seller reputation."
+  },
+  {
+    "id": "shopee-my",
+    "name": "Shopee Malaysia",
+    "homepage": "https://shopee.com.my",
+    "type": "marketplace",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["my"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://shopee.com.my/search?keyword=expresslrs",
+      "TAA60004S35": "https://shopee.com.my/search?keyword=lipo+drone"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Malaysian marketplace. Verify seller reputation."
+  },
+  {
+    "id": "drone-india",
+    "name": "DroneIndia",
+    "homepage": "https://droneindia.shop",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["in"],
+    "location": null,
+    "products": {
+      "SKU11073": "https://droneindia.shop/search?q=pixhawk",
+      "HM-EP1-2400": "https://droneindia.shop/search?q=expresslrs"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "India drone parts retailer."
+  },
+  {
+    "id": "drone-bay-ae",
+    "name": "DroneBay UAE",
+    "homepage": "https://www.dronebay.ae",
+    "type": "reseller",
+    "channel": "both",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["ae"],
+    "location": {
+      "city": "Dubai",
+      "state": null,
+      "country": "ae"
+    },
+    "products": {
+      "SKU11073": "https://www.dronebay.ae/search?q=pixhawk"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "UAE drone retailer. Dubai showroom."
+  },
+  {
+    "id": "mercado-libre-br",
+    "name": "Mercado Livre",
+    "homepage": "https://www.mercadolivre.com.br",
+    "type": "marketplace",
+    "channel": "online",
+    "tier": null,
+    "status": "active",
+    "regions": ["br"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://lista.mercadolivre.com.br/expresslrs",
+      "TAA60004S35": "https://lista.mercadolivre.com.br/bateria-lipo-drone"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Brazil's largest marketplace. Verify seller reputation."
+  },
+  {
+    "id": "droneparts-za",
+    "name": "DroneParts SA",
+    "homepage": "https://droneparts.co.za",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "starter",
+    "status": "active",
+    "regions": ["za"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://droneparts.co.za/search?q=expresslrs",
+      "TAA60004S35": "https://droneparts.co.za/search?q=lipo"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "South Africa drone parts retailer."
+  },
+  {
+    "id": "dronestore-ca",
+    "name": "DroneStore Canada",
+    "homepage": "https://www.dronestore.ca",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["ca"],
+    "location": null,
+    "products": {
+      "SKU30125": "https://www.dronestore.ca/search?q=holybro",
+      "HM-EP1-2400": "https://www.dronestore.ca/search?q=expresslrs",
+      "TAA60004S35": "https://www.dronestore.ca/search?q=tattu"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Canadian drone retailer."
+  },
+  {
+    "id": "rotorgeeks-ca",
+    "name": "RotorGeeks",
+    "homepage": "https://rotorgeeks.com",
+    "type": "reseller",
+    "channel": "online",
+    "tier": "professional",
+    "status": "active",
+    "regions": ["ca"],
+    "location": null,
+    "products": {
+      "HM-EP1-2400": "https://rotorgeeks.com/search?q=expresslrs",
+      "TAA60004S35": "https://rotorgeeks.com/search?q=lipo",
+      "RM-TX16S": "https://rotorgeeks.com/search?q=radiomaster"
+    },
+    "featured": false,
+    "contact": "",
+    "notes": "Canadian FPV specialist."
+  }
+]

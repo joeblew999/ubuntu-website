@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/joeblew999/ubuntu-website/internal/browser"
-	"github.com/joeblew999/ubuntu-website/internal/mcp"
+	"github.com/joeblew999/ubuntu-website/internal/claude"
 )
 
 // OAuth constants for gcloud application-default credentials
@@ -71,6 +71,22 @@ func (c *cliContext) handleAuth(args []string) {
 	}
 }
 
+// locationToTarget maps CLI --location flag values to Claude targets
+func locationToTarget(location string) (claude.Target, error) {
+	switch location {
+	case "vscode":
+		return claude.TargetVSCode, nil
+	case "project":
+		return claude.TargetProject, nil
+	case "claude":
+		return claude.TargetClaude, nil
+	case "desktop":
+		return claude.TargetDesktop, nil
+	default:
+		return "", fmt.Errorf("unknown location: %s (valid: vscode, project, claude, desktop)", location)
+	}
+}
+
 func (c *cliContext) authAdd(args []string) {
 	location := "vscode"
 	for _, a := range args {
@@ -84,53 +100,31 @@ func (c *cliContext) authAdd(args []string) {
 		c.exitError(fmt.Sprintf("Error finding project root: %v", err))
 	}
 
-	var mcpFile string
-	switch location {
-	case "vscode":
-		targetDir := filepath.Join(projectRoot, ".vscode")
-		os.MkdirAll(targetDir, 0755)
-		mcpFile = filepath.Join(targetDir, "mcp.json")
-	case "project":
-		mcpFile = filepath.Join(projectRoot, ".mcp.json")
-	case "claude":
-		targetDir := filepath.Join(projectRoot, ".claude")
-		os.MkdirAll(targetDir, 0755)
-		mcpFile = filepath.Join(targetDir, "mcp.json")
-	default:
-		c.exitError(fmt.Sprintf("Unknown location: %s", location))
-	}
-
-	config, err := mcp.LoadConfig(mcpFile)
+	target, err := locationToTarget(location)
 	if err != nil {
 		c.exitError(err.Error())
 	}
 
-	if mcp.AddGoogleServer(config) {
-		if err := mcp.SaveConfig(mcpFile, config); err != nil {
-			c.exitError(err.Error())
-		}
+	result, err := claude.AddMCPServer(claude.GoogleServerName, target, projectRoot)
+	if err != nil {
+		c.exitError(fmt.Sprintf("Error adding MCP server: %v", err))
+	}
+
+	// Show backup info for VSCode targets (safety feature)
+	if result.BackupPath != "" {
+		fmt.Fprintf(c.stdout, "Backup: %s\n", result.BackupPath)
+	}
+
+	if result.ServerAdded {
 		fmt.Fprintln(c.stdout, "Added Google MCP server")
-		fmt.Fprintf(c.stdout, "   File: %s\n", mcpFile)
+		fmt.Fprintf(c.stdout, "   File: %s\n", result.ConfigPath)
 	} else {
-		fmt.Fprintf(c.stdout, "Google MCP server already configured in %s\n", mcpFile)
+		fmt.Fprintf(c.stdout, "Google MCP server already configured in %s\n", result.ConfigPath)
 	}
 
-	// Add permissions
-	if err := mcp.EnsureClaudeDir(projectRoot); err != nil {
-		c.exitError(err.Error())
-	}
-	settingsPath := mcp.GetSettingsPath(projectRoot)
-	settings, err := mcp.LoadSettings(settingsPath)
-	if err != nil {
-		c.exitError(err.Error())
-	}
-
-	if mcp.AddGooglePermissions(settings) {
-		if err := mcp.SaveSettings(settingsPath, settings); err != nil {
-			c.exitError(err.Error())
-		}
+	if result.PermissionsSet {
 		fmt.Fprintln(c.stdout, "Added Google MCP permissions")
-		fmt.Fprintf(c.stdout, "   File: %s\n", settingsPath)
+		fmt.Fprintf(c.stdout, "   File: %s\n", result.SettingsPath)
 	}
 
 	fmt.Fprintln(c.stdout, "")
@@ -150,40 +144,32 @@ func (c *cliContext) authRemove(args []string) {
 		c.exitError(fmt.Sprintf("Error finding project root: %v", err))
 	}
 
-	var mcpFile string
-	switch location {
-	case "vscode":
-		mcpFile = filepath.Join(projectRoot, ".vscode", "mcp.json")
-	case "project":
-		mcpFile = filepath.Join(projectRoot, ".mcp.json")
-	case "claude":
-		mcpFile = filepath.Join(projectRoot, ".claude", "mcp.json")
-	default:
-		c.exitError(fmt.Sprintf("Unknown location: %s", location))
-	}
-
-	config, err := mcp.LoadConfig(mcpFile)
+	target, err := locationToTarget(location)
 	if err != nil {
 		c.exitError(err.Error())
 	}
 
-	if mcp.RemoveGoogleServer(config) {
-		if len(config.MCPServers) == 0 {
-			os.Remove(mcpFile)
+	result, err := claude.RemoveMCPServer(claude.GoogleServerName, target, projectRoot)
+	if err != nil {
+		c.exitError(fmt.Sprintf("Error removing MCP server: %v", err))
+	}
+
+	// Show backup info for VSCode targets (safety feature)
+	if result.BackupPath != "" {
+		fmt.Fprintf(c.stdout, "Backup: %s\n", result.BackupPath)
+	}
+
+	if result.ServerRemoved {
+		if result.ConfigDeleted {
 			fmt.Fprintln(c.stdout, "Removed Google MCP server (deleted empty config)")
 		} else {
-			mcp.SaveConfig(mcpFile, config)
 			fmt.Fprintln(c.stdout, "Removed Google MCP server")
 		}
 	} else {
 		fmt.Fprintln(c.stdout, "Google MCP server not found")
 	}
 
-	// Remove permissions
-	settingsPath := mcp.GetSettingsPath(projectRoot)
-	settings, _ := mcp.LoadSettings(settingsPath)
-	if settings != nil && mcp.RemoveGooglePermissions(settings) {
-		mcp.SaveSettings(settingsPath, settings)
+	if result.PermissionsRemoved {
 		fmt.Fprintln(c.stdout, "Removed Google MCP permissions")
 	}
 }
@@ -197,43 +183,34 @@ func (c *cliContext) authStatus(args []string) {
 	}
 
 	projectRoot, _ := findProjectRoot()
-	var mcpFile string
-	switch location {
-	case "vscode":
-		mcpFile = filepath.Join(projectRoot, ".vscode", "mcp.json")
-	case "project":
-		mcpFile = filepath.Join(projectRoot, ".mcp.json")
-	case "claude":
-		mcpFile = filepath.Join(projectRoot, ".claude", "mcp.json")
+
+	target, err := locationToTarget(location)
+	if err != nil {
+		c.exitError(err.Error())
 	}
 
 	fmt.Fprintf(c.stdout, "=== Google MCP Status (%s) ===\n\n", location)
 
-	config, err := mcp.LoadConfig(mcpFile)
+	status, err := claude.GetMCPServerStatus(claude.GoogleServerName, target, projectRoot)
 	if err != nil {
-		fmt.Fprintf(c.stdout, "No config at %s\n", mcpFile)
-		return
+		c.exitError(fmt.Sprintf("Error getting status: %v", err))
 	}
 
-	if config.HasServer(mcp.GoogleServerName) {
-		fmt.Fprintf(c.stdout, "MCP Server: configured in %s\n", mcpFile)
+	if status.Configured {
+		fmt.Fprintf(c.stdout, "MCP Server: configured in %s\n", status.ConfigPath)
 	} else {
 		fmt.Fprintln(c.stdout, "MCP Server: not configured")
 	}
 
-	settingsPath := mcp.GetSettingsPath(projectRoot)
-	settings, _ := mcp.LoadSettings(settingsPath)
-	if settings != nil {
-		count := mcp.CountGooglePermissions(settings)
-		fmt.Fprintf(c.stdout, "Permissions: %d google tools allowed\n", count)
-	}
+	fmt.Fprintf(c.stdout, "Permissions: %d google tools allowed\n", status.PermissionCount)
 }
 
 func (c *cliContext) authCheck(args []string) {
-	fmt.Fprintln(c.stdout, "=== Google MCP Setup Check ===\n")
+	fmt.Fprintln(c.stdout, "=== Google MCP Setup Check ===")
+	fmt.Fprintln(c.stdout)
 
 	// Check binary
-	if _, err := exec.LookPath(mcp.GoogleServerCmd); err != nil {
+	if _, err := exec.LookPath(claude.GoogleServerCmd); err != nil {
 		fmt.Fprintln(c.stdout, "google-mcp-server: NOT INSTALLED")
 		fmt.Fprintln(c.stdout, "   Run: go install go.ngs.io/google-mcp-server@latest")
 	} else {
@@ -250,7 +227,7 @@ func (c *cliContext) authCheck(args []string) {
 
 	// Check accounts
 	homeDir, _ := os.UserHomeDir()
-	accounts, _ := filepath.Glob(filepath.Join(homeDir, mcp.GoogleAccountsDir, "*.json"))
+	accounts, _ := filepath.Glob(filepath.Join(homeDir, claude.GoogleAccountsDir, "*.json"))
 	if len(accounts) == 0 {
 		fmt.Fprintln(c.stdout, "Accounts: NOT AUTHENTICATED")
 		fmt.Fprintln(c.stdout, "   Run: google-mcp-server")
@@ -336,7 +313,8 @@ func (c *cliContext) authLogin(args []string) {
 		}
 	}
 
-	fmt.Fprintln(c.stdout, "=== Google OAuth Login ===\n")
+	fmt.Fprintln(c.stdout, "=== Google OAuth Login ===")
+	fmt.Fprintln(c.stdout)
 
 	pkce, err := browser.GeneratePKCE()
 	if err != nil {
@@ -448,7 +426,7 @@ func (c *cliContext) printAuthUsage() {
 	fmt.Fprintln(c.stdout, `Usage: google auth <command> [arguments]
 
 Commands:
-  add [--location=LOC]      Add Google MCP server to Claude Code
+  add [--location=LOC]      Add Google MCP server to Claude
   remove [--location=LOC]   Remove Google MCP server
   status [--location=LOC]   Show configuration status
   check                     Check setup status
@@ -457,9 +435,10 @@ Commands:
   login [--account=EMAIL]   Authenticate with Google (OAuth flow)
 
 Locations:
-  vscode  - .vscode/mcp.json (default)
-  project - .mcp.json
-  claude  - .claude/mcp.json
+  vscode  - .vscode/mcp.json (default, Claude Code)
+  project - .mcp.json (project root)
+  claude  - .claude/mcp.json (claude folder)
+  desktop - Claude Desktop app config
 
 Open targets:
   project, consent, credentials
@@ -467,6 +446,7 @@ Open targets:
 
 Examples:
   google auth add
+  google auth add --location=desktop
   google auth check
   google auth guide
   google auth open credentials

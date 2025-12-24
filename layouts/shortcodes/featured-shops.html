@@ -1,0 +1,96 @@
+{{/* Featured Shops - displays shops with physical locations grouped by country */}}
+{{/* Usage: {{< featured-shops >}} */}}
+
+{{ $partners := site.Data.partners.all | default (slice) }}
+{{ $regions := site.Data.regions | default (slice) }}
+
+{{/* Build region lookup for flags */}}
+{{ $regionLookup := dict }}
+{{ range $regions }}
+  {{ $regionLookup = merge $regionLookup (dict .id .) }}
+{{ end }}
+
+{{/* Filter to shops with physical locations (channel = "physical" or "both") */}}
+{{ $physicalShops := slice }}
+{{ range $partners }}
+  {{ $channel := .channel | default "online" }}
+  {{ if or (eq $channel "physical") (eq $channel "both") }}
+    {{ if .location }}
+      {{ $physicalShops = $physicalShops | append . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* Group shops by country */}}
+{{ $byCountry := dict }}
+{{ range $physicalShops }}
+  {{ $country := .location.country | default "other" }}
+  {{ $existing := index $byCountry $country | default (slice) }}
+  {{ $byCountry = merge $byCountry (dict $country ($existing | append .)) }}
+{{ end }}
+
+{{ if gt (len $physicalShops) 0 }}
+<div class="space-y-6">
+  {{ range $country, $shops := $byCountry }}
+    {{ $regionInfo := index $regionLookup $country }}
+    <div class="border rounded-lg p-4 dark:border-gray-700">
+      <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
+        {{ if $regionInfo }}
+          <span>{{ $regionInfo.flag }}</span>
+          <span>{{ $regionInfo.name }}</span>
+        {{ else }}
+          <span>{{ upper $country }}</span>
+        {{ end }}
+      </h4>
+      <div class="space-y-3">
+        {{ range $shops }}
+          <div class="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                {{ if .homepage }}
+                  <a href="{{ .homepage }}" target="_blank" rel="noopener" class="font-medium text-blue-600 hover:underline">{{ .name }}</a>
+                {{ else }}
+                  <span class="font-medium">{{ .name }}</span>
+                {{ end }}
+                {{/* Channel indicator */}}
+                {{ if eq .channel "physical" }}
+                  <span class="text-sm" title="Physical store only">🏪</span>
+                {{ else if eq .channel "both" }}
+                  <span class="text-sm" title="Physical store + online">🏪🌐</span>
+                {{ end }}
+                {{/* Status indicator */}}
+                {{ if eq .status "prospect" }}
+                  <span class="text-xs px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100">coming soon</span>
+                {{ else if .featured }}
+                  <span class="text-xs px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100">featured</span>
+                {{ end }}
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                {{ .location.city }}{{ if .location.state }}, {{ .location.state }}{{ end }}
+              </div>
+              {{/* Product count for active shops */}}
+              {{ if and (eq .status "active") (gt (len .products) 0) }}
+                <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  {{ len .products }} BOM components in stock
+                </div>
+              {{ end }}
+            </div>
+            {{ if and (eq .status "active") .homepage }}
+              <a href="{{ .homepage }}" target="_blank" rel="noopener" class="text-sm px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors whitespace-nowrap">
+                Visit Shop
+              </a>
+            {{ end }}
+          </div>
+        {{ end }}
+      </div>
+    </div>
+  {{ end }}
+</div>
+
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
+  🏪 = Physical store &nbsp; 🏪🌐 = Physical store + online ordering
+</p>
+
+{{ else }}
+<p class="text-gray-500">No shops with physical locations found. Check our <a href="#online-sellers" class="text-blue-600 hover:underline">online sellers</a> below.</p>
+{{ end }}

@@ -361,6 +361,66 @@ curl http://localhost:8088/today
 
 **Process Compose:** Add `calendar-server` to dev workflow by enabling in `process-compose.yaml`.
 
+### Airspace Demo (BVLOS)
+
+Interactive US airspace visualization for drone fleet operations. Displays FAA controlled airspace, special use airspace (MOAs, restricted areas), and LAANC ceiling altitudes.
+
+**Demo:** `/airspace-demo/` (static HTML + Leaflet.js)
+**Content Page:** `content/english/fleet/airspace-demo.md`
+**Data:** FAA UDDS GeoJSON files stored in Cloudflare R2
+
+**Architecture:**
+- Development: Loads from local `static/airspace/*.geojson` (if present)
+- Production: Loads from R2 (`https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/airspace/`)
+- Auto-detects environment via `window.location.hostname`
+
+**CLI:** `cmd/airspace/main.go`
+
+**Taskfile Commands:**
+```bash
+task airspace:demo              # Start standalone server (port 9091)
+task airspace:status            # Show data file status and age
+task airspace:download          # Refresh all FAA data
+task airspace:download:uas      # Download only UAS Facility Map (LAANC)
+task airspace:download:boundary # Download only Airspace Boundary
+task airspace:download:sua      # Download only Special Use Airspace
+task r2:airspace:upload         # Sync data to R2
+task r2:endpoints               # List all R2 asset URLs
+task r2:endpoints:test          # Verify R2 endpoints accessible
+```
+
+**Data Files (44MB total, gitignored):**
+- `faa_airspace_boundary.geojson` (14MB) - Class B/C/D/E
+- `faa_special_use_airspace.geojson` (28MB) - MOAs, Restricted
+- `faa_uas_facility_map.geojson` (2.2MB) - LAANC grid
+
+**R2 Bucket:** `ubuntu-website-assets`
+**R2 Dashboard:** `task r2:open:bucket`
+
+### Cloudflare R2 (Large Assets)
+
+R2 object storage for static assets that exceed Cloudflare Pages' 25MB file limit.
+
+**Taskfile:** `taskfiles/Taskfile.cf-r2.yml`
+
+**Key Commands:**
+```bash
+task r2:status          # Show bucket status and dashboard URLs
+task r2:list            # List bucket contents
+task r2:endpoints       # List all asset endpoints
+task r2:endpoints:test  # Test endpoint accessibility
+task r2:upload FILE=x   # Upload single file
+task r2:sync DIR=x      # Sync directory to R2
+task r2:open            # Open R2 dashboard
+task r2:open:bucket     # Open bucket browser
+task r2:open:settings   # Open bucket settings
+```
+
+**Configuration:**
+- Bucket: `ubuntu-website-assets`
+- Public URL: `https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev`
+- Requires `CLOUDFLARE_API_TOKEN` with R2 permissions
+
 ### Page Images (banner, services, etc.)
 
 Location: `assets/images/`

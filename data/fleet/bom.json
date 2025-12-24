@@ -1,0 +1,434 @@
+[
+  {
+    "sku": "SKU30125",
+    "category": "Airframe",
+    "component": "Holybro X500 V2 ARF Kit",
+    "image": "x500-v2.svg",
+    "description": "500mm wheelbase carbon fiber frame with motors, ESCs, and props",
+    "isReference": true
+  },
+  {
+    "sku": "SKU30126",
+    "category": "Airframe",
+    "component": "Holybro S500 V2 Kit",
+    "image": "s500-v2.svg",
+    "description": "Alternative 500mm frame for larger payloads"
+  },
+  {
+    "sku": "IFLIGHT-XL5",
+    "category": "Airframe",
+    "component": "iFlight Nazgul5 V3 Frame",
+    "image": "nazgul5-frame.svg",
+    "description": "5-inch racing frame, lighter weight option"
+  },
+  {
+    "sku": "SKU11073",
+    "category": "Flight Control",
+    "component": "Pixhawk 6X",
+    "image": "pixhawk-6x.svg",
+    "description": "Flight controller with triple IMU, dual barometer",
+    "isReference": true
+  },
+  {
+    "sku": "SKU-PX6C",
+    "category": "Flight Control",
+    "component": "Pixhawk 6C",
+    "image": "pixhawk-6c.svg",
+    "description": "Compact flight controller, budget alternative to 6X"
+  },
+  {
+    "sku": "SKU-CUAV-X7",
+    "category": "Flight Control",
+    "component": "CUAV X7+ Pro",
+    "image": "cuav-x7.svg",
+    "description": "Industrial-grade flight controller with H7 processor"
+  },
+  {
+    "sku": "CUBE-ORANGE",
+    "category": "Flight Control",
+    "component": "Cube Orange+",
+    "image": "cube-orange.svg",
+    "description": "Modular autopilot with ADS-B receiver option"
+  },
+  {
+    "sku": "SKU18117",
+    "category": "Flight Control",
+    "component": "Pixhawk 6X Baseboard",
+    "image": "pixhawk-6x-baseboard.svg",
+    "description": "Carrier board for Pixhawk 6X",
+    "isReference": true
+  },
+  {
+    "sku": "SKU15011",
+    "category": "Flight Control",
+    "component": "Pixhawk 6X Accessories",
+    "image": "pixhawk-6x-accessories.svg",
+    "description": "Cables and case for Pixhawk 6X",
+    "isReference": true
+  },
+  {
+    "sku": "SKU15019",
+    "category": "Power",
+    "component": "PM06 V2 Power Module",
+    "image": "pm06-v2.svg",
+    "description": "Power sensing + 5V/3A BEC",
+    "isReference": true
+  },
+  {
+    "sku": "SKU15020",
+    "category": "Power",
+    "component": "PM07 Power Module",
+    "image": "pm07.svg",
+    "description": "High-current power module for larger builds"
+  },
+  {
+    "sku": "MATEK-PMHV",
+    "category": "Power",
+    "component": "Matek HV Power Module",
+    "image": "matek-pm.svg",
+    "description": "6S compatible power module with dual BEC"
+  },
+  {
+    "sku": "SKU12027",
+    "category": "Navigation",
+    "component": "Holybro M9N GPS",
+    "image": "m9n-gps.svg",
+    "description": "GPS + compass module",
+    "isReference": true
+  },
+  {
+    "sku": "SKU12028",
+    "category": "Navigation",
+    "component": "Holybro M10 GPS",
+    "image": "m10-gps.svg",
+    "description": "Latest generation GPS with faster acquisition"
+  },
+  {
+    "sku": "HERE3-GPS",
+    "category": "Navigation",
+    "component": "Here3 GPS/RTK",
+    "image": "here3-gps.svg",
+    "description": "CAN-based GPS with RTK capability"
+  },
+  {
+    "sku": "UBLOX-F9P",
+    "category": "Navigation",
+    "component": "u-blox F9P RTK Module",
+    "image": "ublox-f9p.svg",
+    "description": "Centimeter-level RTK positioning"
+  },
+  {
+    "sku": "SKU12033",
+    "category": "Navigation",
+    "component": "GPS Mast",
+    "image": "gps-mast.svg",
+    "description": "Folding mast for interference reduction",
+    "isReference": true
+  },
+  {
+    "sku": "SKU12007",
+    "category": "Safety",
+    "component": "Safety Switch & Buzzer",
+    "image": "safety-switch.svg",
+    "description": "Arm safety + audio alerts",
+    "isReference": true
+  },
+  {
+    "sku": "RPI4-MODEL-B-8GB",
+    "category": "Companion",
+    "component": "Raspberry Pi 4 8GB",
+    "image": "raspberry-pi-4.svg",
+    "description": "Sensor companion computer",
+    "isReference": true
+  },
+  {
+    "sku": "RPI5-8GB",
+    "category": "Companion",
+    "component": "Raspberry Pi 5 8GB",
+    "image": "raspberry-pi-5.svg",
+    "description": "Latest Pi with improved performance"
+  },
+  {
+    "sku": "RPI-CM4-8GB",
+    "category": "Companion",
+    "component": "Raspberry Pi CM4 8GB",
+    "image": "raspberry-pi-cm4.svg",
+    "description": "Compute Module for custom carrier boards"
+  },
+  {
+    "sku": "SDSDQED-128G-GNSIN",
+    "category": "Storage",
+    "component": "Industrial microSD 128GB",
+    "image": "microsd-128gb.svg",
+    "description": "High endurance storage for Pi",
+    "isReference": true
+  },
+  {
+    "sku": "SDSDQED-256G-GNSIN",
+    "category": "Storage",
+    "component": "Industrial microSD 256GB",
+    "image": "microsd-256gb.svg",
+    "description": "Larger storage for extended logging"
+  },
+  {
+    "sku": "900-13767-0000-000",
+    "category": "Companion",
+    "component": "Jetson Orin Nano 8GB",
+    "image": "jetson-orin-nano.svg",
+    "description": "AI companion computer, 40 TOPS",
+    "isReference": true
+  },
+  {
+    "sku": "945-13766-0000-000",
+    "category": "Companion",
+    "component": "Jetson Orin Nano Super",
+    "image": "jetson-orin-super.svg",
+    "description": "Enhanced Orin Nano, 67 TOPS"
+  },
+  {
+    "sku": "900-13767-0040-000",
+    "category": "Companion",
+    "component": "Jetson Orin NX 16GB",
+    "image": "jetson-orin-nx.svg",
+    "description": "High-performance AI, 100 TOPS"
+  },
+  {
+    "sku": "900-13701-0000-000",
+    "category": "Companion",
+    "component": "Jetson AGX Orin 64GB",
+    "image": "jetson-agx-orin.svg",
+    "description": "Maximum AI performance, 275 TOPS"
+  },
+  {
+    "sku": "WD-SN530-256G",
+    "category": "Storage",
+    "component": "NVMe SSD 256GB",
+    "image": "nvme-ssd.svg",
+    "description": "Fast storage for Jetson",
+    "isReference": true
+  },
+  {
+    "sku": "WD-SN530-512G",
+    "category": "Storage",
+    "component": "NVMe SSD 512GB",
+    "image": "nvme-ssd-512.svg",
+    "description": "Larger NVMe for AI model storage"
+  },
+  {
+    "sku": "HM-EP1-2400",
+    "category": "RC",
+    "component": "ExpressLRS EP1",
+    "image": "expresslrs-ep1.svg",
+    "description": "2.4GHz RC receiver, open-source",
+    "isReference": true
+  },
+  {
+    "sku": "HM-EP2-2400",
+    "category": "RC",
+    "component": "ExpressLRS EP2",
+    "image": "expresslrs-ep2.svg",
+    "description": "Diversity receiver with dual antennas"
+  },
+  {
+    "sku": "HM-ES900RX",
+    "category": "RC",
+    "component": "ExpressLRS 900MHz RX",
+    "image": "expresslrs-900.svg",
+    "description": "Long range 900MHz receiver"
+  },
+  {
+    "sku": "TBS-CROSSFIRE",
+    "category": "RC",
+    "component": "TBS Crossfire Nano RX",
+    "image": "tbs-crossfire.svg",
+    "description": "868/915MHz long range RC system"
+  },
+  {
+    "sku": "RM-TX16S",
+    "category": "RC",
+    "component": "RadioMaster TX16S MK II",
+    "image": "radiomaster-tx16s.svg",
+    "description": "Full-size RC transmitter with ELRS"
+  },
+  {
+    "sku": "RM-BOXER",
+    "category": "RC",
+    "component": "RadioMaster Boxer",
+    "image": "radiomaster-boxer.svg",
+    "description": "Compact RC transmitter with ELRS"
+  },
+  {
+    "sku": "SKU17012",
+    "category": "Telemetry",
+    "component": "SiK Telemetry Radio V3",
+    "image": "sik-radio-v3.svg",
+    "description": "915MHz telemetry radio pair",
+    "isReference": true
+  },
+  {
+    "sku": "SKU17013",
+    "category": "Telemetry",
+    "component": "SiK Telemetry 500mW",
+    "image": "sik-radio-500mw.svg",
+    "description": "Higher power 500mW telemetry radio"
+  },
+  {
+    "sku": "RFD900X",
+    "category": "Telemetry",
+    "component": "RFD900x Modem",
+    "image": "rfd900x.svg",
+    "description": "Long range 900MHz telemetry, 40km+"
+  },
+  {
+    "sku": "USR-ES105",
+    "category": "Networking",
+    "component": "Industrial Ethernet Switch",
+    "image": "ethernet-switch.svg",
+    "description": "5-port GbE switch",
+    "isReference": true
+  },
+  {
+    "sku": "USR-ES108",
+    "category": "Networking",
+    "component": "Industrial Ethernet Switch 8-Port",
+    "image": "ethernet-switch-8.svg",
+    "description": "8-port GbE for larger payloads"
+  },
+  {
+    "sku": "TAA60004S35",
+    "category": "Power",
+    "component": "LiPo Battery 4S 6000mAh",
+    "image": "lipo-4s-6000mah.svg",
+    "description": "4S 35C flight battery",
+    "isReference": true
+  },
+  {
+    "sku": "TAA45004S45",
+    "category": "Power",
+    "component": "LiPo Battery 4S 4500mAh",
+    "image": "lipo-4s-4500mah.svg",
+    "description": "4S 45C lighter weight option"
+  },
+  {
+    "sku": "TAA80006S25",
+    "category": "Power",
+    "component": "LiPo Battery 6S 8000mAh",
+    "image": "lipo-6s-8000mah.svg",
+    "description": "6S battery for larger aircraft"
+  },
+  {
+    "sku": "ISDT-Q6",
+    "category": "Power",
+    "component": "ISDT Q6 Pro Charger",
+    "image": "isdt-q6.svg",
+    "description": "Compact LiPo charger 300W"
+  },
+  {
+    "sku": "SKU12010",
+    "category": "Mounting",
+    "component": "Pixhawk Vibration Mount",
+    "image": "vibration-mount.svg",
+    "description": "Anti-vibration damping mount",
+    "isReference": true
+  },
+  {
+    "sku": "SKU12055",
+    "category": "Cabling",
+    "component": "Holybro Cable Kit",
+    "image": "cable-kit.svg",
+    "description": "JST-GH and CAN cables",
+    "isReference": true
+  },
+  {
+    "sku": "RM520NGLAA-M20-SGASA",
+    "category": "Connectivity",
+    "component": "Quectel RM520N-GL 5G Modem",
+    "image": "quectel-rm520n.svg",
+    "description": "4G LTE + 5G NR cellular modem",
+    "isReference": true
+  },
+  {
+    "sku": "RM500Q-GL",
+    "category": "Connectivity",
+    "component": "Quectel RM500Q-GL 5G",
+    "image": "quectel-rm500q.svg",
+    "description": "5G Sub-6GHz modem, cost-effective"
+  },
+  {
+    "sku": "EC25-G",
+    "category": "Connectivity",
+    "component": "Quectel EC25-G 4G LTE",
+    "image": "quectel-ec25.svg",
+    "description": "4G LTE Cat 4 modem for basic connectivity"
+  },
+  {
+    "sku": "CADDX-VISTA",
+    "category": "FPV",
+    "component": "Caddx Vista",
+    "image": "caddx-vista.svg",
+    "description": "DJI digital FPV system, low latency"
+  },
+  {
+    "sku": "CADDX-POLAR",
+    "category": "FPV",
+    "component": "Caddx Polar Starlight",
+    "image": "caddx-polar.svg",
+    "description": "Low-light digital FPV camera"
+  },
+  {
+    "sku": "DJI-O3",
+    "category": "FPV",
+    "component": "DJI O3 Air Unit",
+    "image": "dji-o3.svg",
+    "description": "Latest DJI digital FPV, 4K recording"
+  },
+  {
+    "sku": "RUNCAM-PHOENIX2",
+    "category": "FPV",
+    "component": "RunCam Phoenix 2",
+    "image": "runcam-phoenix2.svg",
+    "description": "Analog FPV camera, low latency"
+  },
+  {
+    "sku": "RUNCAM-THUMB",
+    "category": "FPV",
+    "component": "RunCam Thumb Pro",
+    "image": "runcam-thumb.svg",
+    "description": "4K action camera, ultra-light"
+  },
+  {
+    "sku": "FOXEER-DIGISIGHT",
+    "category": "FPV",
+    "component": "Foxeer Digisight V3",
+    "image": "foxeer-digisight.svg",
+    "description": "Digital/analog switchable FPV camera"
+  },
+  {
+    "sku": "TF-LUNA",
+    "category": "Sensors",
+    "component": "TF-Luna LiDAR",
+    "image": "tf-luna.svg",
+    "description": "8m rangefinder for altitude hold"
+  },
+  {
+    "sku": "LIGHTWARE-SF45",
+    "category": "Sensors",
+    "component": "LightWare SF45/B",
+    "image": "lightware-sf45.svg",
+    "description": "350° scanning LiDAR for obstacle avoidance"
+  },
+  {
+    "sku": "FLOW-PX4",
+    "category": "Sensors",
+    "component": "PX4Flow Optical Flow",
+    "image": "px4flow.svg",
+    "description": "Optical flow sensor for indoor flight"
+  },
+  {
+    "sku": "LIDAR-LITE-V3",
+    "category": "Sensors",
+    "component": "LIDAR-Lite v3HP",
+    "image": "lidar-lite.svg",
+    "description": "40m laser altimeter"
+  }
+]

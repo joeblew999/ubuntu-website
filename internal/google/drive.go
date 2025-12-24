@@ -66,8 +66,8 @@ func (c *cliContext) handleDrive(args []string) {
 			fmt.Fprintf(c.stdout, "Name: %s\n", file.Name)
 			fmt.Fprintf(c.stdout, "ID: %s\n", file.ID)
 			fmt.Fprintf(c.stdout, "Type: %s\n", file.MimeType)
-			if file.Size > 0 {
-				fmt.Fprintf(c.stdout, "Size: %d bytes\n", file.Size)
+			if file.Size != "" && file.Size != "0" {
+				fmt.Fprintf(c.stdout, "Size: %s bytes\n", file.Size)
 			}
 			if file.WebViewLink != "" {
 				fmt.Fprintf(c.stdout, "Link: %s\n", file.WebViewLink)
@@ -152,6 +152,35 @@ func (c *cliContext) handleDrive(args []string) {
 		}
 		fmt.Fprintln(c.stdout, "Deleted successfully")
 
+	case "search", "find":
+		if len(cmdArgs) < 1 {
+			c.exitError("QUERY required")
+		}
+		result, err := client.Search(cmdArgs[0], 20)
+		if err != nil {
+			c.exitError(err.Error())
+		}
+		if jsonOutput {
+			c.outputJSON(result)
+		} else {
+			if len(result.Files) == 0 {
+				fmt.Fprintf(c.stdout, "No files found matching '%s'\n", cmdArgs[0])
+				return
+			}
+			fmt.Fprintf(c.stdout, "Files matching '%s':\n\n", cmdArgs[0])
+			for _, f := range result.Files {
+				icon := "📄"
+				if f.IsFolder() {
+					icon = "📁"
+				}
+				fmt.Fprintf(c.stdout, "  %s %s\n", icon, f.Name)
+				fmt.Fprintf(c.stdout, "      ID: %s\n", f.ID)
+				if f.WebViewLink != "" {
+					fmt.Fprintf(c.stdout, "      Link: %s\n", f.WebViewLink)
+				}
+			}
+		}
+
 	default:
 		fmt.Fprintf(c.stderr, "Unknown drive command: %s\n", cmd)
 		c.printDriveUsage()
@@ -164,6 +193,7 @@ func (c *cliContext) printDriveUsage() {
 
 Commands:
   list [FOLDER_ID]              List files (default: root)
+  search QUERY                  Search for files by name
   get FILE_ID                   Get file metadata
   download FILE_ID [OUTPUT]     Download file content
   upload FILE [--parent=ID]     Upload a file
@@ -175,6 +205,7 @@ Options:
 
 Examples:
   google drive list
+  google drive search "CV"
   google drive list 1abc123def
   google drive get 1abc123def
   google drive download 1abc123def output.txt

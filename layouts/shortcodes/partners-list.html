@@ -1,0 +1,120 @@
+{{/* Partners List - displays partners from data/partners/all.json */}}
+{{/* Usage: {{< partners-list status="active" tier="enterprise,professional" type="manufacturer,reseller" >}} */}}
+
+{{ $partners := site.Data.partners.all | default (slice) }}
+
+{{/* Get filter parameters */}}
+{{ $statusFilter := .Get "status" | default "" }}
+{{ $tierFilter := .Get "tier" | default "" }}
+{{ $typeFilter := .Get "type" | default "" }}
+
+{{/* Parse comma-separated filters into slices */}}
+{{ $statusList := slice }}
+{{ if $statusFilter }}
+  {{ $statusList = split $statusFilter "," }}
+{{ end }}
+
+{{ $tierList := slice }}
+{{ if $tierFilter }}
+  {{ $tierList = split $tierFilter "," }}
+{{ end }}
+
+{{ $typeList := slice }}
+{{ if $typeFilter }}
+  {{ $typeList = split $typeFilter "," }}
+{{ end }}
+
+{{/* Filter partners */}}
+{{ $filtered := slice }}
+{{ range $partners }}
+  {{ $include := true }}
+
+  {{/* Status filter */}}
+  {{ if and $include (gt (len $statusList) 0) }}
+    {{ $status := .status | default "active" }}
+    {{ if not (in $statusList $status) }}
+      {{ $include = false }}
+    {{ end }}
+  {{ end }}
+
+  {{/* Tier filter */}}
+  {{ if and $include (gt (len $tierList) 0) }}
+    {{ $tier := .tier | default "" }}
+    {{ if not (in $tierList $tier) }}
+      {{ $include = false }}
+    {{ end }}
+  {{ end }}
+
+  {{/* Type filter */}}
+  {{ if and $include (gt (len $typeList) 0) }}
+    {{ $type := .type | default "" }}
+    {{ if not (in $typeList $type) }}
+      {{ $include = false }}
+    {{ end }}
+  {{ end }}
+
+  {{ if $include }}
+    {{ $filtered = $filtered | append . }}
+  {{ end }}
+{{ end }}
+
+{{/* Display partners */}}
+{{ if gt (len $filtered) 0 }}
+<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+  {{ range $filtered }}
+  <div class="p-4 border rounded-lg hover:shadow-md transition-shadow dark:border-gray-700">
+    <div class="flex items-start justify-between mb-2">
+      <h3 class="font-semibold text-lg">
+        {{ if .homepage }}
+          <a href="{{ .homepage }}" target="_blank" rel="noopener" class="hover:text-blue-600">{{ .name }}</a>
+        {{ else }}
+          {{ .name }}
+        {{ end }}
+      </h3>
+      <div class="flex gap-1">
+        {{/* Type badge */}}
+        {{ if eq .type "manufacturer" }}
+          <span class="text-xs px-2 py-0.5 rounded bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100">official</span>
+        {{ else if eq .type "reseller" }}
+          <span class="text-xs px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100">reseller</span>
+        {{ else if eq .type "marketplace" }}
+          <span class="text-xs px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100">marketplace</span>
+        {{ end }}
+        {{/* Tier badge for partners */}}
+        {{ if .tier }}
+          <span class="text-xs px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100">{{ .tier }}</span>
+        {{ end }}
+      </div>
+    </div>
+
+    {{/* Location or Regions */}}
+    {{ if .location }}
+    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+      {{ if eq .channel "physical" }}🏪{{ else if eq .channel "both" }}🏪🌐{{ end }}
+      {{ .location.city }}{{ if .location.state }}, {{ .location.state }}{{ end }}
+    </div>
+    {{ else if .regions }}
+    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+      {{ if eq .channel "online" }}🌐{{ end }}
+      {{ range $i, $r := .regions }}{{ if $i }}, {{ end }}{{ upper $r }}{{ end }}
+    </div>
+    {{ end }}
+
+    {{/* Product count */}}
+    {{ $productCount := len .products }}
+    {{ if gt $productCount 0 }}
+    <div class="text-sm text-gray-600 dark:text-gray-300">
+      {{ $productCount }} BOM {{ if eq $productCount 1 }}component{{ else }}components{{ end }}
+    </div>
+    {{ end }}
+
+    {{/* Notes - optional */}}
+    {{ if and .notes (not (in .notes "prospect")) }}
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ .notes }}</p>
+    {{ end }}
+  </div>
+  {{ end }}
+</div>
+{{ else }}
+<p class="text-gray-500">No partners found matching the criteria.</p>
+{{ end }}

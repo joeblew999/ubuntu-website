@@ -1,77 +1,201 @@
-{{/* BOM Sellers Table - renders CSV data as interactive table with purchase links and images */}}
-{{ $file := .Get 0 | default "data/x500_fleet_sellers.csv" }}
-{{ with resources.Get $file }}
-  {{ $csv := . | transform.Unmarshal }}
+{{/* BOM Sellers Table with Country Filtering */}}
+{{/* Reads from data/fleet/bom.json, data/partners/all.json, and data/regions.json */}}
+
+{{ $bom := site.Data.fleet.bom | default (slice) }}
+{{ $partners := site.Data.partners.all | default (slice) }}
+{{ $regions := site.Data.regions | default (slice) }}
+
+{{/* Build SKU -> sellers map (active only) */}}
+{{ $skuSellers := newScratch }}
+{{ range $partners }}
+  {{ $partner := . }}
+  {{ $status := .status | default "active" }}
+  {{ if eq $status "active" }}
+    {{ range $sku, $url := .products }}
+      {{ $existing := $skuSellers.Get $sku | default (slice) }}
+      {{ $regionsStr := delimit $partner.regions "," }}
+      {{ $sellerInfo := dict "id" $partner.id "name" $partner.name "url" $url "type" $partner.type "channel" $partner.channel "regions" $regionsStr }}
+      {{ $skuSellers.Set $sku ($existing | append $sellerInfo) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+<div class="bom-sellers-container">
+  {{/* Country selector */}}
+  <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+    <label class="block text-sm font-medium mb-2" for="country-select">Select your country:</label>
+    <div class="flex flex-wrap items-center gap-3">
+      <select id="country-select" class="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]">
+        <option value="all">🌐 All Countries (show all sellers)</option>
+        {{ range $regions }}
+        <option value="{{ .id }}">{{ .flag }} {{ .name }}</option>
+        {{ end }}
+      </select>
+      <button type="button" id="clear-filter" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        Clear filter
+      </button>
+    </div>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2" id="region-hint">
+      Showing all sellers worldwide. Select your country to see local options.
+    </p>
+  </div>
+
+  {{/* BOM Table */}}
   <div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
+    <table class="w-full text-left border-collapse" id="bom-table">
       <thead>
         <tr class="bg-gray-100 dark:bg-gray-800">
           <th class="p-3 border-b font-semibold w-16"></th>
           <th class="p-3 border-b font-semibold">Category</th>
           <th class="p-3 border-b font-semibold">Component</th>
           <th class="p-3 border-b font-semibold">SKU</th>
-          <th class="p-3 border-b font-semibold">Seller 1</th>
-          <th class="p-3 border-b font-semibold">Seller 2</th>
-          <th class="p-3 border-b font-semibold">Seller 3</th>
+          <th class="p-3 border-b font-semibold">Where to Buy</th>
         </tr>
       </thead>
       <tbody>
-        {{ range $i, $row := $csv }}
-          {{ if gt $i 0 }}
-            <tr class="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
-              {{ $category := index $row 0 }}
-              {{ $component := index $row 1 }}
-              {{ $sku := index $row 2 }}
-              {{ $image := index $row 3 }}
-              {{ $seller1 := index $row 4 }}
-              {{ $seller1URL := index $row 5 }}
-              {{ $seller2 := index $row 6 }}
-              {{ $seller2URL := index $row 7 }}
-              {{ $seller3 := index $row 8 }}
-              {{ $seller3URL := index $row 9 }}
-
-              <td class="p-2">
-                {{ if $image }}
-                  {{ $imgPath := printf "images/bom/%s" $image }}
-                  {{ with resources.Get $imgPath }}
-                    <img src="{{ .RelPermalink }}" alt="{{ $component }}" class="w-12 h-12 object-contain rounded" loading="lazy">
-                  {{ else }}
-                    <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">—</div>
-                  {{ end }}
+        {{ range $bom }}
+          {{ $sku := .sku }}
+          {{ $component := .component }}
+          {{ $image := .image }}
+          {{ $sellers := $skuSellers.Get $sku | default (slice) }}
+          <tr class="border-b hover:bg-gray-50 dark:hover:bg-gray-700 bom-row">
+            <td class="p-2">
+              {{ if $image }}
+                {{ $imgPath := printf "images/bom/%s" $image }}
+                {{ with resources.Get $imgPath }}
+                  <img src="{{ .RelPermalink }}" alt="{{ $component }}" class="w-12 h-12 object-contain rounded" loading="lazy">
                 {{ else }}
                   <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">—</div>
                 {{ end }}
-              </td>
-              <td class="p-3"><strong>{{ $category }}</strong></td>
-              <td class="p-3">{{ $component }}</td>
-              <td class="p-3"><code>{{ $sku }}</code></td>
-              <td class="p-3">
-                {{ if $seller1URL }}
-                  <a href="{{ $seller1URL }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $seller1 }}</a>
-                {{ else if $seller1 }}
-                  {{ $seller1 }}
-                {{ end }}
-              </td>
-              <td class="p-3">
-                {{ if $seller2URL }}
-                  <a href="{{ $seller2URL }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $seller2 }}</a>
-                {{ else if $seller2 }}
-                  {{ $seller2 }}
-                {{ end }}
-              </td>
-              <td class="p-3">
-                {{ if $seller3URL }}
-                  <a href="{{ $seller3URL }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $seller3 }}</a>
-                {{ else if $seller3 }}
-                  {{ $seller3 }}
-                {{ end }}
-              </td>
-            </tr>
-          {{ end }}
+              {{ else }}
+                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">—</div>
+              {{ end }}
+            </td>
+            <td class="p-3"><strong>{{ .category }}</strong></td>
+            <td class="p-3">{{ .component }}</td>
+            <td class="p-3"><code>{{ .sku }}</code></td>
+            <td class="p-3">
+              {{ if $sellers }}
+                <ul class="list-none space-y-1">
+                  {{ range $sellers }}
+                    <li class="seller-item flex items-center gap-2" data-regions="{{ .regions }}">
+                      {{ if .url }}
+                        <a href="{{ .url }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ .name }}</a>
+                      {{ else }}
+                        {{ .name }}
+                      {{ end }}
+                      {{/* Type badge */}}
+                      {{ if eq .type "manufacturer" }}
+                        <span class="text-xs px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100">official</span>
+                      {{ else if eq .type "reseller" }}
+                        <span class="text-xs px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100">reseller</span>
+                      {{ else if eq .type "marketplace" }}
+                        <span class="text-xs px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100">marketplace</span>
+                      {{ end }}
+                      {{/* Channel indicator */}}
+                      {{ if eq .channel "physical" }}
+                        <span class="text-xs" title="Physical store only">🏪</span>
+                      {{ else if eq .channel "both" }}
+                        <span class="text-xs" title="Physical store + online">🏪🌐</span>
+                      {{ end }}
+                    </li>
+                  {{ end }}
+                </ul>
+              {{ else }}
+                <span class="text-gray-400">—</span>
+              {{ end }}
+            </td>
+          </tr>
         {{ end }}
       </tbody>
     </table>
   </div>
-{{ else }}
-  <p class="text-red-500">Error: Could not load {{ $file }}</p>
-{{ end }}
+
+  {{/* No results message */}}
+  <div id="no-results" class="hidden p-8 text-center text-gray-500 dark:text-gray-400">
+    <p class="text-lg mb-2">No local sellers found for your country.</p>
+    <p class="text-sm">Global sellers (marked with 🌍) ship worldwide and are always shown.</p>
+  </div>
+</div>
+
+<script>
+(function() {
+  const countrySelect = document.getElementById('country-select');
+  const clearBtn = document.getElementById('clear-filter');
+  const sellerItems = document.querySelectorAll('.seller-item');
+  const bomRows = document.querySelectorAll('.bom-row');
+  const regionHint = document.getElementById('region-hint');
+  const noResults = document.getElementById('no-results');
+
+  // Country names for hint text
+  const countryNames = {
+    'all': 'all countries',
+    'global': 'Global / Worldwide',
+    {{ range $regions }}
+    '{{ .id }}': '{{ .flag }} {{ .name }}',
+    {{ end }}
+  };
+
+  let currentCountry = 'all';
+
+  // Load saved country preference
+  const savedCountry = localStorage.getItem('preferred-country');
+  if (savedCountry && countryNames[savedCountry]) {
+    currentCountry = savedCountry;
+    countrySelect.value = savedCountry;
+    filterByCountry(currentCountry);
+  }
+
+  countrySelect.addEventListener('change', function() {
+    currentCountry = this.value;
+    localStorage.setItem('preferred-country', currentCountry);
+    filterByCountry(currentCountry);
+  });
+
+  clearBtn.addEventListener('click', function() {
+    currentCountry = 'all';
+    countrySelect.value = 'all';
+    localStorage.removeItem('preferred-country');
+    filterByCountry('all');
+  });
+
+  function filterByCountry(country) {
+    let visibleCount = 0;
+    let totalSellers = 0;
+
+    sellerItems.forEach(item => {
+      totalSellers++;
+      const itemRegions = item.dataset.regions.split(',');
+      // Show if: all selected, OR seller is global, OR seller matches country
+      const show = country === 'all' ||
+                   itemRegions.includes('global') ||
+                   itemRegions.includes(country);
+
+      item.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+
+    // Check each row - if all sellers are hidden, dim the row
+    bomRows.forEach(row => {
+      const visibleSellers = row.querySelectorAll('.seller-item:not([style*="display: none"])');
+      if (visibleSellers.length === 0) {
+        row.classList.add('opacity-50');
+      } else {
+        row.classList.remove('opacity-50');
+      }
+    });
+
+    // Show/hide no results message
+    noResults.classList.toggle('hidden', visibleCount > 0);
+
+    // Update hint text
+    if (country === 'all') {
+      regionHint.textContent = 'Showing all sellers worldwide.';
+    } else {
+      const name = countryNames[country] || country;
+      const globalNote = visibleCount > 0 ? ' (includes global shippers)' : '';
+      regionHint.textContent = `Showing sellers for ${name}${globalNote}. ${visibleCount} of ${totalSellers} options visible.`;
+    }
+  }
+})();
+</script>

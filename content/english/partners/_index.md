@@ -16,13 +16,11 @@ We provide that infrastructure. You sell the hardware. Together, we turn one-tim
 
 ## How It Works
 
-```
 1. Customer buys drone kit from your shop
 2. Kit includes credentials for our managed infrastructure
 3. Customer's drones connect as leaf nodes to our hubs
 4. You earn revenue share on their subscription
 5. We handle infrastructure—or you do, your choice
-```
 
 **Open hardware, managed infrastructure.** We don't compete with you on hardware sales. We provide the backend that makes your hardware more valuable.
 
@@ -156,6 +154,14 @@ Transparent pricing your customers can understand:
 | **200+ vehicles** | Custom | Dedicated resources |
 
 [Contact us](/contact?subject=partnership) for current partner pricing sheet.
+
+---
+
+## Hardware Vendors
+
+These manufacturers and resellers stock components from our reference BOM:
+
+{{< partners-list status="active" type="manufacturer,reseller" >}}
 
 ---
 
