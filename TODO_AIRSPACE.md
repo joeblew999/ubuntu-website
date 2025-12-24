@@ -370,6 +370,115 @@ map.on('moveend', async () => {
 
 ---
 
+---
+
+## Protomaps Ecosystem (bdon's work)
+
+Brandon Liu ([bdon](https://github.com/bdon)) has built the entire stack we need. **Don't reinvent - integrate.**
+
+### Key Projects
+
+| Project | Purpose | Our Use |
+|---------|---------|---------|
+| [protomaps/PMTiles](https://github.com/protomaps/PMTiles) | Single-file vector tile format | Store tiled airspace data in R2 |
+| [protomaps/go-pmtiles](https://github.com/protomaps/go-pmtiles) | CLI for PMTiles operations | `pmtiles serve`, `pmtiles upload`, `pmtiles extract` |
+| [protomaps/protomaps-leaflet](https://github.com/protomaps/protomaps-leaflet) | Vector rendering for Leaflet | Replace GeoJSON loading with progressive tiles |
+| [felt/tippecanoe](https://github.com/felt/tippecanoe) | GeoJSON → vector tiles | Convert FAA data to PMTiles |
+| [bdon/cng-storage-guide](https://github.com/bdon/cng-storage-guide) | Cloud storage comparison | Confirms R2 is ideal (zero egress) |
+
+### Why R2 is Perfect (from bdon's research)
+
+```yaml
+# From bdon/cng-storage-guide
+- name: Cloudflare R2
+  cost_per_gb_stored: 0.015
+  cost_per_gb_egress: 0        # <-- THIS IS KEY
+  cost_per_1k_gets: 0.00036
+```
+
+PMTiles on R2 = **zero bandwidth costs**. A 575MB obstacles file served to thousands of users costs only storage + requests, not bandwidth.
+
+### PMTiles CLI Commands We Need
+
+```bash
+# Install
+go install github.com/protomaps/go-pmtiles@latest
+
+# Convert GeoJSON to PMTiles (via tippecanoe)
+tippecanoe -zg -o faa_obstacles.pmtiles faa_obstacles.geojson
+
+# Upload directly to R2 (S3-compatible)
+pmtiles upload faa_obstacles.pmtiles s3://ubuntu-website-assets/airspace/
+
+# Serve locally for testing
+pmtiles serve ./static/airspace/ --port 8081
+
+# Extract subset by bounding box
+pmtiles extract source.pmtiles subset.pmtiles --bbox=-122.5,37.5,-122.0,38.0
+```
+
+### Updated Architecture with Protomaps
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          FAA DATA SOURCES                                    │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      GITHUB ACTIONS PIPELINE                                 │
+│                                                                              │
+│  1. Download GeoJSON from FAA ArcGIS                                        │
+│  2. Convert to PMTiles via tippecanoe                                        │
+│  3. Upload to R2 via `pmtiles upload`                                        │
+│  4. Update manifest.json                                                     │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              R2 STORAGE                                      │
+│                                                                              │
+│  /airspace/                                                                  │
+│    manifest.json                                                             │
+│    faa_airspace.pmtiles        <- All airspace in one file!                 │
+│    faa_airports.pmtiles                                                      │
+│    faa_obstacles.pmtiles       <- 575MB → ~50MB tiled                       │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      WEB GUI (protomaps-leaflet)                             │
+│                                                                              │
+│  import { PMTiles, leafletLayer } from 'pmtiles';                           │
+│  const tiles = new PMTiles('https://r2.../airspace/faa_airspace.pmtiles');  │
+│  map.addLayer(leafletLayer(tiles));                                          │
+│                                                                              │
+│  → Only loads visible tiles via HTTP Range requests                          │
+│  → Progressive loading as user pans/zooms                                    │
+│  → No 50MB+ initial download!                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Revised Implementation Roadmap
+
+| Phase | Task | Tools |
+|-------|------|-------|
+| **1A** | Add `sync` command with ETag tracking | Go, R2 API |
+| **1B** | GitHub Actions for FAA→R2 sync | GH Actions |
+| **2A** | Install tippecanoe in CI | `brew install tippecanoe` |
+| **2B** | Convert large datasets to PMTiles | tippecanoe, go-pmtiles |
+| **2C** | Update web GUI to protomaps-leaflet | protomaps-leaflet |
+| **3** | Combine all layers into single PMTiles | tippecanoe --layer flag |
+
+### Resources
+
+- Protomaps Docs: https://docs.protomaps.com
+- PMTiles Spec: https://github.com/protomaps/PMTiles/blob/main/spec/v3/spec.md
+- Cloud Storage Guide: https://bdon.github.io/cng-storage-guide/
+- Tippecanoe: https://github.com/felt/tippecanoe
+
+---
+
 ## Decision Log
 
 | Date | Decision | Rationale |
@@ -377,3 +486,5 @@ map.on('moveend', async () => {
 | 2024-12-24 | Skip obstacles for now | 575MB too large for GeoJSON; needs vector tiles |
 | 2024-12-24 | Diff sync before more sources | Adding data without smart sync = exponential pain |
 | 2024-12-24 | GitHub Actions first | Simpler than CF Worker; already have CI |
+| 2024-12-24 | Use Protomaps stack | bdon already solved this; don't reinvent |
+| 2024-12-24 | R2 for storage | Zero egress costs, HTTP Range support for PMTiles |
