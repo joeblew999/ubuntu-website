@@ -34,6 +34,8 @@ type Dataset struct {
 	// For FeatureServer APIs that require pagination
 	IsPaginated bool
 	PageSize    int
+	// ETagURL is the URL to check for ETag/Last-Modified (for paginated APIs, this is the layer URL not the query URL)
+	ETagURL string
 }
 
 var datasets = map[string]Dataset{
@@ -43,6 +45,8 @@ var datasets = map[string]Dataset{
 		BaseURL:     "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/FAA_UAS_FacilityMap_Data/FeatureServer/0/query",
 		IsPaginated: true,
 		PageSize:    2000,
+		// ETagURL points to the layer (not /query) which returns proper ETag/Last-Modified headers
+		ETagURL: "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/FAA_UAS_FacilityMap_Data/FeatureServer/0",
 	},
 	"boundary": {
 		Name:     "Airspace Boundary",
@@ -378,28 +382,21 @@ func runSync() {
 			}
 		}
 
-		if !needsDownload && !ds.IsPaginated {
-			// HEAD request to check ETag (only for direct downloads)
-			newETag, needsDownload = checkETag(client, ds.BaseURL, store.ETags[key])
+		if !needsDownload {
+			// Check for changes using ETag or Last-Modified header
+			// For paginated APIs, use ETagURL (the layer URL) which returns proper headers
+			// For direct downloads, use BaseURL
+			checkURL := ds.BaseURL
+			if ds.ETagURL != "" {
+				checkURL = ds.ETagURL
+			}
+			newETag, needsDownload = checkETag(client, checkURL, store.ETags[key])
 			if needsDownload {
-				fmt.Printf("[%s] %s: CHANGED\n", key, ds.Name)
+				fmt.Printf("[%s] %s: CHANGED (source updated)\n", key, ds.Name)
 			} else {
 				fmt.Printf("[%s] %s: unchanged\n", key, ds.Name)
 				skipped++
 				continue
-			}
-		} else if !needsDownload && ds.IsPaginated {
-			// For paginated APIs, we can't easily check ETag
-			// Check file age instead - re-download if older than 7 days
-			if info, err := os.Stat(outPath); err == nil {
-				age := time.Since(info.ModTime())
-				if age < 7*24*time.Hour {
-					fmt.Printf("[%s] %s: recent (%.0f days old)\n", key, ds.Name, age.Hours()/24)
-					skipped++
-					continue
-				}
-				fmt.Printf("[%s] %s: STALE (%.0f days old)\n", key, ds.Name, age.Hours()/24)
-				needsDownload = true
 			}
 		}
 
@@ -422,9 +419,19 @@ func runSync() {
 			continue
 		}
 
-		// Update ETag
+		// Update ETag/Last-Modified for change tracking
 		if newETag != "" {
 			store.ETags[key] = newETag
+		} else {
+			// For paginated downloads, do a HEAD to get the current ETag/Last-Modified
+			// Use ETagURL if available (the layer URL returns proper headers)
+			checkURL := ds.BaseURL
+			if ds.ETagURL != "" {
+				checkURL = ds.ETagURL
+			}
+			if etag, _ := checkETag(client, checkURL, ""); etag != "" {
+				store.ETags[key] = etag
+			}
 		}
 
 		// Report file size
