@@ -1,7 +1,7 @@
 {{/* Airspace Demo - Full-screen interactive map */}}
 {{/* Uses PMTiles from R2 for efficient progressive loading */}}
-{{/* Configuration: data/airspace/datasets.json is the single source of truth */}}
-{{/* Layer names and filenames here MUST match that file */}}
+{{/* Configuration: Manifest-driven - fetches manifest.json and regional manifests from R2 */}}
+{{/* Supports multiple regions with automatic detection based on viewport */}}
 
 {{ define "main" }}
 <style>
@@ -140,8 +140,14 @@
     const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const DATA_BASE = isLocalDev ? '/airspace' : '{{ site.Params.r2.public_url }}/airspace';
     const TILES_BASE = DATA_BASE + '/tiles';
+    const MANIFEST_URL = DATA_BASE + '/manifest.json';
 
     console.log('Airspace Demo:', isLocalDev ? 'LOCAL mode' : 'R2 mode', '- Data from:', DATA_BASE);
+
+    // Global state for manifest-driven loading
+    let globalManifest = null;
+    let activeRegion = null;
+    let regionManifest = null;
 
     // Initialize map centered on continental US
     const map = L.map('airspace-map').setView([39.8, -98.5], 5);
@@ -213,6 +219,59 @@
           symbolizer: new protomapsL.PolygonSymbolizer({ fill: '#ffff00', opacity: 0.5, stroke: '#cc9900', width: 1 }) },
     ];
 
+    // Manifest-driven loading functions
+    async function loadGlobalManifest() {
+        try {
+            const resp = await fetch(MANIFEST_URL);
+            if (!resp.ok) throw new Error(`Manifest fetch failed: ${resp.status}`);
+            globalManifest = await resp.json();
+            console.log('Global manifest loaded:', globalManifest);
+            return globalManifest;
+        } catch (e) {
+            console.warn('Could not load global manifest, using legacy mode:', e.message);
+            return null;
+        }
+    }
+
+    async function loadRegionManifest(regionId) {
+        if (!globalManifest || !globalManifest.regions[regionId]) {
+            console.warn(`Region ${regionId} not found in manifest`);
+            return null;
+        }
+
+        const region = globalManifest.regions[regionId];
+        const manifestFile = region.manifest_file;
+
+        try {
+            const resp = await fetch(`${DATA_BASE}/${manifestFile}`);
+            if (!resp.ok) throw new Error(`Region manifest fetch failed: ${resp.status}`);
+            regionManifest = await resp.json();
+            activeRegion = regionId;
+            console.log(`Region manifest loaded for ${regionId}:`, regionManifest);
+            return regionManifest;
+        } catch (e) {
+            console.warn(`Could not load region manifest for ${regionId}:`, e.message);
+            return null;
+        }
+    }
+
+    // Detect which region the viewport is in based on bounding boxes
+    function detectRegion(bounds) {
+        if (!globalManifest) return null;
+
+        const center = bounds.getCenter();
+        const lat = center.lat;
+        const lng = center.lng;
+
+        for (const [regionId, region] of Object.entries(globalManifest.regions)) {
+            const [west, south, east, north] = region.bbox;
+            if (lng >= west && lng <= east && lat >= south && lat <= north) {
+                return regionId;
+            }
+        }
+        return null;
+    }
+
     // Check data availability: individual PMTiles (best for filtering) > GeoJSON fallback
     // Note: Combined PMTiles removed - doesn't support per-layer filtering
     async function checkDataMode() {
@@ -269,7 +328,11 @@
         document.getElementById('laanc-legend').style.display = 'flex';
 
         document.getElementById('loading').style.display = 'none';
-        document.getElementById('data-mode').textContent = '⚡ PMTiles (per-layer files)';
+
+        // Only update data-mode if not already set by manifest loader
+        if (!regionManifest) {
+            document.getElementById('data-mode').textContent = '⚡ PMTiles (per-layer files)';
+        }
     }
 
     // GeoJSON fallback functions
@@ -433,19 +496,47 @@
         });
     }
 
-    // Initialize
+    // Initialize with manifest-driven loading
     async function init() {
         setupToggles();
         setupPanelToggle();
 
-        // Check data availability: individual PMTiles (with filtering) > GeoJSON fallback
+        // Try manifest-driven loading first
+        const manifest = await loadGlobalManifest();
+
+        if (manifest) {
+            // Detect region from initial viewport
+            const bounds = map.getBounds();
+            const detectedRegion = detectRegion(bounds);
+
+            if (detectedRegion) {
+                console.log(`Detected region: ${detectedRegion}`);
+                const regionData = await loadRegionManifest(detectedRegion);
+
+                if (regionData) {
+                    // Update panel title with region name
+                    document.querySelector('.info-panel h2 span').textContent =
+                        `${regionData.name} Airspace Viewer`;
+
+                    // Update data mode indicator
+                    document.getElementById('data-mode').innerHTML =
+                        `⚡ Manifest-driven<br>Region: ${regionData.name}<br>Updated: ${regionData.updated.split('T')[0]}`;
+
+                    // Load PMTiles using manifest layer info
+                    await loadIndividualPMTiles();
+                    return;
+                }
+            }
+        }
+
+        // Fallback: legacy mode (direct PMTiles check)
+        console.log('Using legacy mode (no manifest or region not detected)');
         const dataMode = await checkDataMode();
 
         if (dataMode === 'individual') {
             await loadIndividualPMTiles();
         } else {
             await loadGeoJSON();
-            // Show LAANC toggle in GeoJSON mode (also shown in PMTiles mode via loadIndividualPMTiles)
             document.getElementById('laanc-toggle-label').style.display = 'flex';
             document.getElementById('laanc-legend').style.display = 'flex';
         }

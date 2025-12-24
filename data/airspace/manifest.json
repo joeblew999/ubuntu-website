@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "updated": "2024-12-24T00:00:00Z",
+  "regions": {
+    "usa": {
+      "name": "United States",
+      "bbox": [-125, 24, -66, 50],
+      "tiles_path": "tiles",
+      "manifest_file": "usa-manifest.json",
+      "default_layers": ["boundary", "sua"]
+    }
+  },
+  "notes": {
+    "bbox_format": "[west, south, east, north]",
+    "tiles_path": "Relative to /airspace/ in R2",
+    "future_regions": ["europe", "canada", "australia", "japan"]
+  }
+}
