@@ -1,0 +1,37 @@
+{
+  "timestamp": "2025-12-24T07:52:32.662795Z",
+  "duration": "8.355s",
+  "duration_ms": 8355,
+  "updated": 0,
+  "skipped": 5,
+  "has_changes": false,
+  "datasets": {
+    "airports": {
+      "status": "unchanged",
+      "duration_ms": 1713,
+      "etag": "W/\"3747ef32aae4e5f81910d80e2fb6edb9\""
+    },
+    "boundary": {
+      "status": "unchanged",
+      "duration_ms": 3423,
+      "etag": "W/\"9788abeb5a29ee0f68739a8f810e13ab\""
+    },
+    "navaids": {
+      "status": "unchanged",
+      "duration_ms": 1512,
+      "etag": "W/\"f8babfc7dbba56139e947f0b26f2c99a\""
+    },
+    "sua": {
+      "status": "unchanged",
+      "duration_ms": 1149,
+      "etag": "W/\"444617dd92135e35f6c104ccb2f1514c-2\""
+    },
+    "uas": {
+      "status": "unchanged",
+      "duration_ms": 555,
+      "etag": "-71000184"
+    }
+  },
+  "total_bytes": 0,
+  "total_size_mb": 0
+}

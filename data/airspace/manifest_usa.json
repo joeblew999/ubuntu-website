@@ -1,0 +1,265 @@
+{
+  "region": "usa",
+  "name": "United States",
+  "version": 1,
+  "updated": "2025-12-24T07:56:51Z",
+  "bbox": [
+    -125,
+    24,
+    -66,
+    50
+  ],
+  "layers": {
+    "airports": {
+      "name": "Airports",
+      "file": "faa_airports.pmtiles",
+      "pmtiles_layer": "airports",
+      "geom_type": "point",
+      "size_mb": 22.949209213256836,
+      "features": 0,
+      "zoom_range": [
+        0,
+        10
+      ],
+      "default_visible": false,
+      "render_rules": [
+        {
+          "fill": "#00ff00",
+          "stroke": "#006600",
+          "width": 1,
+          "radius": 5
+        }
+      ],
+      "legend": [
+        {
+          "label": "Airport",
+          "color": "#00ff00"
+        }
+      ]
+    },
+    "boundary": {
+      "name": "Airspace Boundary",
+      "file": "faa_airspace_boundary.pmtiles",
+      "pmtiles_layer": "boundary",
+      "geom_type": "polygon",
+      "size_mb": 2.516040802001953,
+      "features": 0,
+      "zoom_range": [
+        4,
+        14
+      ],
+      "default_visible": true,
+      "render_rules": [
+        {
+          "filter_prop": "CLASS",
+          "filter_value": "A",
+          "fill": "#0066cc",
+          "stroke": "#0066cc",
+          "opacity": 0.15,
+          "width": 1
+        },
+        {
+          "filter_prop": "CLASS",
+          "filter_value": "C",
+          "fill": "#cc00cc",
+          "stroke": "#cc00cc",
+          "opacity": 0.2,
+          "width": 2
+        },
+        {
+          "filter_prop": "CLASS",
+          "filter_value": "D",
+          "fill": "#0099cc",
+          "stroke": "#0099cc",
+          "opacity": 0.15,
+          "width": 2
+        },
+        {
+          "filter_prop": "CLASS",
+          "filter_value": "E",
+          "fill": "#00cc99",
+          "stroke": "#00cc99",
+          "opacity": 0.1,
+          "width": 1
+        },
+        {
+          "filter_prop": "CLASS",
+          "filter_value": "G",
+          "fill": "#999999",
+          "stroke": "#999999",
+          "opacity": 0.05,
+          "width": 1
+        },
+        {
+          "fill": "#666666",
+          "stroke": "#666666",
+          "opacity": 0.1,
+          "width": 1
+        }
+      ],
+      "legend": [
+        {
+          "label": "Class A",
+          "color": "#0066cc"
+        },
+        {
+          "label": "Class C",
+          "color": "#cc00cc"
+        },
+        {
+          "label": "Class D",
+          "color": "#0099cc"
+        },
+        {
+          "label": "Class E",
+          "color": "#00cc99"
+        }
+      ]
+    },
+    "laanc": {
+      "name": "LAANC/UAS Facility Map",
+      "file": "faa_uas_facility_map.pmtiles",
+      "pmtiles_layer": "uas",
+      "geom_type": "polygon",
+      "size_mb": 123.12504482269287,
+      "features": 378252,
+      "zoom_range": [
+        6,
+        14
+      ],
+      "default_visible": false,
+      "render_rules": [
+        {
+          "fill": "#ffff00",
+          "stroke": "#cc9900",
+          "opacity": 0.5,
+          "width": 1
+        }
+      ],
+      "legend": [
+        {
+          "label": "LAANC Grid",
+          "color": "#ffff00"
+        }
+      ]
+    },
+    "navaids": {
+      "name": "Navigation Aids",
+      "file": "faa_navaids.pmtiles",
+      "pmtiles_layer": "navaids",
+      "geom_type": "point",
+      "size_mb": 2.4741592407226562,
+      "features": 0,
+      "zoom_range": [
+        0,
+        10
+      ],
+      "default_visible": false,
+      "render_rules": [
+        {
+          "fill": "#ff00ff",
+          "stroke": "#660066",
+          "width": 1,
+          "radius": 4
+        }
+      ],
+      "legend": [
+        {
+          "label": "VOR/NDB",
+          "color": "#ff00ff"
+        }
+      ]
+    },
+    "sua": {
+      "name": "Special Use Airspace",
+      "file": "faa_special_use_airspace.pmtiles",
+      "pmtiles_layer": "sua",
+      "geom_type": "polygon",
+      "size_mb": 6.926379203796387,
+      "features": 0,
+      "zoom_range": [
+        4,
+        14
+      ],
+      "default_visible": true,
+      "render_rules": [
+        {
+          "filter_prop": "TYPE_CODE",
+          "filter_value": "R",
+          "fill": "#cc0000",
+          "stroke": "#cc0000",
+          "opacity": 0.3,
+          "width": 2
+        },
+        {
+          "filter_prop": "TYPE_CODE",
+          "filter_value": "P",
+          "fill": "#ff0000",
+          "stroke": "#ff0000",
+          "opacity": 0.4,
+          "width": 2
+        },
+        {
+          "filter_prop": "TYPE_CODE",
+          "filter_value": "MOA",
+          "fill": "#ff9900",
+          "stroke": "#ff9900",
+          "opacity": 0.2,
+          "width": 1
+        },
+        {
+          "filter_prop": "TYPE_CODE",
+          "filter_value": "A",
+          "fill": "#ffcc00",
+          "stroke": "#ffcc00",
+          "opacity": 0.2,
+          "width": 1
+        },
+        {
+          "filter_prop": "TYPE_CODE",
+          "filter_value": "W",
+          "fill": "#996600",
+          "stroke": "#996600",
+          "opacity": 0.15,
+          "width": 1
+        },
+        {
+          "fill": "#666666",
+          "stroke": "#666666",
+          "opacity": 0.1,
+          "width": 1
+        }
+      ],
+      "legend": [
+        {
+          "label": "Restricted",
+          "color": "#cc0000"
+        },
+        {
+          "label": "Prohibited",
+          "color": "#ff0000"
+        },
+        {
+          "label": "MOA",
+          "color": "#ff9900"
+        },
+        {
+          "label": "Alert",
+          "color": "#ffcc00"
+        },
+        {
+          "label": "Warning",
+          "color": "#996600"
+        }
+      ]
+    }
+  },
+  "source": {
+    "authority": "FAA",
+    "urls": {
+      "adds": "https://adds-faa.opendata.arcgis.com",
+      "udds": "https://udds-faa.opendata.arcgis.com"
+    },
+    "update_cycle": "28-day AIRAC"
+  }
+}
