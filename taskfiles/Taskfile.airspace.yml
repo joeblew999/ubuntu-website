@@ -4,33 +4,26 @@
 # Serves as demo/proof-of-capability for data provider applications.
 #
 # Usage:
-#   task airspace:demo      - Start demo server (standalone)
-#   task airspace:open      - Open demo in browser
+#   task airspace:open      - Open demo in browser (via Hugo dev server)
 #   task airspace:download  - Refresh FAA data
 #
-# The demo is also available via Hugo at /airspace-demo/ when running `task dev`
+# The demo is a Hugo page at /airspace-demo/ - run `task dev` first.
+# Data URL (R2) is configured in config/_default/params.toml
 
 version: '3'
 
 vars:
-  AIRSPACE_PORT: 9091
   AIRSPACE_DATA_DIR: static/airspace
-  AIRSPACE_DEMO_DIR: static/airspace-demo
 
 tasks:
   # ===========================================================================
-  # Demo Server
+  # Demo Access
   # ===========================================================================
 
-  demo:
-    desc: Start standalone airspace demo server
-    cmds:
-      - go run ./cmd/airspace serve -port {{.AIRSPACE_PORT}}
-
   open:
-    desc: Open airspace demo in browser
+    desc: Open airspace demo in browser (requires Hugo dev server)
     cmds:
-      - open http://localhost:{{.AIRSPACE_PORT}}/airspace-demo/
+      - open http://localhost:1313/airspace-demo/
 
   # ===========================================================================
   # Data Management
@@ -66,16 +59,29 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Check airspace demo dependencies
+    desc: Check airspace data and R2 config
     cmds:
       - |
-        echo "Checking airspace demo..."
-        if [ ! -f "{{.AIRSPACE_DEMO_DIR}}/index.html" ]; then
-          echo "ERROR: Demo not found at {{.AIRSPACE_DEMO_DIR}}/index.html"
+        echo "Checking airspace setup..."
+
+        # Check R2 config in params.toml
+        if grep -q "r2.public_url" config/_default/params.toml 2>/dev/null; then
+          echo "OK: R2 URL configured in params.toml"
+        else
+          echo "WARNING: R2 URL not found in params.toml"
+        fi
+
+        # Check Hugo layout
+        if [ -f "layouts/fleet/airspace-demo.html" ]; then
+          echo "OK: Hugo layout exists"
+        else
+          echo "ERROR: Missing layouts/fleet/airspace-demo.html"
           exit 1
         fi
-        if [ ! -d "{{.AIRSPACE_DATA_DIR}}" ]; then
-          echo "WARNING: No data. Run: task airspace:download"
+
+        # Check local data (for downloads)
+        if [ -d "{{.AIRSPACE_DATA_DIR}}" ]; then
+          echo "OK: Local data present at {{.AIRSPACE_DATA_DIR}}"
         else
-          echo "OK: Demo and data present"
+          echo "INFO: No local data. Run: task airspace:download"
         fi

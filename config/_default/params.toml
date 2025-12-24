@@ -104,6 +104,11 @@ map_longitude = "-0.1622023"
 map_marker = "images/marker.png"
 
 
+# R2 Storage (Cloudflare)
+# Large static assets served from R2 (files >25MB exceed Pages limit)
+[r2]
+public_url = "https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev"
+
 # Subscription
 [subscription]
 enable = false

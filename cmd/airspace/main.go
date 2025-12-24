@@ -5,7 +5,6 @@
 //	airspace download             # Download all datasets
 //	airspace download -dataset uas
 //	airspace status               # Show data file status
-//	airspace serve                # Start demo server
 package main
 
 import (
@@ -13,12 +12,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -66,8 +63,6 @@ func main() {
 		runDownload()
 	case "status":
 		runStatus()
-	case "serve":
-		runServe()
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -83,13 +78,11 @@ func printUsage() {
 	fmt.Println("Commands:")
 	fmt.Println("  download    Download FAA airspace data from ArcGIS APIs")
 	fmt.Println("  status      Show data file status and age")
-	fmt.Println("  serve       Start demo HTTP server")
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  airspace download                    # Download all datasets")
 	fmt.Println("  airspace download -dataset uas       # Download only UAS Facility Map")
 	fmt.Println("  airspace status                      # Show data status")
-	fmt.Println("  airspace serve -port 9091            # Start server on port 9091")
 }
 
 // ============================================================================
@@ -273,42 +266,4 @@ func formatAge(d time.Duration) string {
 		return fmt.Sprintf("%d hours", int(d.Hours()))
 	}
 	return fmt.Sprintf("%d days", int(d.Hours()/24))
-}
-
-// ============================================================================
-// Serve Command
-// ============================================================================
-
-func runServe() {
-	fs := flag.NewFlagSet("serve", flag.ExitOnError)
-	port := fs.Int("port", 9091, "Port to listen on")
-	staticDir := fs.String("static", "./static", "Static files directory")
-	fs.Parse(os.Args[1:])
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-
-		// Correct Content-Type for GeoJSON
-		if strings.HasSuffix(r.URL.Path, ".geojson") {
-			w.Header().Set("Content-Type", "application/geo+json")
-		}
-
-		// Serve from static folder
-		path := filepath.Join(*staticDir, r.URL.Path)
-		if r.URL.Path == "/" {
-			path = filepath.Join(*staticDir, "airspace-demo/index.html")
-		}
-
-		http.ServeFile(w, r, path)
-	})
-
-	addr := fmt.Sprintf(":%d", *port)
-	fmt.Printf("Airspace demo server starting on http://localhost%s\n", addr)
-	fmt.Printf("  Demo:  http://localhost%s/airspace-demo/\n", addr)
-	fmt.Printf("  Data:  http://localhost%s/airspace/\n", addr)
-	fmt.Println()
-	fmt.Println("Press Ctrl+C to stop")
-
-	log.Fatal(http.ListenAndServe(addr, nil))
 }
