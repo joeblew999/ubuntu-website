@@ -1,0 +1,52 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Test Restricted Area",
+        "type_code": "R",
+        "ceiling": 5000
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-122.5, 37.5],
+          [-122.0, 37.5],
+          [-122.0, 38.0],
+          [-122.5, 38.0],
+          [-122.5, 37.5]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Test MOA",
+        "type_code": "MOA",
+        "ceiling": 18000
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-121.5, 37.0],
+          [-121.0, 37.0],
+          [-121.0, 37.5],
+          [-121.5, 37.5],
+          [-121.5, 37.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "SFO Airport",
+        "type": "airport"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.375, 37.619]
+      }
+    }
+  ]
+}
