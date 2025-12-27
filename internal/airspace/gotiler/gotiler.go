@@ -1,6 +1,9 @@
-// Package gotiler provides pure Go tile generation for Cloudflare Workers.
+// Package gotiler provides pure Go tile generation for CI environments.
 //
-// This replaces tippecanoe for environments where C++ binaries can't run.
+// This replaces tippecanoe for GitHub Actions and other environments where
+// installing C++ binaries is impractical. The generated PMTiles files are
+// then uploaded to R2 for serving via Cloudflare CDN.
+//
 // Uses paulmach/orb for geometry and protomaps/go-pmtiles for output.
 package gotiler
 
