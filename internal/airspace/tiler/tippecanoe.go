@@ -52,6 +52,9 @@ func (t *Tippecanoe) Tile(inputPath, outputPath string, config airspace.TileConf
 	}
 
 	// Feature handling
+	if config.ReduceRate > 0 {
+		args = append(args, fmt.Sprintf("-r%d", config.ReduceRate))
+	}
 	if config.DropDensest {
 		args = append(args, "--drop-densest-as-needed")
 	}

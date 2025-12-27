@@ -9,6 +9,7 @@ type TileConfig struct {
 	DropDensest     bool   // Drop features in dense tiles
 	NoFeatureLimit  bool   // Don't limit features per tile
 	NoTileSizeLimit bool   // Don't limit tile size
+	ReduceRate      int    // Feature reduction rate (tippecanoe -r flag, 0 = default)
 }
 
 // Tiler generates PMTiles from GeoJSON.

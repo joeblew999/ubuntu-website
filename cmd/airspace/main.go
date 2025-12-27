@@ -31,6 +31,7 @@ import (
 
 	"github.com/joeblew999/ubuntu-website/internal/airspace"
 	"github.com/joeblew999/ubuntu-website/internal/airspace/gotiler"
+	"github.com/joeblew999/ubuntu-website/internal/airspace/tiler"
 )
 
 // =============================================================================
@@ -91,16 +92,6 @@ type Dataset struct {
 	ETagURL     string // URL to check for ETag/Last-Modified (for paginated APIs)
 }
 
-// TileConfig holds tippecanoe settings per dataset
-type TileConfig struct {
-	MinZoom          int
-	MaxZoom          int
-	DropDensest      bool   // --drop-densest-as-needed
-	NoFeatureLimit   bool   // --no-feature-limit
-	NoTileSizeLimit  bool   // --no-tile-size-limit
-	ReduceRate       int    // -r rate (1 = no reduction)
-}
-
 var datasets = map[string]Dataset{
 	"uas": {
 		Name:        "UAS Facility Map",
@@ -155,14 +146,14 @@ var datasets = map[string]Dataset{
 	},
 }
 
-// tileConfigs holds tippecanoe configuration per dataset
-var tileConfigs = map[string]TileConfig{
-	"boundary": {MinZoom: -1, MaxZoom: -1, DropDensest: false},  // -zg (auto zoom)
-	"sua":      {MinZoom: -1, MaxZoom: -1, DropDensest: false},  // -zg
-	"uas":      {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
-	"airports": {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
-	"navaids":  {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
-	"obstacles": {MinZoom: -1, MaxZoom: -1, DropDensest: true},  // -zg --drop-densest-as-needed
+// tileConfigs holds tile generation settings per dataset (uses airspace.TileConfig)
+var tileConfigs = map[string]airspace.TileConfig{
+	"boundary":  {MinZoom: -1, MaxZoom: -1, DropDensest: false},                                        // -zg (auto zoom)
+	"sua":       {MinZoom: -1, MaxZoom: -1, DropDensest: false},                                        // -zg
+	"uas":       {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true}, // explicit zoom, no reduction
+	"airports":  {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
+	"navaids":   {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
+	"obstacles": {MinZoom: -1, MaxZoom: -1, DropDensest: true},                                         // -zg --drop-densest-as-needed
 }
 
 // datasetOrder defines the processing order (consistent ordering)
@@ -909,10 +900,12 @@ func runTile() {
 	fmt.Println("=============================")
 	fmt.Println()
 
-	// Create gotiler instance if needed
-	var goTiler *gotiler.GoTiler
-	if useGoTiler {
-		goTiler = gotiler.New()
+	// Create tiler instance based on selection
+	var activeTiler airspace.Tiler
+	if useTippecanoe {
+		activeTiler = tiler.New()
+	} else if useGoTiler {
+		activeTiler = gotiler.New()
 	}
 
 	tiled := 0
@@ -944,25 +937,19 @@ func runTile() {
 		// Convert using selected tiler
 		fmt.Printf("[%s] Converting %s → %s\n", key, ds.GeoJSON, ds.PMTiles)
 
-		var tileErr error
-		if useTippecanoe {
-			tileErr = runTippecanoe(key, geoJSONPath, pmTilesPath, ds.Layer)
-		} else if useGoTiler {
-			cfg := tileConfigs[key]
-			tileConfig := airspace.TileConfig{
-				MinZoom: cfg.MinZoom,
-				MaxZoom: cfg.MaxZoom,
-				Layer:   ds.Layer,
-			}
-			// Use sensible defaults for gotiler
-			if tileConfig.MinZoom < 0 {
-				tileConfig.MinZoom = 0
-			}
-			if tileConfig.MaxZoom < 0 {
-				tileConfig.MaxZoom = 10
-			}
-			tileErr = goTiler.Tile(geoJSONPath, pmTilesPath, tileConfig)
+		// Build config from tileConfigs map
+		cfg := tileConfigs[key]
+		cfg.Layer = ds.Layer
+
+		// For gotiler, use sensible defaults when auto-zoom is requested
+		if useGoTiler && cfg.MinZoom < 0 {
+			cfg.MinZoom = 0
 		}
+		if useGoTiler && cfg.MaxZoom < 0 {
+			cfg.MaxZoom = 10
+		}
+
+		tileErr := activeTiler.Tile(geoJSONPath, pmTilesPath, cfg)
 
 		if tileErr != nil {
 			fmt.Fprintf(os.Stderr, "[%s] ERROR: %v\n", key, tileErr)
@@ -978,45 +965,6 @@ func runTile() {
 
 	fmt.Println()
 	fmt.Printf("Done: %d tiled, %d skipped\n", tiled, skipped)
-}
-
-func runTippecanoe(key, inputPath, outputPath, layer string) error {
-	config := tileConfigs[key]
-
-	args := []string{
-		"-o", outputPath,
-		"--layer=" + layer,
-		"--force",
-	}
-
-	// Zoom settings
-	if config.MinZoom >= 0 && config.MaxZoom >= 0 {
-		args = append(args, fmt.Sprintf("-Z%d", config.MinZoom))
-		args = append(args, fmt.Sprintf("-z%d", config.MaxZoom))
-	} else {
-		args = append(args, "-zg") // Auto-detect zoom
-	}
-
-	// Feature reduction
-	if config.ReduceRate > 0 {
-		args = append(args, fmt.Sprintf("-r%d", config.ReduceRate))
-	}
-	if config.DropDensest {
-		args = append(args, "--drop-densest-as-needed")
-	}
-	if config.NoFeatureLimit {
-		args = append(args, "--no-feature-limit")
-	}
-	if config.NoTileSizeLimit {
-		args = append(args, "--no-tile-size-limit")
-	}
-
-	args = append(args, inputPath)
-
-	cmd := exec.Command("tippecanoe", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
 }
 
 // ============================================================================
