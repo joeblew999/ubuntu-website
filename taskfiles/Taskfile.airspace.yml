@@ -1,56 +1,37 @@
 # Airspace Pipeline - FAA data sync and tile generation
 #
-# All logic is in Go: cmd/airspace/main.go
-# All file paths are constants in the Go code.
+# All logic is in Go: cmd/airspace + internal/airspace
 #
 # Usage:
-#   task airspace:pipeline   - Full idempotent pipeline (sync → tile → manifest)
-#   task airspace:status     - Show current data status
+#   task airspace:pipeline              - Full idempotent pipeline
+#   task airspace:pipeline FORCE=true   - Force re-download and regenerate
+#   task airspace:pipeline TILER=gotiler - Use pure Go tiler
+#   task airspace:status                - Show current data status
 
 version: '3'
 
+vars:
+  FORCE: 'false'
+  TILER: 'auto'  # auto, tippecanoe, gotiler
+
 tasks:
-  # Primary commands - everything else is in Go
+  # Primary pipeline command
   pipeline:
     desc: Full idempotent pipeline (sync → tile → manifest)
+    vars:
+      FORCE_FLAG: '{{if eq .FORCE "true"}}-force{{end}}'
+      TILER_FLAG: '{{if ne .TILER "auto"}}-tiler {{.TILER}}{{end}}'
     cmds:
-      - go run ./cmd/airspace pipeline
+      - go run ./cmd/airspace pipeline {{.FORCE_FLAG}} {{.TILER_FLAG}}
 
-  pipeline:force:
-    desc: Force full pipeline even if no changes
-    cmds:
-      - go run ./cmd/airspace pipeline -force
-
-  # Pure Go pipeline (no external dependencies)
-  pipeline:go:
-    desc: Full pipeline using pure Go tiler (no tippecanoe needed)
-    cmds:
-      - go run ./cmd/airspace pipeline -tiler gotiler
-
-  pipeline:go:force:
-    desc: Force pipeline with pure Go tiler
-    cmds:
-      - go run ./cmd/airspace pipeline -tiler gotiler -force
-
-  pipeline:go:upload:
-    desc: Pure Go pipeline + R2 upload
-    cmds:
-      - go run ./cmd/airspace pipeline -tiler gotiler
-      - |
-        if [ -f "data/airspace/sync_result.json" ]; then
-          HAS_CHANGES=$(jq -r '.has_changes' data/airspace/sync_result.json)
-          if [ "$HAS_CHANGES" = "true" ]; then
-            echo "Uploading to R2..."
-            task r2:airspace:upload
-          else
-            echo "No changes - skipping R2 upload"
-          fi
-        fi
-
+  # Pipeline + R2 upload
   pipeline:upload:
-    desc: Pipeline + R2 upload (idempotent)
+    desc: Pipeline + R2 upload (only uploads if changes)
+    vars:
+      FORCE_FLAG: '{{if eq .FORCE "true"}}-force{{end}}'
+      TILER_FLAG: '{{if ne .TILER "auto"}}-tiler {{.TILER}}{{end}}'
     cmds:
-      - go run ./cmd/airspace pipeline
+      - go run ./cmd/airspace pipeline {{.FORCE_FLAG}} {{.TILER_FLAG}}
       - |
         if [ -f "data/airspace/sync_result.json" ]; then
           HAS_CHANGES=$(jq -r '.has_changes' data/airspace/sync_result.json)
@@ -62,27 +43,29 @@ tasks:
           fi
         fi
 
-  # Individual commands (for debugging/manual use)
+  # Individual commands
   sync:
     desc: Sync FAA data (ETag-based change detection)
+    vars:
+      FORCE_FLAG: '{{if eq .FORCE "true"}}-force{{end}}'
     cmds:
-      - go run ./cmd/airspace sync
+      - go run ./cmd/airspace sync {{.FORCE_FLAG}}
 
   tile:
-    desc: Convert GeoJSON to PMTiles (auto-detect tiler)
+    desc: Convert GeoJSON to PMTiles
+    vars:
+      FORCE_FLAG: '{{if eq .FORCE "true"}}-force{{end}}'
+      TILER_FLAG: '{{if ne .TILER "auto"}}-tiler {{.TILER}}{{end}}'
+      DATASET_FLAG: '{{if .DATASET}}-dataset {{.DATASET}}{{end}}'
     cmds:
-      - go run ./cmd/airspace tile
-
-  tile:go:
-    desc: Convert GeoJSON to PMTiles using pure Go (no tippecanoe)
-    cmds:
-      - go run ./cmd/airspace tile -tiler gotiler
+      - go run ./cmd/airspace tile {{.FORCE_FLAG}} {{.TILER_FLAG}} {{.DATASET_FLAG}}
 
   manifest:
     desc: Generate manifest files
     cmds:
       - go run ./cmd/airspace manifest
 
+  # Status and debugging
   status:
     desc: Show data file status
     cmds:
@@ -93,6 +76,7 @@ tasks:
     cmds:
       - go run ./cmd/airspace history
 
+  # CI helpers
   check:
     desc: Check if sync had changes (for CI)
     cmds:
@@ -104,8 +88,8 @@ tasks:
       - go run ./cmd/airspace summary
 
   # Tool installation
-  install:
-    desc: Install tippecanoe
+  install:tippecanoe:
+    desc: Install tippecanoe (optional - gotiler works without it)
     status:
       - which tippecanoe
     cmds:

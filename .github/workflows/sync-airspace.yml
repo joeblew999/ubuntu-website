@@ -62,11 +62,7 @@ jobs:
         run: |
           # Single command does: sync → tile (if changed) → manifest
           # Uses pure Go tiler (gotiler) - no tippecanoe needed
-          if [ "${{ inputs.force }}" = "true" ]; then
-            task airspace:pipeline:go:force
-          else
-            task airspace:pipeline:go
-          fi
+          task airspace:pipeline TILER=gotiler FORCE=${{ inputs.force || 'false' }}
 
       - name: Check for changes
         id: check_changes
