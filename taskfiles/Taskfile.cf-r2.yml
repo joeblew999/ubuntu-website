@@ -138,48 +138,48 @@ tasks:
         echo "Done. Files available at: {{.R2_PUBLIC_URL}}/{{.PREFIX}}"
 
   # ===========================================================================
-  # Airspace Data (specific workflow)
+  # Airspace Data (manifest-driven)
   # ===========================================================================
 
   airspace:upload:
-    desc: Upload airspace PMTiles and GeoJSON to R2
+    desc: Upload airspace PMTiles to R2 (reads from manifest)
     vars:
-      MAX_SIZE_MB: 100
+      MANIFEST: data/airspace/manifest_usa.json
+      TILES_DIR: static/airspace/tiles
     cmds:
       - |
         echo "Uploading airspace data to r2://{{.R2_BUCKET}}/airspace/"
         echo ""
 
-        # Upload PMTiles first (preferred format)
-        echo "=== PMTiles ==="
-        if [ -d "static/airspace/tiles" ]; then
-          for file in static/airspace/tiles/*.pmtiles; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
-              size_mb=$((size / 1024 / 1024))
-              echo "  Uploading: $filename (${size_mb}MB)"
-              {{.WRANGLER}} r2 object put "{{.R2_BUCKET}}/airspace/tiles/$filename" --file "$file" --remote
-            fi
-          done
-        else
-          echo "  No PMTiles directory found"
+        # Check manifest exists
+        if [ ! -f "{{.MANIFEST}}" ]; then
+          echo "ERROR: Manifest not found: {{.MANIFEST}}"
+          echo "Run: task airspace:manifest"
+          exit 1
         fi
 
+        # Upload PMTiles from manifest
+        echo "=== PMTiles (from manifest) ==="
+        jq -r '.layers | to_entries[] | .value.file' "{{.MANIFEST}}" | while read -r filename; do
+          filepath="{{.TILES_DIR}}/$filename"
+          if [ -f "$filepath" ]; then
+            size=$(stat -f%z "$filepath" 2>/dev/null || stat -c%s "$filepath" 2>/dev/null)
+            size_mb=$((size / 1024 / 1024))
+            echo "  Uploading: $filename (${size_mb}MB)"
+            {{.WRANGLER}} r2 object put "{{.R2_BUCKET}}/airspace/tiles/$filename" --file "$filepath" --remote
+          else
+            echo "  SKIP: $filename (file not found)"
+          fi
+        done
+
+        # Upload manifests
         echo ""
-        echo "=== GeoJSON (skipping >{{.MAX_SIZE_MB}}MB) ==="
-        for file in static/airspace/*.geojson; do
+        echo "=== Manifests ==="
+        for file in data/airspace/manifest*.json; do
           if [ -f "$file" ]; then
             filename=$(basename "$file")
-            size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
-            size_mb=$((size / 1024 / 1024))
-
-            if [ "$size_mb" -gt "{{.MAX_SIZE_MB}}" ]; then
-              echo "  SKIP: $filename (${size_mb}MB > {{.MAX_SIZE_MB}}MB)"
-            else
-              echo "  Uploading: $filename (${size_mb}MB)"
-              {{.WRANGLER}} r2 object put "{{.R2_BUCKET}}/airspace/$filename" --file "$file" --remote
-            fi
+            echo "  Uploading: $filename"
+            {{.WRANGLER}} r2 object put "{{.R2_BUCKET}}/airspace/$filename" --file "$file" --remote
           fi
         done
 
@@ -187,16 +187,8 @@ tasks:
         echo "Done. Files available at: {{.R2_PUBLIC_URL}}/airspace/"
       - |
         echo ""
-        echo "Available endpoints:"
-        echo "  PMTiles (recommended):"
-        echo "    {{.R2_PUBLIC_URL}}/airspace/tiles/faa_airspace_boundary.pmtiles"
-        echo "    {{.R2_PUBLIC_URL}}/airspace/tiles/faa_special_use_airspace.pmtiles"
-        echo "    {{.R2_PUBLIC_URL}}/airspace/tiles/faa_airports.pmtiles"
-        echo "    {{.R2_PUBLIC_URL}}/airspace/tiles/faa_navaids.pmtiles"
-        echo ""
-        echo "  GeoJSON (legacy):"
-        echo "    {{.R2_PUBLIC_URL}}/airspace/faa_uas_facility_map.geojson"
-        echo "    {{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson"
+        echo "Endpoints (from manifest):"
+        jq -r '.layers | to_entries[] | "  {{.R2_PUBLIC_URL}}/airspace/tiles/\(.value.file)"' "{{.MANIFEST}}" 2>/dev/null || echo "  (run task airspace:manifest to see endpoints)"
 
   # ===========================================================================
   # Endpoint Registry
@@ -204,7 +196,9 @@ tasks:
   # Documents all R2 assets and their public URLs
 
   endpoints:
-    desc: List all R2 asset endpoints
+    desc: List all R2 asset endpoints (from manifest)
+    vars:
+      MANIFEST: data/airspace/manifest_usa.json
     cmds:
       - |
         echo "========================================"
@@ -213,18 +207,21 @@ tasks:
         echo ""
         echo "Base URL: {{.R2_PUBLIC_URL}}"
         echo ""
-        echo "Airspace Data (FAA UDDS):"
-        echo "  /airspace/faa_airspace_boundary.geojson     - Class B/C/D/E airspace (14MB)"
-        echo "  /airspace/faa_special_use_airspace.geojson  - MOAs, Restricted (28MB)"
-        echo "  /airspace/faa_uas_facility_map.geojson      - LAANC grid ceilings (2.2MB)"
-        echo ""
-        echo "Full URLs:"
-        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson"
-        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_special_use_airspace.geojson"
-        echo "  {{.R2_PUBLIC_URL}}/airspace/faa_uas_facility_map.geojson"
+
+        if [ -f "{{.MANIFEST}}" ]; then
+          echo "Airspace PMTiles (from manifest):"
+          jq -r '.layers | to_entries[] | "  \(.value.file) - \(.value.name) (\(.value.size_mb)MB)"' "{{.MANIFEST}}"
+          echo ""
+          echo "Full URLs:"
+          jq -r '.layers | to_entries[] | "  {{.R2_PUBLIC_URL}}/airspace/tiles/\(.value.file)"' "{{.MANIFEST}}"
+        else
+          echo "No manifest found. Run: task airspace:manifest"
+        fi
 
   endpoints:test:
-    desc: Test that all R2 endpoints are accessible
+    desc: Test that all R2 endpoints are accessible (from manifest)
+    vars:
+      MANIFEST: data/airspace/manifest_usa.json
     cmds:
       - |
         echo "Testing R2 endpoints..."
@@ -240,9 +237,13 @@ tasks:
           fi
         }
 
-        test_url "{{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson" "Airspace Boundary"
-        test_url "{{.R2_PUBLIC_URL}}/airspace/faa_special_use_airspace.geojson" "Special Use Airspace"
-        test_url "{{.R2_PUBLIC_URL}}/airspace/faa_uas_facility_map.geojson" "UAS Facility Map"
+        if [ -f "{{.MANIFEST}}" ]; then
+          jq -r '.layers | to_entries[] | "\(.value.file)|\(.value.name)"' "{{.MANIFEST}}" | while IFS='|' read -r file name; do
+            test_url "{{.R2_PUBLIC_URL}}/airspace/tiles/$file" "$name"
+          done
+        else
+          echo "No manifest found. Run: task airspace:manifest"
+        fi
 
         echo ""
         echo "Done."
