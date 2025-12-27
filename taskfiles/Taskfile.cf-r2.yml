@@ -31,8 +31,9 @@ vars:
   CF_R2_DASH_BUCKET: 'https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/r2/default/buckets/{{.R2_BUCKET}}'
   CF_R2_DASH_SETTINGS: 'https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/r2/default/buckets/{{.R2_BUCKET}}/settings'
 
-  # Wrangler path
-  WRANGLER: '{{.HOME}}/.bun/bin/wrangler'
+  # Wrangler path - use from PATH (works with npm, bun, or any install method)
+  WRANGLER:
+    sh: which wrangler 2>/dev/null || echo "wrangler"
 
 tasks:
   # ===========================================================================
