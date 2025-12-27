@@ -2,6 +2,7 @@
 #
 # Syncs FAA airspace data from ArcGIS to Cloudflare R2.
 # Uses ETag tracking to only download changed files.
+# Uses pure Go tiler (gotiler) - no external dependencies like tippecanoe.
 #
 # Schedule: Weekly on Thursday (aligned with AIRAC cycle midpoint)
 # Manual: workflow_dispatch for on-demand sync
@@ -48,11 +49,6 @@ jobs:
       - name: Install wrangler
         run: npm install -g wrangler
 
-      - name: Install tippecanoe
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tippecanoe
-
       - name: Restore sync cache
         uses: actions/cache@v4
         with:
@@ -65,18 +61,16 @@ jobs:
         id: pipeline
         run: |
           # Single command does: sync → tile (if changed) → manifest
-          # Same command used locally: task airspace:pipeline
+          # Uses pure Go tiler (gotiler) - no tippecanoe needed
           if [ "${{ inputs.force }}" = "true" ]; then
-            task airspace:pipeline:force
+            task airspace:pipeline:go:force
           else
-            task airspace:pipeline
+            task airspace:pipeline:go
           fi
 
       - name: Check for changes
         id: check_changes
-        run: |
-          # Use Go command for consistency with local dev
-          go run ./cmd/airspace check >> $GITHUB_OUTPUT
+        run: task airspace:check >> $GITHUB_OUTPUT
 
       - name: Upload to R2
         if: steps.check_changes.outputs.has_changes == 'true'
@@ -96,6 +90,4 @@ jobs:
           key: airspace-sync-${{ github.run_id }}
 
       - name: Summary
-        run: |
-          # Use Go command - writes to GITHUB_STEP_SUMMARY automatically
-          go run ./cmd/airspace summary
+        run: task airspace:summary

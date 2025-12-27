@@ -21,6 +21,32 @@ tasks:
     cmds:
       - go run ./cmd/airspace pipeline -force
 
+  # Pure Go pipeline (no external dependencies)
+  pipeline:go:
+    desc: Full pipeline using pure Go tiler (no tippecanoe needed)
+    cmds:
+      - go run ./cmd/airspace pipeline -tiler gotiler
+
+  pipeline:go:force:
+    desc: Force pipeline with pure Go tiler
+    cmds:
+      - go run ./cmd/airspace pipeline -tiler gotiler -force
+
+  pipeline:go:upload:
+    desc: Pure Go pipeline + R2 upload
+    cmds:
+      - go run ./cmd/airspace pipeline -tiler gotiler
+      - |
+        if [ -f "data/airspace/sync_result.json" ]; then
+          HAS_CHANGES=$(jq -r '.has_changes' data/airspace/sync_result.json)
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "Uploading to R2..."
+            task r2:airspace:upload
+          else
+            echo "No changes - skipping R2 upload"
+          fi
+        fi
+
   pipeline:upload:
     desc: Pipeline + R2 upload (idempotent)
     cmds:
@@ -43,9 +69,14 @@ tasks:
       - go run ./cmd/airspace sync
 
   tile:
-    desc: Convert GeoJSON to PMTiles (skips unchanged)
+    desc: Convert GeoJSON to PMTiles (auto-detect tiler)
     cmds:
       - go run ./cmd/airspace tile
+
+  tile:go:
+    desc: Convert GeoJSON to PMTiles using pure Go (no tippecanoe)
+    cmds:
+      - go run ./cmd/airspace tile -tiler gotiler
 
   manifest:
     desc: Generate manifest files

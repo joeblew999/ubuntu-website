@@ -496,46 +496,30 @@ tasks:
         echo "Syncing GitHub repository secrets from .env..."
         echo ""
 
-        # Check .env exists
         if [ ! -f .env ]; then
           echo "ERROR: .env file not found"
           exit 1
         fi
 
-        # Source .env
-        set -a
-        source .env
-        set +a
+        set -a && source .env && set +a
 
-        # Sync CLOUDFLARE_API_TOKEN
         if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
-          echo "Setting CLOUDFLARE_API_TOKEN..."
           echo "$CLOUDFLARE_API_TOKEN" | {{.GH_BIN}} secret set CLOUDFLARE_API_TOKEN
           echo "  ✓ CLOUDFLARE_API_TOKEN"
-        else
-          echo "  - CLOUDFLARE_API_TOKEN not in .env, skipping"
         fi
 
-        # Sync BLUESKY_APP_PASSWORD
         if [ -n "$BLUESKY_APP_PASSWORD" ]; then
-          echo "Setting BLUESKY_APP_PASSWORD..."
           echo "$BLUESKY_APP_PASSWORD" | {{.GH_BIN}} secret set BLUESKY_APP_PASSWORD
           echo "  ✓ BLUESKY_APP_PASSWORD"
-        else
-          echo "  - BLUESKY_APP_PASSWORD not in .env, skipping"
         fi
 
-        # Sync DEEPL_API_KEY
         if [ -n "$DEEPL_API_KEY" ]; then
-          echo "Setting DEEPL_API_KEY..."
           echo "$DEEPL_API_KEY" | {{.GH_BIN}} secret set DEEPL_API_KEY
           echo "  ✓ DEEPL_API_KEY"
-        else
-          echo "  - DEEPL_API_KEY not in .env, skipping"
         fi
 
         echo ""
-        echo "Secrets synced. Verify with: task tools:gh:secret:list"
+        echo "Done. Verify: task tools:gh:secret:list"
 
   secret:check:
     desc: Compare .env secrets with GitHub secrets

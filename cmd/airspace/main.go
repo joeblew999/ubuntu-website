@@ -28,6 +28,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/joeblew999/ubuntu-website/internal/airspace"
+	"github.com/joeblew999/ubuntu-website/internal/airspace/gotiler"
 )
 
 // =============================================================================
@@ -210,7 +213,7 @@ func printUsage() {
 	fmt.Println()
 	fmt.Println("Commands:")
 	fmt.Println("  sync        Smart sync FAA data (only download if source changed)")
-	fmt.Println("  tile        Convert GeoJSON to PMTiles (requires tippecanoe)")
+	fmt.Println("  tile        Convert GeoJSON to PMTiles")
 	fmt.Println("  manifest    Generate manifest files with file sizes and metadata")
 	fmt.Println("  pipeline    Full pipeline: sync → tile (if changed) → manifest")
 	fmt.Println("  download    Download FAA airspace data (use sync instead)")
@@ -218,6 +221,11 @@ func printUsage() {
 	fmt.Println("  history     Show sync history and change patterns")
 	fmt.Println("  check       Output sync result for GitHub Actions")
 	fmt.Println("  summary     Generate GitHub Actions step summary")
+	fmt.Println()
+	fmt.Println("Tiler Options (for tile command):")
+	fmt.Println("  -tiler auto       Auto-detect (tippecanoe if available, else gotiler)")
+	fmt.Println("  -tiler tippecanoe Use tippecanoe (external binary)")
+	fmt.Println("  -tiler gotiler    Use pure Go tiler (no dependencies)")
 	fmt.Println()
 	fmt.Println("Datasets:")
 	fmt.Println("  uas         UAS Facility Map (LAANC ceiling altitudes)")
@@ -229,9 +237,11 @@ func printUsage() {
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  airspace pipeline                       # Full idempotent pipeline")
+	fmt.Println("  airspace pipeline -tiler gotiler        # Pipeline with pure Go tiler")
 	fmt.Println("  airspace sync                           # Sync only changed datasets")
 	fmt.Println("  airspace sync -force                    # Force re-download all")
-	fmt.Println("  airspace tile                           # Convert all GeoJSON to PMTiles")
+	fmt.Println("  airspace tile                           # Convert using auto-detected tiler")
+	fmt.Println("  airspace tile -tiler gotiler            # Convert using pure Go tiler")
 	fmt.Println("  airspace tile -dataset uas              # Convert single dataset")
 	fmt.Println("  airspace manifest                       # Generate manifest files")
 	fmt.Println("  airspace status                         # Show data status")
@@ -837,20 +847,46 @@ func saveETags(path string, store ETagStore) error {
 }
 
 // ============================================================================
-// Tile Command - Convert GeoJSON to PMTiles using tippecanoe
+// Tile Command - Convert GeoJSON to PMTiles
 // ============================================================================
 
 func runTile() {
 	fs := flag.NewFlagSet("tile", flag.ExitOnError)
 	datasetFlag := fs.String("dataset", "", "Specific dataset to tile (empty = all)")
 	force := fs.Bool("force", false, "Force regenerate even if PMTiles is newer than GeoJSON")
+	tilerFlag := fs.String("tiler", "auto", "Tiler to use: auto, tippecanoe, gotiler")
 	fs.Parse(os.Args[1:])
 
-	// Check tippecanoe is installed
-	if _, err := exec.LookPath("tippecanoe"); err != nil {
-		fmt.Fprintln(os.Stderr, "Error: tippecanoe not found in PATH")
-		fmt.Fprintln(os.Stderr, "Install with: brew install tippecanoe (macOS) or apt install tippecanoe (Ubuntu)")
+	// Determine which tiler to use
+	useTippecanoe := false
+	useGoTiler := false
+
+	switch *tilerFlag {
+	case "tippecanoe":
+		if _, err := exec.LookPath("tippecanoe"); err != nil {
+			fmt.Fprintln(os.Stderr, "Error: tippecanoe not found in PATH")
+			fmt.Fprintln(os.Stderr, "Install with: brew install tippecanoe (macOS) or apt install tippecanoe (Ubuntu)")
+			os.Exit(1)
+		}
+		useTippecanoe = true
+	case "gotiler", "go":
+		useGoTiler = true
+	case "auto", "":
+		// Auto-detect: prefer tippecanoe if available, fall back to gotiler
+		if _, err := exec.LookPath("tippecanoe"); err == nil {
+			useTippecanoe = true
+		} else {
+			useGoTiler = true
+		}
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown tiler: %s (valid: auto, tippecanoe, gotiler)\n", *tilerFlag)
 		os.Exit(1)
+	}
+
+	if useTippecanoe {
+		fmt.Println("Using: tippecanoe (external)")
+	} else if useGoTiler {
+		fmt.Println("Using: gotiler (pure Go)")
 	}
 
 	// Create tiles directory
@@ -872,6 +908,12 @@ func runTile() {
 	fmt.Println("Converting GeoJSON to PMTiles")
 	fmt.Println("=============================")
 	fmt.Println()
+
+	// Create gotiler instance if needed
+	var goTiler *gotiler.GoTiler
+	if useGoTiler {
+		goTiler = gotiler.New()
+	}
 
 	tiled := 0
 	skipped := 0
@@ -899,10 +941,31 @@ func runTile() {
 			}
 		}
 
-		// Run tippecanoe
+		// Convert using selected tiler
 		fmt.Printf("[%s] Converting %s → %s\n", key, ds.GeoJSON, ds.PMTiles)
-		if err := runTippecanoe(key, geoJSONPath, pmTilesPath, ds.Layer); err != nil {
-			fmt.Fprintf(os.Stderr, "[%s] ERROR: %v\n", key, err)
+
+		var tileErr error
+		if useTippecanoe {
+			tileErr = runTippecanoe(key, geoJSONPath, pmTilesPath, ds.Layer)
+		} else if useGoTiler {
+			cfg := tileConfigs[key]
+			tileConfig := airspace.TileConfig{
+				MinZoom: cfg.MinZoom,
+				MaxZoom: cfg.MaxZoom,
+				Layer:   ds.Layer,
+			}
+			// Use sensible defaults for gotiler
+			if tileConfig.MinZoom < 0 {
+				tileConfig.MinZoom = 0
+			}
+			if tileConfig.MaxZoom < 0 {
+				tileConfig.MaxZoom = 10
+			}
+			tileErr = goTiler.Tile(geoJSONPath, pmTilesPath, tileConfig)
+		}
+
+		if tileErr != nil {
+			fmt.Fprintf(os.Stderr, "[%s] ERROR: %v\n", key, tileErr)
 			continue
 		}
 
@@ -1274,6 +1337,7 @@ func copyFile(src, dst string) error {
 func runPipeline() {
 	fs := flag.NewFlagSet("pipeline", flag.ExitOnError)
 	force := fs.Bool("force", false, "Force all steps even if no changes")
+	tilerFlag := fs.String("tiler", "auto", "Tiler to use: auto, tippecanoe, gotiler")
 	fs.Parse(os.Args[1:])
 
 	fmt.Println("╔════════════════════════════════════════╗")
@@ -1302,7 +1366,7 @@ func runPipeline() {
 	fmt.Println()
 	fmt.Printf("▶ Step 2: Generate PMTiles (%d datasets changed)\n", result.Updated)
 	fmt.Println("------------------------------------------------")
-	runTileInternal(false) // Don't force - rely on file timestamps
+	runTileInternal(false, *tilerFlag) // Don't force - rely on file timestamps
 
 	fmt.Println()
 	fmt.Println("▶ Step 3: Update Manifests")
@@ -1339,13 +1403,16 @@ func runSyncInternal(force bool) {
 	os.Args = oldArgs
 }
 
-func runTileInternal(force bool) {
+func runTileInternal(force bool, tiler string) {
 	oldArgs := os.Args
+	args := []string{"airspace"}
 	if force {
-		os.Args = []string{"airspace", "-force"}
-	} else {
-		os.Args = []string{"airspace"}
+		args = append(args, "-force")
 	}
+	if tiler != "" && tiler != "auto" {
+		args = append(args, "-tiler", tiler)
+	}
+	os.Args = args
 	runTile()
 	os.Args = oldArgs
 }
