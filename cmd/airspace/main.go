@@ -43,6 +43,8 @@ func main() {
 		runTile()
 	case "manifest":
 		runManifest()
+	case "upload":
+		runUpload()
 	case "download":
 		runDownload()
 	case "status":
@@ -70,7 +72,7 @@ func printUsage() {
 	fmt.Println("  sync        Smart sync FAA data (only download if source changed)")
 	fmt.Println("  tile        Convert GeoJSON to PMTiles")
 	fmt.Println("  manifest    Generate manifest files with file sizes and metadata")
-	fmt.Println("  download    Download FAA airspace data (use sync instead)")
+	fmt.Println("  upload      Upload PMTiles to Cloudflare R2 (manifest-driven)")
 	fmt.Println("  status      Show data file status and age")
 	fmt.Println("  history     Show sync history and change patterns")
 	fmt.Println("  check       Output sync result for GitHub Actions")
@@ -87,6 +89,8 @@ func printUsage() {
 	fmt.Println("  airspace sync                      # Sync only changed datasets")
 	fmt.Println("  airspace sync -force               # Force re-download all")
 	fmt.Println("  airspace tile -dataset uas         # Convert single dataset")
+	fmt.Println("  airspace upload                    # Upload to R2")
+	fmt.Println("  airspace upload -test              # Test R2 endpoints")
 }
 
 // ============================================================================
@@ -133,7 +137,7 @@ func runPipeline() {
 	} else {
 		fmt.Printf("✓ Pipeline complete: %d synced, %d tiled\n",
 			result.SyncResult.Updated, result.TileCount)
-		fmt.Println("  Next: Run 'task r2:airspace:upload' to push to R2")
+		fmt.Println("  Next: Run 'airspace upload' to push to R2")
 	}
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 }
@@ -356,6 +360,31 @@ func runHistory() {
 			run.Timestamp.Format("2006-01-02 15:04"),
 			status,
 			run.Duration)
+	}
+}
+
+// ============================================================================
+// Upload Command
+// ============================================================================
+
+func runUpload() {
+	fs := flag.NewFlagSet("upload", flag.ExitOnError)
+	testOnly := fs.Bool("test", false, "Test endpoints only (don't upload)")
+	fs.Parse(os.Args[1:])
+
+	if *testOnly {
+		// Test mode - check if endpoints are accessible
+		if err := airspace.TestR2Endpoints(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	// Upload mode
+	if err := airspace.UploadToR2(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
 	}
 }
 

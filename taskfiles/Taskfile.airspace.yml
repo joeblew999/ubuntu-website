@@ -37,7 +37,7 @@ tasks:
           HAS_CHANGES=$(jq -r '.has_changes' data/airspace/sync_result.json)
           if [ "$HAS_CHANGES" = "true" ]; then
             echo "Uploading to R2..."
-            task r2:airspace:upload
+            go run ./cmd/airspace upload
           else
             echo "No changes - skipping R2 upload"
           fi
@@ -104,3 +104,22 @@ tasks:
     desc: Open airspace demo in browser
     cmds:
       - open http://localhost:1313/fleet/airspace-demo/
+
+  # ===========================================================================
+  # R2 Upload (airspace-specific)
+  # ===========================================================================
+
+  upload:
+    desc: Upload airspace PMTiles to R2 (reads from manifest)
+    cmds:
+      - go run ./cmd/airspace upload
+
+  upload:test:
+    desc: Test that all R2 endpoints are accessible
+    cmds:
+      - go run ./cmd/airspace upload -test
+
+  upload:list:
+    desc: List airspace files in R2
+    cmds:
+      - wrangler r2 object list ubuntu-website-assets --prefix airspace/

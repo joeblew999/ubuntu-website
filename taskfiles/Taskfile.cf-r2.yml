@@ -96,11 +96,6 @@ tasks:
     cmds:
       - '{{.WRANGLER}} r2 object list {{.R2_BUCKET}}'
 
-  list:airspace:
-    desc: List airspace data files in R2
-    cmds:
-      - '{{.WRANGLER}} r2 object list {{.R2_BUCKET}} --prefix airspace/'
-
   # ===========================================================================
   # Upload Operations
   # ===========================================================================
@@ -138,115 +133,15 @@ tasks:
         echo "Done. Files available at: {{.R2_PUBLIC_URL}}/{{.PREFIX}}"
 
   # ===========================================================================
-  # Airspace Data (manifest-driven)
+  # URL Helper
   # ===========================================================================
 
-  airspace:upload:
-    desc: Upload airspace PMTiles to R2 (reads from manifest)
-    vars:
-      MANIFEST: data/airspace/manifest_usa.json
-      TILES_DIR: static/airspace/tiles
+  url:
+    desc: Show public URL for a file
+    requires:
+      vars: [KEY]
     cmds:
-      - |
-        echo "Uploading airspace data to r2://{{.R2_BUCKET}}/airspace/"
-        echo ""
-
-        # Check manifest exists
-        if [ ! -f "{{.MANIFEST}}" ]; then
-          echo "ERROR: Manifest not found: {{.MANIFEST}}"
-          echo "Run: task airspace:manifest"
-          exit 1
-        fi
-
-        # Upload PMTiles from manifest
-        echo "=== PMTiles (from manifest) ==="
-        jq -r '.layers | to_entries[] | .value.file' "{{.MANIFEST}}" | while read -r filename; do
-          filepath="{{.TILES_DIR}}/$filename"
-          if [ -f "$filepath" ]; then
-            size=$(stat -f%z "$filepath" 2>/dev/null || stat -c%s "$filepath" 2>/dev/null)
-            size_mb=$((size / 1024 / 1024))
-            echo "  Uploading: $filename (${size_mb}MB)"
-            {{.WRANGLER}} r2 object put "{{.R2_BUCKET}}/airspace/tiles/$filename" --file "$filepath" --remote
-          else
-            echo "  SKIP: $filename (file not found)"
-          fi
-        done
-
-        # Upload manifests
-        echo ""
-        echo "=== Manifests ==="
-        for file in data/airspace/manifest*.json; do
-          if [ -f "$file" ]; then
-            filename=$(basename "$file")
-            echo "  Uploading: $filename"
-            {{.WRANGLER}} r2 object put "{{.R2_BUCKET}}/airspace/$filename" --file "$file" --remote
-          fi
-        done
-
-        echo ""
-        echo "Done. Files available at: {{.R2_PUBLIC_URL}}/airspace/"
-      - |
-        echo ""
-        echo "Endpoints (from manifest):"
-        jq -r '.layers | to_entries[] | "  {{.R2_PUBLIC_URL}}/airspace/tiles/\(.value.file)"' "{{.MANIFEST}}" 2>/dev/null || echo "  (run task airspace:manifest to see endpoints)"
-
-  # ===========================================================================
-  # Endpoint Registry
-  # ===========================================================================
-  # Documents all R2 assets and their public URLs
-
-  endpoints:
-    desc: List all R2 asset endpoints (from manifest)
-    vars:
-      MANIFEST: data/airspace/manifest_usa.json
-    cmds:
-      - |
-        echo "========================================"
-        echo "R2 Asset Endpoints"
-        echo "========================================"
-        echo ""
-        echo "Base URL: {{.R2_PUBLIC_URL}}"
-        echo ""
-
-        if [ -f "{{.MANIFEST}}" ]; then
-          echo "Airspace PMTiles (from manifest):"
-          jq -r '.layers | to_entries[] | "  \(.value.file) - \(.value.name) (\(.value.size_mb)MB)"' "{{.MANIFEST}}"
-          echo ""
-          echo "Full URLs:"
-          jq -r '.layers | to_entries[] | "  {{.R2_PUBLIC_URL}}/airspace/tiles/\(.value.file)"' "{{.MANIFEST}}"
-        else
-          echo "No manifest found. Run: task airspace:manifest"
-        fi
-
-  endpoints:test:
-    desc: Test that all R2 endpoints are accessible (from manifest)
-    vars:
-      MANIFEST: data/airspace/manifest_usa.json
-    cmds:
-      - |
-        echo "Testing R2 endpoints..."
-        echo ""
-
-        test_url() {
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$1")
-          SIZE=$(curl -sI "$1" | grep -i content-length | awk '{print $2}' | tr -d '\r')
-          if [ "$STATUS" = "200" ]; then
-            echo "  ✓ $2 ($STATUS, ${SIZE:-?} bytes)"
-          else
-            echo "  ✗ $2 ($STATUS)"
-          fi
-        }
-
-        if [ -f "{{.MANIFEST}}" ]; then
-          jq -r '.layers | to_entries[] | "\(.value.file)|\(.value.name)"' "{{.MANIFEST}}" | while IFS='|' read -r file name; do
-            test_url "{{.R2_PUBLIC_URL}}/airspace/tiles/$file" "$name"
-          done
-        else
-          echo "No manifest found. Run: task airspace:manifest"
-        fi
-
-        echo ""
-        echo "Done."
+      - echo "{{.R2_PUBLIC_URL}}/{{.KEY}}"
 
   # ===========================================================================
   # Dashboard URLs
@@ -289,15 +184,18 @@ tasks:
 
   cors:test:
     desc: Test CORS headers from allowed origins
+    vars:
+      TEST_FILE: '{{.TEST_FILE | default "airspace/manifest.json"}}'
     cmds:
       - |
         echo "Testing CORS headers..."
+        echo "Test file: {{.R2_PUBLIC_URL}}/{{.TEST_FILE}}"
         echo ""
 
         test_cors() {
           ORIGIN="$1"
           echo "Origin: $ORIGIN"
-          HEADERS=$(curl -sI -H "Origin: $ORIGIN" "{{.R2_PUBLIC_URL}}/airspace/faa_airspace_boundary.geojson" 2>/dev/null | grep -i "access-control")
+          HEADERS=$(curl -sI -H "Origin: $ORIGIN" "{{.R2_PUBLIC_URL}}/{{.TEST_FILE}}" 2>/dev/null | grep -i "access-control")
           if [ -n "$HEADERS" ]; then
             echo "  ✓ CORS enabled"
             echo "$HEADERS" | sed 's/^/    /'

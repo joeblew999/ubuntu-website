@@ -72,7 +72,7 @@ jobs:
         if: steps.check_changes.outputs.has_changes == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: task r2:airspace:upload
+        run: task airspace:upload
 
       - name: Skip notification
         if: steps.check_changes.outputs.has_changes != 'true'

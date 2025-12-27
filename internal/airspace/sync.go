@@ -49,9 +49,6 @@ type SyncHistory struct {
 	AvgDurationMs int64        `json:"avg_duration_ms"`
 }
 
-// MaxHistoryRuns is the number of sync runs to keep in history.
-const MaxHistoryRuns = 20
-
 // SyncOptions configures sync behavior.
 type SyncOptions struct {
 	OutputDir string
