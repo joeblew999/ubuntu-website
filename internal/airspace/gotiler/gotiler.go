@@ -5,6 +5,26 @@
 // then uploaded to R2 for serving via Cloudflare CDN.
 //
 // Uses paulmach/orb for geometry and protomaps/go-pmtiles for output.
+//
+// # Architecture Decision: Why Not Cloudflare Workers?
+//
+// This package runs in GitHub Actions, not Cloudflare Workers, because:
+//
+//  1. WASM compatibility: go-pmtiles imports zombiezen.com/go/sqlite which
+//     depends on modernc.org/libc - this doesn't compile to WASM.
+//
+//  2. Resource limits: Workers have 10-50ms CPU limits and memory constraints.
+//     Processing 422MB of GeoJSON features would exceed these limits.
+//
+//  3. Batch vs streaming: Tile generation requires processing all features
+//     to determine tile intersections - this is inherently a batch operation.
+//
+//  4. PMTiles design: PMTiles is optimized for static hosting with HTTP Range
+//     requests. The browser's pmtiles.js library handles this efficiently.
+//
+// The current architecture (GitHub Actions → PMTiles → R2 → CDN → Browser)
+// is optimal because FAA data updates weekly (AIRAC cycle) and PMTiles
+// enables efficient CDN caching with Range request support.
 package gotiler
 
 import (
