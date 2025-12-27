@@ -156,11 +156,9 @@ var tileConfigs = map[string]airspace.TileConfig{
 	"obstacles": {MinZoom: -1, MaxZoom: -1, DropDensest: true},                                         // -zg --drop-densest-as-needed
 }
 
-// datasetOrder defines the processing order (consistent ordering)
+// datasetOrder defines the processing order (consistent ordering).
+// Note: obstacles is excluded by default due to large file size.
 var datasetOrder = []string{"uas", "boundary", "sua", "airports", "navaids"}
-
-// datasetOrderWithObstacles includes obstacles (large file, skipped by default)
-var datasetOrderWithObstacles = []string{"uas", "boundary", "sua", "airports", "navaids", "obstacles"}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -327,13 +325,13 @@ func downloadDirect(client *http.Client, url, outPath string) error {
 // downloadPaginated handles ArcGIS FeatureServer pagination
 func downloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 	type FeatureCollection struct {
-		Type     string        `json:"type"`
-		Features []interface{} `json:"features"`
+		Type     string `json:"type"`
+		Features []any  `json:"features"`
 	}
 
 	collection := FeatureCollection{
 		Type:     "FeatureCollection",
-		Features: make([]interface{}, 0),
+		Features: make([]any, 0),
 	}
 
 	offset := 0
@@ -1262,7 +1260,7 @@ func countGeoJSONFeatures(path string) int {
 	return strings.Count(string(data), `"type":"Feature"`)
 }
 
-func writeJSON(path string, v interface{}) error {
+func writeJSON(path string, v any) error {
 	data, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return err

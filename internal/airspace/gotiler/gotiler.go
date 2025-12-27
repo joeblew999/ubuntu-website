@@ -248,7 +248,7 @@ func writePMTiles(path string, tiles map[maptile.Tile][]byte, config airspace.Ti
 	}
 
 	// Build metadata JSON
-	metadata := map[string]interface{}{
+	metadata := map[string]any{
 		"name":        config.Layer,
 		"format":      "pbf",
 		"compression": "gzip",
