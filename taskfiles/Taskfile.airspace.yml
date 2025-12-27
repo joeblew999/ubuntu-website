@@ -62,6 +62,16 @@ tasks:
     cmds:
       - go run ./cmd/airspace history
 
+  check:
+    desc: Check if sync had changes (for CI)
+    cmds:
+      - go run ./cmd/airspace check
+
+  summary:
+    desc: Generate markdown summary (for CI)
+    cmds:
+      - go run ./cmd/airspace summary
+
   # Tool installation
   install:
     desc: Install tippecanoe

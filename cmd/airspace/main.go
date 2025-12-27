@@ -192,6 +192,10 @@ func main() {
 		runStatus()
 	case "history":
 		runHistory()
+	case "summary":
+		runSummary()
+	case "check":
+		runCheck()
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -212,6 +216,8 @@ func printUsage() {
 	fmt.Println("  download    Download FAA airspace data (use sync instead)")
 	fmt.Println("  status      Show data file status and age")
 	fmt.Println("  history     Show sync history and change patterns")
+	fmt.Println("  check       Output sync result for GitHub Actions")
+	fmt.Println("  summary     Generate GitHub Actions step summary")
 	fmt.Println()
 	fmt.Println("Datasets:")
 	fmt.Println("  uas         UAS Facility Map (LAANC ceiling altitudes)")
@@ -1349,4 +1355,80 @@ func runManifestInternal() {
 	os.Args = []string{"airspace"}
 	runManifest()
 	os.Args = oldArgs
+}
+
+// runCheck outputs sync result as GitHub Actions outputs.
+// Usage in workflow: eval $(go run ./cmd/airspace check)
+func runCheck() {
+	resultPath := filepath.Join(DirData, FileSyncResult)
+	data, err := os.ReadFile(resultPath)
+	if err != nil {
+		fmt.Println("has_changes=false")
+		fmt.Println("updated_count=0")
+		return
+	}
+
+	var result struct {
+		HasChanges bool `json:"has_changes"`
+		Updated    int  `json:"updated"`
+	}
+	if err := json.Unmarshal(data, &result); err != nil {
+		fmt.Println("has_changes=false")
+		fmt.Println("updated_count=0")
+		return
+	}
+
+	fmt.Printf("has_changes=%t\n", result.HasChanges)
+	fmt.Printf("updated_count=%d\n", result.Updated)
+}
+
+// runSummary outputs GitHub Actions step summary markdown.
+// Writes to GITHUB_STEP_SUMMARY if set, otherwise stdout.
+func runSummary() {
+	var out *os.File
+	if summaryPath := os.Getenv("GITHUB_STEP_SUMMARY"); summaryPath != "" {
+		f, err := os.OpenFile(summaryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: cannot write to GITHUB_STEP_SUMMARY: %v\n", err)
+			out = os.Stdout
+		} else {
+			defer f.Close()
+			out = f
+		}
+	} else {
+		out = os.Stdout
+	}
+
+	fmt.Fprintln(out, "## Airspace Sync Complete")
+	fmt.Fprintln(out)
+
+	// Sync result
+	resultPath := filepath.Join(DirData, FileSyncResult)
+	if data, err := os.ReadFile(resultPath); err == nil {
+		fmt.Fprintln(out, "### Sync Result")
+		fmt.Fprintln(out, "```json")
+		fmt.Fprintln(out, string(data))
+		fmt.Fprintln(out, "```")
+		fmt.Fprintln(out)
+	}
+
+	// PMTiles files
+	fmt.Fprintln(out, "### PMTiles Files")
+	fmt.Fprintln(out, "| File | Size |")
+	fmt.Fprintln(out, "|------|------|")
+
+	files, _ := filepath.Glob(filepath.Join(DirPMTiles, "*.pmtiles"))
+	if len(files) == 0 {
+		fmt.Fprintln(out, "| _No PMTiles found_ | - |")
+	} else {
+		for _, f := range files {
+			info, err := os.Stat(f)
+			if err != nil {
+				continue
+			}
+			sizeMB := float64(info.Size()) / 1024 / 1024
+			fmt.Fprintf(out, "| %s | %.1f MB |\n", filepath.Base(f), sizeMB)
+		}
+	}
+	fmt.Fprintln(out)
 }

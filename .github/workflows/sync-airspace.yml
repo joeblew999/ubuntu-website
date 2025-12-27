@@ -75,15 +75,8 @@ jobs:
       - name: Check for changes
         id: check_changes
         run: |
-          if [ -f "data/airspace/sync_result.json" ]; then
-            HAS_CHANGES=$(jq -r '.has_changes' data/airspace/sync_result.json)
-            UPDATED=$(jq -r '.updated' data/airspace/sync_result.json)
-            echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
-            echo "updated_count=$UPDATED" >> $GITHUB_OUTPUT
-          else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "updated_count=0" >> $GITHUB_OUTPUT
-          fi
+          # Use Go command for consistency with local dev
+          go run ./cmd/airspace check >> $GITHUB_OUTPUT
 
       - name: Upload to R2
         if: steps.check_changes.outputs.has_changes == 'true'
@@ -104,18 +97,5 @@ jobs:
 
       - name: Summary
         run: |
-          echo "## Airspace Sync Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ -f "data/airspace/sync_result.json" ]; then
-            echo "### Sync Result" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            cat data/airspace/sync_result.json >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### PMTiles Files" >> $GITHUB_STEP_SUMMARY
-          if [ -d "static/airspace/tiles" ]; then
-            ls -lh static/airspace/tiles/*.pmtiles 2>/dev/null || echo "No PMTiles found"
-          fi >> $GITHUB_STEP_SUMMARY
+          # Use Go command - writes to GITHUB_STEP_SUMMARY automatically
+          go run ./cmd/airspace summary
