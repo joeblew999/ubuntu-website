@@ -240,6 +240,37 @@ Configured inside Gmail settings to send outbound email through SMTP2GO relay. T
 
 **Future consideration:** Could add direct SMTP2GO API integration (`/email/send` endpoint) for programmatic sending without Gmail.
 
+### Cloudflare Email (cfemail)
+
+Transactional email sending via the Cloudflare Email Service REST API. A
+dependency-free alternative to the SMTP2GO/Gmail relay that consolidates onto
+Cloudflare (we already use Pages, R2, DNS). **Does NOT manage subscriber lists
+or campaigns — that remains MailerLite's job.**
+
+**CLI:** `cmd/cfemail/main.go`
+**Package:** `internal/cfemail/`
+**Taskfile:** `taskfiles/Taskfile.cfemail.yml`
+
+**From address:** defaults to `gerard.webb@ubuntusoftware.net` (override with `--from`/`FROM`).
+
+**Commands:**
+```bash
+task cfemail:check                                          # Verify env (token, account ID)
+task cfemail:send TO=x@y.com SUBJECT="Hi" BODY="Hello"      # Plain-text
+task cfemail:send TO=x@y.com SUBJECT="Hi" HTML="<h1>Hi</h1>" # HTML
+```
+
+**Environment (from .env):**
+- `CLOUDFLARE_API_TOKEN` — token with **Email Sending: Edit**
+- `CF_ACCOUNT_ID` — Cloudflare account ID (same vars as `cfanalytics`)
+
+**Prerequisite (one-time):** onboard `ubuntusoftware.net` under Cloudflare
+dashboard → Email Service → Email Sending (adds SPF + DKIM DNS records). New
+accounts start with a conservative daily quota that ramps up with reputation.
+
+**Also available:** SMTP submission (`smtp.mx.cloudflare.net:465`, implicit TLS,
+user `api_token`, password = CF API token) for tools that already speak SMTP.
+
 ### Gmail CLI Tool
 
 Unified email sending via API or browser automation. **From address is always `gerard.webb@ubuntusoftware.net`** - hardcoded to prevent mistakes.

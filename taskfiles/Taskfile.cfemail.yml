@@ -1,0 +1,100 @@
+# Cloudflare Email Tasks
+#
+# Send transactional email via the Cloudflare Email Service REST API.
+# Replaces SMTP2GO/Gmail as the sending relay. Does NOT manage subscriber
+# lists or campaigns — that remains MailerLite's job.
+#
+# Usage:
+#   task cfemail:check                                          - Verify env is configured
+#   task cfemail:send TO=x@y.com SUBJECT="Hi" BODY="Hello"      - Send plain-text email
+#   task cfemail:send TO=x@y.com SUBJECT="Hi" HTML="<h1>Hi</h1>" - Send HTML email
+#
+# Environment (from .env):
+#   CLOUDFLARE_API_TOKEN   API token with 'Email Sending: Edit'
+#   CF_ACCOUNT_ID          Cloudflare account ID
+#
+# Prerequisite: onboard ubuntusoftware.net under Cloudflare dashboard
+#   Email Service > Email Sending (adds SPF + DKIM DNS records).
+# Create a token at: https://dash.cloudflare.com/profile/api-tokens
+
+version: '3'
+
+vars:
+  CFEMAIL_BIN: 'cfemail{{exeExt}}'
+  CFEMAIL_CMD: '{{.BIN_INSTALL_DIR}}/{{.CFEMAIL_BIN}}'
+
+tasks:
+  # ===========================================================================
+  # Checks (check:* - lifecycle phase)
+  # ===========================================================================
+
+  check:
+    desc: Verify Cloudflare email env is configured (token, account ID)
+    deps: [check:deps]
+    cmds:
+      - '{{.CFEMAIL_CMD}} check'
+
+  check:deps:
+    desc: Ensure cfemail binary is available (builds from source)
+    internal: true
+    status:
+      - test -f "{{.BIN_INSTALL_DIR}}/{{.CFEMAIL_BIN}}"
+    cmds:
+      - mkdir -p "{{.BIN_INSTALL_DIR}}"
+      - go build -o "{{.BIN_INSTALL_DIR}}/{{.CFEMAIL_BIN}}" ./cmd/cfemail
+
+  # ===========================================================================
+  # Send (send - transactional email)
+  # ===========================================================================
+
+  send:
+    desc: Send an email (TO=x@y.com SUBJECT="..." BODY="..." or HTML="...")
+    summary: |
+      Send a transactional email via Cloudflare Email Service.
+
+      Required:
+        TO        Recipient(s), comma-separated (supports "Name <email>")
+        SUBJECT   Subject line
+
+      Body (at least one):
+        BODY      Plain-text body
+        HTML      HTML body
+
+      Optional:
+        CC        CC recipient(s)
+        BCC       BCC recipient(s)
+        REPLY_TO  Reply-To address
+        FROM      From address (default: gerard.webb@ubuntusoftware.net)
+
+      Examples:
+        task cfemail:send TO=user@example.com SUBJECT="Hello" BODY="Hi there"
+        task cfemail:send TO=user@example.com SUBJECT="Hello" HTML="<h1>Hi</h1>"
+    deps: [check:deps]
+    requires:
+      vars: [TO, SUBJECT]
+    cmds:
+      - >-
+        {{.CFEMAIL_CMD}} send
+        --to={{.TO | quote}}
+        --subject={{.SUBJECT | quote}}
+        {{if .BODY}}--text={{.BODY | quote}}{{end}}
+        {{if .HTML}}--html={{.HTML | quote}}{{end}}
+        {{if .CC}}--cc={{.CC | quote}}{{end}}
+        {{if .BCC}}--bcc={{.BCC | quote}}{{end}}
+        {{if .REPLY_TO}}--reply-to={{.REPLY_TO | quote}}{{end}}
+        {{if .FROM}}--from={{.FROM | quote}}{{end}}
+
+  # ===========================================================================
+  # Release (release:* - build for distribution)
+  # ===========================================================================
+
+  release:build:
+    desc: Build cfemail for release (current platform, or set GOOS/GOARCH)
+    cmds:
+      - mkdir -p "{{.ROOT_DIR}}/{{.DIR_BUILD}}"
+      - go build -o "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.CFEMAIL_BIN}}" ./cmd/cfemail
+
+  release:test:
+    desc: Test built cfemail release binary
+    cmds:
+      - "{{.ROOT_DIR}}/{{.DIR_BUILD}}/{{.CFEMAIL_BIN}} help || true"

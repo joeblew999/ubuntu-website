@@ -49,6 +49,7 @@ includes:
   translate: ./taskfiles/Taskfile.translate.yml
   autotranslate: ./taskfiles/Taskfile.autotranslate.yml
   cfanalytics: ./taskfiles/Taskfile.cfanalytics.yml
+  cfemail: ./taskfiles/Taskfile.cfemail.yml
   sitecheck: ./taskfiles/Taskfile.sitecheck.yml
   genlogo: ./taskfiles/Taskfile.genlogo.yml
   mailerlite: ./taskfiles/Taskfile.mailerlite.yml
