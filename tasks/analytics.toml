@@ -1,0 +1,21 @@
+# tasks/analytics.toml — Cloudflare Web Analytics (project module)
+# Ported from taskfiles/Taskfile.cfanalytics.yml. Wraps cmd/cfanalytics.
+# Naming preserved: cfanalytics:*
+
+["cfanalytics:report"]
+description = "Check analytics and report changes (>20% threshold)"
+run = "go run ./cmd/cfanalytics"
+
+["cfanalytics:report:verbose"]
+description = "Check analytics with verbose output"
+run = "go run ./cmd/cfanalytics -v"
+
+["cfanalytics:report:webhook"]
+description = "Post analytics changes to webhook (set ANALYTICS_WEBHOOK_URL)"
+run = '''
+#!/usr/bin/env nu
+if ("ANALYTICS_WEBHOOK_URL" not-in $env) {
+    print -e "ANALYTICS_WEBHOOK_URL not set"; exit 1
+}
+go run ./cmd/cfanalytics -webhook $env.ANALYTICS_WEBHOOK_URL
+'''

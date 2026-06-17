@@ -1,0 +1,43 @@
+# tasks/hugo.toml — Hugo static site generator (project module)
+# Ported from taskfiles/Taskfile.hugo.yml. Naming preserved: hugo:*
+
+["hugo:dev"]
+description = "Start Hugo development server (binds 0.0.0.0)"
+run = '''
+#!/usr/bin/env nu
+let branch = (try { git rev-parse --abbrev-ref HEAD | str trim } catch { "unknown" })
+print "========================================"
+print "Hugo Development Server"
+print "========================================"
+if $branch == "main" { print "Branch: MAIN (production)" } else { print $"Branch: ($branch) (preview)" }
+let lan = (try { go run ./cmd/lanip | str trim } catch { "unknown" })
+print $"Local URL: http://localhost:1313"
+print $"LAN URL:   http://($lan):1313"
+print "========================================"
+hugo server --buildDrafts --buildFuture --bind 0.0.0.0
+'''
+
+["hugo:dev:lan"]
+description = "Start Hugo dev server with LAN baseURL (for mobile testing)"
+run = '''
+#!/usr/bin/env nu
+let lan = (try { go run ./cmd/lanip | str trim } catch { "127.0.0.1" })
+print $"LAN URL: http://($lan):1313  (use this on your mobile device)"
+hugo server --buildDrafts --buildFuture --bind 0.0.0.0 --baseURL $"http://($lan):1313"
+'''
+
+["hugo:build"]
+description = "Build production site (--gc --minify)"
+run = "hugo --gc --minify"
+
+["hugo:preview"]
+description = "Preview production build"
+run = "hugo server -e production --minify"
+
+["hugo:clean"]
+description = "Clean build artifacts (public, resources, lock)"
+run = '''
+#!/usr/bin/env nu
+[public resources .hugo_build.lock] | each { |p| rm -rf $p }
+print "cleaned: public/ resources/ .hugo_build.lock"
+'''
