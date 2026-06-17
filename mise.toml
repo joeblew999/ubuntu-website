@@ -10,12 +10,12 @@
 # See MISE_MIGRATION.md for the Taskfile -> mise mapping and rollout plan.
 
 [tools]
-go = "1.25"          # matches go.mod (go 1.25.4) and Taskfile GO_VERSION
-node = "lts"         # Hugo Plate theme build (tailwind) — package.json present
-hugo = "0.152.2"     # MUST be the extended build (Hugo Plate requires v0.144+ extended)
-task = "latest"      # go-task — kept during migration for coexistence
-nushell = "latest"   # task scripting language
-fnox = "latest"      # secret manager
+go = "1.25"                        # matches go.mod (go 1.25.4) and Taskfile GO_VERSION
+node = "lts"                       # Hugo Plate theme build (tailwind) — package.json present
+hugo-extended = "0.152.2"          # extended build required by Hugo Plate (v0.144+ extended)
+task = "latest"                    # go-task — kept during migration for coexistence
+"aqua:nushell/nushell" = "latest"  # task scripting language (nushell not in short registry)
+fnox = "latest"                    # secret manager (github:jdx/fnox)
 
 [env]
 # Project-level, non-secret environment. Secrets are NOT stored here — they
