@@ -71,9 +71,7 @@ run = '''
 
 def main [worker_url: string] {
   print $"Testing webhook at ($worker_url)/webhook..."
-  ^curl -X POST $"($worker_url)/webhook"
-    -H "Content-Type: application/x-www-form-urlencoded"
-    -d "name=Test User&email=test-worker@example.com&company=Test Company&platform=macOS"
+  ^curl -X POST $"($worker_url)/webhook" -H "Content-Type: application/x-www-form-urlencoded" -d "name=Test User&email=test-worker@example.com&company=Test Company&platform=macOS"
   print ""
   print "Check MailerLite dashboard or worker logs for the result."
 }

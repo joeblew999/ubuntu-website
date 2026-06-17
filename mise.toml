@@ -77,4 +77,5 @@ includes = [
   "tasks/r2.toml",
   "tasks/workers.toml",
   "tasks/dev.toml",
+  "tasks/secrets.toml",
 ]

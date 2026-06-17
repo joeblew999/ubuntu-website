@@ -50,7 +50,19 @@ Known follow-ups flagged during the port:
 - `r2:bucket:create/delete` duplicate shared `cf:r2-*` primitives; could delegate later.
 - `youtube:clean*` dropped the interactive confirm prompt (no mise/nushell equivalent).
 
-**Phase 2 — secrets:** `.env` → fnox; enable the `fnox-env` plugin block in `mise.toml`.
+**Phase 2 — secrets (`.env` → fnox), scaffolded; run on the Mac:**
+fnox uses the **OS keychain** provider (macOS Keychain). The shared library provides
+`fnox:init` / `secrets:status` / `secrets:migrate-to-keychain` / `secrets:sync-github`;
+this repo adds `secrets:import-env` and `secrets:required`. Runbook:
+```bash
+mise install                  # provisions fnox + nushell (needs Mac tokens)
+mise run fnox:init            # keychain provider in the global fnox config
+mise run secrets:import-env   # push .env KEY=VALUE pairs into the keychain
+mise run secrets:required     # verify the keys this repo needs are present
+# then enable the [plugins] fnox-env block in mise.toml (below), and:
+rm .env                       # secrets now live in the keychain, not on disk
+mise run secrets:status       # confirm fnox + GitHub Actions secret state
+```
 
 **Phase 3 — cut over:** once parity is verified, delete `Taskfile.yml` + `taskfiles/`,
 update CI workflows from `task …` to `mise run …`, flip `CLAUDE.md` ("USE TASKFILE" → "USE MISE").

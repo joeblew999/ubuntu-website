@@ -29,7 +29,7 @@ run = '''
 
 def main [] {
   let lan = (try { ^go run ./cmd/lanip | str trim } catch { "127.0.0.1" })
-  print $"LAN URL: http://($lan):1313  (use this on your mobile device)"
+  print $"LAN URL: http://($lan):1313  -- use this on your mobile device"
   ^hugo server --buildDrafts --buildFuture --bind 0.0.0.0 --baseURL $"http://($lan):1313"
 }
 '''
