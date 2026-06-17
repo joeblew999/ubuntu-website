@@ -1,0 +1,379 @@
+# tasks/toki.toml — toki:* namespace: Go i18n toolkit (fork joeblew999/toki). Ported from taskfiles/Taskfile.toki.yml.
+
+# ── toki:src:clone ───────────────────────────────────────────────────────────
+["toki:src:clone"]
+description = "Clone toki fork to .src/toki"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  if ($"($src)/.git" | path exists) {
+    print $"toki source already present at ($src)"
+    return
+  }
+  mkdir ($src | path dirname)
+  ^git clone "https://github.com/joeblew999/toki.git" $src
+  try {
+    ^git -C $src remote add upstream "https://github.com/romshark/toki.git"
+  } catch {
+    print --stderr "upstream remote already exists (ignored)"
+  }
+}
+'''
+
+# ── toki:src:update ──────────────────────────────────────────────────────────
+["toki:src:update"]
+description = "Pull latest from fork (origin)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  ^git -C $src fetch origin
+  ^git -C $src pull origin main
+}
+'''
+
+# ── toki:src:upstream ────────────────────────────────────────────────────────
+["toki:src:upstream"]
+description = "Fetch upstream changes (romshark/toki)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  ^git -C $src fetch upstream
+  print ""
+  print "Upstream changes fetched. To merge:"
+  print $"  git -C ($src) merge upstream/main"
+}
+'''
+
+# ── toki:src:upstream:merge ──────────────────────────────────────────────────
+["toki:src:upstream:merge"]
+description = "Merge upstream main into current branch"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  ^git -C $src fetch upstream
+  ^git -C $src merge upstream/main
+}
+'''
+
+# ── toki:src:status ──────────────────────────────────────────────────────────
+["toki:src:status"]
+description = "Show git status of toki source"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  ^git -C $src status
+  print ""
+  ^git -C $src log --oneline -5
+}
+'''
+
+# ── toki:src:open ────────────────────────────────────────────────────────────
+["toki:src:open"]
+description = "Open toki source in VSCode"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  ^code $src
+}
+'''
+
+# ── toki:build ───────────────────────────────────────────────────────────────
+["toki:build"]
+description = "Build toki binary from source into BIN_INSTALL_DIR"
+depends = ["toki:src:clone"]
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  mkdir $dir
+  let bin = ($dir | path expand | path join "toki")
+  ^go -C $src build -o $bin .
+}
+'''
+
+# ── toki:build:clean ─────────────────────────────────────────────────────────
+["toki:build:clean"]
+description = "Remove built toki binary"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  rm -f ($dir | path join "toki")
+}
+'''
+
+# ── toki:webedit ─────────────────────────────────────────────────────────────
+["toki:webedit"]
+description = "Start toki web UI for editing translations"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [...args: string] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  ^$bin webedit ...$args
+}
+'''
+
+# ── toki:generate ────────────────────────────────────────────────────────────
+["toki:generate"]
+description = "Generate i18n bundles from Go source"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [...args: string] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  ^$bin generate ...$args
+}
+'''
+
+# ── toki:lint ────────────────────────────────────────────────────────────────
+["toki:lint"]
+description = "Lint translations for errors"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [...args: string] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  ^$bin lint ...$args
+}
+'''
+
+# ── toki:help ────────────────────────────────────────────────────────────────
+["toki:help"]
+description = "Show toki help"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  ^$bin --help
+}
+'''
+
+# ── toki:version ─────────────────────────────────────────────────────────────
+["toki:version"]
+description = "Show toki version"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  ^$bin version
+}
+'''
+
+# ── toki:dev:test ────────────────────────────────────────────────────────────
+["toki:dev:test"]
+description = "Run toki tests"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  ^go -C $src test ./...
+}
+'''
+
+# ── toki:dev:fmt ─────────────────────────────────────────────────────────────
+["toki:dev:fmt"]
+description = "Format toki source"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  ^gofumpt -w $src
+}
+'''
+
+# ── toki:dev:lint ────────────────────────────────────────────────────────────
+["toki:dev:lint"]
+description = "Lint toki source"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let src = ($env.SRC_DIR? | default ".src" | path join "toki")
+  ^golangci-lint run --path-prefix $src
+}
+'''
+
+# ── toki:gh:open ─────────────────────────────────────────────────────────────
+["toki:gh:open"]
+description = "Open fork on GitHub"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^open "https://github.com/joeblew999/toki"
+}
+'''
+
+# ── toki:gh:upstream ─────────────────────────────────────────────────────────
+["toki:gh:upstream"]
+description = "Open upstream repo on GitHub"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^open "https://github.com/romshark/toki"
+}
+'''
+
+# ── toki:gh:compare ──────────────────────────────────────────────────────────
+["toki:gh:compare"]
+description = "Compare fork with upstream"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^open "https://github.com/romshark/toki/compare/main...joeblew999:toki:main"
+}
+'''
+
+# ── toki:gh:pr ───────────────────────────────────────────────────────────────
+["toki:gh:pr"]
+description = "Open PR from fork to upstream"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^open "https://github.com/romshark/toki/compare/main...joeblew999:toki:main?expand=1"
+}
+'''
+
+# ── toki:md:generate ─────────────────────────────────────────────────────────
+["toki:md:generate"]
+description = "Generate ARB catalogs from English markdown (de, zh, ja)"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  let content = ($env.ROOT_DIR? | default "." | path join "content")
+  ^$bin generate -l en -md ($content | path join "english") -md-only -t de -t zh -t ja -v
+}
+'''
+
+# ── toki:md:status ───────────────────────────────────────────────────────────
+["toki:md:status"]
+description = "Show ARB completeness stats"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let bundle = ($env.ROOT_DIR? | default "." | path join "tokibundle")
+  print "=== Toki ARB Catalogs ==="
+  if not ($bundle | path exists) {
+    print "No tokibundle directory. Run: mise run toki:md:generate"
+    return
+  }
+  let files = (glob ($bundle | path join "catalog_*.arb"))
+  if ($files | is-empty) {
+    print "No catalog_*.arb files found."
+    return
+  }
+  for f in $files {
+    let locale = ($f | path basename | str replace ".arb" "" | str replace "catalog_" "")
+    let text = (open --raw $f | decode utf-8)
+    let count = ($text | lines | where {|l| $l =~ '"msg' } | length)
+    let empty = ($text | lines | where {|l| $l =~ '": ""' } | length)
+    print $"($locale): ($count) messages, ($empty) empty"
+  }
+}
+'''
+
+# ── toki:md:webedit ──────────────────────────────────────────────────────────
+["toki:md:webedit"]
+description = "Edit translations in web UI"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  let bundle = ($env.ROOT_DIR? | default "." | path join "tokibundle")
+  ^$bin webedit -bundle $bundle
+}
+'''
+
+# ── toki:md:clean ────────────────────────────────────────────────────────────
+["toki:md:clean"]
+description = "Remove generated tokibundle directory"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let bundle = ($env.ROOT_DIR? | default "." | path join "tokibundle")
+  rm -rf $bundle
+}
+'''
+
+# ── toki:md:apply ────────────────────────────────────────────────────────────
+["toki:md:apply"]
+description = "Apply translations from ARB to markdown (lang: de, zh, ja, vi)"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [lang: string] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  let content = ($env.ROOT_DIR? | default "." | path join "content")
+  let bundle = ($env.ROOT_DIR? | default "." | path join "tokibundle")
+  let target = (match $lang {
+    "vi" => "vietnamese",
+    "de" => "german",
+    "zh" => "chinese",
+    "ja" => "japanese",
+    _ => $lang,
+  })
+  ^$bin apply -md ($content | path join "english") -out ($content | path join $target) -b $bundle -t $lang -v
+}
+'''
+
+# ── toki:md:apply:all ────────────────────────────────────────────────────────
+["toki:md:apply:all"]
+description = "Apply all translations (de, zh, ja, vi)"
+depends = ["toki:build"]
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  let bin = ($dir | path expand | path join "toki")
+  let content = ($env.ROOT_DIR? | default "." | path join "content")
+  let bundle = ($env.ROOT_DIR? | default "." | path join "tokibundle")
+  for pair in [[lang target]; ["vi" "vietnamese"] ["de" "german"] ["zh" "chinese"] ["ja" "japanese"]] {
+    ^$bin apply -md ($content | path join "english") -out ($content | path join $pair.target) -b $bundle -t $pair.lang -v
+  }
+}
+'''

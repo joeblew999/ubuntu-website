@@ -1,0 +1,209 @@
+# tasks/translate.toml — translate:* namespace: translation workflow management. Ported from taskfiles/Taskfile.translate.yml.
+
+# ── translate:content:status ─────────────────────────────────────────────────
+["translate:content:status"]
+description = "Show what English files changed since last translation"
+run = '''
+#!/usr/bin/env nu
+
+def main [github_issue?: string] {
+  if ($github_issue | default "false") == "true" {
+    ^go run ./cmd/translate -github-issue content status
+  } else {
+    ^go run ./cmd/translate content status
+  }
+}
+'''
+
+# ── translate:content:next ───────────────────────────────────────────────────
+["translate:content:next"]
+description = "Show next file to translate (with progress indicator)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/translate content next
+}
+'''
+
+# ── translate:content:diff ───────────────────────────────────────────────────
+["translate:content:diff"]
+description = "Show git diff for a specific English file since last translation"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string] {
+  if ($file | is-empty) {
+    print --stderr "✗ FILE is required"
+    exit 1
+  }
+  ^go run ./cmd/translate content diff $file
+}
+'''
+
+# ── translate:content:changed ────────────────────────────────────────────────
+["translate:content:changed"]
+description = "Show detailed changes for all English files since last translation"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/translate content changed
+}
+'''
+
+# ── translate:content:done ───────────────────────────────────────────────────
+["translate:content:done"]
+description = "Mark current translations as complete (update checkpoint tag)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/translate content done
+}
+'''
+
+# ── translate:content:missing ────────────────────────────────────────────────
+["translate:content:missing"]
+description = "Show which languages are missing content files"
+run = '''
+#!/usr/bin/env nu
+
+def main [github_issue?: string] {
+  if ($github_issue | default "false") == "true" {
+    ^go run ./cmd/translate -github-issue content missing
+  } else {
+    ^go run ./cmd/translate content missing
+  }
+}
+'''
+
+# ── translate:content:orphans ────────────────────────────────────────────────
+["translate:content:orphans"]
+description = "Show files in target languages with no English source"
+run = '''
+#!/usr/bin/env nu
+
+def main [github_issue?: string] {
+  if ($github_issue | default "false") == "true" {
+    ^go run ./cmd/translate -github-issue content orphans
+  } else {
+    ^go run ./cmd/translate content orphans
+  }
+}
+'''
+
+# ── translate:content:stale ──────────────────────────────────────────────────
+["translate:content:stale"]
+description = "Show translations that may be outdated (target < 50% of source size)"
+run = '''
+#!/usr/bin/env nu
+
+def main [github_issue?: string] {
+  if ($github_issue | default "false") == "true" {
+    ^go run ./cmd/translate -github-issue content stale
+  } else {
+    ^go run ./cmd/translate content stale
+  }
+}
+'''
+
+# ── translate:content:clean ──────────────────────────────────────────────────
+["translate:content:clean"]
+description = "Delete orphaned files (prompts unless FORCE=true)"
+run = '''
+#!/usr/bin/env nu
+
+def main [force?: string] {
+  if ($force | default "false") == "true" {
+    ^go run ./cmd/translate -force content clean
+  } else {
+    ^go run ./cmd/translate content clean
+  }
+}
+'''
+
+# ── translate:menu:check ─────────────────────────────────────────────────────
+["translate:menu:check"]
+description = "Validate menu files for broken links and sync issues"
+run = '''
+#!/usr/bin/env nu
+
+def main [github_issue?: string] {
+  if ($github_issue | default "false") == "true" {
+    ^go run ./cmd/translate -github-issue menu check
+  } else {
+    ^go run ./cmd/translate menu check
+  }
+}
+'''
+
+# ── translate:menu:sync ──────────────────────────────────────────────────────
+["translate:menu:sync"]
+description = "Generate translated menu files from English"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/translate menu sync
+}
+'''
+
+# ── translate:lang:list ──────────────────────────────────────────────────────
+["translate:lang:list"]
+description = "Show configured languages and detect stray directories"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/translate lang list
+}
+'''
+
+# ── translate:lang:validate ──────────────────────────────────────────────────
+["translate:lang:validate"]
+description = "Verify translator config matches Hugo config"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/translate lang validate
+}
+'''
+
+# ── translate:lang:add ───────────────────────────────────────────────────────
+["translate:lang:add"]
+description = "Add a new target language"
+run = '''
+#!/usr/bin/env nu
+
+def main [code: string, name: string, dirname: string] {
+  ^go run ./cmd/translate lang add $code $name $dirname
+}
+'''
+
+# ── translate:lang:remove ────────────────────────────────────────────────────
+["translate:lang:remove"]
+description = "Remove a target language (prompts unless FORCE=true)"
+run = '''
+#!/usr/bin/env nu
+
+def main [code: string, force?: string] {
+  if ($force | default "false") == "true" {
+    ^go run ./cmd/translate -force lang remove $code
+  } else {
+    ^go run ./cmd/translate lang remove $code
+  }
+}
+'''
+
+# ── translate:lang:init ──────────────────────────────────────────────────────
+["translate:lang:init"]
+description = "Initialize content directory for a configured language"
+run = '''
+#!/usr/bin/env nu
+
+def main [code: string] {
+  ^go run ./cmd/translate lang init $code
+}
+'''

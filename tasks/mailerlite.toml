@@ -1,0 +1,291 @@
+# tasks/mailerlite.toml — mailerlite:* namespace: MailerLite subscriber management. Ported from taskfiles/Taskfile.mailerlite.yml.
+
+# ── mailerlite:check ─────────────────────────────────────────────────────────
+["mailerlite:check"]
+description = "Run all verification checks (API connection, groups, webhooks)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "╔══════════════════════════════════════════════════════════════╗"
+  print "║         MailerLite Verification                              ║"
+  print "╚══════════════════════════════════════════════════════════════╝"
+  print ""
+  ^go run ./cmd/mailerlite stats
+  print ""
+  ^go run ./cmd/mailerlite groups list
+  print ""
+  ^go run ./cmd/mailerlite webhooks list
+  print ""
+  ^go run ./cmd/mailerlite releases latest
+}
+'''
+
+# ── mailerlite:subscribers:list ──────────────────────────────────────────────
+["mailerlite:subscribers:list"]
+description = "List all subscribers"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite subscribers list
+}
+'''
+
+# ── mailerlite:subscribers:count ─────────────────────────────────────────────
+["mailerlite:subscribers:count"]
+description = "Count total subscribers"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite subscribers count
+}
+'''
+
+# ── mailerlite:subscribers:get ───────────────────────────────────────────────
+["mailerlite:subscribers:get"]
+description = "Get subscriber by email"
+run = '''
+#!/usr/bin/env nu
+
+def main [email: string] {
+  ^go run ./cmd/mailerlite subscribers get $email
+}
+'''
+
+# ── mailerlite:subscribers:add ───────────────────────────────────────────────
+["mailerlite:subscribers:add"]
+description = "Add or update subscriber (name optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [email: string, name?: string] {
+  ^go run ./cmd/mailerlite subscribers add $email ($name | default "")
+}
+'''
+
+# ── mailerlite:subscribers:delete ────────────────────────────────────────────
+["mailerlite:subscribers:delete"]
+description = "Delete subscriber by email"
+run = '''
+#!/usr/bin/env nu
+
+def main [email: string] {
+  ^go run ./cmd/mailerlite subscribers delete $email
+}
+'''
+
+# ── mailerlite:groups:list ───────────────────────────────────────────────────
+["mailerlite:groups:list"]
+description = "List all groups"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite groups list
+}
+'''
+
+# ── mailerlite:groups:create ─────────────────────────────────────────────────
+["mailerlite:groups:create"]
+description = "Create a new group"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string] {
+  ^go run ./cmd/mailerlite groups create $name
+}
+'''
+
+# ── mailerlite:groups:subscribers ────────────────────────────────────────────
+["mailerlite:groups:subscribers"]
+description = "List subscribers in a group"
+run = '''
+#!/usr/bin/env nu
+
+def main [group_id: string] {
+  ^go run ./cmd/mailerlite groups subscribers $group_id
+}
+'''
+
+# ── mailerlite:groups:assign ─────────────────────────────────────────────────
+["mailerlite:groups:assign"]
+description = "Assign subscriber to group"
+run = '''
+#!/usr/bin/env nu
+
+def main [group_id: string, email: string] {
+  ^go run ./cmd/mailerlite groups assign $group_id $email
+}
+'''
+
+# ── mailerlite:groups:unassign ───────────────────────────────────────────────
+["mailerlite:groups:unassign"]
+description = "Remove subscriber from group"
+run = '''
+#!/usr/bin/env nu
+
+def main [group_id: string, email: string] {
+  ^go run ./cmd/mailerlite groups unassign $group_id $email
+}
+'''
+
+# ── mailerlite:forms:list ────────────────────────────────────────────────────
+["mailerlite:forms:list"]
+description = "List all forms"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite forms list
+}
+'''
+
+# ── mailerlite:forms:subscribers ─────────────────────────────────────────────
+["mailerlite:forms:subscribers"]
+description = "List subscribers for a form"
+run = '''
+#!/usr/bin/env nu
+
+def main [form_id: string] {
+  ^go run ./cmd/mailerlite forms subscribers $form_id
+}
+'''
+
+# ── mailerlite:webhooks:list ─────────────────────────────────────────────────
+["mailerlite:webhooks:list"]
+description = "List all webhooks"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite webhooks list
+}
+'''
+
+# ── mailerlite:webhooks:create ───────────────────────────────────────────────
+["mailerlite:webhooks:create"]
+description = "Create a webhook (events optional, space-separated)"
+run = '''
+#!/usr/bin/env nu
+
+def main [url: string, events?: string] {
+  ^go run ./cmd/mailerlite webhooks create $url ($events | default "subscriber.created")
+}
+'''
+
+# ── mailerlite:webhooks:delete ───────────────────────────────────────────────
+["mailerlite:webhooks:delete"]
+description = "Delete a webhook by ID"
+run = '''
+#!/usr/bin/env nu
+
+def main [webhook_id: string] {
+  ^go run ./cmd/mailerlite webhooks delete $webhook_id
+}
+'''
+
+# ── mailerlite:automations:list ──────────────────────────────────────────────
+["mailerlite:automations:list"]
+description = "List all automations"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite automations list
+}
+'''
+
+# ── mailerlite:automations:get ───────────────────────────────────────────────
+["mailerlite:automations:get"]
+description = "Get automation details by ID"
+run = '''
+#!/usr/bin/env nu
+
+def main [automation_id: string] {
+  ^go run ./cmd/mailerlite automations get $automation_id
+}
+'''
+
+# ── mailerlite:stats ─────────────────────────────────────────────────────────
+["mailerlite:stats"]
+description = "Show account statistics"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite stats
+}
+'''
+
+# ── mailerlite:open ──────────────────────────────────────────────────────────
+["mailerlite:open"]
+description = "Open MailerLite dashboard in browser (target: dashboard|subscribers|groups|forms|automations|webhooks|api)"
+run = '''
+#!/usr/bin/env nu
+
+def main [target?: string] {
+  ^go run ./cmd/mailerlite open ($target | default "dashboard")
+}
+'''
+
+# ── mailerlite:releases:latest ───────────────────────────────────────────────
+["mailerlite:releases:latest"]
+description = "Show latest GitHub release with download URLs"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite releases latest
+}
+'''
+
+# ── mailerlite:releases:list ─────────────────────────────────────────────────
+["mailerlite:releases:list"]
+description = "List all GitHub releases"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite releases list
+}
+'''
+
+# ── mailerlite:releases:urls ─────────────────────────────────────────────────
+["mailerlite:releases:urls"]
+description = "Show download URLs formatted for email templates"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite releases urls
+}
+'''
+
+# ── mailerlite:server ────────────────────────────────────────────────────────
+["mailerlite:server"]
+description = "Start webhook server to receive Web3Forms submissions (port default 8086, group_id optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [port?: int, group_id?: string] {
+  mut args = ["server" $"PORT=($port | default 8086)"]
+  let gid = ($group_id | default "")
+  if not ($gid | is-empty) {
+    $args = ($args | append $"GROUP_ID=($gid)")
+  }
+  ^go run ./cmd/mailerlite ...$args
+}
+'''
+
+# ── mailerlite:ci:report ─────────────────────────────────────────────────────
+["mailerlite:ci:report"]
+description = "[Monitor] Generate subscriber report (markdown output)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/mailerlite -github-issue stats
+}
+'''

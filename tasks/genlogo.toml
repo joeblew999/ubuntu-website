@@ -1,0 +1,78 @@
+# tasks/genlogo.toml — genlogo:* namespace: logo and branding asset generation. Ported from taskfiles/Taskfile.genlogo.yml.
+
+# ── genlogo:generate:all ─────────────────────────────────────────────────────
+["genlogo:generate:all"]
+description = "Generate all branding assets (favicon, logos, og-image, email-logo, avatar, banner)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let root = (^git rev-parse --show-toplevel | str trim)
+  ^go run ./cmd/genlogo -asset all -dir $root
+  print ""
+  print "Assets generated. Next steps:"
+  print "  1. Deploy website (git push) - updates Hugo site with new favicon, logos, og-image"
+  print "  2. Gmail signature - re-upload email-logo.png at https://mail.google.com/mail/u/0/#settings/general"
+  print "  3. Bluesky profile - re-upload avatar & banner at https://bsky.app/profile/ubuntusoftware.net"
+}
+'''
+
+# ── genlogo:generate:favicon ─────────────────────────────────────────────────
+["genlogo:generate:favicon"]
+description = "Generate favicon only"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let root = (^git rev-parse --show-toplevel | str trim)
+  ^go run ./cmd/genlogo -asset favicon -dir $root
+}
+'''
+
+# ── genlogo:generate:logo ────────────────────────────────────────────────────
+["genlogo:generate:logo"]
+description = "Generate logo SVGs only"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let root = (^git rev-parse --show-toplevel | str trim)
+  ^go run ./cmd/genlogo -asset logo-svg -dir $root
+}
+'''
+
+# ── genlogo:generate:og-image ────────────────────────────────────────────────
+["genlogo:generate:og-image"]
+description = "Generate Open Graph image only"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let root = (^git rev-parse --show-toplevel | str trim)
+  ^go run ./cmd/genlogo -asset og -dir $root
+}
+'''
+
+# ── genlogo:generate:avatar ──────────────────────────────────────────────────
+["genlogo:generate:avatar"]
+description = "Generate avatar only"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let root = (^git rev-parse --show-toplevel | str trim)
+  ^go run ./cmd/genlogo -asset avatar -dir $root
+}
+'''
+
+# ── genlogo:generate:banner ──────────────────────────────────────────────────
+["genlogo:generate:banner"]
+description = "Generate banner only"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let root = (^git rev-parse --show-toplevel | str trim)
+  ^go run ./cmd/genlogo -asset banner -dir $root
+}
+'''

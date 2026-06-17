@@ -1,0 +1,108 @@
+# tasks/vanityimport.toml — vanityimport:* namespace: Go vanity import path package management. Ported from taskfiles/Taskfile.vanityimport.yml.
+
+# ── vanityimport:list ────────────────────────────────────────────────────────
+["vanityimport:list"]
+description = "List all packages"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/vanityimport list
+}
+'''
+
+# ── vanityimport:info ────────────────────────────────────────────────────────
+["vanityimport:info"]
+description = "Show package information"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string] {
+  ^go run ./cmd/vanityimport info $name
+}
+'''
+
+# ── vanityimport:add ─────────────────────────────────────────────────────────
+["vanityimport:add"]
+description = "Add a new package"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string, repo?: string, description?: string, version?: string] {
+  mut flags = []
+  if not (($repo | default "") | is-empty) { $flags = ($flags | append ["--repo" $repo]) }
+  if not (($description | default "") | is-empty) { $flags = ($flags | append ["--description" $description]) }
+  if not (($version | default "") | is-empty) { $flags = ($flags | append ["--version" $version]) }
+  ^go run ./cmd/vanityimport add $name ...$flags
+}
+'''
+
+# ── vanityimport:update ──────────────────────────────────────────────────────
+["vanityimport:update"]
+description = "Update package metadata from GitHub (NAME optional; empty = all)"
+run = '''
+#!/usr/bin/env nu
+
+def main [name?: string] {
+  let name = ($name | default "")
+  if ($name | is-empty) {
+    ^go run ./cmd/vanityimport update
+  } else {
+    ^go run ./cmd/vanityimport update $name
+  }
+}
+'''
+
+# ── vanityimport:update:all ──────────────────────────────────────────────────
+["vanityimport:update:all"]
+description = "Update all packages from GitHub"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/vanityimport update
+}
+'''
+
+# ── vanityimport:docs ────────────────────────────────────────────────────────
+["vanityimport:docs"]
+description = "Generate markdown docs for a package (optional OUTPUT path)"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string, output?: string] {
+  let output = ($output | default "")
+  if ($output | is-empty) {
+    ^go run ./cmd/vanityimport docs $name
+  } else {
+    ^go run ./cmd/vanityimport docs $name -o $output
+  }
+}
+'''
+
+# ── vanityimport:docs:save ───────────────────────────────────────────────────
+["vanityimport:docs:save"]
+description = "Generate and save docs to content directory"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string] {
+  ^go run ./cmd/vanityimport docs $name -o $"content/english/pkg/($name).md"
+}
+'''
+
+# ── vanityimport:packages ────────────────────────────────────────────────────
+["vanityimport:packages"]
+description = "[alias] List all packages"
+depends = ["vanityimport:list"]
+
+# ── vanityimport:help ────────────────────────────────────────────────────────
+["vanityimport:help"]
+description = "Show vanityimport CLI help"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/vanityimport --help
+}
+'''

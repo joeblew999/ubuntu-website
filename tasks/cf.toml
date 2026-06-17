@@ -1,0 +1,394 @@
+# tasks/cf.toml — cf-pages:* namespace: Cloudflare Pages project deploy/status/open. Ported from taskfiles/Taskfile.cf.yml.
+#
+# NOTE: prefixed `cf-pages:` to AVOID clashing with the shared `cf:*` primitives
+# (tool-cf.toml from joeblew999/.github). Generic CF primitives are NOT recreated here.
+# Project literals: PROJECT_NAME=ubuntu-website, DOMAIN=www.ubuntusoftware.net,
+# URL_PRODUCTION=https://www.ubuntusoftware.net, URL_PREVIEW=https://ubuntu-website.pages.dev.
+# CF_ACCOUNT_ID / CF_ZONE_ID come from $env (set in mise.toml).
+
+# ── cf-pages:check:validate ──────────────────────────────────────────────────
+["cf-pages:check:validate"]
+description = "Validate wrangler can access Cloudflare"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let r = (^wrangler pages project list --json | complete)
+  if $r.exit_code == 0 {
+    print "OK: wrangler can access Cloudflare"
+  } else {
+    print "WARN: Could not validate Cloudflare access (may need login)"
+  }
+}
+'''
+
+# ── cf-pages:status ──────────────────────────────────────────────────────────
+["cf-pages:status"]
+description = "Check Cloudflare Pages deployment status"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  print "========================================"
+  print "Cloudflare Pages Status"
+  print "========================================"
+  print "Project: ubuntu-website"
+  print ""
+  print "URLs:"
+  print "  Production: https://www.ubuntusoftware.net"
+  print "  Preview: https://ubuntu-website.pages.dev"
+  print ""
+  print "Dashboards:"
+  print $"  Pages: https://dash.cloudflare.com/($acct)/pages/view/ubuntu-website"
+  print $"  Settings: https://dash.cloudflare.com/($acct)/pages/view/ubuntu-website/settings/production"
+  print ""
+  print "Recent Deployments:"
+  print "========================================"
+  ^wrangler pages deployment list --project-name=ubuntu-website
+}
+'''
+
+# ── cf-pages:logs ────────────────────────────────────────────────────────────
+["cf-pages:logs"]
+description = "View recent Pages deployment logs"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  print "========================================"
+  print "Recent Deployments"
+  print "========================================"
+  print $"Dashboard: https://dash.cloudflare.com/($acct)/pages/view/ubuntu-website"
+  print ""
+  ^wrangler pages deployment list --project-name=ubuntu-website | lines | first 10 | str join "\n" | print
+}
+'''
+
+# ── cf-pages:tail ────────────────────────────────────────────────────────────
+["cf-pages:tail"]
+description = "Tail latest Pages deployment logs"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  print "========================================"
+  print "Tailing Deployment Logs"
+  print "========================================"
+  print $"Dashboard: https://dash.cloudflare.com/($acct)/pages/view/ubuntu-website"
+  print ""
+  ^wrangler pages deployment tail --project-name=ubuntu-website
+}
+'''
+
+# ── cf-pages:preview-url ─────────────────────────────────────────────────────
+["cf-pages:preview-url"]
+description = "Get and open the latest preview deployment URL"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "========================================"
+  print "Latest Preview Deployment"
+  print "========================================"
+  let line = (^wrangler pages deployment list --project-name=ubuntu-website
+    | lines | where ($it | str contains "Preview") | first)
+  let url = (if ($line | is-empty) { "" } else { ($line | split row -r '\s+' | get 9? | default "") })
+  if ($url | is-empty) {
+    print "No preview deployments found"
+  } else {
+    print $"URL: ($url)"
+    print ""
+    print "Opening in browser..."
+    ^open $url
+  }
+}
+'''
+
+# ── cf-pages:purge ───────────────────────────────────────────────────────────
+["cf-pages:purge"]
+description = "Purge Cloudflare CDN cache for the zone"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let token = ($env.CLOUDFLARE_API_TOKEN? | default "")
+  if ($token | is-empty) {
+    print --stderr "ERROR: CLOUDFLARE_API_TOKEN must be set in env"
+    exit 1
+  }
+  let zone = ($env.CF_ZONE_ID? | default "")
+  print "Purging Cloudflare cache for www.ubuntusoftware.net..."
+  let resp = (^curl -s -X POST $"https://api.cloudflare.com/client/v4/zones/($zone)/purge_cache"
+    -H $"Authorization: Bearer ($token)"
+    -H "Content-Type: application/json"
+    --data '{"purge_everything":true}')
+  if ($resp | str contains '"success": true') or ($resp | str contains '"success":true') {
+    print "OK: Cache purged successfully"
+  } else {
+    print --stderr "ERROR: Cache purge failed:"
+    print --stderr $resp
+    exit 1
+  }
+}
+'''
+
+# ── cf-pages:secret:set ──────────────────────────────────────────────────────
+["cf-pages:secret:set"]
+description = "Set a secret for the Pages project (NAME e.g. HUGO_VERSION)"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string] {
+  print "Setting secret for Pages project..."
+  ^wrangler pages secret put $name --project-name=ubuntu-website
+}
+'''
+
+# ── cf-pages:secret:list ─────────────────────────────────────────────────────
+["cf-pages:secret:list"]
+description = "List secrets for the Pages project"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^wrangler pages secret list --project-name=ubuntu-website
+}
+'''
+
+# ── cf-pages:open ────────────────────────────────────────────────────────────
+["cf-pages:open"]
+description = "Open Cloudflare Pages dashboard in browser"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/pages/view/ubuntu-website"
+}
+'''
+
+# ── cf-pages:open:settings ───────────────────────────────────────────────────
+["cf-pages:open:settings"]
+description = "Open Cloudflare Pages settings in browser"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/pages/view/ubuntu-website/settings/production"
+}
+'''
+
+# ── cf-pages:open:domain ─────────────────────────────────────────────────────
+["cf-pages:open:domain"]
+description = "Open domain dashboard in browser"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/ubuntusoftware.net"
+}
+'''
+
+# ── cf-pages:open:ai ─────────────────────────────────────────────────────────
+["cf-pages:open:ai"]
+description = "Open Cloudflare AI Crawl Control (configure AI bot access)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/ubuntusoftware.net/ai"
+}
+'''
+
+# ── cf-pages:open:r2 ─────────────────────────────────────────────────────────
+["cf-pages:open:r2"]
+description = "Open Cloudflare R2 dashboard"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/r2/overview"
+}
+'''
+
+# ── cf-pages:email:status ────────────────────────────────────────────────────
+["cf-pages:email:status"]
+description = "Check Email Routing status and list rules/destinations"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let token = ($env.CLOUDFLARE_API_TOKEN? | default "")
+  if ($token | is-empty) {
+    print --stderr "ERROR: CLOUDFLARE_API_TOKEN must be set in env"
+    exit 1
+  }
+  let zone = ($env.CF_ZONE_ID? | default "")
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  print "========================================"
+  print "Email Routing Status for www.ubuntusoftware.net"
+  print "========================================"
+  print ""
+
+  let settings = (^curl -s $"https://api.cloudflare.com/client/v4/zones/($zone)/email/routing"
+    -H $"Authorization: Bearer ($token)" -H "Content-Type: application/json")
+  let enabled = (try { $settings | from json | get result.enabled } catch { "unknown" })
+  print $"Email Routing: ($enabled)"
+  print ""
+
+  print "Routing Rules:"
+  print "----------------------------------------"
+  let rules = (^curl -s $"https://api.cloudflare.com/client/v4/zones/($zone)/email/routing/rules"
+    -H $"Authorization: Bearer ($token)" -H "Content-Type: application/json")
+  try {
+    $rules | from json | get result | each { |r|
+      let m = ($r.matchers.0.value? | default "catch-all")
+      let a = ($r.actions.0.value.0? | default "drop")
+      let s = (if $r.enabled { "enabled" } else { "disabled" })
+      print $"  ($m) -> ($a) [($s)]"
+    }
+  } catch { print "  No rules configured" }
+  print ""
+
+  print "Verified Destinations:"
+  print "----------------------------------------"
+  let dests = (^curl -s $"https://api.cloudflare.com/client/v4/accounts/($acct)/email/routing/addresses"
+    -H $"Authorization: Bearer ($token)" -H "Content-Type: application/json")
+  try {
+    $dests | from json | get result | each { |d|
+      let v = (if $d.verified { "verified" } else { "pending" })
+      print $"  ($d.email) [($v)]"
+    }
+  } catch { print "  No destinations" }
+}
+'''
+
+# ── cf-pages:email:add ───────────────────────────────────────────────────────
+["cf-pages:email:add"]
+description = "Add email forwarding rule (FROM TO)"
+run = '''
+#!/usr/bin/env nu
+
+def main [from: string, to: string] {
+  let token = ($env.CLOUDFLARE_API_TOKEN? | default "")
+  if ($token | is-empty) {
+    print --stderr "ERROR: CLOUDFLARE_API_TOKEN must be set in env"
+    exit 1
+  }
+  let zone = ($env.CF_ZONE_ID? | default "")
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+
+  print "========================================"
+  print "Adding Email Routing Rule"
+  print "========================================"
+  print $"  From: ($from)"
+  print $"  To:   ($to)"
+  print ""
+
+  print "Checking destination address..."
+  let dests = (^curl -s $"https://api.cloudflare.com/client/v4/accounts/($acct)/email/routing/addresses"
+    -H $"Authorization: Bearer ($token)" -H "Content-Type: application/json")
+  let verified = (try {
+    $dests | from json | get result | where email == $to | get verified.0?
+  } catch { null })
+
+  if $verified != true {
+    print $"Destination ($to) not verified. Adding..."
+    let add = (^curl -s -X POST $"https://api.cloudflare.com/client/v4/accounts/($acct)/email/routing/addresses"
+      -H $"Authorization: Bearer ($token)" -H "Content-Type: application/json"
+      --data $'{"email": "($to)"}')
+    let ok = (try { $add | from json | get success } catch { false })
+    if $ok {
+      print $"Verification email sent to ($to)"
+      print "Please verify before continuing."
+      exit 0
+    } else {
+      print "Note: Destination may already exist or require verification"
+    }
+  } else {
+    print $"OK: Destination ($to) is verified"
+  }
+
+  print ""
+  print "Creating routing rule..."
+  let body = $'{"actions": [{"type": "forward", "value": ["($to)"]}], "matchers": [{"type": "literal", "field": "to", "value": "($from)"}], "enabled": true, "name": "Forward ($from) to ($to)"}'
+  let resp = (^curl -s -X POST $"https://api.cloudflare.com/client/v4/zones/($zone)/email/routing/rules"
+    -H $"Authorization: Bearer ($token)" -H "Content-Type: application/json" --data $body)
+  let ok = (try { $resp | from json | get success } catch { false })
+  if $ok {
+    print "OK: Routing rule created successfully!"
+    print ""
+    print $"Emails to ($from) will now forward to ($to)"
+  } else {
+    let err = (try { $resp | from json | get errors.0.message } catch { "Unknown error" })
+    print --stderr $"ERROR: ($err)"
+    print --stderr $resp
+    exit 1
+  }
+}
+'''
+
+# ── cf-pages:email:remove ────────────────────────────────────────────────────
+["cf-pages:email:remove"]
+description = "Remove email forwarding rule (FROM)"
+run = '''
+#!/usr/bin/env nu
+
+def main [from: string] {
+  let token = ($env.CLOUDFLARE_API_TOKEN? | default "")
+  if ($token | is-empty) {
+    print --stderr "ERROR: CLOUDFLARE_API_TOKEN must be set in env"
+    exit 1
+  }
+  let zone = ($env.CF_ZONE_ID? | default "")
+
+  print $"Removing routing rule for ($from)..."
+  let rules = (^curl -s $"https://api.cloudflare.com/client/v4/zones/($zone)/email/routing/rules"
+    -H $"Authorization: Bearer ($token)" -H "Content-Type: application/json")
+  let rule_id = (try {
+    $rules | from json | get result | where ($it.matchers.0.value? | default "") == $from | get tag.0?
+  } catch { null })
+
+  if ($rule_id | is-empty) or ($rule_id == null) {
+    print --stderr $"ERROR: No routing rule found for ($from)"
+    exit 1
+  }
+
+  let resp = (^curl -s -X DELETE $"https://api.cloudflare.com/client/v4/zones/($zone)/email/routing/rules/($rule_id)"
+    -H $"Authorization: Bearer ($token)" -H "Content-Type: application/json")
+  let ok = (try { $resp | from json | get success } catch { false })
+  if $ok {
+    print "OK: Routing rule removed"
+  } else {
+    print --stderr "ERROR: Failed to remove rule"
+    print --stderr $resp
+    exit 1
+  }
+}
+'''
+
+# ── cf-pages:email:open ──────────────────────────────────────────────────────
+["cf-pages:email:open"]
+description = "Open Cloudflare Email Routing dashboard"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/www.ubuntusoftware.net/email/routing/routes"
+}
+'''

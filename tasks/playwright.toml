@@ -1,0 +1,247 @@
+# tasks/playwright.toml — playwright:* namespace: browser automation tool. Ported from taskfiles/Taskfile.playwright.yml.
+
+# ── playwright:install ───────────────────────────────────────────────────────
+["playwright:install"]
+description = "Install Playwright browsers (chromium)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/playwright install
+}
+'''
+
+# ── playwright:oauth ─────────────────────────────────────────────────────────
+["playwright:oauth"]
+description = "Start OAuth flow with callback server (url, port=8085, timeout=120, headless)"
+run = '''
+#!/usr/bin/env nu
+
+def main [url: string, port: string = "8085", timeout: string = "120", headless?: string] {
+  mut flags = []
+  if (($headless | default "") | is-not-empty) { $flags = ($flags | append "-headless") }
+  $flags = ($flags | append [$"-port=($port)" $"-timeout=($timeout)"])
+  ^go run ./cmd/playwright ...$flags oauth $url
+}
+'''
+
+# ── playwright:open ──────────────────────────────────────────────────────────
+["playwright:open"]
+description = "Open URL in Playwright browser (url, timeout=120, headless)"
+run = '''
+#!/usr/bin/env nu
+
+def main [url: string, timeout: string = "120", headless?: string] {
+  mut flags = []
+  if (($headless | default "") | is-not-empty) { $flags = ($flags | append "-headless") }
+  $flags = ($flags | append $"-timeout=($timeout)")
+  ^go run ./cmd/playwright ...$flags open $url
+}
+'''
+
+# ── playwright:screenshot ────────────────────────────────────────────────────
+["playwright:screenshot"]
+description = "Take a screenshot of a URL (url, file output)"
+run = '''
+#!/usr/bin/env nu
+
+def main [url: string, file: string] {
+  ^go run ./cmd/playwright screenshot $url $file
+}
+'''
+
+# ── playwright:build ─────────────────────────────────────────────────────────
+["playwright:build"]
+description = "Build the playwright binary into BIN_INSTALL_DIR"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let dir = ($env.BIN_INSTALL_DIR? | default ".bin")
+  mkdir $dir
+  ^go build -o $"($dir)/playwright" ./cmd/playwright
+}
+'''
+
+# ── playwright:example:google-oauth ──────────────────────────────────────────
+["playwright:example:google-oauth"]
+description = "Example: explain the Google OAuth flow using the oauth command"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "Playwright OAuth Example - Google"
+  print ""
+  print "In a real implementation, you would:"
+  print "  1. Generate PKCE code_verifier and code_challenge"
+  print "  2. Build the OAuth URL with your client_id and scopes"
+  print "  3. Call: mise run playwright:oauth <your-oauth-url>"
+  print "  4. Parse the JSON output to get the authorization code"
+  print "  5. Exchange the code for tokens via POST to token endpoint"
+  print ""
+  print "See: cmd/google-auth/main.go for a working implementation"
+}
+'''
+
+# ── playwright:example:screenshot ────────────────────────────────────────────
+["playwright:example:screenshot"]
+description = "Example: screenshot the Ubuntu Software website homepage"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/playwright screenshot "https://www.ubuntusoftware.net" "homepage.png"
+  print "Screenshot saved to homepage.png"
+}
+'''
+
+# ── playwright:example:mailerlite-oauth ──────────────────────────────────────
+["playwright:example:mailerlite-oauth"]
+description = "Example: explain the MailerLite OAuth flow"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "Playwright OAuth Example - MailerLite"
+  print ""
+  print "MailerLite typically uses API key authentication."
+  print "Get your API key from: https://dashboard.mailerlite.com/integrations/api"
+  print ""
+  print "If OAuth is needed for certain integrations:"
+  print "  mise run playwright:oauth 'https://connect.mailerlite.com/oauth/authorize?...'"
+  print ""
+  print "Then parse the JSON output and exchange the code for tokens."
+}
+'''
+
+# ── playwright:gmail:settings ────────────────────────────────────────────────
+["playwright:gmail:settings"]
+description = "Open Gmail Settings > Accounts page (manual setup)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/playwright gmail-settings
+}
+'''
+
+# ── playwright:gmail:sendas ──────────────────────────────────────────────────
+["playwright:gmail:sendas"]
+description = "Configure Gmail Send mail as with SMTP relay (name, email, provider, user, pass)"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string, email: string, provider: string, user: string, pass: string] {
+  ^go run ./cmd/playwright gmail-sendas $name $email $provider $user $pass
+}
+'''
+
+# ── playwright:gmail:sendas:smtp2go ──────────────────────────────────────────
+["playwright:gmail:sendas:smtp2go"]
+description = "Configure Gmail Send mail as with SMTP2GO (name, email, user, pass)"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string, email: string, user?: string, pass?: string] {
+  let u = (($user | default "") | default ($env.SMTP2GO_USERNAME? | default "ubuntusoftware.net"))
+  let p = (($pass | default "") | default ($env.SMTP2GO_PASSWORD? | default ""))
+  ^go run ./cmd/playwright gmail-sendas $name $email smtp2go $u $p
+}
+'''
+
+# ── playwright:gmail:sendas:brevo ────────────────────────────────────────────
+["playwright:gmail:sendas:brevo"]
+description = "Configure Gmail Send mail as with Brevo (name, email, user, pass)"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string, email: string, user: string, pass: string] {
+  ^go run ./cmd/playwright gmail-sendas $name $email brevo $user $pass
+}
+'''
+
+# ── playwright:gmail:sendas:resend ───────────────────────────────────────────
+["playwright:gmail:sendas:resend"]
+description = "Configure Gmail Send mail as with Resend (name, email, apikey)"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string, email: string, apikey: string] {
+  ^go run ./cmd/playwright gmail-sendas $name $email resend resend $apikey
+}
+'''
+
+# ── playwright:gmail:logout ──────────────────────────────────────────────────
+["playwright:gmail:logout"]
+description = "Logout of Google accounts in the Gmail automation profile"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/playwright gmail-logout
+}
+'''
+
+# ── playwright:gmail:switch ──────────────────────────────────────────────────
+["playwright:gmail:switch"]
+description = "Open Google Account chooser (add or switch accounts)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/playwright gmail-switch
+}
+'''
+
+# ── playwright:cloudflare ────────────────────────────────────────────────────
+["playwright:cloudflare"]
+description = "Open Cloudflare dashboard in browser (page?, profile defaults to ~/.playwright-cloudflare)"
+run = '''
+#!/usr/bin/env nu
+
+def main [page?: string] {
+  let profile = ($env.PROFILE? | default "~/.playwright-cloudflare")
+  if (($page | default "") | is-empty) {
+    ^go run ./cmd/playwright $"-profile=($profile)" cloudflare
+  } else {
+    ^go run ./cmd/playwright $"-profile=($profile)" cloudflare $page
+  }
+}
+'''
+
+# ── playwright:cloudflare:email ──────────────────────────────────────────────
+["playwright:cloudflare:email"]
+description = "Open Cloudflare Email Routing (domain defaults to ubuntusoftware.net)"
+run = '''
+#!/usr/bin/env nu
+
+def main [domain: string = "ubuntusoftware.net"] {
+  let profile = ($env.PROFILE? | default "~/.playwright-cloudflare")
+  ^go run ./cmd/playwright $"-profile=($profile)" cloudflare-email $domain
+}
+'''
+
+# ── playwright:cloudflare:email:add ──────────────────────────────────────────
+["playwright:cloudflare:email:add"]
+description = "Add email forwarding rule with HIL automation (from, to, domain?)"
+run = '''
+#!/usr/bin/env nu
+
+def main [from: string, to: string, domain?: string] {
+  let profile = ($env.PROFILE? | default "~/.playwright-cloudflare")
+  let dom = (($domain | default "") | default ($from | split row "@" | last))
+  ^go run ./cmd/playwright $"-profile=($profile)" cloudflare-email-add $from $to $dom
+}
+'''
+
+# ── playwright:cloudflare:token ──────────────────────────────────────────────
+["playwright:cloudflare:token"]
+description = "Setup Cloudflare API token (guided browser flow)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let profile = ($env.PROFILE? | default "~/.playwright-cloudflare")
+  ^go run ./cmd/playwright $"-profile=($profile)" cloudflare-token
+}
+'''

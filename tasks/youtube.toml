@@ -1,0 +1,428 @@
+# tasks/youtube.toml — youtube:* namespace: download & edit videos for self-hosting (yt-dlp + FFmpeg). Ported from taskfiles/Taskfile.youtube.yml.
+
+# ── youtube:default ──────────────────────────────────────────────────────────
+["youtube:default"]
+description = "Show youtube CLI help"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/youtube --help
+}
+'''
+
+# ── youtube:info ─────────────────────────────────────────────────────────────
+["youtube:info"]
+description = "Show metadata and formats for a URL"
+run = '''
+#!/usr/bin/env nu
+
+def main [url?: string] {
+  let u = ($url | default "https://www.youtube.com/watch?v=jNQXAC9IVRw")
+  ^go run ./cmd/youtube info $u
+}
+'''
+
+# ── youtube:download ─────────────────────────────────────────────────────────
+["youtube:download"]
+description = "Download video to static/videos/cache/ (best quality)"
+run = '''
+#!/usr/bin/env nu
+
+def main [url?: string] {
+  let u = ($url | default "https://www.youtube.com/watch?v=jNQXAC9IVRw")
+  mkdir static/videos/cache
+  ^go run ./cmd/youtube download -output "static/videos/cache/%(title)s.%(ext)s" $u
+  print ""
+  print "Original saved to cache/. Use edit workflow to process and output to static/videos/"
+}
+'''
+
+# ── youtube:download:720 ─────────────────────────────────────────────────────
+["youtube:download:720"]
+description = "Download video at 720p max to cache/"
+run = '''
+#!/usr/bin/env nu
+
+def main [url?: string] {
+  let u = ($url | default "https://www.youtube.com/watch?v=jNQXAC9IVRw")
+  mkdir static/videos/cache
+  ^go run ./cmd/youtube download -quality 720 -output "static/videos/cache/%(title)s.%(ext)s" $u
+}
+'''
+
+# ── youtube:download:480 ─────────────────────────────────────────────────────
+["youtube:download:480"]
+description = "Download video at 480p max to cache/ (Cloudflare Pages friendly)"
+run = '''
+#!/usr/bin/env nu
+
+def main [url?: string] {
+  let u = ($url | default "https://www.youtube.com/watch?v=jNQXAC9IVRw")
+  mkdir static/videos/cache
+  ^go run ./cmd/youtube download -quality 480 -output "static/videos/cache/%(title)s.%(ext)s" $u
+}
+'''
+
+# ── youtube:download:audio ───────────────────────────────────────────────────
+["youtube:download:audio"]
+description = "Download audio only to cache/"
+run = '''
+#!/usr/bin/env nu
+
+def main [url?: string] {
+  let u = ($url | default "https://www.youtube.com/watch?v=jNQXAC9IVRw")
+  mkdir static/videos/cache
+  ^go run ./cmd/youtube download -audio-only -output "static/videos/cache/%(title)s.%(ext)s" $u
+}
+'''
+
+# ── youtube:list ─────────────────────────────────────────────────────────────
+["youtube:list"]
+description = "List downloaded videos with source URLs (from cache/ manifests)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  if ("static/videos/cache" | path exists) {
+    ^go run ./cmd/youtube list -dir "static/videos/cache"
+  } else {
+    print "No cache directory yet. Run: mise run youtube:download <url>"
+  }
+}
+'''
+
+# ── youtube:list:files ───────────────────────────────────────────────────────
+["youtube:list:files"]
+description = "List video files with sizes (both cache and edited)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "=== Original downloads (cache/) ==="
+  if ("static/videos/cache" | path exists) {
+    let files = (try { ls "static/videos/cache" } catch { [] })
+    if ($files | is-empty) { print "  (empty)" } else { $files | select name size | print }
+  } else {
+    print "  (no cache directory)"
+  }
+  print ""
+  print "=== Edited videos (static/videos/) ==="
+  if ("static/videos" | path exists) {
+    let files = (try { ls "static/videos" | where type == "file" } catch { [] })
+    if ($files | is-empty) { print "  (empty)" } else { $files | select name size | print }
+  } else {
+    print "  (no videos directory)"
+  }
+}
+'''
+
+# ── youtube:refresh ──────────────────────────────────────────────────────────
+["youtube:refresh"]
+description = "Re-download all videos from their manifests (same quality settings)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/youtube refresh -dir "static/videos/cache"
+}
+'''
+
+# ── youtube:clean ────────────────────────────────────────────────────────────
+["youtube:clean"]
+description = "Remove all downloaded videos (cache + edited)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  rm -rf "static/videos"
+  print "Cleaned static/videos/"
+}
+'''
+
+# ── youtube:clean:cache ──────────────────────────────────────────────────────
+["youtube:clean:cache"]
+description = "Remove only original downloads (keep edited videos)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  rm -rf "static/videos/cache"
+  print "Cleaned static/videos/cache/"
+}
+'''
+
+# ── youtube:probe ────────────────────────────────────────────────────────────
+["youtube:probe"]
+description = "Show video info (resolution, codec, duration, size)"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string] {
+  ^go run ./cmd/youtube probe $file
+}
+'''
+
+# ── youtube:crop ─────────────────────────────────────────────────────────────
+["youtube:crop"]
+description = "Crop video (file w h [x] [y] [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, w: int, h: int, x?: int, y?: int, out?: string] {
+  let xx = ($x | default 0)
+  let yy = ($y | default 0)
+  mut args = [crop -w $w -h $h -x $xx -y $yy]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:trim ─────────────────────────────────────────────────────────────
+["youtube:trim"]
+description = "Trim video (file [start] [end] [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, start?: string, end?: string, out?: string] {
+  mut args = [trim]
+  if ($start | is-not-empty) { $args = ($args | append [-start $start]) }
+  if ($end | is-not-empty) { $args = ($args | append [-end $end]) }
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:scale ────────────────────────────────────────────────────────────
+["youtube:scale"]
+description = "Scale/resize video (file [w] [h] [out]) - use -1 to keep aspect ratio"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, w?: int, h?: int, out?: string] {
+  let ww = ($w | default (-1))
+  let hh = ($h | default (-1))
+  mut args = [scale -w $ww -h $hh]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:compress ─────────────────────────────────────────────────────────
+["youtube:compress"]
+description = "Compress video (file [crf] [preset] [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, crf?: int, preset?: string, out?: string] {
+  let c = ($crf | default 23)
+  let p = ($preset | default "medium")
+  mut args = [compress -crf $c -preset $p]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:overlay ──────────────────────────────────────────────────────────
+["youtube:overlay"]
+description = "Add logo/watermark overlay (file image [pos] [scale] [margin] [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, image: string, pos?: string, scale?: int, margin?: int, out?: string] {
+  let pp = ($pos | default "bottomright")
+  let ss = ($scale | default 10)
+  let mm = ($margin | default 2)
+  mut args = [overlay -image $image -pos $pp -scale $ss -margin $mm]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:gif ──────────────────────────────────────────────────────────────
+["youtube:gif"]
+description = "Extract animated GIF (file [start] [duration] [w] [fps] [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, start?: string, duration?: int, w?: int, fps?: int, out?: string] {
+  let st = ($start | default "0")
+  let du = ($duration | default 5)
+  let ww = ($w | default 480)
+  let ff = ($fps | default 10)
+  mut args = [gif -start $st -duration $du -w $ww -fps $ff]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:thumbnail ────────────────────────────────────────────────────────
+["youtube:thumbnail"]
+description = "Extract poster frame as JPG (file [time] [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, time?: string, out?: string] {
+  let t = ($time | default "00:00:01")
+  mut args = [thumbnail -time $t]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:speed ────────────────────────────────────────────────────────────
+["youtube:speed"]
+description = "Change playback speed (file factor [out]) - 0.5=half, 2.0=double"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, factor: float, out?: string] {
+  mut args = [speed -factor $factor]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:rotate ───────────────────────────────────────────────────────────
+["youtube:rotate"]
+description = "Rotate video (file [deg]) - 90, 180, or 270"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, deg?: int, out?: string] {
+  let d = ($deg | default 90)
+  mut args = [rotate -deg $d]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:fade ─────────────────────────────────────────────────────────────
+["youtube:fade"]
+description = "Add fade in/out effects (file [in] [out_fade] [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, fade_in?: int, fade_out?: int, out?: string] {
+  let fi = ($fade_in | default 0)
+  let fo = ($fade_out | default 0)
+  mut args = [fade -in $fi -out $fo]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:concat ───────────────────────────────────────────────────────────
+["youtube:concat"]
+description = "Join multiple videos (file1 file2 [file3] [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file1: string, file2: string, file3?: string, out?: string] {
+  mut args = [concat]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file1 $file2])
+  if ($file3 | is-not-empty) { $args = ($args | append $file3) }
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:mute ─────────────────────────────────────────────────────────────
+["youtube:mute"]
+description = "Remove audio track (file [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, out?: string] {
+  mut args = [mute]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:audio ────────────────────────────────────────────────────────────
+["youtube:audio"]
+description = "Replace audio track (file audio [out])"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, audio: string, out?: string] {
+  mut args = [audio -file $audio]
+  if ($out | is-not-empty) { $args = ($args | append [-o $out]) }
+  $args = ($args | append [-force $file])
+  ^go run ./cmd/youtube ...$args
+}
+'''
+
+# ── youtube:edit:visual-inertial-nav ─────────────────────────────────────────
+["youtube:edit:visual-inertial-nav"]
+description = "Process visual-inertial navigation demo for website"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let input = "static/videos/cache/visual-inertial-navigation-module-demo.mp4"
+  let trimmed = "static/videos/cache/visual-inertial-navigation-module-demo-trimmed.mp4"
+  let output = "static/videos/visual-inertial-nav-edited.mp4"
+  let logo = "assets/images/favicon.png"
+  print "=== Processing visual-inertial navigation demo ==="
+  print "Source https://www.youtube.com/watch?v=cjNkLobw2Cw"
+  print ""
+  print "Step 1 Trim first 5 seconds to remove intro text"
+  ^go run ./cmd/youtube trim -start 5 -o $trimmed -force $input
+  print ""
+  print "Step 2 Add Ubuntu Software logo (resolution independent)"
+  ^go run ./cmd/youtube overlay -image $logo -pos bottomright -o $output -force $trimmed
+  print ""
+  print "Step 3 Cleanup intermediate files"
+  rm -f $trimmed
+  print ""
+  print "=== Done ==="
+  ^go run ./cmd/youtube probe $output
+  print ""
+  print "Hugo shortcode:"
+  print "  video src=videos/visual-inertial-nav-edited.mp4"
+}
+'''
+
+# ── youtube:edit:gps-free-vio ────────────────────────────────────────────────
+["youtube:edit:gps-free-vio"]
+description = "Process GPS-free VIO navigation demo for website"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let input = "static/videos/cache/autonomous-gps-free-navigation-with-vio-closed-loop-test.mp4"
+  let trimmed = "static/videos/cache/autonomous-gps-free-navigation-with-vio-closed-loop-test-trimmed.mp4"
+  let output = "static/videos/gps-free-vio-edited.mp4"
+  let logo = "assets/images/favicon.png"
+  print "=== Processing GPS-free VIO navigation demo ==="
+  print "Source https://www.youtube.com/watch?v=M2yySQxFG7c"
+  print ""
+  print "Step 1 Trim to 60 seconds"
+  ^go run ./cmd/youtube trim -end 60 -o $trimmed -force $input
+  print ""
+  print "Step 2 Add Ubuntu Software logo (resolution independent)"
+  ^go run ./cmd/youtube overlay -image $logo -pos bottomright -o $output -force $trimmed
+  print ""
+  print "Step 3 Cleanup intermediate files"
+  rm -f $trimmed
+  print ""
+  print "=== Done ==="
+  ^go run ./cmd/youtube probe $output
+  print ""
+  print "Hugo shortcode:"
+  print "  video src=videos/gps-free-vio-edited.mp4"
+}
+'''

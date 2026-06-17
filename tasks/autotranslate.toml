@@ -1,0 +1,384 @@
+# tasks/autotranslate.toml — autotranslate:* namespace: automatic DeepL/Claude translation. Ported from taskfiles/Taskfile.autotranslate.yml.
+
+# ── autotranslate:file ───────────────────────────────────────────────────────
+["autotranslate:file"]
+description = "Translate a single file to target language"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, lang: string, provider?: string, dry_run?: string, verbose?: string] {
+  if ($file | is-empty) or ($lang | is-empty) {
+    print --stderr "✗ FILE and LANG are required"
+    exit 1
+  }
+  mut args = [$"--provider=($provider | default 'deepl')"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  if ($verbose | default "false") == "true" { $args = ($args | append "--verbose") }
+  $args = ($args | append ["file" $file $lang])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:missing ────────────────────────────────────────────────────
+["autotranslate:missing"]
+description = "Translate all missing files for a language"
+run = '''
+#!/usr/bin/env nu
+
+def main [lang: string, provider?: string, dry_run?: string, verbose?: string] {
+  if ($lang | is-empty) {
+    print --stderr "✗ LANG is required"
+    exit 1
+  }
+  mut args = [$"--provider=($provider | default 'deepl')"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  if ($verbose | default "false") == "true" { $args = ($args | append "--verbose") }
+  $args = ($args | append ["missing" $lang])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:languages ──────────────────────────────────────────────────
+["autotranslate:languages"]
+description = "List supported languages"
+run = '''
+#!/usr/bin/env nu
+
+def main [provider?: string] {
+  ^go run ./cmd/autotranslate $"--provider=($provider | default 'deepl')" languages
+}
+'''
+
+# ── autotranslate:status ─────────────────────────────────────────────────────
+["autotranslate:status"]
+description = "Show API configuration status for all providers"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/autotranslate status
+}
+'''
+
+# ── autotranslate:vi ─────────────────────────────────────────────────────────
+["autotranslate:vi"]
+description = "Translate Vietnamese (DeepL)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = []
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "vi"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:de ─────────────────────────────────────────────────────────
+["autotranslate:de"]
+description = "Translate German (DeepL)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = []
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "de"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:zh ─────────────────────────────────────────────────────────
+["autotranslate:zh"]
+description = "Translate Chinese (DeepL)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = []
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "zh"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:ja ─────────────────────────────────────────────────────────
+["autotranslate:ja"]
+description = "Translate Japanese (DeepL)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = []
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "ja"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:vi:claude ──────────────────────────────────────────────────
+["autotranslate:vi:claude"]
+description = "Translate Vietnamese (Claude - unlimited)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = ["--provider=claude"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "vi"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:de:claude ──────────────────────────────────────────────────
+["autotranslate:de:claude"]
+description = "Translate German (Claude - unlimited)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = ["--provider=claude"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "de"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:zh:claude ──────────────────────────────────────────────────
+["autotranslate:zh:claude"]
+description = "Translate Chinese (Claude - unlimited)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = ["--provider=claude"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "zh"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:ja:claude ──────────────────────────────────────────────────
+["autotranslate:ja:claude"]
+description = "Translate Japanese (Claude - unlimited)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = ["--provider=claude"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "ja"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:all ────────────────────────────────────────────────────────
+["autotranslate:all"]
+description = "Translate all languages (DeepL - uses quota!)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  print "Translating all missing content to all languages..."
+  print "This may use significant API quota!"
+  for lang in [vi de zh ja] {
+    mut args = []
+    if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+    $args = ($args | append ["--verbose" "missing" $lang])
+    ^go run ./cmd/autotranslate ...$args
+  }
+}
+'''
+
+# ── autotranslate:all:claude ─────────────────────────────────────────────────
+["autotranslate:all:claude"]
+description = "Translate all languages (Claude API - requires credits)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  print "Translating all missing content using Claude API..."
+  for lang in [vi de zh ja] {
+    mut args = ["--provider=claude"]
+    if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+    $args = ($args | append ["--verbose" "missing" $lang])
+    ^go run ./cmd/autotranslate ...$args
+  }
+}
+'''
+
+# ── autotranslate:vi:cli ─────────────────────────────────────────────────────
+["autotranslate:vi:cli"]
+description = "Translate Vietnamese (Claude CLI - uses subscription)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = ["--provider=claude-cli"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "vi"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:de:cli ─────────────────────────────────────────────────────
+["autotranslate:de:cli"]
+description = "Translate German (Claude CLI - uses subscription)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = ["--provider=claude-cli"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "de"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:zh:cli ─────────────────────────────────────────────────────
+["autotranslate:zh:cli"]
+description = "Translate Chinese (Claude CLI - uses subscription)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = ["--provider=claude-cli"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "zh"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:ja:cli ─────────────────────────────────────────────────────
+["autotranslate:ja:cli"]
+description = "Translate Japanese (Claude CLI - uses subscription)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  mut args = ["--provider=claude-cli"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "missing" "ja"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:all:cli ────────────────────────────────────────────────────
+["autotranslate:all:cli"]
+description = "Translate all languages (Claude CLI - uses subscription)"
+run = '''
+#!/usr/bin/env nu
+
+def main [dry_run?: string] {
+  print "Translating all missing content using Claude CLI..."
+  for lang in [vi de zh ja] {
+    mut args = ["--provider=claude-cli"]
+    if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+    $args = ($args | append ["--verbose" "missing" $lang])
+    ^go run ./cmd/autotranslate ...$args
+  }
+}
+'''
+
+# ── autotranslate:arb ────────────────────────────────────────────────────────
+["autotranslate:arb"]
+description = "Translate ARB catalog entries for a language (batch mode)"
+run = '''
+#!/usr/bin/env nu
+
+def main [lang: string, provider?: string, bundle?: string, dry_run?: string, verbose?: string] {
+  if ($lang | is-empty) {
+    print --stderr "✗ LANG is required"
+    exit 1
+  }
+  mut args = [$"--provider=($provider | default 'deepl')" $"--bundle=($bundle | default 'tokibundle')"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  if ($verbose | default "false") == "true" { $args = ($args | append "--verbose") }
+  $args = ($args | append ["arb" $lang])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:arb:status ─────────────────────────────────────────────────
+["autotranslate:arb:status"]
+description = "Show ARB translation status for all languages"
+run = '''
+#!/usr/bin/env nu
+
+def main [bundle?: string] {
+  ^go run ./cmd/autotranslate $"--bundle=($bundle | default 'tokibundle')" arb-status
+}
+'''
+
+# ── autotranslate:arb:vi ─────────────────────────────────────────────────────
+["autotranslate:arb:vi"]
+description = "Translate Vietnamese ARB (DeepL - batch)"
+run = '''
+#!/usr/bin/env nu
+
+def main [bundle?: string, dry_run?: string] {
+  mut args = [$"--bundle=($bundle | default 'tokibundle')"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "arb" "vi"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:arb:de ─────────────────────────────────────────────────────
+["autotranslate:arb:de"]
+description = "Translate German ARB (DeepL - batch)"
+run = '''
+#!/usr/bin/env nu
+
+def main [bundle?: string, dry_run?: string] {
+  mut args = [$"--bundle=($bundle | default 'tokibundle')"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "arb" "de"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:arb:zh ─────────────────────────────────────────────────────
+["autotranslate:arb:zh"]
+description = "Translate Chinese ARB (DeepL - batch)"
+run = '''
+#!/usr/bin/env nu
+
+def main [bundle?: string, dry_run?: string] {
+  mut args = [$"--bundle=($bundle | default 'tokibundle')"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "arb" "zh"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:arb:ja ─────────────────────────────────────────────────────
+["autotranslate:arb:ja"]
+description = "Translate Japanese ARB (DeepL - batch)"
+run = '''
+#!/usr/bin/env nu
+
+def main [bundle?: string, dry_run?: string] {
+  mut args = [$"--bundle=($bundle | default 'tokibundle')"]
+  if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+  $args = ($args | append ["--verbose" "arb" "ja"])
+  ^go run ./cmd/autotranslate ...$args
+}
+'''
+
+# ── autotranslate:arb:all ────────────────────────────────────────────────────
+["autotranslate:arb:all"]
+description = "Translate all ARB catalogs (DeepL - batch)"
+run = '''
+#!/usr/bin/env nu
+
+def main [bundle?: string, dry_run?: string] {
+  print "Translating all ARB catalogs..."
+  for lang in [vi de zh ja] {
+    mut args = [$"--bundle=($bundle | default 'tokibundle')"]
+    if ($dry_run | default "false") == "true" { $args = ($args | append "--dry-run") }
+    $args = ($args | append ["--verbose" "arb" $lang])
+    ^go run ./cmd/autotranslate ...$args
+  }
+}
+'''

@@ -1,0 +1,115 @@
+# tasks/url.toml — url:* namespace: browser-open shortcuts / SEO dashboards. Ported from taskfiles/Taskfile.url.yml.
+
+# ── url:dev ──────────────────────────────────────────────────────────────────
+["url:dev"]
+description = "Open local development server in browser"
+run = '''
+#!/usr/bin/env nu
+
+def open-url [url: string] {
+  try { ^open $url } catch { ^xdg-open $url }
+}
+
+def main [] {
+  open-url "http://localhost:1313"
+}
+'''
+
+# ── url:prod ─────────────────────────────────────────────────────────────────
+["url:prod"]
+description = "Open production website in browser"
+run = '''
+#!/usr/bin/env nu
+
+def open-url [url: string] {
+  try { ^open $url } catch { ^xdg-open $url }
+}
+
+def main [] {
+  open-url "https://www.ubuntusoftware.net"
+}
+'''
+
+# ── url:preview ──────────────────────────────────────────────────────────────
+["url:preview"]
+description = "Open preview website in browser"
+run = '''
+#!/usr/bin/env nu
+
+def open-url [url: string] {
+  try { ^open $url } catch { ^xdg-open $url }
+}
+
+def main [] {
+  open-url "https://ubuntu-website.pages.dev"
+}
+'''
+
+# ── url:commit ───────────────────────────────────────────────────────────────
+["url:commit"]
+description = "Open commit preview URL in browser"
+run = '''
+#!/usr/bin/env nu
+
+def open-url [url: string] {
+  try { ^open $url } catch { ^xdg-open $url }
+}
+
+def main [] {
+  let commit = (^git rev-parse --short HEAD | str trim)
+  open-url $"https://($commit).ubuntu-website.pages.dev"
+}
+'''
+
+# ── url:search-console ───────────────────────────────────────────────────────
+["url:search-console"]
+description = "Open Google Search Console"
+run = '''
+#!/usr/bin/env nu
+
+def open-url [url: string] {
+  try { ^open $url } catch { ^xdg-open $url }
+}
+
+def main [] {
+  open-url "https://search.google.com/search-console"
+}
+'''
+
+# ── url:cf-analytics ─────────────────────────────────────────────────────────
+["url:cf-analytics"]
+description = "Open Cloudflare Web Analytics"
+run = '''
+#!/usr/bin/env nu
+
+def open-url [url: string] {
+  try { ^open $url } catch { ^xdg-open $url }
+}
+
+def main [] {
+  open-url "https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/web-analytics/overview?siteTag~in=4c28a6bfb5514996914a603c999d5c79"
+}
+'''
+
+# ── url:seo-setup ────────────────────────────────────────────────────────────
+["url:seo-setup"]
+description = "Open all SEO setup pages (Search Console + Cloudflare Analytics)"
+run = '''
+#!/usr/bin/env nu
+
+def open-url [url: string] {
+  try { ^open $url } catch { ^xdg-open $url }
+}
+
+def main [] {
+  print "Opening Google Search Console..."
+  open-url "https://search.google.com/search-console"
+  print "Opening Cloudflare Web Analytics..."
+  open-url "https://dash.cloudflare.com/7384af54e33b8a54ff240371ea368440/web-analytics/overview?siteTag~in=4c28a6bfb5514996914a603c999d5c79"
+  print ""
+  print "Setup steps:"
+  print "1. Google Search Console - Add property, Domain, ubuntusoftware.net"
+  print "2. Copy verification TXT record to Cloudflare DNS"
+  print "3. Cloudflare Analytics - Enable Web Analytics (one click)"
+}
+'''

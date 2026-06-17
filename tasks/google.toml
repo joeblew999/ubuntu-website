@@ -1,0 +1,621 @@
+# tasks/google.toml — google:* namespace: unified CLI for all Google services (auth, calendar, gmail, drive, sheets, docs, slides). Ported from taskfiles/Taskfile.google.yml.
+
+# ── google:default ───────────────────────────────────────────────────────────
+["google:default"]
+description = "Show unified Google CLI status and help"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google
+}
+'''
+
+# ── google:check ─────────────────────────────────────────────────────────────
+["google:check"]
+description = "Verify Google CLI is built and working"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "Google CLI ready (run via: go run ./cmd/google)"
+  let out = (^go run ./cmd/google | complete | get stdout)
+  $out | lines | first 5 | each { |l| print $l }
+}
+'''
+
+# ===========================================================================
+# Auth Commands
+# ===========================================================================
+
+# ── google:auth:check ────────────────────────────────────────────────────────
+["google:auth:check"]
+description = "Check Google setup status"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google auth check
+}
+'''
+
+# ── google:auth:guide ────────────────────────────────────────────────────────
+["google:auth:guide"]
+description = "Show setup guide"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google auth guide
+}
+'''
+
+# ── google:auth:add ──────────────────────────────────────────────────────────
+["google:auth:add"]
+description = "Add Google MCP server to Claude Code (LOCATION optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [location?: string] {
+  if ($location | is-empty) {
+    ^go run ./cmd/google auth add
+  } else {
+    ^go run ./cmd/google auth add $"--location=($location)"
+  }
+}
+'''
+
+# ── google:auth:remove ───────────────────────────────────────────────────────
+["google:auth:remove"]
+description = "Remove Google MCP server (LOCATION optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [location?: string] {
+  if ($location | is-empty) {
+    ^go run ./cmd/google auth remove
+  } else {
+    ^go run ./cmd/google auth remove $"--location=($location)"
+  }
+}
+'''
+
+# ── google:auth:status ───────────────────────────────────────────────────────
+["google:auth:status"]
+description = "Show MCP configuration status (LOCATION optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [location?: string] {
+  if ($location | is-empty) {
+    ^go run ./cmd/google auth status
+  } else {
+    ^go run ./cmd/google auth status $"--location=($location)"
+  }
+}
+'''
+
+# ── google:auth:login ────────────────────────────────────────────────────────
+["google:auth:login"]
+description = "Authenticate with Google via OAuth flow (ACCOUNT optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [account?: string] {
+  if ($account | is-empty) {
+    ^go run ./cmd/google auth login
+  } else {
+    ^go run ./cmd/google auth login $"--account=($account)"
+  }
+}
+'''
+
+# ── google:auth:open ─────────────────────────────────────────────────────────
+["google:auth:open"]
+description = "Open Google Cloud Console page (TARGET required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [target: string] {
+  ^go run ./cmd/google auth open $target
+}
+'''
+
+# ── google:auth:help ─────────────────────────────────────────────────────────
+["google:auth:help"]
+description = "Show Auth commands"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google auth
+}
+'''
+
+# ===========================================================================
+# Calendar Commands
+# ===========================================================================
+
+# ── google:calendar:today ────────────────────────────────────────────────────
+["google:calendar:today"]
+description = "List today's calendar events"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google calendar today
+}
+'''
+
+# ── google:calendar:list ─────────────────────────────────────────────────────
+["google:calendar:list"]
+description = "List upcoming events (MAX optional, default 10)"
+run = '''
+#!/usr/bin/env nu
+
+def main [max?: string] {
+  let m = ($max | default "10")
+  ^go run ./cmd/google calendar list $"--max=($m)"
+}
+'''
+
+# ── google:calendar:list:week ────────────────────────────────────────────────
+["google:calendar:list:week"]
+description = "List this week's events (next 7 days)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let end = ((date now) + 7day | format date "%Y-%m-%dT23:59:59%z")
+  ^go run ./cmd/google calendar list $"--end=($end)" --max=50
+}
+'''
+
+# ── google:calendar:create ───────────────────────────────────────────────────
+["google:calendar:create"]
+description = "Create calendar event (TITLE, START, END required; DESCRIPTION, LOCATION, ATTENDEES optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [title: string, start: string, end: string, description?: string, location?: string, attendees?: string] {
+  mut args = [calendar create $"--title=($title)" $"--start=($start)" $"--end=($end)"]
+  if not ($description | is-empty) { $args = ($args | append $"--description=($description)") }
+  if not ($location | is-empty) { $args = ($args | append $"--location=($location)") }
+  if not ($attendees | is-empty) { $args = ($args | append $"--attendees=($attendees)") }
+  ^go run ./cmd/google ...$args
+}
+'''
+
+# ── google:calendar:compose ──────────────────────────────────────────────────
+["google:calendar:compose"]
+description = "Open calendar to create event (TITLE, START, END required; DESCRIPTION, LOCATION optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [title: string, start: string, end: string, description?: string, location?: string] {
+  mut args = [calendar compose $"--title=($title)" $"--start=($start)" $"--end=($end)"]
+  if not ($description | is-empty) { $args = ($args | append $"--description=($description)") }
+  if not ($location | is-empty) { $args = ($args | append $"--location=($location)") }
+  ^go run ./cmd/google ...$args
+}
+'''
+
+# ── google:calendar:check ────────────────────────────────────────────────────
+["google:calendar:check"]
+description = "Verify Calendar API connection"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google calendar check
+}
+'''
+
+# ── google:calendar:open ─────────────────────────────────────────────────────
+["google:calendar:open"]
+description = "Open Google Calendar in browser (VIEW optional: day|week|month|agenda, default week)"
+run = '''
+#!/usr/bin/env nu
+
+def main [view?: string] {
+  let v = ($view | default "week")
+  ^go run ./cmd/google calendar open $v
+}
+'''
+
+# ── google:calendar:server ───────────────────────────────────────────────────
+["google:calendar:server"]
+description = "Start Calendar webhook server (PORT optional, default 8088)"
+run = '''
+#!/usr/bin/env nu
+
+def main [port?: string] {
+  let p = ($port | default "8088")
+  ^go run ./cmd/google calendar server $"--port=($p)"
+}
+'''
+
+# ── google:calendar:help ─────────────────────────────────────────────────────
+["google:calendar:help"]
+description = "Show Calendar commands"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google calendar
+}
+'''
+
+# ===========================================================================
+# Gmail Commands
+# ===========================================================================
+
+# ── google:gmail:list ────────────────────────────────────────────────────────
+["google:gmail:list"]
+description = "List recent Gmail messages (MAX optional default 10, QUERY optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [max?: string, query?: string] {
+  let m = ($max | default "10")
+  mut args = [gmail list $"--max=($m)"]
+  if not ($query | is-empty) { $args = ($args | append $"--query=($query)") }
+  ^go run ./cmd/google ...$args
+}
+'''
+
+# ── google:gmail:send ────────────────────────────────────────────────────────
+["google:gmail:send"]
+description = "Send email via Gmail API (TO, SUBJECT, BODY required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [to: string, subject: string, body: string] {
+  ^go run ./cmd/google gmail send $"--to=($to)" $"--subject=($subject)" $"--body=($body)"
+}
+'''
+
+# ── google:gmail:compose ─────────────────────────────────────────────────────
+["google:gmail:compose"]
+description = "Open Gmail compose (TO, SUBJECT, BODY required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [to: string, subject: string, body: string] {
+  ^go run ./cmd/google gmail compose $"--to=($to)" $"--subject=($subject)" $"--body=($body)"
+}
+'''
+
+# ── google:gmail:check ───────────────────────────────────────────────────────
+["google:gmail:check"]
+description = "Verify Gmail API connection"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google gmail check
+}
+'''
+
+# ── google:gmail:server ──────────────────────────────────────────────────────
+["google:gmail:server"]
+description = "Start Gmail webhook server (PORT optional, default 8087)"
+run = '''
+#!/usr/bin/env nu
+
+def main [port?: string] {
+  let p = ($port | default "8087")
+  ^go run ./cmd/google gmail server $"--port=($p)"
+}
+'''
+
+# ── google:gmail:help ────────────────────────────────────────────────────────
+["google:gmail:help"]
+description = "Show Gmail commands"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google gmail
+}
+'''
+
+# ===========================================================================
+# Drive Commands
+# ===========================================================================
+
+# ── google:drive:list ────────────────────────────────────────────────────────
+["google:drive:list"]
+description = "List files in Google Drive (FOLDER optional, default root)"
+run = '''
+#!/usr/bin/env nu
+
+def main [folder?: string] {
+  if ($folder | is-empty) {
+    ^go run ./cmd/google drive list
+  } else {
+    ^go run ./cmd/google drive list $folder
+  }
+}
+'''
+
+# ── google:drive:get ─────────────────────────────────────────────────────────
+["google:drive:get"]
+description = "Get file metadata (FILE_ID required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [file_id: string] {
+  ^go run ./cmd/google drive get $file_id
+}
+'''
+
+# ── google:drive:download ────────────────────────────────────────────────────
+["google:drive:download"]
+description = "Download file (FILE_ID required, OUTPUT optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [file_id: string, output?: string] {
+  if ($output | is-empty) {
+    ^go run ./cmd/google drive download $file_id
+  } else {
+    ^go run ./cmd/google drive download $file_id $output
+  }
+}
+'''
+
+# ── google:drive:upload ──────────────────────────────────────────────────────
+["google:drive:upload"]
+description = "Upload file (FILE required, PARENT optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, parent?: string] {
+  if ($parent | is-empty) {
+    ^go run ./cmd/google drive upload $file
+  } else {
+    ^go run ./cmd/google drive upload $file $"--parent=($parent)"
+  }
+}
+'''
+
+# ── google:drive:mkdir ───────────────────────────────────────────────────────
+["google:drive:mkdir"]
+description = "Create folder (NAME required, PARENT optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [name: string, parent?: string] {
+  if ($parent | is-empty) {
+    ^go run ./cmd/google drive mkdir $name
+  } else {
+    ^go run ./cmd/google drive mkdir $name $"--parent=($parent)"
+  }
+}
+'''
+
+# ── google:drive:rm ──────────────────────────────────────────────────────────
+["google:drive:rm"]
+description = "Delete file (FILE_ID required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [file_id: string] {
+  ^go run ./cmd/google drive rm $file_id
+}
+'''
+
+# ── google:drive:help ────────────────────────────────────────────────────────
+["google:drive:help"]
+description = "Show Drive commands"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google drive
+}
+'''
+
+# ===========================================================================
+# Sheets Commands
+# ===========================================================================
+
+# ── google:sheets:info ───────────────────────────────────────────────────────
+["google:sheets:info"]
+description = "Get spreadsheet info (SPREADSHEET_ID required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [spreadsheet_id: string] {
+  ^go run ./cmd/google sheets info $spreadsheet_id
+}
+'''
+
+# ── google:sheets:get ────────────────────────────────────────────────────────
+["google:sheets:get"]
+description = "Get cell values (SPREADSHEET_ID, RANGE required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [spreadsheet_id: string, range: string] {
+  ^go run ./cmd/google sheets get $spreadsheet_id $range
+}
+'''
+
+# ── google:sheets:set ────────────────────────────────────────────────────────
+["google:sheets:set"]
+description = "Update cells (SPREADSHEET_ID, RANGE, VALUES required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [spreadsheet_id: string, range: string, values: string] {
+  ^go run ./cmd/google sheets set $spreadsheet_id $range $values
+}
+'''
+
+# ── google:sheets:append ─────────────────────────────────────────────────────
+["google:sheets:append"]
+description = "Append rows (SPREADSHEET_ID, RANGE, VALUES required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [spreadsheet_id: string, range: string, values: string] {
+  ^go run ./cmd/google sheets append $spreadsheet_id $range $values
+}
+'''
+
+# ── google:sheets:clear ──────────────────────────────────────────────────────
+["google:sheets:clear"]
+description = "Clear range (SPREADSHEET_ID, RANGE required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [spreadsheet_id: string, range: string] {
+  ^go run ./cmd/google sheets clear $spreadsheet_id $range
+}
+'''
+
+# ── google:sheets:help ───────────────────────────────────────────────────────
+["google:sheets:help"]
+description = "Show Sheets commands"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google sheets
+}
+'''
+
+# ===========================================================================
+# Docs Commands
+# ===========================================================================
+
+# ── google:docs:get ──────────────────────────────────────────────────────────
+["google:docs:get"]
+description = "Get document content (DOCUMENT_ID required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [document_id: string] {
+  ^go run ./cmd/google docs get $document_id
+}
+'''
+
+# ── google:docs:create ───────────────────────────────────────────────────────
+["google:docs:create"]
+description = "Create new document (TITLE required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [title: string] {
+  ^go run ./cmd/google docs create $title
+}
+'''
+
+# ── google:docs:append ───────────────────────────────────────────────────────
+["google:docs:append"]
+description = "Append text to document (DOCUMENT_ID, TEXT required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [document_id: string, text: string] {
+  ^go run ./cmd/google docs append $document_id $text
+}
+'''
+
+# ── google:docs:insert ───────────────────────────────────────────────────────
+["google:docs:insert"]
+description = "Insert text at index (DOCUMENT_ID, INDEX, TEXT required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [document_id: string, index: string, text: string] {
+  ^go run ./cmd/google docs insert $document_id $index $text
+}
+'''
+
+# ── google:docs:replace ──────────────────────────────────────────────────────
+["google:docs:replace"]
+description = "Replace text (DOCUMENT_ID, FIND, REPLACE required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [document_id: string, find: string, replace: string] {
+  ^go run ./cmd/google docs replace $document_id $find $replace
+}
+'''
+
+# ── google:docs:help ─────────────────────────────────────────────────────────
+["google:docs:help"]
+description = "Show Docs commands"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google docs
+}
+'''
+
+# ===========================================================================
+# Slides Commands
+# ===========================================================================
+
+# ── google:slides:get ────────────────────────────────────────────────────────
+["google:slides:get"]
+description = "Get presentation info (PRESENTATION_ID required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [presentation_id: string] {
+  ^go run ./cmd/google slides get $presentation_id
+}
+'''
+
+# ── google:slides:create ─────────────────────────────────────────────────────
+["google:slides:create"]
+description = "Create new presentation (TITLE required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [title: string] {
+  ^go run ./cmd/google slides create $title
+}
+'''
+
+# ── google:slides:add ────────────────────────────────────────────────────────
+["google:slides:add"]
+description = "Add slide (PRESENTATION_ID required, INDEX optional)"
+run = '''
+#!/usr/bin/env nu
+
+def main [presentation_id: string, index?: string] {
+  if ($index | is-empty) {
+    ^go run ./cmd/google slides add-slide $presentation_id
+  } else {
+    ^go run ./cmd/google slides add-slide $presentation_id $index
+  }
+}
+'''
+
+# ── google:slides:delete ─────────────────────────────────────────────────────
+["google:slides:delete"]
+description = "Delete slide (PRESENTATION_ID, SLIDE_ID required)"
+run = '''
+#!/usr/bin/env nu
+
+def main [presentation_id: string, slide_id: string] {
+  ^go run ./cmd/google slides delete-slide $presentation_id $slide_id
+}
+'''
+
+# ── google:slides:help ───────────────────────────────────────────────────────
+["google:slides:help"]
+description = "Show Slides commands"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/google slides
+}
+'''

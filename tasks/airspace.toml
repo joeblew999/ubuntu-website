@@ -1,0 +1,178 @@
+# tasks/airspace.toml — airspace:* namespace: FAA airspace data sync and tile generation. Ported from taskfiles/Taskfile.airspace.yml.
+
+# ── airspace:pipeline ────────────────────────────────────────────────────────
+["airspace:pipeline"]
+description = "Full idempotent pipeline (sync → tile → manifest)"
+tools = { tippecanoe = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [force?: string, tiler?: string] {
+  let force = ($force | default "false")
+  let tiler = ($tiler | default "auto")
+  mut flags = []
+  if $force == "true" { $flags = ($flags | append "-force") }
+  if $tiler != "auto" { $flags = ($flags | append ["-tiler" $tiler]) }
+  ^go run ./cmd/airspace pipeline ...$flags
+}
+'''
+
+# ── airspace:pipeline:upload ─────────────────────────────────────────────────
+["airspace:pipeline:upload"]
+description = "Pipeline + R2 upload (only uploads if changes)"
+tools = { tippecanoe = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [force?: string, tiler?: string] {
+  let force = ($force | default "false")
+  let tiler = ($tiler | default "auto")
+  mut flags = []
+  if $force == "true" { $flags = ($flags | append "-force") }
+  if $tiler != "auto" { $flags = ($flags | append ["-tiler" $tiler]) }
+  ^go run ./cmd/airspace pipeline ...$flags
+
+  let result = "data/airspace/sync_result.json"
+  if ($result | path exists) {
+    let has_changes = (try { open $result | get has_changes } catch { false })
+    if $has_changes == true {
+      print "Uploading to R2..."
+      ^go run ./cmd/airspace upload
+    } else {
+      print "No changes - skipping R2 upload"
+    }
+  }
+}
+'''
+
+# ── airspace:sync ────────────────────────────────────────────────────────────
+["airspace:sync"]
+description = "Sync FAA data (ETag-based change detection)"
+run = '''
+#!/usr/bin/env nu
+
+def main [force?: string] {
+  let force = ($force | default "false")
+  mut flags = []
+  if $force == "true" { $flags = ($flags | append "-force") }
+  ^go run ./cmd/airspace sync ...$flags
+}
+'''
+
+# ── airspace:tile ────────────────────────────────────────────────────────────
+["airspace:tile"]
+description = "Convert GeoJSON to PMTiles"
+tools = { tippecanoe = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [force?: string, tiler?: string, dataset?: string] {
+  let force = ($force | default "false")
+  let tiler = ($tiler | default "auto")
+  let dataset = ($dataset | default "")
+  mut flags = []
+  if $force == "true" { $flags = ($flags | append "-force") }
+  if $tiler != "auto" { $flags = ($flags | append ["-tiler" $tiler]) }
+  if not ($dataset | is-empty) { $flags = ($flags | append ["-dataset" $dataset]) }
+  ^go run ./cmd/airspace tile ...$flags
+}
+'''
+
+# ── airspace:manifest ────────────────────────────────────────────────────────
+["airspace:manifest"]
+description = "Generate manifest files"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/airspace manifest
+}
+'''
+
+# ── airspace:status ──────────────────────────────────────────────────────────
+["airspace:status"]
+description = "Show data file status"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/airspace status
+}
+'''
+
+# ── airspace:history ─────────────────────────────────────────────────────────
+["airspace:history"]
+description = "Show sync history (for cron tuning)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/airspace history
+}
+'''
+
+# ── airspace:check ───────────────────────────────────────────────────────────
+["airspace:check"]
+description = "Check if sync had changes (for CI)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/airspace check
+}
+'''
+
+# ── airspace:summary ─────────────────────────────────────────────────────────
+["airspace:summary"]
+description = "Generate markdown summary (for CI)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/airspace summary
+}
+'''
+
+# ── airspace:open ────────────────────────────────────────────────────────────
+["airspace:open"]
+description = "Open airspace demo in browser"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^open "http://localhost:1313/fleet/airspace-demo/"
+}
+'''
+
+# ── airspace:upload ──────────────────────────────────────────────────────────
+["airspace:upload"]
+description = "Upload airspace PMTiles to R2 (reads from manifest)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/airspace upload
+}
+'''
+
+# ── airspace:upload:test ─────────────────────────────────────────────────────
+["airspace:upload:test"]
+description = "Test that all R2 endpoints are accessible"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/airspace upload -test
+}
+'''
+
+# ── airspace:upload:list ─────────────────────────────────────────────────────
+["airspace:upload:list"]
+description = "List airspace files in R2"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^wrangler r2 object list ubuntu-website-assets --prefix airspace/
+}
+'''

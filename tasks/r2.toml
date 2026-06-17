@@ -1,0 +1,246 @@
+# tasks/r2.toml — r2:* namespace: R2 object storage for this repo's bucket/endpoints. Ported from taskfiles/Taskfile.cf-r2.yml.
+#
+# Bucket: ubuntu-website-assets. Public URL: https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev
+# CF_ACCOUNT_ID comes from $env (set in mise.toml). CLOUDFLARE_API_TOKEN from env.
+# NOTE: r2:bucket:create / bucket:delete are PROJECT wrappers; they could call the
+# shared `cf:r2-create` primitive — kept faithful to source for now (see review note).
+
+# ── r2:bucket:create ─────────────────────────────────────────────────────────
+["r2:bucket:create"]
+description = "Create the R2 bucket (project wrapper; could call shared cf:r2-create)"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^wrangler r2 bucket create ubuntu-website-assets
+  print "Bucket created. Run 'mise run r2:bucket:public' to enable public access."
+}
+'''
+
+# ── r2:bucket:delete ─────────────────────────────────────────────────────────
+["r2:bucket:delete"]
+description = "Delete the R2 bucket and ALL contents (destructive)"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print --stderr "This will delete the bucket and ALL contents."
+  ^wrangler r2 bucket delete ubuntu-website-assets
+}
+'''
+
+# ── r2:bucket:public ─────────────────────────────────────────────────────────
+["r2:bucket:public"]
+description = "Show instructions to enable public access for the R2 bucket"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  print "To enable public access:"
+  print ""
+  print "Option 1 - R2.dev subdomain (quick):"
+  print $"  1. Go to: https://dash.cloudflare.com/($acct)/r2/overview/buckets/ubuntu-website-assets/settings"
+  print "  2. Enable 'R2.dev subdomain'"
+  print "  3. Copy the generated URL"
+  print ""
+  print "Option 2 - Custom domain (recommended for production):"
+  print "  1. Add CNAME: assets.ubuntusoftware.net -> your-bucket.r2.cloudflarestorage.com"
+  print "  2. Configure custom domain in R2 settings"
+  print ""
+  print "After enabling, update R2_PUBLIC_URL in this taskfile."
+}
+'''
+
+# ── r2:status ────────────────────────────────────────────────────────────────
+["r2:status"]
+description = "Show R2 bucket status and dashboard URLs"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  print "========================================"
+  print "R2 Bucket Status"
+  print "========================================"
+  print "Bucket: ubuntu-website-assets"
+  print "Public URL: https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev"
+  print ""
+  print "Dashboards:"
+  print $"  R2 Overview: https://dash.cloudflare.com/($acct)/r2/overview"
+  print $"  Bucket: https://dash.cloudflare.com/($acct)/r2/default/buckets/ubuntu-website-assets"
+  print $"  Settings: https://dash.cloudflare.com/($acct)/r2/default/buckets/ubuntu-website-assets/settings"
+  print ""
+  print "Checking bucket..."
+  let found = (^wrangler r2 bucket list | lines | where ($it | str contains "ubuntu-website-assets"))
+  if ($found | is-empty) {
+    print "Bucket not found. Run: mise run r2:bucket:create"
+  } else {
+    $found | str join "\n" | print
+  }
+}
+'''
+
+# ── r2:list ──────────────────────────────────────────────────────────────────
+["r2:list"]
+description = "List bucket contents"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^wrangler r2 object list ubuntu-website-assets
+}
+'''
+
+# ── r2:upload ────────────────────────────────────────────────────────────────
+["r2:upload"]
+description = "Upload single file to R2 (FILE, optional KEY)"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [file: string, key?: string] {
+  let k = ($key | default $file)
+  ^wrangler r2 object put $"ubuntu-website-assets/($k)" --file $file --remote
+  print $"Uploaded to https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/($k)"
+}
+'''
+
+# ── r2:sync ──────────────────────────────────────────────────────────────────
+["r2:sync"]
+description = "Sync a directory to R2 (DIR, optional PREFIX)"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [dir: string, prefix?: string] {
+  let pfx = ($prefix | default "")
+  print $"Syncing ($dir) to r2://ubuntu-website-assets/($pfx)"
+  ls $dir | where type == file | each { |f|
+    let name = ($f.name | path basename)
+    print $"  Uploading: ($name)"
+    ^wrangler r2 object put $"ubuntu-website-assets/($pfx)($name)" --file $f.name --remote
+  }
+  print ""
+  print $"Done. Files available at: https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/($pfx)"
+}
+'''
+
+# ── r2:url ───────────────────────────────────────────────────────────────────
+["r2:url"]
+description = "Show public URL for a file (KEY)"
+run = '''
+#!/usr/bin/env nu
+
+def main [key: string] {
+  print $"https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/($key)"
+}
+'''
+
+# ── r2:open ──────────────────────────────────────────────────────────────────
+["r2:open"]
+description = "Open R2 dashboard in browser"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/r2/overview"
+}
+'''
+
+# ── r2:open:bucket ───────────────────────────────────────────────────────────
+["r2:open:bucket"]
+description = "Open R2 bucket browser in browser"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/r2/default/buckets/ubuntu-website-assets"
+}
+'''
+
+# ── r2:open:settings ─────────────────────────────────────────────────────────
+["r2:open:settings"]
+description = "Open R2 bucket settings in browser"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  let acct = ($env.CF_ACCOUNT_ID? | default "")
+  ^open $"https://dash.cloudflare.com/($acct)/r2/default/buckets/ubuntu-website-assets/settings"
+}
+'''
+
+# ── r2:cors:set ──────────────────────────────────────────────────────────────
+["r2:cors:set"]
+description = "Apply CORS rules to R2 bucket (from ./r2-cors.json)"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^wrangler r2 bucket cors set ubuntu-website-assets --file ./r2-cors.json --force
+  print "CORS rules applied. Test with mise run r2:cors:test"
+}
+'''
+
+# ── r2:cors:get ──────────────────────────────────────────────────────────────
+["r2:cors:get"]
+description = "Show current CORS configuration"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^wrangler r2 bucket cors list ubuntu-website-assets
+}
+'''
+
+# ── r2:cors:delete ───────────────────────────────────────────────────────────
+["r2:cors:delete"]
+description = "Remove CORS configuration"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^wrangler r2 bucket cors delete ubuntu-website-assets --force
+}
+'''
+
+# ── r2:cors:test ─────────────────────────────────────────────────────────────
+["r2:cors:test"]
+description = "Test CORS headers from allowed origins (optional TEST_FILE)"
+run = '''
+#!/usr/bin/env nu
+
+def main [test_file?: string] {
+  let tf = ($test_file | default "airspace/manifest.json")
+  let base = "https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev"
+  print "Testing CORS headers..."
+  print $"Test file: ($base)/($tf)"
+  print ""
+
+  def test-cors [origin: string, url: string] {
+    print $"Origin: ($origin)"
+    let headers = (^curl -sI -H $"Origin: ($origin)" $url
+      | lines | where ($it | str downcase | str starts-with "access-control"))
+    if ($headers | is-empty) {
+      print "  ✗ No CORS headers"
+    } else {
+      print "  ✓ CORS enabled"
+      $headers | each { |h| print $"    ($h)" }
+    }
+    print ""
+  }
+
+  test-cors "https://www.ubuntusoftware.net" $"($base)/($tf)"
+  test-cors "http://localhost:1313" $"($base)/($tf)"
+}
+'''

@@ -1,0 +1,63 @@
+# tasks/dev.toml — dev:* namespace: dev workflow (process-compose + Task-UI orchestration). Ported from taskfiles/Taskfile.dev.yml.
+#
+# Source delegated to the pc:* and tui:* tool namespaces, which wrap xplat's
+# embedded process-compose (`xplat process ...`) and task-ui. Replicated here as
+# the same underlying commands.
+
+# ── dev:up ───────────────────────────────────────────────────────────────────
+["dev:up"]
+description = "Start all dev processes (Hugo + tools) with TUI dashboard"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^xplat process up
+}
+'''
+
+# ── dev:down ─────────────────────────────────────────────────────────────────
+["dev:down"]
+description = "Stop all dev processes"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^xplat process down
+}
+'''
+
+# ── dev:logs ─────────────────────────────────────────────────────────────────
+["dev:logs"]
+description = "View combined process logs"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^xplat process logs
+}
+'''
+
+# ── dev:status ───────────────────────────────────────────────────────────────
+["dev:status"]
+description = "Show process status"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^xplat process process list
+}
+'''
+
+# ── dev:ui ───────────────────────────────────────────────────────────────────
+["dev:ui"]
+description = "Start Task-UI web dashboard at http://localhost:3000"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "Starting Task-UI at http://localhost:3000"
+  print "Press Ctrl+C to stop"
+  print ""
+  ^task-ui --history-enable
+}
+'''

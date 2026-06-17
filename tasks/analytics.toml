@@ -1,21 +1,40 @@
-# tasks/analytics.toml — Cloudflare Web Analytics (project module)
+# tasks/analytics.toml — cfanalytics:* namespace: Cloudflare Web Analytics.
 # Ported from taskfiles/Taskfile.cfanalytics.yml. Wraps cmd/cfanalytics.
-# Naming preserved: cfanalytics:*
 
+# ── cfanalytics:report ───────────────────────────────────────────────────────
 ["cfanalytics:report"]
 description = "Check analytics and report changes (>20% threshold)"
-run = "go run ./cmd/cfanalytics"
+run = '''
+#!/usr/bin/env nu
 
+def main [] {
+  ^go run ./cmd/cfanalytics
+}
+'''
+
+# ── cfanalytics:report:verbose ───────────────────────────────────────────────
 ["cfanalytics:report:verbose"]
 description = "Check analytics with verbose output"
-run = "go run ./cmd/cfanalytics -v"
+run = '''
+#!/usr/bin/env nu
 
+def main [] {
+  ^go run ./cmd/cfanalytics -v
+}
+'''
+
+# ── cfanalytics:report:webhook ───────────────────────────────────────────────
 ["cfanalytics:report:webhook"]
 description = "Post analytics changes to webhook (set ANALYTICS_WEBHOOK_URL)"
 run = '''
 #!/usr/bin/env nu
-if ("ANALYTICS_WEBHOOK_URL" not-in $env) {
-    print -e "ANALYTICS_WEBHOOK_URL not set"; exit 1
+
+def main [] {
+  let url = ($env.ANALYTICS_WEBHOOK_URL? | default "")
+  if ($url | is-empty) {
+    print --stderr "✗ ANALYTICS_WEBHOOK_URL not set in env"
+    exit 1
+  }
+  ^go run ./cmd/cfanalytics -webhook $url
 }
-go run ./cmd/cfanalytics -webhook $env.ANALYTICS_WEBHOOK_URL
 '''

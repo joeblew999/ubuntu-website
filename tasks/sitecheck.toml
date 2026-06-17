@@ -1,23 +1,51 @@
-# tasks/sitecheck.toml — Site reachability checks (project module)
+# tasks/sitecheck.toml — sitecheck:* namespace: site reachability checks.
 # Ported from taskfiles/Taskfile.sitecheck.yml. Wraps cmd/sitecheck.
-# Naming preserved: sitecheck:*
 
+# ── sitecheck:http ───────────────────────────────────────────────────────────
 ["sitecheck:http"]
 description = "Check site HTTP reachability from all global locations"
-run = "go run ./cmd/sitecheck"
+run = '''
+#!/usr/bin/env nu
 
+def main [] {
+  ^go run ./cmd/sitecheck
+}
+'''
+
+# ── sitecheck:dns ────────────────────────────────────────────────────────────
 ["sitecheck:dns"]
 description = "Check DNS resolution from all global locations"
-run = "go run ./cmd/sitecheck -type dns"
+run = '''
+#!/usr/bin/env nu
 
+def main [] {
+  ^go run ./cmd/sitecheck -type dns
+}
+'''
+
+# ── sitecheck:tcp ────────────────────────────────────────────────────────────
 ["sitecheck:tcp"]
 description = "Check TCP port 443 from all global locations"
-run = "go run ./cmd/sitecheck -type tcp"
+run = '''
+#!/usr/bin/env nu
 
+def main [] {
+  ^go run ./cmd/sitecheck -type tcp
+}
+'''
+
+# ── sitecheck:redirect ───────────────────────────────────────────────────────
 ["sitecheck:redirect"]
 description = "Check apex domain redirects to www"
-run = "go run ./cmd/sitecheck -type redirect"
+run = '''
+#!/usr/bin/env nu
 
+def main [] {
+  ^go run ./cmd/sitecheck -type redirect
+}
+'''
+
+# ── sitecheck:all ────────────────────────────────────────────────────────────
 ["sitecheck:all"]
 description = "Run all site checks (DNS, TCP, redirect, HTTP)"
 depends = ["sitecheck:dns", "sitecheck:tcp", "sitecheck:redirect", "sitecheck:http"]

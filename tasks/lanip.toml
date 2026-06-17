@@ -1,0 +1,50 @@
+# tasks/lanip.toml — lanip:* namespace: cross-platform LAN IP detection. Ported from taskfiles/Taskfile.lanip.yml.
+
+# ── lanip:get ────────────────────────────────────────────────────────────────
+["lanip:get"]
+description = "Get LAN IP address"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  ^go run ./cmd/lanip
+}
+'''
+
+# ── lanip:check:validate ─────────────────────────────────────────────────────
+["lanip:check:validate"]
+description = "Smoke test lanip module works"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "Validating lanip module..."
+  let result = (^go run ./cmd/lanip | complete)
+  if $result.exit_code != 0 {
+    print --stderr $"lanip:check:validate FAILED: ($result.stderr)"
+    exit 1
+  }
+  let lan = ($result.stdout | str trim)
+  print $"LAN IP: ($lan)"
+  print "lanip:check:validate passed"
+}
+'''
+
+# ── lanip:check:health ───────────────────────────────────────────────────────
+["lanip:check:health"]
+description = "Check network connectivity (can reach external DNS)"
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  print "Checking network health..."
+  let result = (^go run ./cmd/lanip | complete)
+  let lan = ($result.stdout | str trim)
+  if $result.exit_code != 0 or ($lan | is-empty) {
+    print --stderr "lanip:check:health FAILED: No LAN IP detected"
+    exit 1
+  }
+  print $"LAN IP: ($lan)"
+  print "lanip:check:health passed"
+}
+'''

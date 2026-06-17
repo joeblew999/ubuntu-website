@@ -37,7 +37,18 @@ inside `tasks/*.toml` (matches the shared library exactly).
 - [x] Shared library included by-reference (remote git includes resolve)
 - [x] Pilot modules: `tasks/hugo.toml`, `tasks/analytics.toml`, `tasks/sitecheck.toml`
 
-**Phase 1 — port project modules** (in progress — see checklist below).
+**Phase 1 — port project modules (DONE for all project Taskfiles):**
+- [x] 21 local `tasks/*.toml` modules ported (inline nushell, `def main` arg pattern).
+- [x] All wired into `mise.toml`; `mise tasks ls` loads **363 tasks** (shared + local), 0 parse/load errors.
+- ⚠️ Inline **nushell bodies are not yet runtime-tested** — `mise tasks ls` validates TOML/loading only. nushell couldn't be installed in the sandbox (GitHub API rate limit), and tasks need real tools/secrets. Run a `mise run <task>` smoke pass locally to verify behavior.
+
+Not ported (by design): `gh`, `wrangler` → use shared `gh:*` / `wrangler:*`. `git`, `claude-cli`, `coder*`, `process-compose`, `task-ui`, `task`, `gh` (tools/) remain on the Taskfile for now (dev-only / covered by shared lib); revisit at cutover.
+
+Known follow-ups flagged during the port:
+- `google-mcp:setup` references `setup:prereqs`, which doesn't exist in the source Taskfile either (pre-existing) — will fail until defined.
+- `dev:status` mirrors the source's `xplat process process list` (looks doubled) — confirm the real subcommand.
+- `r2:bucket:create/delete` duplicate shared `cf:r2-*` primitives; could delegate later.
+- `youtube:clean*` dropped the interactive confirm prompt (no mise/nushell equivalent).
 
 **Phase 2 — secrets:** `.env` → fnox; enable the `fnox-env` plugin block in `mise.toml`.
 

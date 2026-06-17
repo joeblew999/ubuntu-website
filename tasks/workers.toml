@@ -1,0 +1,80 @@
+# tasks/workers.toml — workers:* namespace: Cloudflare Workers / serverless webhooks. Ported from taskfiles/Taskfile.workers.yml.
+#
+# Source ran wrangler from the ./workers dir. Here each task `cd`s into ./workers
+# before invoking wrangler. The shared `wrangler:check:deps`/`wrangler:install`
+# helpers are DROPPED — wrangler is a managed mise tool (tools = { wrangler }).
+
+# ── workers:deploy ───────────────────────────────────────────────────────────
+["workers:deploy"]
+description = "Deploy all Cloudflare Workers"
+depends = ["workers:mailerlite:deploy"]
+
+# ── workers:mailerlite:deploy ────────────────────────────────────────────────
+["workers:mailerlite:deploy"]
+description = "Deploy mailerlite webhook worker to Cloudflare"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  cd ./workers
+  ^wrangler deploy
+}
+'''
+
+# ── workers:mailerlite:secret ────────────────────────────────────────────────
+["workers:mailerlite:secret"]
+description = "Set MAILERLITE_API_KEY secret for the worker"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  cd ./workers
+  print "Setting MAILERLITE_API_KEY secret..."
+  print "Paste your API key and press Enter:"
+  ^wrangler secret put MAILERLITE_API_KEY
+}
+'''
+
+# ── workers:mailerlite:dev ───────────────────────────────────────────────────
+["workers:mailerlite:dev"]
+description = "Run mailerlite worker locally for development"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  cd ./workers
+  ^wrangler dev
+}
+'''
+
+# ── workers:mailerlite:tail ──────────────────────────────────────────────────
+["workers:mailerlite:tail"]
+description = "Tail logs from deployed mailerlite worker"
+tools = { wrangler = "latest" }
+run = '''
+#!/usr/bin/env nu
+
+def main [] {
+  cd ./workers
+  ^wrangler tail
+}
+'''
+
+# ── workers:mailerlite:test ──────────────────────────────────────────────────
+["workers:mailerlite:test"]
+description = "Test the deployed worker with a sample webhook (WORKER_URL)"
+run = '''
+#!/usr/bin/env nu
+
+def main [worker_url: string] {
+  print $"Testing webhook at ($worker_url)/webhook..."
+  ^curl -X POST $"($worker_url)/webhook"
+    -H "Content-Type: application/x-www-form-urlencoded"
+    -d "name=Test User&email=test-worker@example.com&company=Test Company&platform=macOS"
+  print ""
+  print "Check MailerLite dashboard or worker logs for the result."
+}
+'''
