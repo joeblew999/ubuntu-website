@@ -1,0 +1,61 @@
+# mise-en-place configuration — https://mise.jdx.dev
+#
+# Standardizes this repo on the same toolchain used across the other repos:
+#   - mise     : tool/runtime versions + env + task runner
+#   - nushell  : task scripting (see mise-tasks/)
+#   - fnox     : encrypted/remote secret management (see MISE_MIGRATION.md)
+#
+# This file is ADDITIVE and coexists with the existing Taskfile during the
+# migration. `mise install` provisions the tools; `mise run` runs tasks.
+# See MISE_MIGRATION.md for the Taskfile -> mise mapping and rollout plan.
+
+[tools]
+go = "1.25"          # matches go.mod (go 1.25.4) and Taskfile GO_VERSION
+node = "lts"         # Hugo Plate theme build (tailwind) — package.json present
+hugo = "0.152.2"     # MUST be the extended build (Hugo Plate requires v0.144+ extended)
+task = "latest"      # go-task — kept during migration for coexistence
+nushell = "latest"   # task scripting language
+fnox = "latest"      # secret manager
+
+[env]
+# Project-level, non-secret environment. Secrets are NOT stored here — they
+# come from fnox (see below). These mirror the Taskfile `vars:` block.
+CF_ACCOUNT_ID = "7384af54e33b8a54ff240371ea368440"
+CF_ZONE_ID = "867fb5996096b895b47114b6564ee0fb"
+CF_WEB_ANALYTICS_SITE_TAG = "4c28a6bfb5514996914a603c999d5c79"
+CGO_ENABLED = "1"
+
+# Local .env still works during migration (auto-loaded by mise).
+_.file = ".env"
+
+# --- fnox secret integration (enable once `fnox init` is configured) ---
+# Loads secrets (CLOUDFLARE_API_TOKEN, MAILERLITE_API_KEY, DEEPL_API_KEY, ...)
+# as env vars via the mise<->fnox plugin. Left commented so `mise install`
+# never fails on a missing plugin/config before secrets are migrated.
+#
+# [plugins]
+# fnox-env = "https://github.com/jdx/mise-env-fnox"
+#
+# [env]
+# _.fnox-env = { tools = true }
+
+# =============================================================================
+# Tasks (pilot set — proves the pattern; full port tracked in MISE_MIGRATION.md)
+# =============================================================================
+# These wrap existing Go commands on main. nushell scripts live in mise-tasks/.
+
+[tasks.analytics]
+description = "Cloudflare Web Analytics report (wraps cmd/cfanalytics)"
+run = "go run ./cmd/cfanalytics"
+
+[tasks.sitecheck]
+description = "Site reachability check (wraps cmd/sitecheck)"
+run = "go run ./cmd/sitecheck"
+
+[tasks.hugo-dev]
+description = "Start Hugo dev server"
+run = "hugo server --buildDrafts --buildFuture"
+
+[tasks.build]
+description = "Build production site"
+run = "hugo --gc --minify"
