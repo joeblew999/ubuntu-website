@@ -1,0 +1,15 @@
+# Secret resolution for ubuntu-website. Values live in the macOS keychain; this file declares the contract.
+# (Never omit `-p keychain` on `fnox set`: without it values get inlined as plaintext.)
+#
+# Google MCP server (.mcp.json runs `mise exec -- fnox exec -- google-mcp-server`): the OAuth client of the
+# "Desktop app" credentials in Google Cloud. Account tokens stay in ~/.google-mcp-accounts.
+#   printf %s "<client id>"     | fnox set -p keychain -k UBUNTU_WEBSITE_GOOGLE_CLIENT_ID GOOGLE_CLIENT_ID
+#   printf %s "<client secret>" | fnox set -p keychain -k UBUNTU_WEBSITE_GOOGLE_CLIENT_SECRET GOOGLE_CLIENT_SECRET
+
+[providers.keychain]
+type = "keychain"
+service = "fnox"
+
+[secrets]
+GOOGLE_CLIENT_ID= { provider = "keychain", value = "UBUNTU_WEBSITE_GOOGLE_CLIENT_ID" }
+GOOGLE_CLIENT_SECRET= { provider = "keychain", value = "UBUNTU_WEBSITE_GOOGLE_CLIENT_SECRET" }

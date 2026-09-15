@@ -1,0 +1,9 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+
+# ubuntu-website tools pinned for reproducibility (tasks stay in Taskfile.yml).
+
+[tools]
+# Google MCP server (.mcp.json): upstream release binary, exact version.
+"github:ngs/google-mcp-server" = "0.7.1"
+# Resolves the server's GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET from the keychain (fnox.toml).
+fnox = "1.35.0"
