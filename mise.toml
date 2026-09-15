@@ -1,21 +1,34 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 
 # ubuntu-website: tools pinned for reproducibility, plus the Google MCP server's setup tasks
-# (the site's own tasks stay in Taskfile.yml).
+# (the site's own tasks stay in Taskfile.yml). Claude Code starts the server from .mcp.json
+# (`mise exec -- fnox exec -- google-mcp-server`).
 #
-# New machine, once:
+# New machine (the Google Cloud side already exists):
 #   mise trust && mise install
-#   mise run google:secret -- GOOGLE_CLIENT_ID       # OAuth "Desktop app" client from Google Cloud → keychain
+#   mise run google:secret -- GOOGLE_CLIENT_ID       # hidden prompt → keychain (fnox.toml)
 #   mise run google:secret -- GOOGLE_CLIENT_SECRET
-#   mise run google:auth                             # browser sign-in → ~/.google-mcp-accounts, then google:check
+#   mise run google:auth                             # browser sign-in, ends with google:check
 #
-# Claude Code starts the server from .mcp.json (`mise exec -- fnox exec -- google-mcp-server`).
+# Google Cloud side (Google has no API for these screens, so the task opens them and prints what to paste):
+#   mise run google:console    # Branding + Audience ("Publish app": Testing tokens die after 7 days) + OAuth client
+#
+# Routine:
+#   mise run google:check      # token refresh at Google (proves client id + secret) + a real Calendar call
+#   mise run google:rotate     # new client secret: Add secret + copy in the console, the task does the rest
+#   mise run google:auth       # after "invalid_grant" (expired/revoked token) or to add another account
 
 [tools]
 # Google MCP server (.mcp.json): upstream release binary, exact version.
 "github:ngs/google-mcp-server" = "0.7.1"
 # Resolves the server's GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET from the keychain (fnox.toml).
 fnox = "1.35.0"
+# Reads the refresh token in google:check.
+jq = "1.8.1"
+
+[env]
+# Google Cloud project (number) that owns the OAuth client. Not secret.
+UBUNTU_WEBSITE_GCP_PROJECT = "130034768106"
 
 [tasks."google:secret"]
 description = "Store GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in the keychain (hidden prompt, or stdin)"
@@ -27,6 +40,74 @@ key="${usage_key}"
 case "$key" in GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET) ;; *) echo "key must be GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET"; exit 2;; esac
 fnox set -p keychain -k "UBUNTU_WEBSITE_$key" "$key"
 echo "✓ $key stored in the keychain"
+'''
+
+[tasks."google:console"]
+description = "Open the Google Cloud OAuth screens (Branding, Audience, client) and print the exact values to enter"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+site=https://www.ubuntusoftware.net
+p="$UBUNTU_WEBSITE_GCP_PROJECT"
+for path in / /privacy-policy/ /terms-of-service/; do
+  code=$(curl -s -o /dev/null -L -w '%{http_code}' "$site$path")
+  [ "$code" = 200 ] || { echo "✗ $site$path answers $code: fix the page before using it on the Branding screen"; exit 1; }
+done
+client=$(fnox exec -- sh -c 'printf %s "$GOOGLE_CLIENT_ID"')
+cat <<EOF
+1. Branding  https://console.cloud.google.com/auth/branding?project=$p
+     App name                  anything WITHOUT the word "Google" (Google rejects it), e.g. ged-mcp
+     User support email        your Gmail (pick it from the dropdown)
+     App logo                  leave EMPTY (a logo forces brand verification)
+     Application home page     $site/
+     Privacy policy link       $site/privacy-policy/
+     Terms of service link     $site/terms-of-service/
+     Authorized domains        ubuntusoftware.net
+     Developer contact         your Gmail
+     → Save
+2. Audience  https://console.cloud.google.com/auth/audience?project=$p
+     Publishing status must be "In production" → Publish app → Confirm
+     ("Testing" refresh tokens expire after 7 days). After publishing: mise run google:auth
+3. Client    https://console.cloud.google.com/auth/clients/$client?project=$p
+     Type: Desktop app. Secrets: mise run google:rotate
+EOF
+if [ -z "${GOOGLE_NO_BROWSER:-}" ]; then
+  open "https://console.cloud.google.com/auth/branding?project=$p"
+  open "https://console.cloud.google.com/auth/audience?project=$p"
+fi
+'''
+
+[tasks."google:rotate"]
+description = "Rotate the OAuth client secret: you Add secret + copy it in the console; this stores, proves and cleans up"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+p="$UBUNTU_WEBSITE_GCP_PROJECT"
+client=$(fnox exec -- sh -c 'printf %s "$GOOGLE_CLIENT_ID"')
+old=$(fnox exec -- sh -c 'printf %s "$GOOGLE_CLIENT_SECRET"')
+url="https://console.cloud.google.com/auth/clients/$client?project=$p"
+echo "On the client page click Add secret, then copy the NEW secret (waiting ${GOOGLE_ROTATE_TIMEOUT:-600} s):"
+echo "  $url"
+[ -n "${GOOGLE_NO_BROWSER:-}" ] || open "$url"
+new=
+for _ in $(seq "${GOOGLE_ROTATE_TIMEOUT:-600}"); do
+  c=$(pbpaste 2>/dev/null | tr -d '[:space:]')
+  case "$c" in GOCSPX-*) [ "$c" != "$old" ] && { new=$c; break; };; esac
+  sleep 1
+done
+[ -n "$new" ] || { echo "✗ no new secret copied"; exit 1; }
+printf '' | pbcopy
+printf %s "$new" | fnox set -p keychain -k UBUNTU_WEBSITE_GOOGLE_CLIENT_SECRET GOOGLE_CLIENT_SECRET >/dev/null
+echo "✓ new secret stored in the keychain (clipboard cleared)"
+for try in 1 2 3 4 5 6; do
+  if mise run google:check; then
+    echo "✓ rotated. Now delete the OLD secret on the client page, then run: mise run google:check"
+    exit 0
+  fi
+  echo "  retrying in 30 s (new secrets can take a moment at Google)…"; sleep 30
+done
+printf %s "$old" | fnox set -p keychain -k UBUNTU_WEBSITE_GOOGLE_CLIENT_SECRET GOOGLE_CLIENT_SECRET >/dev/null
+echo "✗ the new secret never worked; the old one is back in the keychain"; exit 1
 '''
 
 [tasks."google:auth"]
@@ -48,9 +129,10 @@ for _ in $(seq 60); do
   [ -n "$url" ] && break; sleep 1
 done
 [ -n "$url" ] || { echo "✗ no sign-in URL from google-mcp-server:"; cat "$dir/err"; exit 1; }
-echo "Sign in with Google in the browser (listening on localhost:8080 for ${GOOGLE_AUTH_TIMEOUT:-300} s):"
+echo "Sign in with Google in the browser (listening on localhost:8080 for ${GOOGLE_AUTH_TIMEOUT:-300} s)."
+echo "Unverified-app warning: Advanced → Go to <app> (unsafe) → Allow."
 echo "  $url"
-[ -n "${GOOGLE_AUTH_NO_BROWSER:-}" ] || open "$url" 2>/dev/null || true
+[ -n "${GOOGLE_NO_BROWSER:-}" ] || open "$url" 2>/dev/null || true
 for _ in $(seq "${GOOGLE_AUTH_TIMEOUT:-300}"); do
   if grep -q 'Successfully added account' "$dir/err"; then echo "✓ account signed in"; exec 3>&-; mise run google:check; exit 0; fi
   sleep 1
@@ -59,12 +141,31 @@ echo "✗ no sign-in within ${GOOGLE_AUTH_TIMEOUT:-300} s"; exit 1
 '''
 
 [tasks."google:check"]
-description = "Prove the Google MCP server works end to end: a real Calendar API call with the saved token"
+description = "Prove the Google MCP setup end to end: token refresh at Google (client id + secret) and a real Calendar call"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
+shopt -s nullglob
+set -- "$HOME"/.google-mcp-accounts/*.json
+[ "$#" -gt 0 ] || { echo "✗ no signed-in Google account: run mise run google:auth"; exit 1; }
 dir=$(mktemp -d); pid=
 trap '[ -n "$pid" ] && kill "$pid" 2>/dev/null; rm -rf "$dir"' EXIT
+for f in "$@"; do
+  REFRESH=$(jq -r '[.. | objects | .refresh_token? // empty][0] // empty' "$f")
+  [ -n "$REFRESH" ] || { echo "✗ $(basename "$f"): no refresh token: run mise run google:auth"; exit 1; }
+  code=$(REFRESH="$REFRESH" OUT="$dir/token.json" fnox exec -- sh -c 'curl -s -o "$OUT" -w "%{http_code}" https://oauth2.googleapis.com/token -d grant_type=refresh_token --data-urlencode "refresh_token=$REFRESH" --data-urlencode "client_id=$GOOGLE_CLIENT_ID" --data-urlencode "client_secret=$GOOGLE_CLIENT_SECRET"')
+  if [ "$code" != 200 ]; then
+    err=$(jq -r '.error // "unknown"' "$dir/token.json" 2>/dev/null || echo unknown)
+    case "$err" in
+      invalid_grant)  echo "✗ $(basename "$f" .json): token expired or revoked: run mise run google:auth";;
+      invalid_client) echo "✗ client id/secret rejected: run mise run google:rotate (or google:secret)";;
+      *)              echo "✗ Google token endpoint answered HTTP $code ($err)";;
+    esac
+    exit 1
+  fi
+  echo "✓ $(basename "$f" .json): Google refreshed the token with the keychain client id + secret"
+done
+rm -f "$dir/token.json"
 mkfifo "$dir/in"
 fnox exec -- google-mcp-server <"$dir/in" >"$dir/out" 2>"$dir/err" & pid=$!
 exec 3>"$dir/in"
@@ -75,9 +176,7 @@ for _ in $(seq 60); do grep -q '"id":2[,}]' "$dir/out" && break; sleep 1; done
 line=$(grep '"id":2[,}]' "$dir/out" || true)
 if [ -z "$line" ]; then echo "✗ google-mcp-server did not answer:"; tail -5 "$dir/err"; exit 1; fi
 if printf '%s' "$line" | grep -q -e '"error":' -e '"isError":true'; then
-  echo "✗ Calendar call failed (token expired? run: mise run google:auth):"
-  printf '%s\n' "$line" | grep -o '"message":"[^"]*"' | head -1
-  exit 1
+  echo "✗ Calendar call failed:"; printf '%s\n' "$line" | grep -o '"message":"[^"]*"' | head -1; exit 1
 fi
 echo "✓ google-mcp-server $(google-mcp-server --version | awk '{print $2}'): Calendar API answered ($(printf '%s' "$line" | grep -o '\\"id\\"' | wc -l | tr -d ' ') calendars)"
 '''
