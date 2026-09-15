@@ -116,7 +116,7 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 dir=$(mktemp -d); pid=
-trap '[ -n "$pid" ] && kill "$pid" 2>/dev/null; rm -rf "$dir"' EXIT
+trap 'rm -rf "$dir"; [ -z "$pid" ] || kill "$pid" 2>/dev/null || true' EXIT
 mkfifo "$dir/in"
 fnox exec -- google-mcp-server <"$dir/in" >"$dir/out" 2>"$dir/err" & pid=$!
 exec 3>"$dir/in"
@@ -149,7 +149,7 @@ shopt -s nullglob
 set -- "$HOME"/.google-mcp-accounts/*.json
 [ "$#" -gt 0 ] || { echo "✗ no signed-in Google account: run mise run google:auth"; exit 1; }
 dir=$(mktemp -d); pid=
-trap '[ -n "$pid" ] && kill "$pid" 2>/dev/null; rm -rf "$dir"' EXIT
+trap 'rm -rf "$dir"; [ -z "$pid" ] || kill "$pid" 2>/dev/null || true' EXIT
 for f in "$@"; do
   REFRESH=$(jq -r '[.. | objects | .refresh_token? // empty][0] // empty' "$f")
   [ -n "$REFRESH" ] || { echo "✗ $(basename "$f"): no refresh token: run mise run google:auth"; exit 1; }
