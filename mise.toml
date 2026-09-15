@@ -1,9 +1,83 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 
-# ubuntu-website tools pinned for reproducibility (tasks stay in Taskfile.yml).
+# ubuntu-website: tools pinned for reproducibility, plus the Google MCP server's setup tasks
+# (the site's own tasks stay in Taskfile.yml).
+#
+# New machine, once:
+#   mise trust && mise install
+#   mise run google:secret -- GOOGLE_CLIENT_ID       # OAuth "Desktop app" client from Google Cloud → keychain
+#   mise run google:secret -- GOOGLE_CLIENT_SECRET
+#   mise run google:auth                             # browser sign-in → ~/.google-mcp-accounts, then google:check
+#
+# Claude Code starts the server from .mcp.json (`mise exec -- fnox exec -- google-mcp-server`).
 
 [tools]
 # Google MCP server (.mcp.json): upstream release binary, exact version.
 "github:ngs/google-mcp-server" = "0.7.1"
 # Resolves the server's GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET from the keychain (fnox.toml).
 fnox = "1.35.0"
+
+[tasks."google:secret"]
+description = "Store GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in the keychain (hidden prompt, or stdin)"
+usage = 'arg "<key>" help="GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET"'
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+key="${usage_key}"
+case "$key" in GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET) ;; *) echo "key must be GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET"; exit 2;; esac
+fnox set -p keychain -k "UBUNTU_WEBSITE_$key" "$key"
+echo "✓ $key stored in the keychain"
+'''
+
+[tasks."google:auth"]
+description = "Sign a Google account in to the Google MCP server (opens the browser), then run google:check"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+dir=$(mktemp -d); pid=
+trap '[ -n "$pid" ] && kill "$pid" 2>/dev/null; rm -rf "$dir"' EXIT
+mkfifo "$dir/in"
+fnox exec -- google-mcp-server <"$dir/in" >"$dir/out" 2>"$dir/err" & pid=$!
+exec 3>"$dir/in"
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"mise","version":"0"}}}' >&3
+printf '%s\n' '{"jsonrpc":"2.0","method":"notifications/initialized"}' >&3
+printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"accounts_add","arguments":{}}}' >&3
+url=
+for _ in $(seq 60); do
+  url=$(grep -o 'https://accounts.google.com/o/oauth2/auth[^ ]*' "$dir/err" | head -1 || true)
+  [ -n "$url" ] && break; sleep 1
+done
+[ -n "$url" ] || { echo "✗ no sign-in URL from google-mcp-server:"; cat "$dir/err"; exit 1; }
+echo "Sign in with Google in the browser (listening on localhost:8080 for ${GOOGLE_AUTH_TIMEOUT:-300} s):"
+echo "  $url"
+[ -n "${GOOGLE_AUTH_NO_BROWSER:-}" ] || open "$url" 2>/dev/null || true
+for _ in $(seq "${GOOGLE_AUTH_TIMEOUT:-300}"); do
+  if grep -q 'Successfully added account' "$dir/err"; then echo "✓ account signed in"; exec 3>&-; mise run google:check; exit 0; fi
+  sleep 1
+done
+echo "✗ no sign-in within ${GOOGLE_AUTH_TIMEOUT:-300} s"; exit 1
+'''
+
+[tasks."google:check"]
+description = "Prove the Google MCP server works end to end: a real Calendar API call with the saved token"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+dir=$(mktemp -d); pid=
+trap '[ -n "$pid" ] && kill "$pid" 2>/dev/null; rm -rf "$dir"' EXIT
+mkfifo "$dir/in"
+fnox exec -- google-mcp-server <"$dir/in" >"$dir/out" 2>"$dir/err" & pid=$!
+exec 3>"$dir/in"
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"mise","version":"0"}}}' >&3
+printf '%s\n' '{"jsonrpc":"2.0","method":"notifications/initialized"}' >&3
+printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"calendar_list","arguments":{}}}' >&3
+for _ in $(seq 60); do grep -q '"id":2[,}]' "$dir/out" && break; sleep 1; done
+line=$(grep '"id":2[,}]' "$dir/out" || true)
+if [ -z "$line" ]; then echo "✗ google-mcp-server did not answer:"; tail -5 "$dir/err"; exit 1; fi
+if printf '%s' "$line" | grep -q -e '"error":' -e '"isError":true'; then
+  echo "✗ Calendar call failed (token expired? run: mise run google:auth):"
+  printf '%s\n' "$line" | grep -o '"message":"[^"]*"' | head -1
+  exit 1
+fi
+echo "✓ google-mcp-server $(google-mcp-server --version | awk '{print $2}'): Calendar API answered ($(printf '%s' "$line" | grep -o '\\"id\\"' | wc -l | tr -d ' ') calendars)"
+'''
