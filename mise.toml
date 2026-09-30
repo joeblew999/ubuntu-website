@@ -23,6 +23,8 @@
 idiomatic_version_file_enable_tools = ["go"]
 
 [tools]
+bun = "1.4.2"
+node = "24.19.0"
 # Google MCP server (.mcp.json): upstream release binary, exact version.
 "github:ngs/google-mcp-server" = "0.7.1"
 # Resolves the server's GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET from the keychain (fnox.toml).
