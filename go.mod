@@ -2,6 +2,8 @@ module github.com/joeblew999/ubuntu-website
 
 go 1.25.4
 
+toolchain go1.27.1
+
 require (
 	github.com/bounoable/deepl v0.8.0
 	github.com/cli/go-gh/v2 v2.13.0
