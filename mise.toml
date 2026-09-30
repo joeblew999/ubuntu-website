@@ -23,6 +23,10 @@
 idiomatic_version_file_enable_tools = ["go"]
 
 [tools]
+# CI + Taskfile tools (were installed by separate GitHub Actions / npm -g)
+task = "3.45.5"
+hugo-extended = "0.152.2"
+"npm:wrangler" = "4.143.0"
 bun = "1.4.2"
 node = "24.19.0"
 # Google MCP server (.mcp.json): upstream release binary, exact version.
