@@ -85,6 +85,43 @@ tasks:
       - hugo server {{.HUGO_PREVIEW_FLAGS}}
 
   # ===========================================================================
+  # Upgrade
+  # ===========================================================================
+
+  upgrade:
+    desc: Upgrade Hugo (VERSION=x.y.z, default latest) - pin, build check, Cloudflare preview
+    summary: |
+      Hugo is pinned in mise.toml (local + CI) and in Cloudflare Pages' HUGO_VERSION (production
+      and preview). This pins the new version, proves a production build, and switches preview.
+      Production switches only after the preview build of your branch passes (printed at the end).
+    dir: '{{.ROOT_DIR}}'
+    vars:
+      VERSION: '{{.VERSION | default ""}}'
+    cmds:
+      - |
+        set -euo pipefail
+        v="{{.VERSION}}"
+        [ -n "$v" ] || v=$(mise latest hugo-extended)
+        pin=$(mise config get -f mise.toml tools.hugo-extended)
+        echo "Hugo $pin → $v"
+        mise use --pin --path mise.toml hugo-extended@$v
+        bash scripts/theme-css.sh
+        out=$(mktemp -d)
+        if ! mise exec -- hugo -e production --gc --minify -d "$out" > "$out.log" 2>&1; then
+          grep -E "^(ERROR|Error)" "$out.log" | head -5
+          echo "✗ production build fails on Hugo $v; mise.toml left at $v - revert with: mise use --pin --path mise.toml hugo-extended@$pin"
+          exit 1
+        fi
+        grep -E "^WARN|Pages |Total in" "$out.log" || true
+        rm -rf "$out" "$out.log"
+      - task: ':cf:hugo-version'
+        vars: { ENV: preview }
+      - |
+        echo ""
+        echo "Next: commit on a branch and push it; when the Cloudflare preview build passes:"
+        echo "  task cf:hugo-version ENV=production && merge the branch to main"
+
+  # ===========================================================================
   # Clean
   # ===========================================================================
 

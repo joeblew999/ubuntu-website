@@ -45,11 +45,12 @@ task google-mcp:setup
 
 Đó là tất cả. Hệ thống:
 
-1. **Cài đặt máy chủ MCP** (nếu chưa có)
-2. **Mở xác thực có hướng dẫn** trong trình duyệt của bạn
-3. **Lưu trữ thông tin đăng nhập một cách an toàn** trong hệ thống cục bộ của bạn*
-4. **Cấu hình trợ lý AI của bạn** tự động
-5. **Kiểm tra xem mọi thứ hoạt động bình thường*
+1. **Cài đặt một phiên bản máy chủ MCP được ghim cố định** (nếu chưa có)
+2. **Lưu thông tin OAuth Google của bạn vào keychain của hệ điều hành**, không bao giờ lưu trong tệp văn bản thường
+3. **Mở xác thực có hướng dẫn** trong trình duyệt của bạn
+4. **Kiểm tra mọi thứ hoạt động** bằng một lệnh gọi Calendar thực tế
+
+Cấu hình trợ lý AI đi kèm sẵn trong dự án (`.mcp.json`), nên bạn không cần thiết lập thêm gì.
 
 Không kích hoạt API thủ công. Không chỉnh sửa tệp JSON. Không cần khởi động lại.
 
@@ -153,7 +154,7 @@ Các bài đăng trên blog được lên lịch cho các ngày trong tương la
 
 Đây là điểm khác biệt quan trọng so với các tích hợp đám mây thông thường: **thông tin đăng nhập và dữ liệu của bạn vẫn được lưu trữ trên máy tính của bạn**.
 
-Máy chủ MCP chạy trên máy tính cục bộ. Các token xác thực được lưu trữ trong thư mục cá nhân của bạn. Không có dịch vụ đám mây trung gian nào truy cập dữ liệu Google của bạn. Không có bên thứ ba nào có quyền truy cập vào email hoặc tệp tin của bạn.
+Máy chủ MCP chạy trên máy tính cục bộ. Các token xác thực được lưu trữ trong thư mục cá nhân của bạn, còn khóa bí mật OAuth được lưu trong keychain của hệ điều hành. Không có dịch vụ đám mây trung gian nào truy cập dữ liệu Google của bạn. Không có bên thứ ba nào có quyền truy cập vào email hoặc tệp tin của bạn.
 
 Bạn đang sử dụng các dịch vụ của Google, nhưng thông qua hạ tầng do bạn kiểm soát. Nếu bạn quyết định ngắt kết nối, chỉ cần xóa các thông tin đăng nhập cục bộ và bạn đã hoàn tất. Không cần liên hệ với nhà cung cấp. Không cần yêu cầu xuất dữ liệu.
 
@@ -199,11 +200,11 @@ Mỗi cấp độ sẽ trở nên mạnh mẽ hơn khi AI có thể truy cập t
 │         │                                                  │
 │         ▼                                                  │
 │  ┌──────────────────────────────────────────────────────┐ │
-│  │              .vscode/mcp.json                         │ │
-│  │   {                                                   │ │
-│  │     "servers": {                                      │ │
-│  │       "google": { "command": "google-mcp-server" }   │ │
-│  │     }                                                 │ │
+│  │              .mcp.json (checked into the project)     │ │
+│  │   "google": {                                         │ │
+│  │     "command": "mise",                                │ │
+│  │     "args": ["exec", "--", "fnox", "exec", "--",      │ │
+│  │              "google-mcp-server"]                     │ │
 │  │   }                                                   │ │
 │  └──────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
@@ -232,14 +233,14 @@ Làm theo các hướng dẫn. Khởi động lại trợ lý AI của bạn. Xo
 ### Bước từng bước (Nếu bạn muốn kiểm soát)
 
 ```bash
-# 1. Install the MCP server
+# 1. Install the MCP server (pinned release)
 task google-mcp:install
 
-# 2. Authenticate with Google
-task google-mcp:auth
+# 2. Store your Google OAuth client in the OS keychain
+task google-mcp:credentials
 
-# 3. Add to your AI assistant config
-task google-mcp:claude:add
+# 3. Authenticate with Google (opens the browser, then checks)
+task google-mcp:auth
 
 # 4. Verify everything works
 task google-mcp:status
@@ -252,15 +253,15 @@ task google-mcp:accounts:list
 # Shows all authenticated Google accounts
 
 task google-mcp:status
-# Full status: binary, accounts, configuration
+# Full status: binary, keychain secrets, accounts, configuration
 ```
 
 ### Xóa quyền truy cập
 
 ```bash
 task google-mcp:reset CONFIRM=y
-# Removes all local credentials and configuration
-# Also opens Google Console to revoke OAuth access
+# Removes the signed-in account tokens from this machine
+# Revoke the app itself in your Google Account's third-party access settings
 ```
 
 ## Ngoài Google

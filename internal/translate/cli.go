@@ -59,13 +59,13 @@ func Run(args []string, version string, stdout, stderr io.Writer, stdin io.Reade
 
 	// Create CLI context
 	ctx := &cliContext{
-		checker:     checker,
-		opts:        opts,
-		stdout:      stdout,
-		stderr:      stderr,
-		stdin:       stdin,
-		fs:          fs,
-		allArgs:     args,
+		checker: checker,
+		opts:    opts,
+		stdout:  stdout,
+		stderr:  stderr,
+		stdin:   stdin,
+		fs:      fs,
+		allArgs: args,
 	}
 
 	switch namespace {

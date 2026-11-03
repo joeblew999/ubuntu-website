@@ -89,19 +89,30 @@ tasks:
         {{.GH_BIN}} release create "$TAG" --generate-notes $FILES
 
   release:publish:
-    desc: Create release with binaries from {{.ROOT_DIR}}/{{.DIR_BUILD}}/ (requires NAME, VERSION vars)
+    desc: Create release NAME-VERSION with the NAME binary from {{.DIR_BUILD}}/ (FILES="a b" to upload others)
+    summary: |
+      Uploads only the named binary ({{.DIR_BUILD}}/NAME), never all of {{.DIR_BUILD}}/:
+      that directory also holds other tools' builds and the youtube CLI's ffmpeg/yt-dlp cache.
+
+      Usage:
+        task tools:gh:release:publish NAME=sitecheck VERSION=v1.2.0
+        task tools:gh:release:publish NAME=google VERSION=v0.3.0 FILES=".build/google .build/google.exe"
     requires:
       vars: [NAME, VERSION]
     dir: '{{.ROOT_DIR}}'
+    vars:
+      FILES: '{{.FILES | default (printf "%s/%s%s" .DIR_BUILD .NAME exeExt)}}'
     cmds:
       - |
         TAG="{{.NAME}}-{{.VERSION}}"
+        for f in {{.FILES}}; do
+          [ -f "$f" ] || { echo "✗ missing asset: $f (build it first: task {{.NAME}}:release:build)"; exit 1; }
+        done
         echo "Creating release: $TAG"
-        echo "Assets from {{.ROOT_DIR}}/{{.DIR_BUILD}}/:"
-        ls -la {{.ROOT_DIR}}/{{.DIR_BUILD}}/ 2>/dev/null || echo "  (no files in {{.ROOT_DIR}}/{{.DIR_BUILD}}/)"
+        ls -la {{.FILES}}
         echo ""
         echo "Uploading to GitHub..."
-        {{.GH_BIN}} release create "$TAG" --generate-notes {{.ROOT_DIR}}/{{.DIR_BUILD}}/*
+        {{.GH_BIN}} release create "$TAG" --generate-notes {{.FILES}}
         echo ""
         echo "Release created: https://github.com/$({{.GH_BIN}} repo view --json nameWithOwner -q .nameWithOwner)/releases/tag/$TAG"
 

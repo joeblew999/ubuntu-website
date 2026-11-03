@@ -52,3 +52,32 @@ tasks:
     desc: Health check all tools
     cmds:
       - task: git:check:health
+
+  # ===========================================================================
+  # Upgrade (mise pins the tools; this is the front door)
+  # ===========================================================================
+
+  upgrade:
+    desc: Upgrade this project's mise-pinned tools + Go toolchain (Hugo is separate - task hugo:upgrade)
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - |
+        set -euo pipefail
+        # Project tools only (not ~/.config/mise globals); go is pinned by go.mod, hugo needs Cloudflare too.
+        tools=$(mise ls --no-global --current --json | jq -r 'keys[] | select(. != "go" and . != "hugo-extended")' | tr '\n' ' ')
+        mise upgrade --bump $tools
+        go_pin=$(sed -n 's/^toolchain go//p' go.mod)
+        go_latest=$(mise latest go)
+        if [ "$go_pin" != "$go_latest" ]; then
+          go mod edit -toolchain=go$go_latest
+          echo "go toolchain $go_pin → $go_latest (go.mod)"
+        fi
+        mise install
+        hugo_pin=$(mise config get -f mise.toml tools.hugo-extended)
+        hugo_latest=$(mise latest hugo-extended)
+        if [ "$hugo_pin" != "$hugo_latest" ]; then
+          echo ""
+          echo "Hugo $hugo_pin → $hugo_latest available: task hugo:upgrade"
+        fi
+        echo ""
+        echo "Review: git diff -- mise.toml go.mod; then build/test and commit."

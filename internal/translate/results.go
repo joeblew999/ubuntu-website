@@ -38,10 +38,10 @@ type MissingFile struct {
 
 // MissingResult contains missing translation data
 type MissingResult struct {
-	ByLanguage      map[string][]string // lang name → missing files (paths only)
+	ByLanguage      map[string][]string      // lang name → missing files (paths only)
 	ByLanguageFiles map[string][]MissingFile // lang name → missing files with char counts
-	TotalCount      int                 // Total missing files across all languages
-	TotalChars      int64               // Total characters across all missing files
+	TotalCount      int                      // Total missing files across all languages
+	TotalChars      int64                    // Total characters across all missing files
 }
 
 // HasIssues returns true if any translations are missing
@@ -82,20 +82,20 @@ func (r OrphansResult) HasIssues() bool {
 
 // NextResult contains the next file to translate
 type NextResult struct {
-	File         string   // Next English file to translate
-	Languages    []string // Languages that need this file
-	TotalFiles   int      // Total English content files
+	File         string         // Next English file to translate
+	Languages    []string       // Languages that need this file
+	TotalFiles   int            // Total English content files
 	TranslatedBy map[string]int // Files translated per language
 	MissingBy    map[string]int // Files missing per language
-	AllDone      bool     // True if everything is translated
+	AllDone      bool           // True if everything is translated
 }
 
 // ChangedFile represents a file that changed since checkpoint
 type ChangedFile struct {
-	Path        string   // File path
-	LinesAdded  int      // Lines added
-	LinesRemoved int     // Lines removed
-	Preview     []string // First N lines of diff
+	Path         string   // File path
+	LinesAdded   int      // Lines added
+	LinesRemoved int      // Lines removed
+	Preview      []string // First N lines of diff
 }
 
 // ChangedResult contains detailed change information
@@ -118,17 +118,17 @@ func (r ValidateResult) HasIssues() bool {
 
 // LanguageInfo represents a configured language
 type LanguageInfo struct {
-	Code    string
-	Name    string
-	DirName string
-	Weight  int
+	Code     string
+	Name     string
+	DirName  string
+	Weight   int
 	IsSource bool
 }
 
 // LangsResult contains language configuration data
 type LangsResult struct {
-	Languages   []LanguageInfo // Configured languages
-	StrayDirs   []string       // Content dirs not in config
+	Languages []LanguageInfo // Configured languages
+	StrayDirs []string       // Content dirs not in config
 }
 
 // HasIssues returns true if stray directories found
@@ -169,10 +169,10 @@ type CleanResult struct {
 
 // DoneResult contains checkpoint update data
 type DoneResult struct {
-	OldTag  string // Previous checkpoint (if any)
-	NewTag  string // New checkpoint tag
-	Commit  string // Commit SHA that was tagged
-	Error   error  // Any error during update
+	OldTag string // Previous checkpoint (if any)
+	NewTag string // New checkpoint tag
+	Commit string // Commit SHA that was tagged
+	Error  error  // Any error during update
 }
 
 // MenuSyncResult contains menu sync data
@@ -194,18 +194,18 @@ type LangAddResult struct {
 
 // LangRemoveResult contains language remove data
 type LangRemoveResult struct {
-	Code        string   // Language code removed
-	FilesRemoved int     // Number of files deleted
-	Cancelled   bool     // Whether user cancelled
-	Error       error    // Any error during remove
+	Code         string // Language code removed
+	FilesRemoved int    // Number of files deleted
+	Cancelled    bool   // Whether user cancelled
+	Error        error  // Any error during remove
 }
 
 // LangInitResult contains language init data
 type LangInitResult struct {
-	Code        string // Language code
-	DirName     string // Content directory name
-	Path        string // Full path to directory
-	AlreadyExists bool // Whether directory already existed
-	FileCount   int    // Number of existing files (if already exists)
-	Error       error  // Any error during init
+	Code          string // Language code
+	DirName       string // Content directory name
+	Path          string // Full path to directory
+	AlreadyExists bool   // Whether directory already existed
+	FileCount     int    // Number of existing files (if already exists)
+	Error         error  // Any error during init
 }

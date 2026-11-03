@@ -19,6 +19,16 @@ Key points:
 - Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod`. CI installs the same pins via `jdx/mise-action`.
 - Taskfiles call tools by name and never install them (no `brew install`, `curl | bash`, `bun add -g`, `go install` for third-party tools). A `check:deps` for a mise tool runs `mise install <tool>`.
 - New tool → add it to `[tools]` in `mise.toml` with an exact version.
+
+**Upgrading: always through Taskfile** (mise only pins/installs underneath):
+
+| What | Command |
+|------|---------|
+| Tools in `mise.toml` + Go toolchain (`go.mod`) | `task tools:upgrade` |
+| Hugo (mise pin + Cloudflare `HUGO_VERSION`) | `task hugo:upgrade` → branch + Cloudflare preview → `task cf:hugo-version ENV=production` → main |
+| Theme: Hugo Plate + gethugothemes modules, and the npm packages they need | `task theme:update` |
+
+Each is safe to re-run: with nothing new upstream it changes nothing.
 - New machine: `task setup` (= `mise trust && mise install`, then `bun install` + `go mod download`).
 - Not in the mise registry, so still installed by Taskfile: tippecanoe (optional), gcloud (optional), task-ui (`go install` from xplat). The project's own Go CLIs (`cmd/*`) are built by Taskfile.
 
@@ -582,13 +592,14 @@ When working on Via coding aspects:
 
 ### Hugo Version
 
-**Current:** 0.169.0 (extended)
+**Current:** the `hugo-extended` pin in `mise.toml` (the only place the version is written in the repo)
 **Hugo Plate requires:** v0.158+ extended (upstream uses `.Locale`/`.Label`/`hugo.Data`)
 
-Three places must stay aligned:
-1. **Local + CI**: `hugo-extended` pin in `mise.toml` (`mise install`)
-2. **Cloudflare Pages**: `HUGO_VERSION` env var, **both** production (secret) and preview (plain text). Change preview first, push a branch, check the preview build, then production.
-3. **This doc**: Update version above when changing
+Two places must stay aligned:
+1. **Local + CI**: `hugo-extended` pin in `mise.toml`
+2. **Cloudflare Pages**: `HUGO_VERSION`, a **secret** in both production and preview (with `wrangler.toml` in the repo, builds only see secrets; plain dashboard variables are ignored). Set with `task cf:hugo-version ENV=preview|production`.
+
+**Upgrade:** `task hugo:upgrade` (pins, proves a production build, switches preview) → commit on a branch, push, check the Cloudflare preview build → `task cf:hugo-version ENV=production` → merge to main.
 
 Hugo >= 0.165 removed `tailwindcss` from the default `security.exec.allow`; `hugo.toml` re-adds it (`[security.exec]`, per gohugoio/hugo#15178, reported upstream as zeon-studio/hugoplate#250). Hugo then requires `tailwindcss` to be the npm package (`bun install`), not a standalone binary on PATH.
 

@@ -162,8 +162,8 @@ func TestTranslateMenuName(t *testing.T) {
 		{"Platform", "de", "Plattform"},
 		{"Platform", "zh", "平台"},
 		{"Blog", "ja", "ブログ"},
-		{"Blog", "de", "Blog"}, // Same in German
-		{"Unknown", "ja", "Unknown"}, // Fallback to English
+		{"Blog", "de", "Blog"},         // Same in German
+		{"Unknown", "ja", "Unknown"},   // Fallback to English
 		{"Platform", "xx", "Platform"}, // Unknown language
 	}
 
@@ -242,13 +242,13 @@ func TestValidateMenuLinks(t *testing.T) {
 
 	menu := &MenuConfig{
 		Main: []MenuItem{
-			{Name: "Platform", URL: "/platform"},         // exists
-			{Name: "Blog", URL: "/blog"},                 // exists
-			{Name: "Missing", URL: "/missing"},           // doesn't exist
-			{Name: "No URL", URL: ""},                    // no URL, should skip
+			{Name: "Platform", URL: "/platform"}, // exists
+			{Name: "Blog", URL: "/blog"},         // exists
+			{Name: "Missing", URL: "/missing"},   // doesn't exist
+			{Name: "No URL", URL: ""},            // no URL, should skip
 		},
 		Footer: []MenuItem{
-			{Name: "Contact", URL: "/contact"},           // doesn't exist
+			{Name: "Contact", URL: "/contact"}, // doesn't exist
 		},
 	}
 

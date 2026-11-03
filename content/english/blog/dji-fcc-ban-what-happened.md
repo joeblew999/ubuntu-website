@@ -2,7 +2,7 @@
 title: "DJI Is Now on the FCC Covered List — What Actually Happened"
 meta_title: "DJI FCC Ban: What Happened and What It Means | Ubuntu Software"
 description: "The December 2025 deadline passed. DJI is now on the FCC Covered List. Here's how it happened, what it means, and what comes next."
-date: 2024-12-24T06:00:00Z
+date: 2025-12-24T06:00:00Z
 image: "/images/blog/dji-fcc-ban.svg"
 categories: ["Industry", "Drones"]
 author: "Gerard Webb"

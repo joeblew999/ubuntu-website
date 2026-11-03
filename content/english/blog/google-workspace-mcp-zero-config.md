@@ -45,11 +45,12 @@ task google-mcp:setup
 
 That's it. The system:
 
-1. **Installs the MCP server** (if not present)
-2. **Opens guided authentication** in your browser
-3. **Stores credentials securely** in your local system
-4. **Configures your AI assistant** automatically
-5. **Verifies everything works**
+1. **Installs a pinned MCP server release** (if not present)
+2. **Stores your Google OAuth client in the OS keychain**, never in a plain file
+3. **Opens guided authentication** in your browser
+4. **Verifies everything works** with a real Calendar call
+
+Your AI assistant's configuration ships with the project (`.mcp.json`), so there's nothing to wire up.
 
 No manual API enabling. No JSON file editing. No restart dance.
 
@@ -153,7 +154,7 @@ Blog posts scheduled for future dates can trigger calendar events, reminders, an
 
 Here's the crucial difference from typical cloud integrations: **your credentials and data stay on your machine**.
 
-The MCP server runs locally. Authentication tokens are stored in your home directory. No intermediate cloud service sees your Google data. No third-party has access to your email or files.
+The MCP server runs locally. Authentication tokens are stored in your home directory, and the OAuth client secret in your operating system's keychain. No intermediate cloud service sees your Google data. No third-party has access to your email or files.
 
 You're using Google's services, but through infrastructure you control. If you decide to disconnect, delete the local credentials and you're done. No vendor to contact. No data export to request.
 
@@ -199,11 +200,11 @@ For those who want to understand what's happening under the hood:
 │         │                                                  │
 │         ▼                                                  │
 │  ┌──────────────────────────────────────────────────────┐ │
-│  │              .vscode/mcp.json                         │ │
-│  │   {                                                   │ │
-│  │     "servers": {                                      │ │
-│  │       "google": { "command": "google-mcp-server" }   │ │
-│  │     }                                                 │ │
+│  │              .mcp.json (checked into the project)     │ │
+│  │   "google": {                                         │ │
+│  │     "command": "mise",                                │ │
+│  │     "args": ["exec", "--", "fnox", "exec", "--",      │ │
+│  │              "google-mcp-server"]                     │ │
 │  │   }                                                   │ │
 │  └──────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
@@ -232,14 +233,14 @@ Follow the prompts. Restart your AI assistant. Done.
 ### Step-by-Step (If You Want Control)
 
 ```bash
-# 1. Install the MCP server
+# 1. Install the MCP server (pinned release)
 task google-mcp:install
 
-# 2. Authenticate with Google
-task google-mcp:auth
+# 2. Store your Google OAuth client in the OS keychain
+task google-mcp:credentials
 
-# 3. Add to your AI assistant config
-task google-mcp:claude:add
+# 3. Authenticate with Google (opens the browser, then checks)
+task google-mcp:auth
 
 # 4. Verify everything works
 task google-mcp:status
@@ -252,15 +253,15 @@ task google-mcp:accounts:list
 # Shows all authenticated Google accounts
 
 task google-mcp:status
-# Full status: binary, accounts, configuration
+# Full status: binary, keychain secrets, accounts, configuration
 ```
 
 ### Removing Access
 
 ```bash
 task google-mcp:reset CONFIRM=y
-# Removes all local credentials and configuration
-# Also opens Google Console to revoke OAuth access
+# Removes the signed-in account tokens from this machine
+# Revoke the app itself in your Google Account's third-party access settings
 ```
 
 ## Beyond Google
