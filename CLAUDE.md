@@ -14,6 +14,14 @@ Key points:
 - Use `status:` for idempotent `check:deps` tasks
 - Use `deps:` for declarative dependencies
 
+### Tools: mise installs, Taskfile runs
+
+- Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod`. CI installs the same pins via `jdx/mise-action`.
+- Taskfiles call tools by name and never install them (no `brew install`, `curl | bash`, `bun add -g`, `go install` for third-party tools). A `check:deps` for a mise tool runs `mise install <tool>`.
+- New tool → add it to `[tools]` in `mise.toml` with an exact version.
+- New machine: `task setup` (= `mise trust && mise install`, then `bun install` + `go mod download`).
+- Not in the mise registry, so still installed by Taskfile: tippecanoe (optional), gcloud (optional), task-ui (`go install` from xplat). The project's own Go CLIs (`cmd/*`) are built by Taskfile.
+
 ### Code Structure (internal vs pkg)
 - Keep project-only helpers in `internal/` (e.g., `internal/codecinstaller`), not API-stable.
 - Put reusable surfaces in `pkg/` with small, clear interfaces; no `pkg` imports from `internal`.
@@ -157,7 +165,7 @@ task playwright:open URL=https://...       # Open URL in browser
 }
 ```
 
-Used by `cmd/google-auth` for automated Google OAuth flows.
+Used by `cmd/google` (`google auth login`) for automated Google OAuth flows.
 
 
 
@@ -168,22 +176,28 @@ Used by `cmd/google-auth` for automated Google OAuth flows.
 ┌─────────────────────────────────────────────────────────────────┐
 │                        PROJECT FILES                             │
 ├─────────────────────────────────────────────────────────────────┤
-│ cmd/google-auth/        - MCP config management (add/remove)    │
-│ cmd/gmail/              - Gmail CLI (uses internal/gmail)       │
-│ cmd/calendar/           - Calendar CLI (uses internal/calendar) │
+│ mise.toml               - Pins google-mcp-server, fnox, jq;     │
+│                           google:* setup tasks (mise run ...)   │
+│ fnox.toml               - OAuth client id/secret → keychain     │
+│ .mcp.json               - MCP server config (checked in):       │
+│                           mise exec -- fnox exec -- google-mcp- │
+│                           server                                │
+│ cmd/google/             - Unified Google CLI (gmail, calendar,  │
+│                           drive, ... + auth login/open)         │
 │ internal/googleauth/    - Shared token loading                  │
 │ internal/browser/       - Shared browser automation             │
-│ .vscode/mcp.json        - MCP server config (gitignored: NO)    │
-│ .env                    - OAuth credentials (gitignored: YES)   │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    USER-LEVEL FILES (outside project)           │
 ├─────────────────────────────────────────────────────────────────┤
 │ ~/.google-mcp-accounts/ - OAuth tokens (MUST be outside git!)   │
-│ ~/go/bin/google-mcp-server - External MCP server binary         │
+│ macOS keychain          - GOOGLE_CLIENT_ID / _SECRET (via fnox) │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+`task google-mcp:*` names are stable wrappers over the `mise run google:*` tasks (a published blog post uses them).
+Note: `task google:check` (is the unified CLI built and working) is not `mise run google:check` (MCP server end-to-end proof).
 
 **Why tokens are at `~/.google-mcp-accounts/`:**
 - Security: Tokens contain access to Google account - NEVER commit to git
@@ -197,26 +211,26 @@ task google-mcp:setup    # Full guided setup (interactive)
 
 **Manual Setup Steps:**
 ```bash
-# 1. Install external MCP server
+# 1. Install the pinned MCP server, fnox, jq
 task google-mcp:install
 
-# 2. Create Google Cloud OAuth credentials (opens browser)
-task google-mcp:guide
+# 2. Google Cloud OAuth screens + exact values to enter (opens browser)
+task google-mcp:console
 
-# 3. Save credentials
-task google-mcp:credentials CLIENT_ID='xxx' CLIENT_SECRET='xxx'
+# 3. Store client id + secret in the keychain (hidden prompts)
+task google-mcp:credentials
 
-# 4. Authenticate (opens browser for Google sign-in)
-source .env && task google-mcp:auth
-
-# 5. Add to Claude Code
-task google-mcp:claude:add
+# 4. Authenticate (opens browser for Google sign-in), ends with a check
+task google-mcp:auth
 ```
+
+No step 5: `.mcp.json` is checked in. Restart Claude Code to pick up the server.
 
 **Status Check:**
 ```bash
-task google-mcp:status   # Shows binary, accounts, config status
-task google-mcp:check    # Shows next step if incomplete
+task google-mcp:status   # Binary, keychain secrets, accounts, MCP config
+task google-mcp:check    # Token refresh at Google + a real Calendar call
+task google-mcp:rotate   # New client secret (copy it in the console)
 ```
 
 ### Email Sending (SMTP2GO)
@@ -437,6 +451,19 @@ task r2:airspace:upload         # Upload PMTiles to R2
 **R2 Bucket:** `ubuntu-website-assets`
 **R2 Public URL:** `https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/airspace/`
 
+**Local Development:**
+Hugo's dev server doesn't properly handle HTTP range requests, which PMTiles requires.
+Use `pmtiles-server` alongside Hugo for local tile serving:
+
+```bash
+task pmtiles:server              # Start PMTiles server on :8765
+task pmtiles:check               # Check if server is running
+```
+
+Or enable in process-compose (in `process-compose.yaml`, set `disabled: false` for `pmtiles-server`).
+
+The airspace demo page auto-detects the local server and falls back to R2 if unavailable.
+
 ### Cloudflare R2 (Large Assets)
 
 R2 object storage for static assets that exceed Cloudflare Pages' 25MB file limit.
@@ -559,7 +586,7 @@ When working on Via coding aspects:
 **Hugo Plate requires:** v0.144+ extended
 
 Three places must stay aligned:
-1. **Local**: `hugo version` (install via `brew install hugo`)
+1. **Local + CI**: `hugo-extended` pin in `mise.toml` (`mise install`)
 2. **Cloudflare**: `HUGO_VERSION` secret (check build logs via dashboard)
 3. **This doc**: Update version above when changing
 

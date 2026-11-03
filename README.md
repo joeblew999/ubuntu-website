@@ -4,10 +4,19 @@ Multi-language website built with Hugo Plate, featuring automated translation an
 
 http://localhost:1313
 
+http://localhost:1313/fleet/airspace-demo/
+
+http://192.168.0.156:1313/
+
+http://192.168.0.156:1313/fleet/airspace-demo/
+
 https://www.ubuntusoftware.net
 
 https://www.ubuntusoftware.net/sitemap.xml
 https://www.ubuntusoftware.net/sitemap.xml/en/sitemap.xml
+
+https://www.ubuntusoftware.net/fleet/airspace-demo/
+
 
 ## 📍 Touch Points (Edit Locations)
 
@@ -24,25 +33,6 @@ For all URLs, dashboards, and project information, run:
 task          # or: task info
 ```
 
-This will show:
-- Development server URL (local)
-- Production and preview URLs
-- Cloudflare dashboards
-- Quick commands
-
-You can also open any URL directly in your browser:
-
-```bash
-task url:dev      # Open local dev server
-task url:prod     # Open production site
-task url:preview  # Open preview site
-task cf:open      # Open Cloudflare dashboard
-```
-
-
-
-
-
 ## 🌍 Supported Languages
 
 - 🇬🇧 English (en) - Source language
@@ -50,12 +40,13 @@ task cf:open      # Open Cloudflare dashboard
 - 🇨🇳 Chinese Simplified (zh)
 - 🇯🇵 Japanese (ja)
 
+
 ## 🚀 Quick Start
 
 ```bash
 # 1. Environment Setup (first time only - or anytime to sync)
 task env:all                      # Complete env workflow (recommended)
-task setup                        # Install Hugo, Bun, deps
+task setup                        # mise install (pinned tools) + bun/go deps
 
 # 2. Develop
 task dev                          # Start dev server

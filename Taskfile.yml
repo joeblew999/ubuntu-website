@@ -91,6 +91,7 @@ includes:
 
   # Airspace demo (BVLOS development)
   airspace: ./taskfiles/Taskfile.airspace.yml
+  pmtiles: ./taskfiles/Taskfile.pmtiles.yml
 
   # R2 object storage (large static assets)
   r2: ./taskfiles/Taskfile.cf-r2.yml
@@ -151,13 +152,11 @@ vars:
   HUGO_DEV_FLAGS: --buildDrafts --buildFuture
   HUGO_PREVIEW_FLAGS: -e production --minify
 
-  # Go
-  GO_VERSION: "1.25"
+  # Go (version pinned by the toolchain line in go.mod)
   CGO_ENABLED: "1"
 
-  # Wrangler (installed via wrangler:check:deps)
-  # Full path since ~/.bun/bin may not be in PATH
-  WRANGLER_CMD: '{{.HOME}}/.bun/bin/wrangler'
+  # Wrangler (pinned in mise.toml as npm:wrangler)
+  WRANGLER_CMD: wrangler
 
   # Global binary install directory - all tools use this
   # Unix: ~/.local/bin (standard for user binaries)
@@ -230,7 +229,7 @@ tasks:
         echo "  Settings: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/pages/view/{{.PROJECT_NAME}}/settings/production"
         echo ""
         echo "Quick Commands:"
-        echo "  task setup             - Install Hugo, Bun, dependencies"
+        echo "  task setup             - Install pinned tools (mise) + dependencies"
         echo "  task dev               - Start development server"
         echo "  task url:dev           - Open local dev in browser"
         echo "  task build             - Build production site"
@@ -249,36 +248,22 @@ tasks:
   # Setup & Installation
   # ===========================================================================
 
+  # Third-party tools (hugo, bun, wrangler, process-compose, ...) are pinned in mise.toml.
+  # Taskfiles call them by name and never install them; add new tools to mise.toml.
   setup:
-    desc: Complete setup - install Hugo, Bun, and dependencies
+    desc: Complete setup - install pinned tools (mise) and dependencies
     cmds:
-      - task: install:hugo
-      - task: install:bun
+      - task: install:tools
       - task: install:deps
 
-  install:hugo:
-    desc: Install Hugo Extended (via Homebrew)
+  install:tools:
+    desc: Install every tool pinned in mise.toml
+    preconditions:
+      - sh: command -v mise
+        msg: "mise not found. Install: https://mise.jdx.dev/getting-started.html"
     cmds:
-      - |
-        if command -v hugo &> /dev/null; then
-          echo "Hugo already installed"
-          hugo version
-        else
-          echo "Installing Hugo Extended via Homebrew..."
-          brew install hugo
-          hugo version
-        fi
-
-  install:bun:
-    desc: Install Bun
-    cmds:
-      - |
-        if command -v bun &> /dev/null; then
-          echo "Bun already installed"
-        else
-          curl -fsSL https://bun.sh/install | bash
-        fi
-      - bun --version
+      - mise trust
+      - mise install
 
   install:deps:
     desc: Install dependencies

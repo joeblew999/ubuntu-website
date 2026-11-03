@@ -2,12 +2,12 @@
 //
 // Usage:
 //
-//	airspace pipeline             # Full pipeline: sync → tile → manifest
-//	airspace sync                 # Smart sync (only download if changed)
-//	airspace tile                 # Convert GeoJSON to PMTiles
-//	airspace manifest             # Generate manifest files
-//	airspace status               # Show data file status
-//	airspace download             # Download FAA data (use sync instead)
+//	airspace pipeline    # Full pipeline: sync → tile → manifest (local dev)
+//	airspace upload      # Upload to R2 (production)
+//	airspace sync        # Smart sync (only download if changed)
+//	airspace tile        # Convert GeoJSON to PMTiles
+//	airspace manifest    # Generate manifest files
+//	airspace status      # Show data file status
 //
 // See also: layouts/fleet/airspace-demo.html
 package main
@@ -15,7 +15,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -24,6 +23,12 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/airspace/gotiler"
 	"github.com/joeblew999/ubuntu-website/internal/airspace/tiler"
 )
+
+// fatal prints an error and exits.
+func fatal(err error) {
+	fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	os.Exit(1)
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -45,8 +50,6 @@ func main() {
 		runManifest()
 	case "upload":
 		runUpload()
-	case "download":
-		runDownload()
 	case "status":
 		runStatus()
 	case "history":
@@ -111,8 +114,7 @@ func runPipeline() {
 	// Select tiler
 	activeTiler, err := airspace.SelectTiler(*tilerFlag, tiler.New(), gotiler.New())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+		fatal(err)
 	}
 	fmt.Printf("Tiler: %s\n\n", activeTiler.Name())
 
@@ -124,8 +126,7 @@ func runPipeline() {
 
 	result, err := airspace.Pipeline(opts, activeTiler)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Pipeline error: %v\n", err)
-		os.Exit(1)
+		fatal(err)
 	}
 
 	// Print summary
@@ -173,8 +174,7 @@ func runSync() {
 
 	result, err := airspace.Sync(opts)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Sync error: %v\n", err)
-		os.Exit(1)
+		fatal(err)
 	}
 
 	// Print dataset results
@@ -213,8 +213,7 @@ func runTile() {
 	// Select tiler
 	activeTiler, err := airspace.SelectTiler(*tilerFlag, tiler.New(), gotiler.New())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+		fatal(err)
 	}
 
 	fmt.Printf("Converting GeoJSON to PMTiles (using %s)\n", activeTiler.Name())
@@ -224,16 +223,14 @@ func runTile() {
 	if *datasetFlag != "" {
 		// Single dataset
 		if err := airspace.TileOne(activeTiler, *datasetFlag, *force); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
+			fatal(err)
 		}
 		fmt.Printf("[%s] ✓ done\n", *datasetFlag)
 	} else {
 		// All datasets
 		count, err := airspace.TileAll(activeTiler, *force)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
+			fatal(err)
 		}
 		fmt.Printf("\nDone: %d datasets tiled\n", count)
 	}
@@ -249,46 +246,12 @@ func runManifest() {
 	fmt.Println()
 
 	if err := airspace.GenerateManifests(airspace.DirData, airspace.DirPMTiles, airspace.DirGeoJSON); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+		fatal(err)
 	}
 
 	fmt.Printf("✓ %s\n", filepath.Join(airspace.DirData, airspace.FileManifest))
 	fmt.Printf("✓ %s\n", filepath.Join(airspace.DirData, airspace.FileUSAManifest))
 	fmt.Println("\nManifests updated.")
-}
-
-// ============================================================================
-// Download Command (legacy - use sync instead)
-// ============================================================================
-
-func runDownload() {
-	fs := flag.NewFlagSet("download", flag.ExitOnError)
-	outputDir := fs.String("output", airspace.DirGeoJSON, "Output directory")
-	datasetFlag := fs.String("dataset", "", "Specific dataset (empty = all)")
-	timeout := fs.Duration("timeout", 5*time.Minute, "HTTP timeout")
-	fs.Parse(os.Args[1:])
-
-	fmt.Println("Downloading FAA Data")
-	fmt.Println("====================")
-	fmt.Println("Note: Use 'airspace sync' for incremental updates.")
-	fmt.Println()
-
-	client := &http.Client{Timeout: *timeout}
-
-	var datasets []string
-	if *datasetFlag != "" {
-		datasets = []string{*datasetFlag}
-	} else {
-		datasets = airspace.AllDatasets
-	}
-
-	if err := airspace.Download(client, *outputDir, datasets); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("\nDone.")
 }
 
 // ============================================================================
@@ -375,16 +338,14 @@ func runUpload() {
 	if *testOnly {
 		// Test mode - check if endpoints are accessible
 		if err := airspace.TestR2Endpoints(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
+			fatal(err)
 		}
 		return
 	}
 
 	// Upload mode
 	if err := airspace.UploadToR2(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+		fatal(err)
 	}
 }
 
@@ -393,57 +354,11 @@ func runUpload() {
 // ============================================================================
 
 func runCheck() {
-	resultPath := filepath.Join(airspace.DirData, airspace.FileSyncResult)
-	result := airspace.LoadSyncResult(resultPath)
-
-	fmt.Printf("has_changes=%t\n", result.HasChanges)
-	fmt.Printf("updated_count=%d\n", result.Updated)
+	airspace.PrintCheckOutput(os.Stdout)
 }
 
 func runSummary() {
-	var out *os.File
-	if summaryPath := os.Getenv("GITHUB_STEP_SUMMARY"); summaryPath != "" {
-		f, err := os.OpenFile(summaryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			out = os.Stdout
-		} else {
-			defer f.Close()
-			out = f
-		}
-	} else {
-		out = os.Stdout
-	}
-
-	fmt.Fprintln(out, "## Airspace Sync Complete")
-	fmt.Fprintln(out)
-
-	// Sync result
-	resultPath := filepath.Join(airspace.DirData, airspace.FileSyncResult)
-	if data, err := os.ReadFile(resultPath); err == nil {
-		fmt.Fprintln(out, "### Sync Result")
-		fmt.Fprintln(out, "```json")
-		fmt.Fprintln(out, string(data))
-		fmt.Fprintln(out, "```")
-		fmt.Fprintln(out)
-	}
-
-	// PMTiles files
-	fmt.Fprintln(out, "### PMTiles Files")
-	fmt.Fprintln(out, "| File | Size |")
-	fmt.Fprintln(out, "|------|------|")
-
-	files, _ := filepath.Glob(filepath.Join(airspace.DirPMTiles, "*.pmtiles"))
-	if len(files) == 0 {
-		fmt.Fprintln(out, "| _No PMTiles found_ | - |")
-	} else {
-		for _, f := range files {
-			info, err := os.Stat(f)
-			if err != nil {
-				continue
-			}
-			sizeMB := float64(info.Size()) / 1024 / 1024
-			fmt.Fprintf(out, "| %s | %.1f MB |\n", filepath.Base(f), sizeMB)
-		}
-	}
-	fmt.Fprintln(out)
+	w, cleanup := airspace.GetSummaryWriter()
+	defer cleanup()
+	airspace.PrintSummary(w)
 }

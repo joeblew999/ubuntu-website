@@ -1,25 +1,21 @@
 # Process-Compose Tasks
 #
 # Local development process orchestration with health checks and auto-restart.
-# Now uses xplat's embedded process-compose (xplat process).
 #
 # Usage:
 #   task pc:up              Start all dev processes with TUI dashboard
 #   task pc:down            Stop all processes
 #   task pc:logs            View combined logs
 #   task pc:status          Show process status
-#
-# Enable optional processes:
-#   xplat process up --enable translate
-#   xplat process up --enable mailerlite
+#   task pc:attach          Attach to running TUI
 #
 # Documentation: https://github.com/F1bonacc1/process-compose
 
 version: '3'
 
 vars:
-  # Use xplat's embedded process-compose
-  PC_CMD: '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process'
+  PC_CMD: process-compose
+  PC_PORT: 8099
 
 tasks:
   # ===========================================================================
@@ -27,12 +23,13 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure xplat is available (process-compose is embedded)
+    desc: Ensure process-compose is installed
     internal: true
     status:
-      - test -f "{{.BIN_INSTALL_DIR}}/xplat{{exeExt}}"
+      - command -v process-compose
     cmds:
-      - task: xplat:check:deps
+      - echo "Installing process-compose (pinned in mise.toml)..."
+      - mise install process-compose
 
   # ===========================================================================
   # Core Commands (up/down/logs/status)
@@ -42,31 +39,37 @@ tasks:
     desc: Start all dev processes with TUI dashboard
     deps: [check:deps]
     cmds:
-      - '{{.PC_CMD}} up'
+      - '{{.PC_CMD}} up -p {{.PC_PORT}}'
 
   up:detached:
     desc: Start dev processes in background (no TUI)
     deps: [check:deps]
     cmds:
-      - '{{.PC_CMD}} up -t=false -d'
+      - '{{.PC_CMD}} up -p {{.PC_PORT}} -D'
+
+  attach:
+    desc: Attach to running process-compose TUI
+    deps: [check:deps]
+    cmds:
+      - '{{.PC_CMD}} attach -p {{.PC_PORT}}'
 
   down:
     desc: Stop all dev processes
     deps: [check:deps]
     cmds:
-      - '{{.PC_CMD}} down'
+      - '{{.PC_CMD}} down -p {{.PC_PORT}}'
 
   logs:
     desc: View combined process logs
     deps: [check:deps]
     cmds:
-      - '{{.PC_CMD}} logs'
+      - '{{.PC_CMD}} logs -p {{.PC_PORT}}'
 
   status:
     desc: Show process status
     deps: [check:deps]
     cmds:
-      - '{{.PC_CMD}} process list'
+      - '{{.PC_CMD}} process list -p {{.PC_PORT}}'
 
   # ===========================================================================
   # Process Control
@@ -78,7 +81,7 @@ tasks:
     requires:
       vars: [PROCESS]
     cmds:
-      - '{{.PC_CMD}} process restart {{.PROCESS}}'
+      - '{{.PC_CMD}} process restart {{.PROCESS}} -p {{.PC_PORT}}'
 
   stop:
     desc: Stop a specific process (PROCESS=hugo)
@@ -86,7 +89,7 @@ tasks:
     requires:
       vars: [PROCESS]
     cmds:
-      - '{{.PC_CMD}} process stop {{.PROCESS}}'
+      - '{{.PC_CMD}} process stop {{.PROCESS}} -p {{.PC_PORT}}'
 
   start:
     desc: Start a specific process (PROCESS=hugo)
@@ -94,36 +97,4 @@ tasks:
     requires:
       vars: [PROCESS]
     cmds:
-      - '{{.PC_CMD}} process start {{.PROCESS}}'
-
-  # ===========================================================================
-  # Process Generation (from package registry)
-  # ===========================================================================
-
-  generate:
-    desc: Generate process-compose.yaml from package registry
-    deps: [check:deps]
-    cmds:
-      - '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process-gen generate'
-
-  add:
-    desc: Add a package's process to process-compose.yaml (PKG=mailerlite)
-    deps: [check:deps]
-    requires:
-      vars: [PKG]
-    cmds:
-      - '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process-gen add {{.PKG}}'
-
-  remove:
-    desc: Remove a package's process from process-compose.yaml (PKG=mailerlite)
-    deps: [check:deps]
-    requires:
-      vars: [PKG]
-    cmds:
-      - '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process-gen remove {{.PKG}}'
-
-  list:packages:
-    desc: List packages with process configurations
-    deps: [check:deps]
-    cmds:
-      - '{{.BIN_INSTALL_DIR}}/xplat{{exeExt}} process-gen list'
+      - '{{.PC_CMD}} process start {{.PROCESS}} -p {{.PC_PORT}}'

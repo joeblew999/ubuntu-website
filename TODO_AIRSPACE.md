@@ -220,3 +220,10 @@ Mentioned in #240: https://github.com/ramSeraph/pmtiles_mosaic - third-party too
 | 2024-12-24 | 10° grid cells | ~15 cells, ~25K features each |
 | 2024-12-24 | Queue + KV coordination | Parallel cell processing |
 | 2024-12-24 | Use `pmtiles merge` | v1.29.1 supports disjoint merge |
+
+
+---
+
+CLOUDFLARE ????
+
+then we need to design for the extra actor : https://github.com/syumai/workers.  we need to be smart about this ? not sure how it can work when running on cloudflare to be honest, so you need to be very aware and be smart ... will need to also have a build phase in the taskfile so we can account for both golang and wasm too ...and will need our root taskfile to make sure that it uploads the WASM to cloudflare too ? there is alot to consider. probably need a TODO_AIRSPACE_WASM.md ?  you also have a cmd/pmtiles folder btw !!!   

@@ -81,3 +81,18 @@ processes:
       restart: on_failure
       max_restarts: 3
     disabled: true
+
+  # PMTiles server for airspace demo (Hugo can't handle range requests)
+  # Serves tiles from static/airspace/tiles/ on port 8765
+  pmtiles-server:
+    command: task pmtiles:server
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: 8765
+        path: "/faa_uas_facility_map.pmtiles"
+      initial_delay_seconds: 2
+      period_seconds: 10
+    availability:
+      restart: on_failure
+      max_restarts: 3

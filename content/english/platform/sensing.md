@@ -59,9 +59,9 @@ For detailed hardware specifications, see our [Drone Fleet Hardware →]({{< rel
 
 | Type | Examples |
 |------|----------|
-| **LiDAR** | Livox Mid-360, Avia |
-| **RGB-D Cameras** | Intel RealSense, Luxonis OAK-D |
-| **Position** | GPS/GNSS (u-blox RTK), IMU |
+| **LiDAR** | [Livox Mid-360](https://www.livoxtech.com/mid-360) ([SDK](https://github.com/Livox-SDK/Livox-SDK2)), [Avia](https://www.livoxtech.com/avia) ([demo](https://terra-1-g.djicdn.com/65c028cd298f4669a7f0e40e50ba1131/Download/Avia/02_Intro%20Demo.mp4)) |
+| **RGB-D Cameras** | [Intel RealSense](https://www.intelrealsense.com/), [Luxonis OAK-D](https://shop.luxonis.com/products/oak-d) |
+| **Position** | [u-blox RTK](https://www.u-blox.com/en/technologies/rtk-real-time-kinematic) GPS/GNSS, IMU |
 | **Industrial** | Modbus sensors, CAN bus |
 
 Swap sensors without changing code. Configuration-driven, not code-driven.

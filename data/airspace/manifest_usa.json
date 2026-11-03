@@ -2,7 +2,7 @@
   "region": "usa",
   "name": "United States",
   "version": 1,
-  "updated": "2025-12-24T07:56:51Z",
+  "updated": "2025-12-27T07:35:44Z",
   "bbox": [
     -125,
     24,
@@ -15,7 +15,7 @@
       "file": "faa_airports.pmtiles",
       "pmtiles_layer": "airports",
       "geom_type": "point",
-      "size_mb": 22.949209213256836,
+      "size_mb": 23.69624423980713,
       "features": 0,
       "zoom_range": [
         0,
@@ -42,7 +42,7 @@
       "file": "faa_airspace_boundary.pmtiles",
       "pmtiles_layer": "boundary",
       "geom_type": "polygon",
-      "size_mb": 2.516040802001953,
+      "size_mb": 0.09770870208740234,
       "features": 0,
       "zoom_range": [
         4,
@@ -121,7 +121,7 @@
       "file": "faa_uas_facility_map.pmtiles",
       "pmtiles_layer": "uas",
       "geom_type": "polygon",
-      "size_mb": 123.12504482269287,
+      "size_mb": 0.2453622817993164,
       "features": 378252,
       "zoom_range": [
         6,
@@ -148,7 +148,7 @@
       "file": "faa_navaids.pmtiles",
       "pmtiles_layer": "navaids",
       "geom_type": "point",
-      "size_mb": 2.4741592407226562,
+      "size_mb": 2.531430244445801,
       "features": 0,
       "zoom_range": [
         0,
@@ -175,7 +175,7 @@
       "file": "faa_special_use_airspace.pmtiles",
       "pmtiles_layer": "sua",
       "geom_type": "polygon",
-      "size_mb": 6.926379203796387,
+      "size_mb": 0.12520408630371094,
       "features": 0,
       "zoom_range": [
         4,

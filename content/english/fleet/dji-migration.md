@@ -6,8 +6,8 @@ image: "/images/robotics.svg"
 draft: false
 ---
 
-{{< notice "warning" >}}
-**December 23, 2025 Deadline.** Under Section 1709 of the 2025 NDAA, if no federal agency audits DJI by December 23, 2025, the FCC is required to blacklist the company. This means no new model approvals, firmware authorizations, or imports. [Learn more about the timeline](#the-situation).
+{{< notice "danger" >}}
+**The Ban Is Now in Effect.** On December 22, 2025, the FCC added DJI to the Covered List. New DJI models and RF components can no longer receive FCC approval for US sale. Existing drones remain legal to fly, but the transition clock is ticking. [Read the full breakdown →]({{< relref "/blog/dji-fcc-ban-what-happened" >}})
 {{< /notice >}}
 
 ## Why This Matters
@@ -26,11 +26,13 @@ Operators who wait will face emergency transitions at premium prices. Those who 
 
 ## The Situation
 
-### What's Happening
+### What Happened
 
-The 2025 National Defense Authorization Act (NDAA) Section 1709 requires a federal security audit of DJI drones within one year of passage (December 23, 2024). If no agency conducts the audit by December 23, 2025, DJI is automatically added to the FCC's "Covered List."
+On December 22, 2025—one day before the deadline—the FCC announced DJI's addition to the Covered List. The administration bypassed the security audit mandated by Section 1709 of the NDAA, issuing a "national security determination" instead.
 
-**The problem:** No agency was assigned to conduct the audit. DJI has repeatedly requested the audit. As of December 2025, no agency has begun the process.
+DJI sent letters in March, June, and December 2025 asking agencies to examine their products. No agency responded. No investigation was started. No evidence was gathered.
+
+Congress deliberately designed Section 1709 with trap doors: no agency was assigned to conduct the audit, and the ban was automatic if no audit occurred. The outcome was predetermined.
 
 ### What It Means
 
@@ -241,10 +243,10 @@ Most processing software (Pix4D, DroneDeploy, ODM) works with any drone that pro
 
 ---
 
-## The Clock is Ticking
+## The Clock Has Run Out
 
-December 23, 2025 is not a maybe. If you're still flying all-DJI in 2026, you're operating on borrowed time with no path to fleet expansion.
+The ban is now in effect. If you're still flying all-DJI, you're operating on borrowed time with no path to fleet expansion, uncertain firmware support, and tightening supply chains.
 
-Start your transition now. The shops that know open source are going to be very busy.
+The shops that know open source are about to be very busy.
 
 [Contact Us →](/contact?subject=dji-migration)

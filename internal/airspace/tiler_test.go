@@ -5,11 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/protomaps/go-pmtiles/pmtiles"
-
 	"github.com/joeblew999/ubuntu-website/internal/airspace"
 	"github.com/joeblew999/ubuntu-website/internal/airspace/gotiler"
 	"github.com/joeblew999/ubuntu-website/internal/airspace/tiler"
+	"github.com/joeblew999/ubuntu-website/internal/pmtiles"
 )
 
 const (
@@ -105,13 +104,18 @@ func TestGoTilerGeneratesTiles(t *testing.T) {
 
 // TestGoTilerMatchesReference verifies GoTiler output matches the golden reference.
 // The reference was generated with tippecanoe and committed to the repo.
+// This test ensures gotiler produces comparable output to tippecanoe.
 func TestGoTilerMatchesReference(t *testing.T) {
 	g := gotiler.New()
 
-	// Read reference file
+	// Read reference file and parse its header
 	refData, err := os.ReadFile(testReference)
 	if err != nil {
 		t.Fatalf("failed to read reference: %v", err)
+	}
+	refHeader, err := pmtiles.DeserializeHeader(refData[:pmtiles.HeaderV3LenBytes])
+	if err != nil {
+		t.Fatalf("failed to parse reference header: %v", err)
 	}
 
 	tmpDir := t.TempDir()
@@ -128,60 +132,70 @@ func TestGoTilerMatchesReference(t *testing.T) {
 		t.Skipf("GoTiler not yet implemented: %v", err)
 	}
 
-	// Read generated file
+	// Read and parse generated file
 	goData, err := os.ReadFile(goOutput)
 	if err != nil {
 		t.Fatalf("failed to read go output: %v", err)
 	}
 
-	// Debug: compare headers
-	t.Logf("Reference header (first 20 bytes): %x", refData[:20])
-	t.Logf("Go output header (first 20 bytes): %x", goData[:20])
-
-	// Compare sizes first (quick check)
-	if len(goData) != len(refData) {
-		t.Logf("size mismatch: go=%d bytes, reference=%d bytes", len(goData), len(refData))
-	}
-
-	// For now, just verify the file is a valid PMTiles v3
-	if len(goData) < 127 {
+	if len(goData) < pmtiles.HeaderV3LenBytes {
 		t.Fatalf("output too small for PMTiles header: %d bytes", len(goData))
 	}
 
-	// Check magic number
+	// Check magic number and version
 	if string(goData[:7]) != "PMTiles" {
-		t.Errorf("invalid magic number: %s", string(goData[:7]))
+		t.Fatalf("invalid magic number: %s", string(goData[:7]))
 	}
-
-	// Check version
 	if goData[7] != 3 {
-		t.Errorf("invalid version: %d (expected 3)", goData[7])
+		t.Fatalf("invalid version: %d (expected 3)", goData[7])
 	}
 
-	t.Log("GoTiler produces valid PMTiles v3 format")
-
-	// Verify the header can be parsed by go-pmtiles library
-	header, err := pmtiles.DeserializeHeader(goData[:pmtiles.HeaderV3LenBytes])
+	goHeader, err := pmtiles.DeserializeHeader(goData[:pmtiles.HeaderV3LenBytes])
 	if err != nil {
 		t.Fatalf("failed to deserialize header: %v", err)
 	}
 
-	t.Logf("PMTiles header: minzoom=%d, maxzoom=%d, tiles=%d",
-		header.MinZoom, header.MaxZoom, header.TileEntriesCount)
+	// Log comparison
+	t.Logf("Reference: %d tiles, %d bytes, TileDataLength=%d",
+		refHeader.TileEntriesCount, len(refData), refHeader.TileDataLength)
+	t.Logf("GoTiler:   %d tiles, %d bytes, TileDataLength=%d",
+		goHeader.TileEntriesCount, len(goData), goHeader.TileDataLength)
 
-	if header.MinZoom != uint8(config.MinZoom) {
-		t.Errorf("wrong minzoom: got %d, want %d", header.MinZoom, config.MinZoom)
+	// Test 1: Tile count must be at least 50% of reference
+	// The mini_airspace.geojson has 3 features across zoom 0-10, tippecanoe produces ~40 tiles
+	tileRatio := float64(goHeader.TileEntriesCount) / float64(refHeader.TileEntriesCount)
+	if tileRatio < 0.5 {
+		t.Errorf("too few tiles: got %d (%.1f%% of reference %d)",
+			goHeader.TileEntriesCount, tileRatio*100, refHeader.TileEntriesCount)
 	}
-	if header.MaxZoom != uint8(config.MaxZoom) {
-		t.Errorf("wrong maxzoom: got %d, want %d", header.MaxZoom, config.MaxZoom)
+
+	// Test 2: Tile data size must be at least 25% of reference
+	// (gotiler may use different compression, so allow more variance than tile count)
+	dataRatio := float64(goHeader.TileDataLength) / float64(refHeader.TileDataLength)
+	if dataRatio < 0.25 {
+		t.Errorf("tile data too small: got %d bytes (%.1f%% of reference %d)",
+			goHeader.TileDataLength, dataRatio*100, refHeader.TileDataLength)
 	}
-	if header.TileEntriesCount == 0 {
+
+	// Test 3: Zoom levels must match config
+	if goHeader.MinZoom != uint8(config.MinZoom) {
+		t.Errorf("wrong minzoom: got %d, want %d", goHeader.MinZoom, config.MinZoom)
+	}
+	if goHeader.MaxZoom != uint8(config.MaxZoom) {
+		t.Errorf("wrong maxzoom: got %d, want %d", goHeader.MaxZoom, config.MaxZoom)
+	}
+
+	// Test 4: Must have tiles (not empty output)
+	if goHeader.TileEntriesCount == 0 {
 		t.Error("no tiles in output")
 	}
 
-	// Note: Exact byte-for-byte match is not required - different tools may produce
-	// functionally equivalent but not identical files. What matters is that the
-	// tiles can be read and rendered correctly.
+	// Test 5: Overall file size sanity check
+	sizeRatio := float64(len(goData)) / float64(len(refData))
+	if sizeRatio < 0.25 {
+		t.Errorf("file too small: %d bytes (%.1f%% of reference %d)",
+			len(goData), sizeRatio*100, len(refData))
+	}
 }
 
 // TestGoTilerRealData tests with real FAA data (if available).

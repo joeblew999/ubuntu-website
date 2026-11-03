@@ -22,6 +22,11 @@ tasks:
     cmds:
       - task: :pc:down
 
+  attach:
+    desc: Attach to running dev processes TUI
+    cmds:
+      - task: :pc:attach
+
   logs:
     desc: View combined process logs
     cmds:

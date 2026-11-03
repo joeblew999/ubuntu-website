@@ -2,11 +2,13 @@
 #
 # All logic is in Go: cmd/airspace + internal/airspace
 #
-# Usage:
-#   task airspace:pipeline              - Full idempotent pipeline
+# Local development (does NOT touch R2):
+#   task airspace:pipeline              - Full pipeline: sync → tile → manifest
 #   task airspace:pipeline FORCE=true   - Force re-download and regenerate
-#   task airspace:pipeline TILER=gotiler - Use pure Go tiler
 #   task airspace:status                - Show current data status
+#
+# Production (uploads to R2):
+#   task airspace:upload                - Upload PMTiles to R2
 
 version: '3'
 
@@ -15,7 +17,7 @@ vars:
   TILER: 'auto'  # auto, tippecanoe, gotiler
 
 tasks:
-  # Primary pipeline command
+  # Primary pipeline command (local dev - no R2)
   pipeline:
     desc: Full idempotent pipeline (sync → tile → manifest)
     vars:
@@ -23,25 +25,6 @@ tasks:
       TILER_FLAG: '{{if ne .TILER "auto"}}-tiler {{.TILER}}{{end}}'
     cmds:
       - go run ./cmd/airspace pipeline {{.FORCE_FLAG}} {{.TILER_FLAG}}
-
-  # Pipeline + R2 upload
-  pipeline:upload:
-    desc: Pipeline + R2 upload (only uploads if changes)
-    vars:
-      FORCE_FLAG: '{{if eq .FORCE "true"}}-force{{end}}'
-      TILER_FLAG: '{{if ne .TILER "auto"}}-tiler {{.TILER}}{{end}}'
-    cmds:
-      - go run ./cmd/airspace pipeline {{.FORCE_FLAG}} {{.TILER_FLAG}}
-      - |
-        if [ -f "data/airspace/sync_result.json" ]; then
-          HAS_CHANGES=$(jq -r '.has_changes' data/airspace/sync_result.json)
-          if [ "$HAS_CHANGES" = "true" ]; then
-            echo "Uploading to R2..."
-            go run ./cmd/airspace upload
-          else
-            echo "No changes - skipping R2 upload"
-          fi
-        fi
 
   # Individual commands
   sync:

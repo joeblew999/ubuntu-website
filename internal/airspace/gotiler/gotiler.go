@@ -4,27 +4,19 @@
 // installing C++ binaries is impractical. The generated PMTiles files are
 // then uploaded to R2 for serving via Cloudflare CDN.
 //
-// Uses paulmach/orb for geometry and protomaps/go-pmtiles for output.
+// Uses paulmach/orb for geometry and internal/pmtiles for output (WASM-compatible).
 //
-// # Architecture Decision: Why Not Cloudflare Workers?
+// # Architecture
 //
-// This package runs in GitHub Actions, not Cloudflare Workers, because:
+// This package is designed to run in three environments:
+//  1. Local development (macOS/Linux)
+//  2. GitHub Actions (Linux)
+//  3. Cloudflare Workers (WASM) - experimental
 //
-//  1. WASM compatibility: go-pmtiles imports zombiezen.com/go/sqlite which
-//     depends on modernc.org/libc - this doesn't compile to WASM.
-//
-//  2. Resource limits: Workers have 10-50ms CPU limits and memory constraints.
-//     Processing 422MB of GeoJSON features would exceed these limits.
-//
-//  3. Batch vs streaming: Tile generation requires processing all features
-//     to determine tile intersections - this is inherently a batch operation.
-//
-//  4. PMTiles design: PMTiles is optimized for static hosting with HTTP Range
-//     requests. The browser's pmtiles.js library handles this efficiently.
-//
-// The current architecture (GitHub Actions → PMTiles → R2 → CDN → Browser)
-// is optimal because FAA data updates weekly (AIRAC cycle) and PMTiles
-// enables efficient CDN caching with Range request support.
+// The internal/pmtiles package is a minimal subset of go-pmtiles that excludes
+// SQLite dependencies, making it WASM-compatible. The current architecture
+// (GitHub Actions → PMTiles → R2 → CDN → Browser) is optimal because FAA data
+// updates weekly (AIRAC cycle) and PMTiles enables efficient CDN caching.
 package gotiler
 
 import (
@@ -37,10 +29,11 @@ import (
 	"github.com/paulmach/orb/encoding/mvt"
 	"github.com/paulmach/orb/geojson"
 	"github.com/paulmach/orb/maptile"
+	"github.com/paulmach/orb/planar"
 	"github.com/paulmach/orb/simplify"
-	"github.com/protomaps/go-pmtiles/pmtiles"
 
 	"github.com/joeblew999/ubuntu-website/internal/airspace"
+	"github.com/joeblew999/ubuntu-website/internal/pmtiles"
 )
 
 // GoTiler implements airspace.Tiler using pure Go libraries.
@@ -133,13 +126,19 @@ func (g *GoTiler) createMVT(tile maptile.Tile, features []*geojson.Feature, laye
 	tileBound := tile.Bound()
 
 	for _, f := range features {
-		// Skip if geometry doesn't intersect tile
-		if !f.Geometry.Bound().Intersects(tileBound) {
+		// Check if geometry truly intersects the tile (not just bounding boxes)
+		if !geometryIntersectsTile(f.Geometry, tileBound) {
 			continue
 		}
 
-		// Clone the feature to avoid modifying the original
-		clone := geojson.NewFeature(f.Geometry)
+		// Deep clone the geometry - MVT mutates geometry in place during Clip/Project,
+		// so we must use a copy to avoid corrupting the original for other tiles
+		clonedGeom := cloneGeometry(f.Geometry)
+		if clonedGeom == nil {
+			continue
+		}
+
+		clone := geojson.NewFeature(clonedGeom)
 		for k, v := range f.Properties {
 			clone.Properties[k] = v
 		}
@@ -160,14 +159,15 @@ func (g *GoTiler) createMVT(tile maptile.Tile, features []*geojson.Feature, laye
 		layer.Simplify(simplify.DouglasPeucker(epsilon))
 	}
 
-	// Clip to tile bounds
+	// Clip to tile bounds - this clips in world coordinates before projection
 	layer.Clip(tileBound)
 
 	// Project to tile coordinates (0-4096 extent)
 	layer.ProjectToTile(tile)
 
-	// Remove empty features after clipping
-	layer.RemoveEmpty(1.0, 1.0)
+	// Remove empty features after clipping/projection
+	// Use smaller threshold to keep more geometry
+	layer.RemoveEmpty(0.5, 0.5)
 
 	// Skip if all features were removed
 	if len(layer.Features) == 0 {
@@ -182,6 +182,88 @@ func (g *GoTiler) createMVT(tile maptile.Tile, features []*geojson.Feature, laye
 	}
 
 	return data
+}
+
+// geometryIntersectsTile checks if a geometry truly intersects a tile.
+// This is more thorough than just checking bounding box intersection.
+func geometryIntersectsTile(geom orb.Geometry, tileBound orb.Bound) bool {
+	// First check bounding box intersection (quick rejection)
+	if !geom.Bound().Intersects(tileBound) {
+		return false
+	}
+
+	// Create tile polygon for containment checks
+	tilePoly := orb.Polygon{orb.Ring{
+		tileBound.Min,
+		orb.Point{tileBound.Max[0], tileBound.Min[1]},
+		tileBound.Max,
+		orb.Point{tileBound.Min[0], tileBound.Max[1]},
+		tileBound.Min,
+	}}
+
+	switch g := geom.(type) {
+	case orb.Point:
+		return tileBound.Contains(g)
+
+	case orb.MultiPoint:
+		for _, p := range g {
+			if tileBound.Contains(p) {
+				return true
+			}
+		}
+		return false
+
+	case orb.Polygon:
+		// Check if any polygon vertex is in the tile
+		for _, ring := range g {
+			for _, p := range ring {
+				if tileBound.Contains(p) {
+					return true
+				}
+			}
+		}
+		// Check if any tile corner is in the polygon
+		for _, p := range tilePoly[0][:4] {
+			if planar.PolygonContains(g, p) {
+				return true
+			}
+		}
+		// Check if tile center is in polygon (handles case where polygon fully contains tile)
+		if planar.PolygonContains(g, tileBound.Center()) {
+			return true
+		}
+		return false
+
+	case orb.MultiPolygon:
+		for _, poly := range g {
+			if geometryIntersectsTile(poly, tileBound) {
+				return true
+			}
+		}
+		return false
+
+	case orb.LineString:
+		// Check if any vertex is in tile
+		for _, p := range g {
+			if tileBound.Contains(p) {
+				return true
+			}
+		}
+		// Check if line crosses tile (simplified check)
+		return true // If bounding boxes intersect, likely crosses
+
+	case orb.MultiLineString:
+		for _, ls := range g {
+			if geometryIntersectsTile(ls, tileBound) {
+				return true
+			}
+		}
+		return false
+
+	default:
+		// For unknown types, trust bounding box check
+		return true
+	}
 }
 
 // tilesInBounds returns all tiles at a zoom level that intersect a bounding box.
@@ -210,8 +292,11 @@ func tilesInBounds(bounds orb.Bound, zoom uint32) []maptile.Tile {
 }
 
 // simplifyEpsilon returns the simplification tolerance for a zoom level.
+// UAS features are ~0.008° grid cells, so we use smaller tolerances to avoid
+// eliminating them during simplification.
 func simplifyEpsilon(zoom maptile.Zoom) float64 {
 	// Higher zoom = less simplification
+	// Note: UAS grid cells are ~0.008° so we keep epsilon < 0.001 at all zooms
 	switch {
 	case zoom >= 14:
 		return 0 // No simplification
@@ -220,9 +305,76 @@ func simplifyEpsilon(zoom maptile.Zoom) float64 {
 	case zoom >= 6:
 		return 0.0001
 	case zoom >= 4:
-		return 0.001
+		return 0.0005 // Reduced from 0.001 to preserve small polygons
 	default:
-		return 0.01
+		return 0.001 // Reduced from 0.01 to preserve small polygons
+	}
+}
+
+// cloneGeometry creates a deep copy of geometry to avoid mutation by MVT.
+// MVT's Clip and ProjectToTile methods mutate geometry in place, which would
+// corrupt the original geometry needed for generating other tiles.
+func cloneGeometry(g orb.Geometry) orb.Geometry {
+	switch geom := g.(type) {
+	case orb.Point:
+		return orb.Point{geom[0], geom[1]}
+
+	case orb.MultiPoint:
+		clone := make(orb.MultiPoint, len(geom))
+		for i, p := range geom {
+			clone[i] = orb.Point{p[0], p[1]}
+		}
+		return clone
+
+	case orb.LineString:
+		clone := make(orb.LineString, len(geom))
+		for i, p := range geom {
+			clone[i] = orb.Point{p[0], p[1]}
+		}
+		return clone
+
+	case orb.MultiLineString:
+		clone := make(orb.MultiLineString, len(geom))
+		for i, ls := range geom {
+			clone[i] = make(orb.LineString, len(ls))
+			for j, p := range ls {
+				clone[i][j] = orb.Point{p[0], p[1]}
+			}
+		}
+		return clone
+
+	case orb.Ring:
+		clone := make(orb.Ring, len(geom))
+		for i, p := range geom {
+			clone[i] = orb.Point{p[0], p[1]}
+		}
+		return clone
+
+	case orb.Polygon:
+		clone := make(orb.Polygon, len(geom))
+		for i, ring := range geom {
+			clone[i] = make(orb.Ring, len(ring))
+			for j, p := range ring {
+				clone[i][j] = orb.Point{p[0], p[1]}
+			}
+		}
+		return clone
+
+	case orb.MultiPolygon:
+		clone := make(orb.MultiPolygon, len(geom))
+		for i, poly := range geom {
+			clone[i] = make(orb.Polygon, len(poly))
+			for j, ring := range poly {
+				clone[i][j] = make(orb.Ring, len(ring))
+				for k, p := range ring {
+					clone[i][j][k] = orb.Point{p[0], p[1]}
+				}
+			}
+		}
+		return clone
+
+	default:
+		return nil
 	}
 }
 
