@@ -1,20 +1,12 @@
 # gh - GitHub CLI Taskfile
 #
 # Wraps gh CLI for common GitHub operations.
-# Works both locally and in CI (gh is pre-installed in GitHub Actions).
-#
-# Auto-downloads from https://github.com/cli/cli/releases if not found.
+# Works both locally and in CI; gh is pinned in mise.toml.
 
 version: '3'
 
 vars:
   GH_BIN: 'gh{{exeExt}}'
-  # Source repo for downloads
-  GH_DOWNLOAD_REPO: cli/cli
-  # Platform mapping for gh release assets (gh uses macOS not darwin)
-  GH_OS_MAP: '{{if eq OS "darwin"}}macOS{{else if eq OS "windows"}}windows{{else}}linux{{end}}'
-  GH_ARCH_MAP: '{{if eq ARCH "amd64"}}amd64{{else if eq ARCH "arm64"}}arm64{{else}}{{ARCH}}{{end}}'
-  GH_EXT: '{{if eq OS "darwin"}}zip{{else if eq OS "windows"}}zip{{else}}tar.gz{{end}}'
 
 tasks:
   # ===========================================================================
@@ -29,15 +21,10 @@ tasks:
       - task: install
 
   install:
-    desc: Download and install gh CLI
+    desc: Install the mise-pinned gh CLI
     internal: true
     cmds:
-      - |
-        echo "gh CLI not found. Install options:"
-        echo "  macOS:   brew install gh"
-        echo "  Linux:   https://github.com/cli/cli#installation"
-        echo "  Windows: winget install GitHub.cli"
-        exit 1
+      - mise install gh
 
   check:validate:
     desc: Validate gh CLI works and show auth status

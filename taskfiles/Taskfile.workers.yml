@@ -35,14 +35,14 @@ tasks:
   mailerlite:deploy:
     desc: Deploy mailerlite webhook worker to Cloudflare
     dir: '{{.WORKERS_DIR}}'
-    deps: [wrangler:check:deps]
+    deps: [":wrangler:check:deps"]
     cmds:
       - '{{.WRANGLER_CMD}} deploy'
 
   mailerlite:secret:
     desc: Set MAILERLITE_API_KEY secret for the worker
     dir: '{{.WORKERS_DIR}}'
-    deps: [wrangler:check:deps]
+    deps: [":wrangler:check:deps"]
     cmds:
       - |
         echo "Setting MAILERLITE_API_KEY secret..."
@@ -52,14 +52,14 @@ tasks:
   mailerlite:dev:
     desc: Run mailerlite worker locally for development
     dir: '{{.WORKERS_DIR}}'
-    deps: [wrangler:check:deps]
+    deps: [":wrangler:check:deps"]
     cmds:
       - '{{.WRANGLER_CMD}} dev'
 
   mailerlite:tail:
     desc: Tail logs from deployed mailerlite worker
     dir: '{{.WORKERS_DIR}}'
-    deps: [wrangler:check:deps]
+    deps: [":wrangler:check:deps"]
     cmds:
       - '{{.WRANGLER_CMD}} tail'
 
@@ -83,30 +83,3 @@ tasks:
           -d "name=Test User&email=test-worker@example.com&company=Test Company&platform=macOS"
         echo ""
         echo "Check MailerLite dashboard or worker logs for the result."
-
-  # ===========================================================================
-  # Dependencies
-  # ===========================================================================
-
-  wrangler:check:deps:
-    desc: Ensure wrangler is available
-    internal: true
-    status:
-      - command -v {{.WRANGLER_CMD}} &>/dev/null
-    cmds:
-      - task: wrangler:install
-
-  wrangler:install:
-    desc: Install wrangler CLI
-    internal: true
-    cmds:
-      - |
-        echo "Installing wrangler..."
-        if command -v bun &>/dev/null; then
-          bun add -g wrangler
-        elif command -v npm &>/dev/null; then
-          npm install -g wrangler
-        else
-          echo "Error: Need bun or npm to install wrangler"
-          exit 1
-        fi

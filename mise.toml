@@ -1,7 +1,8 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 
-# ubuntu-website: tools pinned for reproducibility, plus the Google MCP server's setup tasks
-# (the site's own tasks stay in Taskfile.yml). Claude Code starts the server from .mcp.json
+# ubuntu-website: every third-party tool the Taskfiles and CI call is pinned here (Taskfiles never
+# install tools: add new ones to [tools]), plus the Google MCP server's setup tasks (the site's own
+# tasks stay in Taskfile.yml). Claude Code starts the server from .mcp.json
 # (`mise exec -- fnox exec -- google-mcp-server`).
 #
 # New machine (the Google Cloud side already exists):
@@ -24,17 +25,25 @@ idiomatic_version_file_enable_tools = ["go"]
 
 [tools]
 # CI + Taskfile tools (were installed by separate GitHub Actions / npm -g)
-task = "3.45.5"
+task = "3.54.0"
+# Held: Hugo >= 0.165 drops tailwindcss from security.exec.allow (Hugo Plate's css.TailwindCSS breaks),
+# and Cloudflare Pages builds with HUGO_VERSION=0.152.2. Upgrade both together (see CLAUDE.md Hugo Version).
 hugo-extended = "0.152.2"
-"npm:wrangler" = "4.143.0"
-bun = "1.4.2"
-node = "24.19.0"
+"npm:wrangler" = "4.156.1"
+bun = "1.4.4"
+node = "26.13.0"
+# Dev process orchestration (task dev:up / process-compose.yaml); not in Homebrew core.
+process-compose = "1.124.0"
+# GitHub CLI (tools:gh:*, release tasks).
+gh = "2.103.3"
+# Google API enablement (google-mcp:tf:*, terraform/google-mcp).
+terraform = "1.17.1"
 # Google MCP server (.mcp.json): upstream release binary, exact version.
-"github:ngs/google-mcp-server" = "0.7.1"
+"github:ngs/google-mcp-server" = "0.8.0"
 # Resolves the server's GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET from the keychain (fnox.toml).
-fnox = "1.35.0"
+fnox = "1.46.0"
 # Reads the refresh token in google:check.
-jq = "1.8.1"
+jq = "1.8.2"
 
 [env]
 # Google Cloud project (number) that owns the OAuth client. Not secret.

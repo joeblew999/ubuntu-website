@@ -1,18 +1,10 @@
 # Wrangler - Cloudflare CLI Taskfile
 #
-# Installs and manages wrangler CLI via Bun.
-# Used by cf.yml for Cloudflare Pages deployments, secrets, and cache purging.
-#
-# Wrangler is npm-only (no standalone binaries), so we install via Bun globally.
-# Uses full path to bun global bin dir since it may not be in PATH.
+# Wrangler is pinned in mise.toml (npm:wrangler) and called by name (WRANGLER_CMD).
+# Used by cf.yml for Cloudflare Pages deployments, secrets, and cache purging,
+# and by workers.yml for Cloudflare Workers.
 
 version: '3'
-
-vars:
-  # Binary name - npm/bun handles platform-specific shims (.cmd on Windows)
-  WRANGLER_BIN: 'wrangler'
-  # Bun global bin directory (consistent location)
-  BUN_GLOBAL_BIN: '{{.HOME}}/.bun/bin'
 
 tasks:
   # ===========================================================================
@@ -20,28 +12,18 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure wrangler CLI is installed via Bun
+    desc: Ensure the mise-pinned wrangler CLI is installed
     status:
-      - test -f "{{.BUN_GLOBAL_BIN}}/{{.WRANGLER_BIN}}"
+      - command -v {{.WRANGLER_CMD}}
     cmds:
-      - 'command -v bun >/dev/null 2>&1 || (echo "ERROR: Bun not installed. Install from https://bun.sh" && exit 1)'
-      - task: install
-
-  install:
-    desc: Install wrangler CLI globally via Bun
-    internal: true
-    cmds:
-      - 'echo "Installing wrangler via Bun..."'
-      - bun add -g wrangler
-      - '"{{.BUN_GLOBAL_BIN}}/{{.WRANGLER_BIN}}" --version'
-      - 'echo "OK: wrangler installed to {{.BUN_GLOBAL_BIN}}"'
+      - mise install npm:wrangler
 
   check:validate:
     desc: Validate wrangler CLI works
     deps: [check:deps]
     cmds:
       - |
-        VERSION=$("{{.BUN_GLOBAL_BIN}}/{{.WRANGLER_BIN}}" --version 2>/dev/null | head -1)
+        VERSION=$({{.WRANGLER_CMD}} --version 2>/dev/null | head -1)
         echo "OK: wrangler $VERSION"
 
   # ===========================================================================
@@ -52,13 +34,11 @@ tasks:
     desc: Show installed wrangler version
     deps: [check:deps]
     cmds:
-      - '"{{.BUN_GLOBAL_BIN}}/{{.WRANGLER_BIN}}" --version'
+      - '{{.WRANGLER_CMD}} --version'
 
   upgrade:
-    desc: Upgrade wrangler to latest version
+    desc: Upgrade wrangler to latest version (re-pins it in mise.toml)
     cmds:
-      - 'command -v bun >/dev/null 2>&1 || (echo "ERROR: Bun not installed" && exit 1)'
-      - 'echo "Upgrading wrangler to latest..."'
-      - bun add -g wrangler@latest
-      - '"{{.BUN_GLOBAL_BIN}}/{{.WRANGLER_BIN}}" --version'
-      - 'echo "OK: wrangler upgraded"'
+      - mise use --pin --path "{{.ROOT_DIR}}/mise.toml" npm:wrangler@latest
+      - '{{.WRANGLER_CMD}} --version'
+      - 'echo "OK: wrangler upgraded; commit mise.toml"'
