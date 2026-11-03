@@ -7,7 +7,7 @@ version: "0.5"
 
 processes:
   hugo:
-    command: hugo server --buildDrafts --buildFuture --bind 0.0.0.0
+    command: bash scripts/theme-css.sh && hugo server --buildDrafts --buildFuture --bind 0.0.0.0
     working_dir: .
     readiness_probe:
       http_get:

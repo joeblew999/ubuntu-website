@@ -45,6 +45,7 @@ version: '3'
 includes:
   # Domain modules
   hugo: ./taskfiles/Taskfile.hugo.yml
+  theme: ./taskfiles/Taskfile.theme.yml
   cf: ./taskfiles/Taskfile.cf.yml
   translate: ./taskfiles/Taskfile.translate.yml
   autotranslate: ./taskfiles/Taskfile.autotranslate.yml

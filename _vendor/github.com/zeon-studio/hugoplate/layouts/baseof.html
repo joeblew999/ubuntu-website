@@ -4,7 +4,7 @@
   class="{{- if not site.Params.theme_switcher -}}
     {{- site.Params.theme_default -}}
   {{- end -}}"
-  lang="{{ site.LanguageCode | default `en-US` }}"
+  lang="{{ site.Language.Locale | default `en-US` }}"
   itemtype="http://schema.org/WebPage">
   <head>
     <!-- head (don't cache it) -->
@@ -16,7 +16,7 @@
 
   </head>
 
-  <body>
+  <body class="flex flex-col min-h-screen">
     <!-- cache partial only in production -->
     {{ if hugo.IsProduction }}
       {{ partialCached "preloader.html" . }}
@@ -31,7 +31,9 @@
 
 
     <!-- announcement -->
-    {{ partialCached "announcement.html" . }}
+    {{ if templates.Exists "_partials/announcement.html" }}
+      {{ partialCached "announcement.html" . }}
+    {{ end }}
 
 
     <!-- header (don't cache it) -->
@@ -39,7 +41,7 @@
     {{ partial "search-modal.html" (dict "Context" . ) }}
 
 
-    <main>
+    <main class="grow">
       {{ block "main" . }}{{ end }}
     </main>
 

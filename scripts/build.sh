@@ -4,6 +4,8 @@
 
 set -e
 
+bash scripts/theme-css.sh
+
 if [ "$CF_PAGES_BRANCH" = "main" ]; then
   echo "🚀 Building production environment for main branch..."
   hugo -e production --gc --minify

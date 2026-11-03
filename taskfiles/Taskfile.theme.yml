@@ -1,0 +1,39 @@
+# Hugo Plate theme
+#
+# The theme is a Hugo Module, vendored in _vendor/ (exact commits in _vendor/modules.txt).
+# Our layouts/ override theme templates; data/theme.json drives colors and fonts.
+#
+# Usage:
+#   task theme:status              Show the pinned theme module commits
+#   task theme:update              Update to the latest upstream commit (repeatable; see below)
+#   task theme:update REF=<sha>    Pin Hugo Plate to a specific commit (or roll back)
+#   task theme:css                 Regenerate assets/css/generated-theme.css from data/theme.json
+#
+# Upgrade = task theme:update → review the diff → push a branch → Cloudflare preview → main.
+# Details: scripts/theme-update.sh
+
+version: '3'
+
+tasks:
+  status:
+    desc: Show the pinned Hugo Plate / gethugothemes module commits
+    cmds:
+      - grep '^# ' _vendor/modules.txt | sed 's/^# //'
+
+  update:
+    desc: Update the Hugo Plate theme (REF=<commit> to pin), sync generator + npm deps, rebuild
+    cmds:
+      - bash scripts/theme-update.sh {{.REF}}
+    vars:
+      REF: '{{.REF | default ""}}'
+
+  css:
+    desc: Regenerate assets/css/generated-theme.css from data/theme.json (Hugo Plate's generator)
+    sources:
+      - data/theme.json
+      - scripts/themeGenerator.js
+      - scripts/theme-css.sh
+    generates:
+      - assets/css/generated-theme.css
+    cmds:
+      - bash scripts/theme-css.sh

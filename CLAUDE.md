@@ -592,9 +592,20 @@ Three places must stay aligned:
 
 Hugo >= 0.165 removed `tailwindcss` from the default `security.exec.allow`; `hugo.toml` re-adds it (`[security.exec]`, per gohugoio/hugo#15178, reported upstream as zeon-studio/hugoplate#250). Hugo then requires `tailwindcss` to be the npm package (`bun install`), not a standalone binary on PATH.
 
-Hugo Plate doesn't tag releases (see [issue #188](https://github.com/zeon-studio/hugoplate/issues/188)), so we track by commit hash in `go.mod`.
+### Updating Hugo Plate (repeatable)
 
-**Updating modules:** `hugo mod get -u` updates all modules together. The gethugothemes modules share a monorepo, so they stay in sync automatically.
+Hugo Plate doesn't tag releases ([issue #188](https://github.com/zeon-studio/hugoplate/issues/188)). It and the gethugothemes modules are Hugo Modules, vendored in `_vendor/`; the exact commits are in `_vendor/modules.txt` (`task theme:status`). Not in `go.mod`: that file belongs to the Go code and `go mod tidy` strips Hugo's entries.
+
+```bash
+task theme:update              # latest upstream (re-run is a no-op when nothing changed)
+task theme:update REF=<sha>    # pin Hugo Plate to a commit, or roll back
+```
+
+`scripts/theme-update.sh` does: `hugo mod get -u` + `hugo mod vendor` (go.mod restored) → syncs `scripts/themeGenerator.js` from that commit (unmodified) → bumps/adds npm packages to match upstream's `package.json` → regenerates `assets/css/generated-theme.css` → lists changed theme templates our `layouts/` override (upstream fixes we don't get) → production build. Then review `git diff -- _vendor package.json`, push a branch, check the Cloudflare preview build, merge to main.
+
+**Don't use upstream's `themeUpdate.js`** (`curl …/tarball/main | tar`): unpinned, no checksums, and it copies templates without the npm packages/build steps they need (that's how `tailwind-bootstrap-grid` broke the build).
+
+**Theme CSS:** upstream generates colors/fonts from `data/theme.json` with `scripts/themeGenerator.js`. Its paths assume `exampleSite/` or `themes/<name>/`, so `scripts/theme-css.sh` runs it unmodified in a temp dir and writes `assets/css/generated-theme.css`. It runs before every Hugo build: `task hugo:*` (dep `theme:css`), process-compose, `scripts/build.sh` (Cloudflare), CI. After editing `data/theme.json`: `task theme:css` and commit the CSS.
 
 ### Hugo Source code
 

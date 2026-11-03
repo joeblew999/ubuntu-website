@@ -54,6 +54,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Generate theme CSS
+        run: bash scripts/theme-css.sh
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5

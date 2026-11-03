@@ -24,6 +24,7 @@ tasks:
 
   dev:
     desc: Start Hugo development server
+    deps: [':theme:css']
     cmds:
       - |
         CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
@@ -52,6 +53,7 @@ tasks:
 
   dev:lan:
     desc: Start Hugo dev server with LAN IP (for mobile testing)
+    deps: [':theme:css']
     cmds:
       - |
         LAN_IP=$(go run ./cmd/lanip 2>/dev/null || echo "127.0.0.1")
@@ -72,11 +74,13 @@ tasks:
 
   build:
     desc: Build production site
+    deps: [':theme:css']
     cmds:
       - hugo {{.HUGO_BUILD_FLAGS}}
 
   preview:
     desc: Preview production build
+    deps: [':theme:css']
     cmds:
       - hugo server {{.HUGO_PREVIEW_FLAGS}}
 
