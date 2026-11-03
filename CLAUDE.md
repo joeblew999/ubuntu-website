@@ -582,13 +582,15 @@ When working on Via coding aspects:
 
 ### Hugo Version
 
-**Current:** 0.152.2 (extended)
-**Hugo Plate requires:** v0.144+ extended
+**Current:** 0.169.0 (extended)
+**Hugo Plate requires:** v0.158+ extended (upstream uses `.Locale`/`.Label`/`hugo.Data`)
 
 Three places must stay aligned:
 1. **Local + CI**: `hugo-extended` pin in `mise.toml` (`mise install`)
-2. **Cloudflare**: `HUGO_VERSION` secret (check build logs via dashboard)
+2. **Cloudflare Pages**: `HUGO_VERSION` env var, **both** production (secret) and preview (plain text). Change preview first, push a branch, check the preview build, then production.
 3. **This doc**: Update version above when changing
+
+Hugo >= 0.165 removed `tailwindcss` from the default `security.exec.allow`; `hugo.toml` re-adds it (`[security.exec]`, per gohugoio/hugo#15178, reported upstream as zeon-studio/hugoplate#250). Hugo then requires `tailwindcss` to be the npm package (`bun install`), not a standalone binary on PATH.
 
 Hugo Plate doesn't tag releases (see [issue #188](https://github.com/zeon-studio/hugoplate/issues/188)), so we track by commit hash in `go.mod`.
 

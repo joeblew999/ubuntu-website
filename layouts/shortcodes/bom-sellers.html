@@ -1,9 +1,9 @@
 {{/* BOM Sellers Table with Country Filtering */}}
 {{/* Reads from data/fleet/bom.json, data/partners/all.json, and data/regions.json */}}
 
-{{ $bom := site.Data.fleet.bom | default (slice) }}
-{{ $partners := site.Data.partners.all | default (slice) }}
-{{ $regions := site.Data.regions | default (slice) }}
+{{ $bom := hugo.Data.fleet.bom | default (slice) }}
+{{ $partners := hugo.Data.partners.all | default (slice) }}
+{{ $regions := hugo.Data.regions | default (slice) }}
 
 {{/* Build SKU -> sellers map (active only) */}}
 {{ $skuSellers := newScratch }}

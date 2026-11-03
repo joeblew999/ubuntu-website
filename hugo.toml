@@ -45,6 +45,12 @@ path = 'page'
 # Don't watch large static files (served from R2, not Pages)
 ignoreFiles = ['static/airspace/.*\.geojson$']
 
+############################# Security ###########################
+# Hugo >= 0.165 dropped tailwindcss from the default exec allow list (gohugoio/hugo#15178);
+# Hugo Plate's css.TailwindCSS needs it. Reported upstream: zeon-studio/hugoplate#250
+[security.exec]
+allow = ['^((dart-)?sass|go|npx|babel|node|git|postcss|tailwindcss)$']
+
 ############################# Build ##############################
 [build]
 [build.buildStats]
@@ -71,9 +77,12 @@ home = ["HTML", "RSS", "WebAppManifest", "SearchIndex"]
 ############################# Imaging ############################
 [imaging]
 # See https://github.com/disintegration/imaging
-# Default JPEG or WebP quality setting. Default is 75.
-quality = 80
 resampleFilter = "Lanczos"
+# JPEG / WebP quality, set per format since Hugo 0.163. Default is 75.
+[imaging.jpeg]
+quality = 80
+[imaging.webp]
+quality = 80
 
 ############################ Caches ##############################
 [caches]

@@ -26,9 +26,8 @@ idiomatic_version_file_enable_tools = ["go"]
 [tools]
 # CI + Taskfile tools (were installed by separate GitHub Actions / npm -g)
 task = "3.54.0"
-# Held: Hugo >= 0.165 drops tailwindcss from security.exec.allow (Hugo Plate's css.TailwindCSS breaks),
-# and Cloudflare Pages builds with HUGO_VERSION=0.152.2. Upgrade both together (see CLAUDE.md Hugo Version).
-hugo-extended = "0.152.2"
+# Keep equal to Cloudflare Pages' HUGO_VERSION (production + preview); see CLAUDE.md Hugo Version.
+hugo-extended = "0.169.0"
 "npm:wrangler" = "4.156.1"
 bun = "1.4.4"
 node = "26.13.0"

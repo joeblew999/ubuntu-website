@@ -1,8 +1,8 @@
 {{/* Featured Shops - displays shops with physical locations grouped by country */}}
 {{/* Usage: {{< featured-shops >}} */}}
 
-{{ $partners := site.Data.partners.all | default (slice) }}
-{{ $regions := site.Data.regions | default (slice) }}
+{{ $partners := hugo.Data.partners.all | default (slice) }}
+{{ $regions := hugo.Data.regions | default (slice) }}
 
 {{/* Build region lookup for flags */}}
 {{ $regionLookup := dict }}

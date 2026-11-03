@@ -299,17 +299,17 @@ func TestGetMenuFilePath(t *testing.T) {
 func TestParseHugoLanguages(t *testing.T) {
 	// Create a temp languages.toml file
 	content := `[en]
-languageName = "English"
+label = "English"
 contentDir = "content/english"
 weight = 1
 
 [de]
-languageName = "German"
+label = "German"
 contentDir = "content/german"
 weight = 2
 
 [ja]
-languageName = "Japanese"
+label = "Japanese"
 contentDir = "content/japanese"
 weight = 3
 `
@@ -368,7 +368,7 @@ func TestParseHugoLanguages_NotFound(t *testing.T) {
 func TestParseHugoLanguages_InvalidTOML(t *testing.T) {
 	// Create an invalid TOML file
 	content := `[en
-languageName = "English"
+label = "English"
 `
 	tmpDir := t.TempDir()
 	langFile := filepath.Join(tmpDir, "languages.toml")

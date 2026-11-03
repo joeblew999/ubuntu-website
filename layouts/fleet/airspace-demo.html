@@ -3,7 +3,7 @@
 {{/* Hugo reads data/airspace/manifest_usa.json at build time */}}
 {{/* To add a new dataset: update Go code → regenerate manifest → Hugo rebuilds */}}
 
-{{ $manifest := site.Data.airspace.manifest_usa }}
+{{ $manifest := hugo.Data.airspace.manifest_usa }}
 
 <style>
     /* Override theme styles for full-screen map */

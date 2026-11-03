@@ -29,7 +29,7 @@ func DefaultHugoConfig() *HugoConfig {
 
 // HugoLanguageEntry represents a single language in languages.toml
 type HugoLanguageEntry struct {
-	LanguageName string `toml:"languageName"`
+	LanguageName string `toml:"label"` // display name (Hugo >= 0.158 "label", was "languageName")
 	ContentDir   string `toml:"contentDir"`
 	Weight       int    `toml:"weight"`
 }
@@ -44,12 +44,12 @@ type HugoLanguagesConfig map[string]HugoLanguageEntry
 // Hugo languages.toml format:
 //
 //	[en]
-//	languageName = "English"
+//	label = "English"
 //	contentDir = "content/english"
 //	weight = 1
 //
 //	[de]
-//	languageName = "German"
+//	label = "German"
 //	contentDir = "content/german"
 //	weight = 2
 //
@@ -467,8 +467,8 @@ func AddLanguageToHugo(code, name, dirname string) error {
 	sb.Write(data)
 	sb.WriteString(fmt.Sprintf("\n################ %s ##################\n", name))
 	sb.WriteString(fmt.Sprintf("[%s]\n", code))
-	sb.WriteString(fmt.Sprintf("languageName = \"%s\"\n", name))
-	sb.WriteString(fmt.Sprintf("languageCode = \"%s\"\n", code))
+	sb.WriteString(fmt.Sprintf("label = \"%s\"\n", name))
+	sb.WriteString(fmt.Sprintf("locale = \"%s\"\n", code))
 	sb.WriteString(fmt.Sprintf("contentDir = \"content/%s\"\n", dirname))
 	sb.WriteString(fmt.Sprintf("weight = %d\n", weight))
 
@@ -513,8 +513,8 @@ func RemoveLanguageFromHugo(code string) error {
 		}
 		sb.WriteString(fmt.Sprintf("\n################ %s ##################\n", langEntry.LanguageName))
 		sb.WriteString(fmt.Sprintf("[%s]\n", langCode))
-		sb.WriteString(fmt.Sprintf("languageName = \"%s\"\n", langEntry.LanguageName))
-		sb.WriteString(fmt.Sprintf("languageCode = \"%s\"\n", langCode))
+		sb.WriteString(fmt.Sprintf("label = \"%s\"\n", langEntry.LanguageName))
+		sb.WriteString(fmt.Sprintf("locale = \"%s\"\n", langCode))
 		sb.WriteString(fmt.Sprintf("contentDir = \"%s\"\n", langEntry.ContentDir))
 		sb.WriteString(fmt.Sprintf("weight = %d\n", langEntry.Weight))
 

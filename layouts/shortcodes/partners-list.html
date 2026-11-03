@@ -1,7 +1,7 @@
 {{/* Partners List - displays partners from data/partners/all.json */}}
 {{/* Usage: {{< partners-list status="active" tier="enterprise,professional" type="manufacturer,reseller" >}} */}}
 
-{{ $partners := site.Data.partners.all | default (slice) }}
+{{ $partners := hugo.Data.partners.all | default (slice) }}
 
 {{/* Get filter parameters */}}
 {{ $statusFilter := .Get "status" | default "" }}

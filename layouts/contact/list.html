@@ -58,7 +58,7 @@
             // Auto-fill subject from URL parameter - mappings defined in data/contact_subjects.yaml
             (function() {
               const subjectMap = {
-                {{ range $key, $value := site.Data.contact_subjects }}"{{ $key }}": "{{ $value }}",
+                {{ range $key, $value := hugo.Data.contact_subjects }}"{{ $key }}": "{{ $value }}",
                 {{ end }}
               };
               const params = new URLSearchParams(window.location.search);
