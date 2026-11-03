@@ -1,4 +1,5 @@
 # github.com/zeon-studio/hugoplate v0.0.0-20261028023344-bc03de7ccd8f
+# github.com/gethugothemes/hugo-modules/llms-txt v0.0.0-20261026040551-4725d0853d0c
 # github.com/gethugothemes/hugo-modules/search v0.0.0-20261026040551-4725d0853d0c
 # github.com/gethugothemes/hugo-modules/pwa v0.0.0-20261026040551-4725d0853d0c
 # github.com/gethugothemes/hugo-modules/images v0.0.0-20261026040551-4725d0853d0c
@@ -22,4 +23,3 @@
 # github.com/gethugothemes/hugo-modules/seo-tools/basic-seo v0.0.0-20261026040551-4725d0853d0c
 # github.com/gethugothemes/hugo-modules/seo-tools/site-verifications v0.0.0-20261026040551-4725d0853d0c
 # github.com/gethugothemes/hugo-modules/seo-tools/google-tag-manager v0.0.0-20261026040551-4725d0853d0c
-# github.com/hugomods/mermaid v0.1.4

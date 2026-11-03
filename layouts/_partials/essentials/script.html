@@ -43,16 +43,28 @@
   src="{{ $scriptsLazy.RelPermalink }}"></script>
 
 <!-- progressive web app -->
-{{ partialCached "pwa.html" . }}
+{{/* https://github.com/gethugothemes/hugo-modules/tree/master/pwa */}}
+{{ if templates.Exists "_partials/pwa.html" }}
+  {{ partialCached "pwa.html" . }}
+{{ end }}
 
 
 <!-- cookie consent -->
-{{ partialCached "cookie-consent.html" . }}
+{{/* https://github.com/gethugothemes/hugo-modules/tree/master/components/cookie-consent */}}
+{{ if templates.Exists "_partials/cookie-consent.html" }}
+  {{ partialCached "cookie-consent.html" . }}
+{{ end }}
 
 
 <!-- google adsense -->
-{{ partialCached "adsense-script.html" . }}
+{{/* https://github.com/gethugothemes/hugo-modules/tree/master/adsense */}}
+{{ if templates.Exists "_partials/adsense-script.html" }}
+  {{ partialCached "adsense-script.html" . }}
+{{ end }}
 
 
-<!-- cookie consent -->
-{{ partialCached "announcement-script.html" . }}
+<!-- announcement -->
+{{/* https://github.com/gethugothemes/hugo-modules/tree/master/components/announcement */}}
+{{ if templates.Exists "_partials/announcement-script.html" }}
+  {{ partialCached "announcement-script.html" . }}
+{{ end }}

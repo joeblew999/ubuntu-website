@@ -32,7 +32,7 @@ Key points:
 
 Each is safe to re-run: with nothing new upstream it changes nothing.
 - New machine: `task setup` (= `mise trust && mise install`, then `bun install` + `go mod download`).
-- Not in the mise registry, so still installed by Taskfile: tippecanoe (optional), gcloud (optional), task-ui (`go install` from xplat). The project's own Go CLIs (`cmd/*`) are built by Taskfile.
+- Not available through mise, so documented instead: tippecanoe (optional, `task airspace:install:tippecanoe`), gcloud (optional, only for `google-mcp:tf:auth:manual`). The Claude CLI is your machine-wide tool (Anthropic's installer, `task claude-cli:install`), not a project pin. The project's own Go CLIs (`cmd/*`) are built by Taskfile.
 
 ### Code Structure (internal vs pkg)
 - Keep project-only helpers in `internal/` (e.g., `internal/codecinstaller`), not API-stable.
@@ -54,7 +54,6 @@ Each is safe to re-run: with nothing new upstream it changes nothing.
 |---------|---------|
 | `task dev:up` | Start Hugo + tools with TUI dashboard |
 | `task dev:down` | Stop all processes |
-| `task dev:ui` | Start Task-UI web dashboard |
 
 ### Branding Assets
 
@@ -268,7 +267,7 @@ Configured inside Gmail settings to send outbound email through SMTP2GO relay. T
 
 ### Gmail CLI Tool
 
-Unified email sending via API or browser automation. **From address is always `gerard.webb@ubuntusoftware.net`** - hardcoded to prevent mistakes.
+Unified email sending via the Gmail API, or via Gmail's compose window in your browser. **From address is always `gerard.webb@ubuntusoftware.net`** - hardcoded to prevent mistakes.
 
 **CLI:** `cmd/gmail/main.go`
 **Package:** `internal/gmail/`
@@ -278,7 +277,7 @@ Unified email sending via API or browser automation. **From address is always `g
 | Mode | Command | Use Case |
 |------|---------|----------|
 | API | `gmail send --mode=api` | Headless, most reliable (default) |
-| Browser | `gmail send --mode=browser` | Fallback when API unavailable |
+| Browser | `gmail send --mode=browser` | Fallback when API unavailable: opens compose in your default browser, you click Send |
 | Compose | `gmail compose` | Opens Gmail for user review before send |
 | Server | `gmail server` | HTTP webhook endpoint for external triggers |
 
@@ -294,7 +293,7 @@ task gmail:server       # Start webhook server (port 8087)
 # Send via API (recommended)
 task gmail:send TO=user@example.com SUBJECT="Hello" BODY="Message"
 
-# Send via browser automation (fallback)
+# Open compose in your browser (fallback; you click Send)
 task gmail:send:browser TO=user@example.com SUBJECT="Hello" BODY="Message"
 
 # Open compose for review (user clicks send)
@@ -613,15 +612,17 @@ task theme:update REF=<sha>    # pin Hugo Plate to a commit, or roll back
 
 ### Hugo Source code
 
-When working on Hugo coding aspects use the source at:
+When working on Hugo coding aspects use the source of the pinned version (`hugo-extended` in `mise.toml`):
 
-- **Source code**: `/Users/apple/workspace/go/src/github.com/joeblew999/wellknown/.src/hugo`
+- **Source code**: https://github.com/gohugoio/hugo (check out the tag matching the pin, e.g. `v0.169.0`)
+- **Release notes** (breaking changes, deprecations): `gh release view v<version> -R gohugoio/hugo`
 
 ### Hugo Plate Source code
 
 When working on Hugo Plate, which is a Hugo theme:
 
-- **Source code**: `/Users/apple/workspace/go/src/github.com/joeblew999/wellknown/.src/hugoplate`
+- **Source code (exact pinned commit)**: `_vendor/github.com/zeon-studio/hugoplate/` (commit in `_vendor/modules.txt`; full repo incl. `scripts/` in `$(go env GOMODCACHE)/github.com/zeon-studio/hugoplate@<version>/`)
+- **Upstream**: https://github.com/zeon-studio/hugoplate
 
 - Only use Hugo template things properly. I do not want to steer away from the standard Hugo Plate way of doing things !!
 

@@ -1,9 +1,13 @@
 [hugoVersion]
 extended = true
-min = "0.144.0"
+min = "0.158.0"
 
 [[imports]]
 path = "github.com/zeon-studio/hugoplate"
+
+# /llms.txt + /llms-full.txt (llmstxt.org) and a .md copy of each page, for AI assistants
+[[imports]]
+path = "github.com/gethugothemes/hugo-modules/llms-txt"
 
 [[imports]]
 path = "github.com/gethugothemes/hugo-modules/search"
@@ -94,6 +98,3 @@ path = "github.com/gethugothemes/hugo-modules/seo-tools/google-tag-manager"
 
 # [[imports]]
 # path = "github.com/gethugothemes/hugo-modules/seo-tools/counter-analytics"
-
-[[imports]]
-path = "github.com/hugomods/mermaid"

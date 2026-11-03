@@ -2,7 +2,7 @@
 title: "Google Workspace via MCP: Zero-Config AI Integration"
 meta_title: "Google Workspace via MCP: Zero-Config AI Integration | Ubuntu Software"
 description: "Connect any AI—cloud, local, or your own—to Gmail, Calendar, Drive, Sheets, Docs, and Slides with one command. MCP means no vendor lock-in. Just provide your email."
-date: 2024-12-15T10:00:00Z
+date: 2025-12-15T10:00:00Z
 image: "/images/blog/google-mcp-integration.svg"
 categories: ["Publish", "AI"]
 author: "Gerard Webb"

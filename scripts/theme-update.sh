@@ -7,7 +7,8 @@
 #   - syncs scripts/themeGenerator.js from the pinned commit (kept unmodified)
 #   - bumps/adds the npm packages upstream's package.json needs (e.g. tailwind-bootstrap-grid)
 #   - regenerates assets/css/generated-theme.css and runs a production build
-#   - lists changed theme templates that our layouts/ override (upstream fixes we don't get)
+#   - 3-way merges upstream changes into the templates our layouts/ override
+#     (clean merges applied for review, conflicts written to .theme-merge/)
 # go.mod/go.sum are restored afterwards: they belong to the Go code and `go mod tidy` strips
 # Hugo's entries anyway; _vendor/modules.txt is the theme pin.
 #
@@ -73,17 +74,39 @@ fi
 echo "==> Theme CSS"
 bash scripts/theme-css.sh
 
-echo "==> Changed theme templates that our layouts/ override (upstream changes we don't get)"
+echo "==> Upstream changes to templates our layouts/ override (3-way merge, base = previously vendored)"
+# Clean merges are applied (review them: a clean merge can still drop something we rely on);
+# conflicts go to .theme-merge/ (gitignored) for hand resolution.
+rm -rf .theme-merge
 overridden=0
+conflicts=0
 while read -r f; do
   rel=${f#*/layouts/}
+  ours=""
   for cand in "$rel" "${rel/#partials\//_partials/}" "${rel/#_partials\//partials/}"; do
-    if [ -f "layouts/$cand" ]; then
-      echo "    layouts/$cand"
-      overridden=$((overridden + 1))
-      break
-    fi
+    [ -f "layouts/$cand" ] && { ours="layouts/$cand"; break; }
   done
+  [ -n "$ours" ] || continue
+  overridden=$((overridden + 1))
+  if [ ! -f "$f" ]; then
+    echo "    $ours: upstream removed or moved $rel (is our override still used?)"
+    continue
+  fi
+  git show "HEAD:$f" > "$tmp/base" 2>/dev/null || : > "$tmp/base"
+  if git merge-file -p "$ours" "$tmp/base" "$f" > "$tmp/merged" 2>/dev/null; then
+    if cmp -s "$tmp/merged" "$ours"; then
+      echo "    $ours: nothing to apply"
+    else
+      cp "$tmp/merged" "$ours"
+      echo "    $ours: merged upstream changes"
+    fi
+  else
+    mkdir -p .theme-merge
+    out=".theme-merge/$(echo "${ours#layouts/}" | tr / _)"
+    cp "$tmp/merged" "$out"
+    echo "    $ours: CONFLICT, resolve from $out"
+    conflicts=$((conflicts + 1))
+  fi
 done < <(git diff --name-only HEAD -- '_vendor/*/layouts/*'; git ls-files --others --exclude-standard -- '_vendor/*/layouts/*')
 [ "$overridden" -gt 0 ] || echo "    none"
 
@@ -97,7 +120,11 @@ grep -E "^WARN" "$tmp/build.log" | sed 's/^/    /' || true
 grep -E "Pages |Total in" "$tmp/build.log" | sed 's/^/    /'
 
 echo ""
-if git diff --quiet -- _vendor package.json bun.lock scripts/themeGenerator.js assets/css/generated-theme.css \
+if [ "$conflicts" -gt 0 ]; then
+  echo "✗ $conflicts template conflict(s): resolve the files in .theme-merge/ into layouts/, then re-run"
+  exit 1
+fi
+if git diff --quiet -- _vendor package.json bun.lock scripts/themeGenerator.js assets/css/generated-theme.css layouts \
   && [ -z "$(git ls-files --others --exclude-standard -- _vendor)" ]; then
   echo "✓ Already up to date (hugoplate $sha)"
 else

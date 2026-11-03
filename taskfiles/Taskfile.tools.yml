@@ -8,7 +8,6 @@
 #   gh       - GitHub CLI for releases, workflows, PRs, issues
 #   wrangler - Cloudflare CLI for Pages, Workers, KV (installed via Bun)
 #   pc       - Process-Compose for local dev orchestration
-#   tui      - Task-UI web dashboard for task execution
 
 version: '3'
 
@@ -28,9 +27,6 @@ includes:
   pc:
     taskfile: ./tools/Taskfile.process-compose.yml
     optional: true  # Optional local dev tool
-  tui:
-    taskfile: ./tools/Taskfile.task-ui.yml
-    optional: true  # Optional web dashboard
 
 tasks:
   # ===========================================================================

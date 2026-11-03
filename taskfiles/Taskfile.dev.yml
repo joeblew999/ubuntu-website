@@ -7,7 +7,6 @@
 #   task dev:down    Stop all processes
 #   task dev:logs    View combined logs
 #   task dev:status  Show process status
-#   task dev:ui      Start Task-UI web dashboard
 
 version: '3'
 
@@ -37,8 +36,3 @@ tasks:
     cmds:
       - task: :pc:status
 
-  # Task-UI (web dashboard)
-  ui:
-    desc: Start Task-UI web dashboard
-    cmds:
-      - task: :tui:up

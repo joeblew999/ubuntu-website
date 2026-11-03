@@ -12,9 +12,14 @@
   {{ if $categories }}
     <ul class="mb-4">
       <li class="mr-4 inline-block">
-        <a href="{{ `authors/` | relLangURL }}{{ .Params.Author | urlize }}/">
-          <i class="fa-regular fa-circle-user mr-2"></i>{{ .Params.author }}
-        </a>
+        {{ $author := .Params.author }}
+        {{ with site.GetPage (printf "/authors/%s" ($author | urlize)) }}
+          <a href="{{ .RelPermalink }}">
+            <i class="fa-regular fa-circle-user mr-2"></i>{{ $author }}
+          </a>
+        {{ else }}
+          <i class="fa-regular fa-circle-user mr-2"></i>{{ $author }}
+        {{ end }}
       </li>
       <li class="mr-4 inline-block">
         <i class="fa-regular fa-folder mr-1"></i>
@@ -32,6 +37,6 @@
   {{ end }}
   <p class="mb-6">{{ .Summary | plainify }}</p>
   <a class="btn btn-outline-primary btn-sm" href="{{ .RelPermalink }}">
-    {{ T "read_more" }}
+    {{ T "read_more" | default "Read More" }}
   </a>
 </div>

@@ -253,9 +253,15 @@ func (t *MarkdownTranslator) translateBody(ctx context.Context, body, sourceLang
 		return "", err
 	}
 
-	// Restore protected content
-	for key, original := range protected {
-		translated = strings.ReplaceAll(translated, key, original)
+	// Restore protected content, newest placeholder first: later passes can wrap earlier
+	// placeholders (a link URL that is a relref shortcode becomes a placeholder holding a
+	// placeholder), so restoring outside-in uncovers the inner ones before they're replaced.
+	for i := counter - 1; i >= 0; i-- {
+		key := fmt.Sprintf("%s%d%s", placeholderPrefix, i, placeholderSuffix)
+		translated = strings.ReplaceAll(translated, key, protected[key])
+	}
+	if strings.Contains(translated, placeholderPrefix) {
+		return "", fmt.Errorf("translation dropped or altered %s…%s placeholders; refusing to write broken output", placeholderPrefix, placeholderSuffix)
 	}
 
 	return translated, nil

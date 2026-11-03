@@ -31,6 +31,8 @@ vars:
   # Fork builds go to DIR_BUILD (gitignored, project-local)
   GOOGLE_MCP_BIN: '{{.ROOT_DIR}}/{{.DIR_BUILD}}/google-mcp-server'
   ACCOUNTS_DIR: '{{.HOME}}/.google-mcp-accounts'
+  # Application-default credentials: written by tf:auth (google auth login) or gcloud
+  ADC_FILE: '{{.HOME}}/.config/gcloud/application_default_credentials.json'
   # Source directory for fork development (uses global SRC_DIR)
   GOOGLE_MCP_SRC: '{{.SRC_DIR}}/google-mcp-server'
 
@@ -279,7 +281,7 @@ tasks:
   # ============================================================================
 
   tf:check:deps:
-    desc: "Check Terraform dependencies (terraform, gcloud)"
+    desc: "Check Terraform dependencies (terraform + application-default credentials; gcloud not needed)"
     cmds:
       - |
         echo "Checking Terraform dependencies..."
@@ -294,21 +296,12 @@ tasks:
           missing=1
         fi
 
-        # Check gcloud
-        if command -v gcloud &>/dev/null; then
-          echo "✅ gcloud: $(gcloud version 2>/dev/null | head -1 | awk '{print $4}')"
+        # Application-default credentials (what the Terraform Google provider reads)
+        if [ -f "{{.ADC_FILE}}" ]; then
+          echo "✅ credentials: {{.ADC_FILE}}"
         else
-          echo "❌ gcloud: not installed"
-          echo "   Install: brew install --cask google-cloud-sdk"
-          missing=1
-        fi
-
-        # Check gcloud auth
-        if gcloud auth application-default print-access-token &>/dev/null 2>&1; then
-          echo "✅ gcloud auth: authenticated"
-        else
-          echo "❌ gcloud auth: not authenticated"
-          echo "   Run: gcloud auth application-default login"
+          echo "❌ credentials: none"
+          echo "   Run: task google-mcp:tf:auth   (no gcloud needed)"
           missing=1
         fi
 
@@ -317,8 +310,7 @@ tasks:
         fi
     status:
       - command -v terraform
-      - command -v gcloud
-      - gcloud auth application-default print-access-token &>/dev/null
+      - test -f "{{.ADC_FILE}}"
 
   tf:install:deps:
     desc: "Install Terraform (mise-pinned); gcloud is optional"
@@ -326,7 +318,7 @@ tasks:
       - mise install terraform
       - |
         echo ""
-        echo "gcloud CLI is OPTIONAL (only tf:auth:manual and tf:setup use it):"
+        echo "gcloud CLI is OPTIONAL (only tf:auth:manual uses it):"
         echo "  macOS: brew install --cask google-cloud-sdk"
         echo "  Other: https://cloud.google.com/sdk/docs/install"
         echo ""
@@ -462,23 +454,14 @@ tasks:
         fi
         echo "✅ terraform installed"
 
-        if ! command -v gcloud &>/dev/null; then
-          echo "Installing gcloud..."
-          brew install --cask google-cloud-sdk
-        fi
-        echo "✅ gcloud installed"
-
-        # Step 2: Check gcloud auth
+        # Step 2: Application-default credentials (Terraform's Google provider reads these)
         echo ""
-        echo "Step 2: Checking gcloud authentication..."
-        if ! gcloud auth application-default print-access-token &>/dev/null 2>&1; then
-          echo ""
-          echo "You need to authenticate with gcloud."
-          echo "This will open a browser window."
-          echo ""
-          gcloud auth application-default login
+        echo "Step 2: Checking credentials..."
+        if [ ! -f "{{.ADC_FILE}}" ]; then
+          echo "Signing in (opens the browser; no gcloud needed)..."
+          task google-mcp:tf:auth
         fi
-        echo "✅ gcloud authenticated"
+        echo "✅ credentials: {{.ADC_FILE}}"
 
         # Step 3: Configure project
         echo ""

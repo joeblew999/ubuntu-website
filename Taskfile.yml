@@ -33,7 +33,6 @@ version: '3'
 #   ci:*        - CI interface tasks
 #   dev:*       - Development workflow (wraps pc + tui)
 #   pc:*        - Process-Compose (dev process orchestration)
-#   tui:*       - Task-UI (web dashboard for tasks)
 #
 # =============================================================================
 
@@ -71,7 +70,6 @@ includes:
   # Development workflow
   dev: ./taskfiles/Taskfile.dev.yml
   pc: ./taskfiles/tools/Taskfile.process-compose.yml
-  tui: ./taskfiles/tools/Taskfile.task-ui.yml
   wrangler: ./taskfiles/tools/Taskfile.wrangler.yml
 
   # MCP servers

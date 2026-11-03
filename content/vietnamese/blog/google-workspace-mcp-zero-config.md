@@ -2,7 +2,7 @@
 title: "Google Workspace thông qua MCP: Tích hợp Trí tuệ Nhân tạo (AI) không cần cấu hình"
 meta_title: "Google Workspace thông qua MCP: Tích hợp Trí tuệ Nhân tạo (AI) không cần cấu hình | Ubuntu Software"
 description: "Kết nối bất kỳ hệ thống AI nào—đám mây, cục bộ hoặc của riêng bạn—với Gmail, Lịch, Drive, Trang tính, Tài liệu và Trang trình bày chỉ với một lệnh. MCP có nghĩa là không bị ràng buộc bởi nhà cung cấp. Chỉ cần cung cấp địa chỉ email của bạn."
-date: 2024-12-15T10:00:00Z
+date: 2025-12-15T10:00:00Z
 image: "/images/blog/google-mcp-integration.svg"
 categories: ["Publish", "AI"]
 author: "Gerard Webb"

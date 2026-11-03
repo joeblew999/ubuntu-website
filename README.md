@@ -6,10 +6,6 @@ http://localhost:1313
 
 http://localhost:1313/fleet/airspace-demo/
 
-http://192.168.0.156:1313/
-
-http://192.168.0.156:1313/fleet/airspace-demo/
-
 https://www.ubuntusoftware.net
 
 https://www.ubuntusoftware.net/sitemap.xml

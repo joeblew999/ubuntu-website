@@ -27,6 +27,7 @@ logs/
 
 # Task (checksum cache)
 .task/
+.theme-merge/
 
 # Testing
 .playwright-mcp/

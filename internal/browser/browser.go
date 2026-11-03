@@ -48,69 +48,6 @@ func OpenURLAndWait(url string) error {
 	return cmd.Run()
 }
 
-// FindPlaywrightBinary locates the Playwright CLI binary.
-// Searches in order:
-// 1. PLAYWRIGHT_BIN environment variable
-// 2. .playwright-mcp/node_modules/.bin/playwright (project-local)
-// 3. node_modules/.bin/playwright (npm-local)
-// 4. PATH lookup
-func FindPlaywrightBinary() string {
-	// 1. Environment variable override
-	if bin := os.Getenv("PLAYWRIGHT_BIN"); bin != "" {
-		if _, err := os.Stat(bin); err == nil {
-			return bin
-		}
-	}
-
-	// 2. Project-local .playwright-mcp directory
-	if bin := ".playwright-mcp/node_modules/.bin/playwright"; fileExists(bin) {
-		return bin
-	}
-
-	// 3. npm-local node_modules
-	if bin := "node_modules/.bin/playwright"; fileExists(bin) {
-		return bin
-	}
-
-	// 4. PATH lookup
-	if path, err := exec.LookPath("playwright"); err == nil {
-		return path
-	}
-
-	// Default fallback (will fail if not found, but gives clear error)
-	return "playwright"
-}
-
-// FindPlaywrightBinaryInDir locates Playwright relative to a specific directory.
-// Useful when running from different working directories.
-func FindPlaywrightBinaryInDir(dir string) string {
-	// 1. Environment variable override
-	if bin := os.Getenv("PLAYWRIGHT_BIN"); bin != "" {
-		if _, err := os.Stat(bin); err == nil {
-			return bin
-		}
-	}
-
-	// 2. Project-local .playwright-mcp directory
-	bin := filepath.Join(dir, ".playwright-mcp/node_modules/.bin/playwright")
-	if fileExists(bin) {
-		return bin
-	}
-
-	// 3. npm-local node_modules
-	bin = filepath.Join(dir, "node_modules/.bin/playwright")
-	if fileExists(bin) {
-		return bin
-	}
-
-	// 4. PATH lookup
-	if path, err := exec.LookPath("playwright"); err == nil {
-		return path
-	}
-
-	return "playwright"
-}
-
 // GetProjectRoot attempts to find the project root directory.
 // Walks up from current directory looking for go.mod or .git.
 func GetProjectRoot() (string, error) {
@@ -124,8 +61,8 @@ func GetProjectRoot() (string, error) {
 		if fileExists(filepath.Join(dir, "go.mod")) {
 			return dir, nil
 		}
-		// Check for .git
-		if fileExists(filepath.Join(dir, ".git")) {
+		// Check for .git (a directory, or a file in worktrees/submodules)
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
 			return dir, nil
 		}
 

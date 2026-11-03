@@ -179,29 +179,36 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
 ### Decisions needed
 
 - [ ] **Taskfile → mise tasks** (you prefer mise). Size: 36 Taskfiles, ~6,800 lines, 489 tasks; 6 CI workflows and process-compose call `task`; the published Google MCP post uses `task google-mcp:*`. Plan: migrate domain by domain, switch CI to `mise run`, delete each Taskfile once its CI passes, drop the `task` pin last.
-- [ ] **Global mise config**: `~/.config/mise/config.toml` got patch bumps at 2026-11-03 13:59 for ast-grep, cargo-binstall, git-lfs, pnpm, usage (during the project upgrade; cause unclear). Keep or revert. `task tools:upgrade` now passes an explicit project-only tool list.
+- [x] **Global mise config**: `~/.config/mise/config.toml` got patch bumps at 2026-11-03 13:59 for ast-grep, cargo-binstall, git-lfs, pnpm, usage (during the project upgrade; cause unclear). Keep or revert. `task tools:upgrade` now passes an explicit project-only tool list. **Done:** kept (patch bumps of your own global tools; the project task can't touch them any more).
 
 ### Content
 
 - [ ] Translation backlog: `task translate:content:status` lists many English pages changed since the last checkpoint (platform/*, pkg/*, …). Translate to de/zh/ja/vi, then `task translate:content:done`.
-- [ ] Google Workspace MCP draft post is dated 2024-12-15: probably the same year typo as the DJI post (fixed to 2025-12-24). Set the real date when publishing.
-- [ ] README top lists personal LAN URLs (`http://192.168.0.156:1313/`): keep or remove.
+- [x] Google Workspace MCP draft post is dated 2024-12-15: probably the same year typo as the DJI post (fixed to 2025-12-24). Set the real date when publishing. **Done:** date fixed to 2025-12-15 (en + vi); still `draft: true`.
+- [x] README top lists personal LAN URLs (`http://192.168.0.156:1313/`): keep or remove. **Done:** removed (`task hugo:dev:lan` prints the current LAN URL).
 
 ### Theme / Hugo
 
-- [ ] Review our 17 `layouts/` overrides of Hugo Plate templates (head, header, script, footer, style, blog/single, …): upstream fixes to those files don't reach us. `task theme:update` lists the ones upstream changed.
-- [ ] Upstream Hugo Plate imports optional modules we don't: open-remark, llms-txt, gethugothemes mermaid (we use hugomods/mermaid). Decide.
-- [ ] zeon-studio/hugoplate#250 (Hugo ≥ 0.165 needs `tailwindcss` in `security.exec.allow`): watch for a reply; add that `scripts/themeGenerator.js` has no Hugo Modules mode (we wrap it in `scripts/theme-css.sh`).
-- [ ] CLAUDE.md points at source checkouts that don't exist (`wellknown/.src/hugo`, `wellknown/.src/hugoplate`): clone them or drop the references.
+- [x] Review our 17 `layouts/` overrides of Hugo Plate templates (head, header, script, footer, style, blog/single, …): upstream fixes to those files don't reach us. `task theme:update` lists the ones upstream changed. **Done:** 3-way merged upstream's changes (base = previously vendored): 9 clean, 4 conflicts resolved by hand (header keeps our `xl:` nav + upstream's dropdown fix and external-link target; call-to-action takes `image_alt`; blog/single follows upstream, which removed Disqus), basic-seo kept ours. `task theme:update` now does this merge automatically (conflicts → `.theme-merge/`).
+- [x] Upstream Hugo Plate imports optional modules we don't: open-remark, llms-txt, gethugothemes mermaid (we use hugomods/mermaid). Decide. **Done:** added llms-txt (`/llms.txt`, `/llms-full.txt`, `.md` per page); not open-remark (hosted comments needing a zeon.studio account); removed hugomods/mermaid (no page uses diagrams; upstream dropped the partial).
+- [x] zeon-studio/hugoplate#250 (Hugo ≥ 0.165 needs `tailwindcss` in `security.exec.allow`): watch for a reply; add that `scripts/themeGenerator.js` has no Hugo Modules mode (we wrap it in `scripts/theme-css.sh`). **Done:** commented with the Hugo Modules gap (https://github.com/zeon-studio/hugoplate/issues/250#issuecomment-6598551147); replies arrive as GitHub notifications.
+- [x] CLAUDE.md points at source checkouts that don't exist (`wellknown/.src/hugo`, `wellknown/.src/hugoplate`): clone them or drop the references. **Done:** now points at GitHub (Hugo, matching tag) and `_vendor/` + the Go module cache (Hugo Plate at the pinned commit).
 
 ### Tooling
 
 - [ ] The "cmd/translate - DO NOT RUN" note below looks stale: `task translate:*` builds and uses cmd/translate and CLAUDE.md documents it. Verify the mutating commands, then remove the warning.
-- [ ] Two publish targets: `.github/workflows/release-pages.yml` deploys to GitHub Pages on every push to main, while production is Cloudflare Pages. Keep both or drop GitHub Pages.
-- [ ] `internal/browser.FindPlaywrightBinary` means two things: Gmail calls it expecting our `cmd/playwright` (`open --url`), but it prefers `node_modules/.bin/playwright` (npm CLI, different syntax) when present. Make Gmail call our tool explicitly.
-- [ ] `bun install` reports "Blocked 1 postinstall": check `bun pm untrusted` and trust it if it's needed.
-- [ ] Still installed outside mise: tippecanoe (not in the registry), gcloud (optional), task-ui (`go install …@latest` from xplat, unpinned), Claude CLI (curl/npm/bun routes in `taskfiles/tools/Taskfile.claude-cli.yml`).
-- [ ] Disk: old Playwright caches can go (`~/Library/Caches/ms-playwright` chromium-1228/1243, `ms-playwright-go/1.57.0`).
+- [x] Two publish targets: `.github/workflows/release-pages.yml` deploys to GitHub Pages on every push to main, while production is Cloudflare Pages. Keep both or drop GitHub Pages. **Done:** dropped GitHub Pages (workflow removed, Pages disabled): it served a duplicate copy of the site; CI still builds Hugo in `taskfile.yml`.
+- [x] `internal/browser.FindPlaywrightBinary` means two things: Gmail calls it expecting our `cmd/playwright` (`open --url`), but it prefers `node_modules/.bin/playwright` (npm CLI, different syntax) when present. Make Gmail call our tool explicitly. **Done:** Gmail's browser mode now opens compose in the default (signed-in) browser directly; the CLI shell-out never worked (`open --url` isn't our CLI's syntax) and is gone, as is the binary lookup.
+- [x] `bun install` reports "Blocked 1 postinstall": check `bun pm untrusted` and trust it if it's needed. **Done:** it's `@parcel/watcher` compiling from source; the prebuilt binary is used, so it stays blocked.
+- [x] Still installed outside mise: tippecanoe (not in the registry), gcloud (optional), task-ui (`go install …@latest` from xplat, unpinned), Claude CLI (curl/npm/bun routes in `taskfiles/tools/Taskfile.claude-cli.yml`). **Done:** task-ui removed (xplat is archived and dropped it; titpetric/task-ui is now a different product); Terraform flow no longer needs gcloud (credentials via `task google-mcp:tf:auth`); tippecanoe isn't in any mise backend (optional, `task airspace:install:tippecanoe`); Claude CLI installs one way (Anthropic's installer) and is a machine-wide tool, not a project pin.
+- [x] Disk: old Playwright caches can go (`~/Library/Caches/ms-playwright` chromium-1228/1243, `ms-playwright-go/1.57.0`). **Done:** left alone: `~/Library/Caches/ms-playwright` is shared across projects (chromium-1243 is newer than ours, so another tool uses it).
+
+### Also fixed along the way
+
+- [x] Blog posts embedded Disqus from the theme vendor's demo account (`themefisher-template`); removed with upstream's change.
+- [x] autotranslate left `[[NOTRANSLATE_n]]` placeholders in output at random (map-order restore of nested placeholders broke relref links); restores newest-first now, refuses to write leftovers, regression tests added.
+- [x] `browser.GetProjectRoot` never matched `.git` (checked it as a file).
+- [x] Hugo module `min` raised to 0.158.0 (what Hugo Plate needs).
 
 ### Decided (leave as is)
 

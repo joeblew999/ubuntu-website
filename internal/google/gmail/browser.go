@@ -1,11 +1,7 @@
 package gmail
 
 import (
-	"context"
-	"fmt"
 	"net/url"
-	"os/exec"
-	"time"
 
 	"github.com/joeblew999/ubuntu-website/internal/browser"
 )
@@ -74,54 +70,25 @@ func (s *BrowserSender) Send(email *Email) (*SendResult, error) {
 	body := email.WithSignature(s.config.Signature)
 	composeURL := buildGmailComposeURL(email.To, email.Subject, body)
 
-	// Use playwright CLI if available, otherwise fall back to open command
-	if err := s.openWithPlaywright(composeURL, email, body); err != nil {
-		// Fallback to system open (compose only)
-		if err := openInBrowser(composeURL); err != nil {
-			return &SendResult{
-				Success: false,
-				Error:   err.Error(),
-				Mode:    s.Name(),
-			}, err
-		}
+	// Open the compose window in the default browser, where the user is signed in to Gmail;
+	// they review and click Send. A Playwright-launched browser has a fresh profile and can't
+	// reach a signed-in Gmail, so automated sending is the API mode's job.
+	if err := openInBrowser(composeURL); err != nil {
 		return &SendResult{
-			Success: true,
-			Mode:    "compose-fallback",
-		}, nil
+			Success: false,
+			Error:   err.Error(),
+			Mode:    s.Name(),
+		}, err
 	}
 
+	mode := s.Name()
+	if !s.composeOnly {
+		mode = "compose-fallback"
+	}
 	return &SendResult{
 		Success: true,
-		Mode:    s.Name(),
+		Mode:    mode,
 	}, nil
-}
-
-// openWithPlaywright uses the playwright CLI to automate Gmail
-func (s *BrowserSender) openWithPlaywright(composeURL string, email *Email, body string) error {
-	// Check if playwright binary exists
-	playwrightBin := findPlaywrightBinary()
-	if playwrightBin == "" {
-		return fmt.Errorf("playwright binary not found")
-	}
-
-	// For compose-only mode, just open the URL
-	if s.composeOnly {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		cmd := exec.CommandContext(ctx, playwrightBin, "open", "--url", composeURL)
-		return cmd.Run()
-	}
-
-	// For send mode, we need to:
-	// 1. Open Gmail compose
-	// 2. Wait for it to load
-	// 3. Change "From" address to company email
-	// 4. Click Send
-
-	// This is complex with the CLI - for now, fall back to compose-only
-	// Full automation would require the playwright Go library or MCP
-	return fmt.Errorf("browser send mode requires MCP - use compose mode or API mode")
 }
 
 // buildGmailComposeURL builds the Gmail compose URL with pre-filled fields
@@ -139,9 +106,4 @@ func buildGmailComposeURL(to, subject, body string) string {
 // openInBrowser opens a URL in the default browser (uses shared browser package)
 func openInBrowser(url string) error {
 	return browser.OpenURL(url)
-}
-
-// findPlaywrightBinary looks for the playwright binary (uses shared browser package)
-func findPlaywrightBinary() string {
-	return browser.FindPlaywrightBinary()
 }
