@@ -15,9 +15,9 @@ package claude
 func init() {
 	// Register the Google MCP server
 	RegisterMCPServer(MCPServerDef{
-		Name:        GoogleServerName,
-		Command:     GoogleServerCmd,
-		Args:        []string{},
+		Name:    GoogleServerName,
+		Command: GoogleServerCmd,
+		Args:    []string{},
 		Env: map[string]string{
 			"GOOGLE_CLIENT_ID":     EnvClientID,
 			"GOOGLE_CLIENT_SECRET": EnvClientSecret,

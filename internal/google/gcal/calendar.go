@@ -63,9 +63,9 @@ type CreateResult struct {
 
 // ListResult contains the result of listing events
 type ListResult struct {
-	Success bool           `json:"success"`
+	Success bool            `json:"success"`
 	Events  []*EventSummary `json:"events,omitempty"`
-	Error   string         `json:"error,omitempty"`
+	Error   string          `json:"error,omitempty"`
 }
 
 // EventSummary is a simplified event for listing

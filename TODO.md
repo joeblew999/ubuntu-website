@@ -215,13 +215,6 @@ Once oyu get the NON CGO FULLY working for the FULL lifecyle, Make sure that dum
 
 ## Broken/Incomplete
 
-### cmd/env - DO NOT RUN
-
-The env tool expects a specific .env structure and will corrupt your .env file.
-
-Investigate https://github.com/helmfile/vals for proper secrets management.
-vals supports multiple backends (Vault, AWS SSM, GCP Secrets, SOPS, etc.)
-
 ### cmd/translate - DO NOT RUN
 
 Current workflow: Claude Code + Taskfile shell scripts (translate:status, translate:done, etc.)

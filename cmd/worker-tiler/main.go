@@ -16,7 +16,7 @@ import (
 
 	"github.com/joeblew999/ubuntu-website/internal/airspace"
 	"github.com/joeblew999/ubuntu-website/internal/airspace/gotiler"
-	"github.com/syumai/workers"
+	"github.com/syumai/workers-go"
 )
 
 func main() {

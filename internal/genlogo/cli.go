@@ -30,10 +30,10 @@ import (
 // =============================================================================
 //
 // Why two directories?
-// - assets/images/: Hugo processes these (optimization, fingerprinting, etc.)
-//   Used for website logos, favicon, OG image - things Hugo needs to reference.
-// - static/images/: Served as-is without Hugo processing.
-//   Used for external platforms (email clients, Bluesky) that need stable URLs.
+//   - assets/images/: Hugo processes these (optimization, fingerprinting, etc.)
+//     Used for website logos, favicon, OG image - things Hugo needs to reference.
+//   - static/images/: Served as-is without Hugo processing.
+//     Used for external platforms (email clients, Bluesky) that need stable URLs.
 const (
 	// Hugo website assets (processed by Hugo)
 	pathFavicon     = "assets/images/favicon.png"       // 512x512 - browser tab icon, large for high-DPI

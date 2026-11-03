@@ -1,0 +1,52 @@
+# Go modules
+#
+# The Go version is the `go` line in go.mod (task tools:upgrade bumps it); this upgrades the
+# module dependencies in go.mod with go-mod-upgrade (pinned in mise.toml), which also finds
+# major-version upgrades that `go get -u` never offers.
+#
+# Usage:
+#   task go:upgrade                 Pick upgrades interactively
+#   task go:upgrade FORCE=true      Take every upgrade (non-interactive; what `task upgrade` runs)
+#   task go:upgrade IGNORE='regex'  Skip modules matching the regex
+#   task go:check                   Build (incl. the js/wasm worker), vet and test
+
+version: '3'
+
+tasks:
+  upgrade:
+    desc: Upgrade Go module dependencies (FORCE=true for all, IGNORE=regex to skip), then go:check
+    dir: '{{.ROOT_DIR}}'
+    interactive: true
+    vars:
+      FORCE: '{{.FORCE | default "false"}}'
+      IGNORE: '{{.IGNORE | default ""}}'
+    cmds:
+      # --cooldown matches mise's minimum_release_age: skip releases younger than a day.
+      - go-mod-upgrade --cooldown 1d {{if eq .FORCE "true"}}-f{{end}} {{if .IGNORE}}-i '{{.IGNORE}}'{{end}}
+      - go mod tidy
+      - task: deprecated
+      - task: check
+
+  deprecated:
+    desc: List direct dependencies that are deprecated (moved modules) or on a retracted version
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      # go-mod-upgrade can't see a module that moved to a new path (e.g. syumai/workers → workers-go);
+      # Go records that as a "Deprecated:" notice in the old module's go.mod.
+      - |
+        found=$(go list -m -u -json all | jq -r 'select(.Indirect | not) | select(.Deprecated or .Retracted) | "  \(.Path)@\(.Version): \(.Deprecated // ("retracted: " + (.Retracted | join("; "))))"')
+        if [ -n "$found" ]; then
+          echo "⚠ Deprecated/retracted direct dependencies: switch to the replacement named here"
+          echo "$found"
+        else
+          echo "✓ No deprecated or retracted direct dependencies"
+        fi
+
+  check:
+    desc: Build all packages (incl. the js/wasm worker), vet and test
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - go build ./...
+      - GOOS=js GOARCH=wasm go build -o /dev/null ./cmd/worker-tiler
+      - go vet ./...
+      - go test ./...

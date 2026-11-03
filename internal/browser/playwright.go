@@ -5,10 +5,8 @@ package browser
 import (
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 
-	"github.com/playwright-community/playwright-go"
+	"github.com/mxschmitt/playwright-go"
 )
 
 // BrowserEngine represents the browser engine to use.
@@ -109,11 +107,11 @@ func DefaultProfileDir() string {
 
 // PlaywrightRunner manages Playwright browser automation.
 type PlaywrightRunner struct {
-	config     *PlaywrightConfig
-	pw         *playwright.Playwright
-	browser    playwright.Browser
-	context    playwright.BrowserContext
-	page       playwright.Page
+	config  *PlaywrightConfig
+	pw      *playwright.Playwright
+	browser playwright.Browser
+	context playwright.BrowserContext
+	page    playwright.Page
 }
 
 // getBrowserType returns the appropriate browser type based on config.
@@ -307,38 +305,21 @@ func (r *PlaywrightRunner) GetText(selector string) (string, error) {
 }
 
 // =============================================================================
-// CLI-based Playwright operations (for when Go library isn't suitable)
+// Browser installation
 // =============================================================================
 
-// RunPlaywrightCLI executes a playwright CLI command.
-func RunPlaywrightCLI(args ...string) error {
-	bin := FindPlaywrightBinary()
-	cmd := exec.Command(bin, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
-// RunPlaywrightCLIWithOutput executes a playwright CLI command and returns output.
-func RunPlaywrightCLIWithOutput(args ...string) (string, error) {
-	bin := FindPlaywrightBinary()
-	cmd := exec.Command(bin, args...)
-	output, err := cmd.CombinedOutput()
-	return strings.TrimSpace(string(output)), err
-}
-
-// InstallPlaywrightBrowsers installs Playwright browsers via CLI.
-// Installs the specified browser engine, or all supported browsers if empty.
+// InstallPlaywrightBrowsers downloads the Playwright driver matching this playwright-go
+// version, plus the given browser engines (all supported browsers if none are given).
+//
+// It uses the library, not a `playwright` CLI on PATH: our own tool (cmd/playwright) is
+// installed as `playwright`, so a PATH lookup would run itself.
 func InstallPlaywrightBrowsers(engines ...BrowserEngine) error {
-	if len(engines) == 0 {
-		// Install all browsers
-		return RunPlaywrightCLI("install")
-	}
-
+	opts := &playwright.RunOptions{Stdout: os.Stdout, Stderr: os.Stderr}
 	for _, engine := range engines {
-		if err := RunPlaywrightCLI("install", string(engine)); err != nil {
-			return fmt.Errorf("failed to install %s: %w", engine, err)
-		}
+		opts.Browsers = append(opts.Browsers, string(engine))
+	}
+	if err := playwright.Install(opts); err != nil {
+		return fmt.Errorf("install playwright browsers %v: %w", opts.Browsers, err)
 	}
 	return nil
 }
@@ -361,9 +342,4 @@ func InstallWebKit() error {
 // InstallAllBrowsers installs all supported browsers.
 func InstallAllBrowsers() error {
 	return InstallPlaywrightBrowsers()
-}
-
-// PlaywrightVersion returns the installed Playwright version.
-func PlaywrightVersion() (string, error) {
-	return RunPlaywrightCLIWithOutput("--version")
 }

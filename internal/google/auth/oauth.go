@@ -2,12 +2,12 @@
 //
 // This package supports two authentication patterns:
 //
-// 1. Application Default Credentials (ADC) - for gcloud/Terraform
-//    Uses gcloud's official OAuth client to create credentials compatible
-//    with Google Cloud SDK tools.
+//  1. Application Default Credentials (ADC) - for gcloud/Terraform
+//     Uses gcloud's official OAuth client to create credentials compatible
+//     with Google Cloud SDK tools.
 //
-// 2. Google MCP Server tokens - for Claude Code integrations
-//    Loads tokens from ~/.google-mcp-accounts for Gmail, Calendar, etc.
+//  2. Google MCP Server tokens - for Claude Code integrations
+//     Loads tokens from ~/.google-mcp-accounts for Gmail, Calendar, etc.
 //
 // Example - gcloud auth flow:
 //

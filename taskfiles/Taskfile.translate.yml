@@ -42,8 +42,15 @@ tasks:
   check:deps:
     desc: Ensure translate binary is available (builds from source or downloads)
     internal: true
-    status:
-      - test -f "{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}}"
+    # Rebuild when the code or its dependencies change, not only when the binary is missing.
+    dir: '{{.ROOT_DIR}}'
+    sources:
+      - go.mod
+      - go.sum
+      - cmd/translate/**/*.go
+      - internal/**/*.go
+    generates:
+      - '{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}}'
     cmds:
       - mkdir -p "{{.BIN_INSTALL_DIR}}"
       - go build -o "{{.BIN_INSTALL_DIR}}/{{.TRANSLATE_BIN}}" ./cmd/translate

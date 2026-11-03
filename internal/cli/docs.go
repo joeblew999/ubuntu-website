@@ -16,13 +16,13 @@ type PackageMeta struct {
 	Version     string // Semantic version (e.g., "v1.0.0")
 
 	// Optional
-	RepoURL          string   // GitHub repository URL
-	DocumentationURL string   // pkg.go.dev URL (auto-generated if empty)
-	License          string   // License (default: MIT)
-	Author           string   // Author name (default: Gerard Webb)
-	HasBinary        bool     // Has downloadable binaries
-	InstallCommand   string   // Alternative install command (e.g., "brew install ...")
-	Features         []string // Feature bullet points
+	RepoURL          string    // GitHub repository URL
+	DocumentationURL string    // pkg.go.dev URL (auto-generated if empty)
+	License          string    // License (default: MIT)
+	Author           string    // Author name (default: Gerard Webb)
+	HasBinary        bool      // Has downloadable binaries
+	InstallCommand   string    // Alternative install command (e.g., "brew install ...")
+	Features         []string  // Feature bullet points
 	Commands         []Command // CLI commands
 	Examples         []Example // Code examples
 }

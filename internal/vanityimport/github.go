@@ -11,13 +11,13 @@ import (
 
 // Repository represents GitHub repository metadata.
 type Repository struct {
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	License     *License   `json:"license"`
-	Topics      []string   `json:"topics"`
-	Owner       Owner      `json:"owner"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	License     *License  `json:"license"`
+	Topics      []string  `json:"topics"`
+	Owner       Owner     `json:"owner"`
 }
 
 // License represents GitHub repository license info.

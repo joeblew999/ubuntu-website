@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/joeblew999/ubuntu-website/internal/browser"
-	"github.com/playwright-community/playwright-go"
+	"github.com/mxschmitt/playwright-go"
 )
 
 // DefaultGmailProfileDir returns the default persistent profile directory for Gmail.
@@ -102,11 +102,11 @@ func ParseSMTPConfig(name, email, provider, user, pass string) *SMTPConfig {
 
 // SettingsAutomation handles Gmail settings configuration via Playwright
 type SettingsAutomation struct {
-	runner       *browser.PlaywrightRunner
-	config       *SMTPConfig
-	timeout      time.Duration
-	profileDir   string // Persistent browser profile directory
-	verbose      bool
+	runner        *browser.PlaywrightRunner
+	config        *SMTPConfig
+	timeout       time.Duration
+	profileDir    string // Persistent browser profile directory
+	verbose       bool
 	browserEngine browser.BrowserEngine // chromium, firefox, or webkit
 }
 
@@ -147,7 +147,7 @@ func NewSettingsAutomation(config *SMTPConfig, opts ...SettingsOption) *Settings
 	s := &SettingsAutomation{
 		config:        config,
 		timeout:       120 * time.Second,
-		profileDir:   DefaultGmailProfileDir(), // Use persistent profile by default
+		profileDir:    DefaultGmailProfileDir(), // Use persistent profile by default
 		verbose:       true,
 		browserEngine: browser.BrowserChromium, // Use Chromium with "chrome" channel for system Chrome
 	}

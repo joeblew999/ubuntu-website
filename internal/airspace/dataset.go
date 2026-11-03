@@ -75,5 +75,5 @@ var TileConfigs = map[string]TileConfig{
 	"uas":       {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true}, // explicit zoom, no reduction
 	"airports":  {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
 	"navaids":   {MinZoom: 0, MaxZoom: 10, ReduceRate: 1, NoFeatureLimit: true, NoTileSizeLimit: true},
-	"obstacles": {MinZoom: -1, MaxZoom: -1, DropDensest: true},                                         // -zg --drop-densest-as-needed
+	"obstacles": {MinZoom: -1, MaxZoom: -1, DropDensest: true}, // -zg --drop-densest-as-needed
 }

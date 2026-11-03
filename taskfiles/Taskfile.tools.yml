@@ -58,7 +58,7 @@ tasks:
   # ===========================================================================
 
   upgrade:
-    desc: Upgrade this project's mise-pinned tools + Go toolchain (Hugo is separate - task hugo:upgrade)
+    desc: Upgrade this project's mise-pinned tools + Go (go.mod) (Hugo is separate - task hugo:upgrade)
     dir: '{{.ROOT_DIR}}'
     cmds:
       - |
@@ -66,11 +66,12 @@ tasks:
         # Project tools only (not ~/.config/mise globals); go is pinned by go.mod, hugo needs Cloudflare too.
         tools=$(mise ls --no-global --current --json | jq -r 'keys[] | select(. != "go" and . != "hugo-extended")' | tr '\n' ' ')
         mise upgrade --bump $tools
-        go_pin=$(sed -n 's/^toolchain go//p' go.mod)
+        go_pin=$(sed -n 's/^go //p' go.mod)
         go_latest=$(mise latest go)
         if [ "$go_pin" != "$go_latest" ]; then
-          go mod edit -toolchain=go$go_latest
-          echo "go toolchain $go_pin → $go_latest (go.mod)"
+          go mod edit -go=$go_latest -toolchain=none
+          go mod tidy
+          echo "go $go_pin → $go_latest (go.mod)"
         fi
         mise install
         hugo_pin=$(mise config get -f mise.toml tools.hugo-extended)

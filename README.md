@@ -13,7 +13,7 @@ http://192.168.0.156:1313/fleet/airspace-demo/
 https://www.ubuntusoftware.net
 
 https://www.ubuntusoftware.net/sitemap.xml
-https://www.ubuntusoftware.net/sitemap.xml/en/sitemap.xml
+https://www.ubuntusoftware.net/en/sitemap.xml
 
 https://www.ubuntusoftware.net/fleet/airspace-demo/
 
@@ -39,183 +39,71 @@ task          # or: task info
 - 🇩🇪 German (de)
 - 🇨🇳 Chinese Simplified (zh)
 - 🇯🇵 Japanese (ja)
+- 🇻🇳 Vietnamese (vi)
 
 
 ## 🚀 Quick Start
 
 ```bash
-# 1. Environment Setup (first time only - or anytime to sync)
-task env:all                      # Complete env workflow (recommended)
-task setup                        # mise install (pinned tools) + bun/go deps
-
-# 2. Develop
-task dev                          # Start dev server
-
-# 3. Translate
-task translate:all                # Translate changed content
-
-# 4. Deploy
-task cf:deploy                    # Deploy to Cloudflare Pages
+task setup      # mise install (pinned tools) + bun/go deps
+task dev:up     # Hugo + tools via process-compose (task dev:down to stop)
 ```
 
-## 🔑 Environment Setup
-
-The recommended way to manage environment configuration:
-
-```bash
-task env:all  # Complete workflow (idempotent - safe to re-run anytime)
-```
-
-This runs the complete unidirectional flow: `setup → list → push → verify`
-
-Individual commands (for advanced use):
-
-```bash
-task env:local:setup  # Setup local .env (interactive wizard)
-task env:local:list   # List local .env configuration
-task env:gh:list      # List GitHub secrets
-task env:gh:push      # Push to GitHub secrets for CI/CD
-```
-
-All commands are idempotent - safe to run multiple times without side effects.
+Pushing to `main` deploys to Cloudflare Pages; other branches get preview deployments.
 
 ## 📋 Prerequisites
 
-- **Go** 1.24+ (for Hugo and translation tool)
-- **Bun** latest (JavaScript runtime)
-- **Task** ([install](https://taskfile.dev/installation/))
+- [mise](https://mise.jdx.dev/getting-started.html): installs every tool pinned in `mise.toml` (Task, Hugo, Bun, Node, Wrangler, …). Go's version comes from `go.mod`.
 
 ## 🛠️ Development Tasks
 
 ```bash
-task dev           # Start dev server
-task build         # Build production
-task preview       # Preview production
+task dev           # Hugo dev server
+task build         # Production build
+task preview       # Preview production build
 task clean         # Clean artifacts
+task upgrade       # Upgrade tools, Go modules and the theme (Hugo: task hugo:upgrade)
 
-task translate:check     # Check changed files
-task translate:all       # Translate all
-task translate:lang LANG=de  # Translate to German
-
-task cf:deploy     # Deploy to Cloudflare
-task cf:status     # Check status
-```
-
-## 🔒 HTTPS Development
-
-The project uses **Caddy + mkcert** for local HTTPS development:
-
-- **Hugo**: `https://localhost/` or `https://192.168.x.x/`
-- **Via GUI**: `https://localhost/admin/` or `https://192.168.x.x/admin/`
-
-### How It Works
-
-1. **Automatic Setup**: Caddy starts automatically when you run the dev server or Via GUI
-2. **Smart Certificates**: mkcert generates certificates for localhost + *.local + your current LAN IP
-3. **Idempotent**: Safe to run multiple times - certificates regenerate only when your LAN IP changes
-4. **Mobile Testing**: Works on iOS Safari without manual CA installation (just accept the certificate prompt)
-
-### Certificate Management
-
-Certificates are stored in `.caddy/certs/` (gitignored) and automatically regenerated when:
-- Certificates don't exist
-- Your LAN IP address changes (switching networks)
-
-### Mobile Device Setup (iOS/Android)
-
-**iOS Safari**: No installation needed! Safari will show a trust prompt the first time you visit the HTTPS site.
-
-**iOS/Android (for apps or other browsers)**:
-1. Install mkcert CA certificate on your mobile device
-2. Find the CA at: `~/Library/Application Support/mkcert/rootCA.pem`
-3. Transfer to your device via AirDrop, email, or file sharing
-4. Install the certificate and trust it in Settings
-
-### Architecture
-
-```
-┌─────────────────────────────────────────────┐
-│  Caddy (HTTPS on port 443)                  │
-│  - localhost, *.local, 192.168.x.x         │
-│  - mkcert certificates                      │
-└──────────┬──────────────────────┬───────────┘
-           │                      │
-           ▼                      ▼
-  ┌────────────────┐    ┌─────────────────┐
-  │ Hugo           │    │ Via GUI         │
-  │ (HTTP :1313)   │    │ (HTTP :3000)    │
-  │ /              │    │ /admin/*        │
-  └────────────────┘    └─────────────────┘
-```
-
-### CLI Commands
-
-```bash
-# Start the system
-go run cmd/env/main.go web-gui          # Starts Caddy + Via GUI
-go run cmd/env/main.go build            # Starts Caddy + Hugo
-
-# Manage Caddy manually (if needed)
-go run cmd/env/main.go caddy-start      # Start Caddy
-go run cmd/env/main.go caddy-stop       # Stop Caddy
-go run cmd/env/main.go caddy-status     # Check if running
-
-# Cleanup
-# Press Ctrl+C in the web-gui terminal - auto-cleanup of Caddy and Hugo
+task cf:status     # Cloudflare Pages deployment status
 ```
 
 ## 🌐 Translation Workflow
 
 1. Edit English content in `content/english/`
-2. Commit changes: `git commit -m "Update: page"`
-3. Check: `task translate:check`
-4. Translate: `task translate:all`
-5. Deploy: `git push` (auto-deploys via CI/CD)
-
-The translation tool:
-- Uses Git to track changes
-- Only translates modified files
-- Preserves Hugo shortcodes & code blocks
-- Calls Claude API for translations
-- Creates checkpoints automatically
+2. `task translate:content:status`: what changed since the last translation
+3. `task translate:content:next`: next file to translate
+4. Translate it into each language (see CLAUDE.md, Translation Workflow)
+5. `task translate:content:done`: move the checkpoint
 
 ## 📦 Project Structure
 
 ```
 .
-├── cmd/env/                # Environment setup CLI
-├── cmd/translate/          # Translation CLI
-├── internal/env/           # Environment management
-├── internal/translate/     # Translation logic
+├── cmd/                    # Go CLIs (translate, autotranslate, google, mailerlite, …)
+├── internal/               # Shared Go packages
 ├── content/
-│   ├── english/           # Source (EN)
-│   ├── german/            # DE translations
-│   ├── chinese/           # ZH translations
-│   └── japanese/          # JA translations
+│   ├── english/            # Source (EN)
+│   ├── german/             # DE
+│   ├── chinese/            # ZH
+│   ├── japanese/           # JA
+│   └── vietnamese/         # VI
 ├── config/_default/
-│   ├── languages.toml     # Language config
-│   └── menus.*.toml       # Per-language menus
-├── i18n/                  # Translation strings
-├── .github/workflows/     # CI/CD
-├── Taskfile.yml           # Task definitions
-└── wrangler.toml          # Cloudflare config
+│   ├── languages.toml      # Language config
+│   └── menus.*.toml        # Per-language menus
+├── i18n/                   # Translation strings
+├── _vendor/                # Hugo Plate + modules, pinned (task theme:update)
+├── .github/workflows/      # CI (tools installed by mise)
+├── mise.toml               # Pinned tools
+├── Taskfile.yml            # Task definitions
+└── wrangler.toml           # Cloudflare Pages config
 ```
 
 ## 🔧 Configuration
 
-The `.env` file contains your API credentials:
+Secrets are never committed:
 
-```bash
-# Cloudflare credentials (for deployment)
-CLOUDFLARE_API_TOKEN=your-token-here
-CLOUDFLARE_ACCOUNT_ID=your-account-id
-CLOUDFLARE_PROJECT_NAME=your-project-name
-
-# Claude API key (for translation)
-CLAUDE_API_KEY=your-api-key-here
-```
-
-**Setup:** Run `task env:local:setup` for interactive wizard, then `task env:gh:push` to sync to GitHub for CI/CD.
+- `.env` (gitignored): e.g. `CLOUDFLARE_API_TOKEN` (read by wrangler and the `cf:*` tasks), `DEEPL_API_KEY` (autotranslate)
+- Google MCP OAuth client: macOS keychain via fnox (`fnox.toml`; `task google-mcp:credentials`)
 
 ## 🔗 References
 

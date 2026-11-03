@@ -27,8 +27,8 @@ type CreateRequest struct {
 
 // ListRequest is the request body for /list endpoint
 type ListRequest struct {
-	Start      string `json:"start,omitempty"`      // RFC3339 format, defaults to now
-	End        string `json:"end,omitempty"`        // RFC3339 format, defaults to end of day
+	Start      string `json:"start,omitempty"`       // RFC3339 format, defaults to now
+	End        string `json:"end,omitempty"`         // RFC3339 format, defaults to end of day
 	MaxResults int    `json:"max_results,omitempty"` // defaults to 10
 }
 
@@ -76,9 +76,9 @@ func (s *Server) handleInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	info := map[string]interface{}{
-		"name":       "calendar-server",
-		"version":    "1.0.0",
-		"calendar":   s.config.CalendarID,
+		"name":     "calendar-server",
+		"version":  "1.0.0",
+		"calendar": s.config.CalendarID,
 		"endpoints": map[string]string{
 			"/":       "Info (this page)",
 			"/health": "Health check",

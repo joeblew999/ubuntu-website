@@ -27,7 +27,6 @@ version: '3'
 #   google:*    - All Google services unified (cmd/google)
 #   airspace:*  - Airspace demo and FAA data tools (cmd/airspace)
 #   r2:*        - R2 object storage for large static assets
-#   env:*       - Environment management
 #   url:*       - URL shortcuts + SEO dashboards
 #   tools:*     - Tools (gh, task, etc.)
 #   release:*   - Release builds for binary tools
@@ -46,6 +45,7 @@ includes:
   # Domain modules
   hugo: ./taskfiles/Taskfile.hugo.yml
   theme: ./taskfiles/Taskfile.theme.yml
+  go: ./taskfiles/Taskfile.go.yml
   cf: ./taskfiles/Taskfile.cf.yml
   translate: ./taskfiles/Taskfile.translate.yml
   autotranslate: ./taskfiles/Taskfile.autotranslate.yml
@@ -55,7 +55,6 @@ includes:
   mailerlite: ./taskfiles/Taskfile.mailerlite.yml
   google: ./taskfiles/Taskfile.google.yml
   youtube: ./taskfiles/Taskfile.youtube.yml
-  env: ./taskfiles/Taskfile.env.yml
   url: ./taskfiles/Taskfile.url.yml
 
   # Infrastructure modules
@@ -126,9 +125,6 @@ vars:
   URL_PREVIEW: https://ubuntu-website.pages.dev
   URL_DEV: http://localhost:1313
 
-  # Commands
-  ENV_CMD: cmd/env/main.go
-
   # Directories (gitignored)
   DIR_PUBLIC: public
   DIR_RESOURCES: resources
@@ -153,7 +149,7 @@ vars:
   HUGO_DEV_FLAGS: --buildDrafts --buildFuture
   HUGO_PREVIEW_FLAGS: -e production --minify
 
-  # Go (version pinned by the toolchain line in go.mod)
+  # Go (version pinned by the go line in go.mod)
   CGO_ENABLED: "1"
 
   # Wrangler (pinned in mise.toml as npm:wrangler)
@@ -248,6 +244,15 @@ tasks:
   # ===========================================================================
   # Setup & Installation
   # ===========================================================================
+
+  upgrade:
+    desc: Upgrade everything except Hugo - tools, Go version + modules, theme (each step is re-runnable)
+    cmds:
+      - task: tools:upgrade
+      - task: go:upgrade
+        vars: { FORCE: 'true' }
+      - task: theme:update
+      - 'echo "Hugo is separate (it also needs Cloudflare): task hugo:upgrade"'
 
   # Third-party tools (hugo, bun, wrangler, process-compose, ...) are pinned in mise.toml.
   # Taskfiles call them by name and never install them; add new tools to mise.toml.

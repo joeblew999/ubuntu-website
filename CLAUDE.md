@@ -16,7 +16,7 @@ Key points:
 
 ### Tools: mise installs, Taskfile runs
 
-- Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod`. CI installs the same pins via `jdx/mise-action`.
+- Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq) is pinned in `mise.toml`. Go is pinned by the `go` line in `go.mod`. CI installs the same pins via `jdx/mise-action`.
 - Taskfiles call tools by name and never install them (no `brew install`, `curl | bash`, `bun add -g`, `go install` for third-party tools). A `check:deps` for a mise tool runs `mise install <tool>`.
 - New tool → add it to `[tools]` in `mise.toml` with an exact version.
 
@@ -24,7 +24,9 @@ Key points:
 
 | What | Command |
 |------|---------|
-| Tools in `mise.toml` + Go toolchain (`go.mod`) | `task tools:upgrade` |
+| **Everything except Hugo** (the three rows below Hugo, in order) | `task upgrade` |
+| Tools in `mise.toml` + Go (`go` line in `go.mod`) | `task tools:upgrade` |
+| Go module dependencies (`go-mod-upgrade`, incl. major versions; build/vet/test after) | `task go:upgrade` (interactive) or `FORCE=true` |
 | Hugo (mise pin + Cloudflare `HUGO_VERSION`) | `task hugo:upgrade` → branch + Cloudflare preview → `task cf:hugo-version ENV=production` → main |
 | Theme: Hugo Plate + gethugothemes modules, and the npm packages they need | `task theme:update` |
 
@@ -580,15 +582,6 @@ task autotranslate:all DRY_RUN=true          # Preview all languages
 Correct paths:
 - `/Users/apple/workspace/go/src/github.com/joeblew999/ubuntu-website`
 - `github.com/joeblew999/ubuntu-website`
-
-### Via Framework
-
-When working on Via coding aspects:
-
-- **Source code**: `/Users/apple/workspace/go/src/github.com/joeblew999/wellknown/.src/via`
-
-- use a closure variable pattern instead of trying to access the signal's value.
-- use PicoCSS
 
 ### Hugo Version
 

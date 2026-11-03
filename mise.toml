@@ -20,7 +20,7 @@
 #   mise run google:auth       # after "invalid_grant" (expired/revoked token) or to add another account
 
 [settings]
-# go.mod/go.work `toolchain` is the Go pin; this makes `mise install` honour it.
+# The `go` line in go.mod is the Go pin; this makes `mise install` honour it.
 idiomatic_version_file_enable_tools = ["go"]
 
 [tools]
@@ -43,6 +43,8 @@ terraform = "1.17.1"
 fnox = "1.46.0"
 # Reads the refresh token in google:check.
 jq = "1.8.2"
+# Go module upgrades incl. major versions (task go:upgrade).
+"aqua:oligot/go-mod-upgrade" = "0.13.0"
 
 [env]
 # Google Cloud project (number) that owns the OAuth client. Not secret.

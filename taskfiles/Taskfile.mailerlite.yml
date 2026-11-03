@@ -57,8 +57,15 @@ tasks:
   check:deps:
     desc: Ensure mailerlite binary is available (builds from source or downloads)
     internal: true
-    status:
-      - test -f "{{.BIN_INSTALL_DIR}}/{{.MAILERLITE_BIN}}"
+    # Rebuild when the code or its dependencies change, not only when the binary is missing.
+    dir: '{{.ROOT_DIR}}'
+    sources:
+      - go.mod
+      - go.sum
+      - cmd/mailerlite/**/*.go
+      - internal/**/*.go
+    generates:
+      - '{{.BIN_INSTALL_DIR}}/{{.MAILERLITE_BIN}}'
     cmds:
       - mkdir -p "{{.BIN_INSTALL_DIR}}"
       - go build -o "{{.BIN_INSTALL_DIR}}/{{.MAILERLITE_BIN}}" ./cmd/mailerlite

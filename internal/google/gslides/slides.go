@@ -50,8 +50,8 @@ type Presentation struct {
 
 // Slide represents a single slide
 type Slide struct {
-	ObjectID      string         `json:"objectId"`
-	PageElements  []*PageElement `json:"pageElements,omitempty"`
+	ObjectID        string           `json:"objectId"`
+	PageElements    []*PageElement   `json:"pageElements,omitempty"`
 	SlideProperties *SlideProperties `json:"slideProperties,omitempty"`
 }
 
@@ -62,10 +62,10 @@ type SlideProperties struct {
 
 // PageElement represents an element on a slide
 type PageElement struct {
-	ObjectID string `json:"objectId"`
-	Size     *Size  `json:"size,omitempty"`
+	ObjectID  string     `json:"objectId"`
+	Size      *Size      `json:"size,omitempty"`
 	Transform *Transform `json:"transform,omitempty"`
-	Shape    *Shape `json:"shape,omitempty"`
+	Shape     *Shape     `json:"shape,omitempty"`
 }
 
 // Size represents dimensions
@@ -91,7 +91,7 @@ type Transform struct {
 
 // Shape represents a shape element
 type Shape struct {
-	ShapeType string `json:"shapeType,omitempty"`
+	ShapeType string       `json:"shapeType,omitempty"`
 	Text      *TextContent `json:"text,omitempty"`
 }
 

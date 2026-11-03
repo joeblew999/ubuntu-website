@@ -52,7 +52,6 @@ func (c *CLI) handleSubscribers(args []string) error {
 func (c *CLI) subscribersList() error {
 	options := &mailerlite.ListSubscriberOptions{
 		Limit: 100,
-		Page:  1,
 	}
 
 	subscribers, _, err := c.client.sdk.Subscriber.List(c.ctx, options)

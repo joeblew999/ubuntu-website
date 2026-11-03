@@ -115,9 +115,9 @@ func (g *GoogleAutomation) CredentialsURL() string {
 func (g *GoogleAutomation) LoginHIL() *browser.HILConfig {
 	return &browser.HILConfig{
 		ReadySelectors: []string{
-			"[data-ogsr-up]",                    // Signed in indicator
-			"a[href*='SignOutOptions']",         // Sign out link (means signed in)
-			"[aria-label='Google Account']",     // Account avatar
+			"[data-ogsr-up]",                     // Signed in indicator
+			"a[href*='SignOutOptions']",          // Sign out link (means signed in)
+			"[aria-label='Google Account']",      // Account avatar
 			"img[data-profileimagelarge='true']", // Profile image
 		},
 		Timeout:     5 * time.Minute,

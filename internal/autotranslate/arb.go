@@ -137,7 +137,7 @@ type ARBTranslator struct {
 func NewARBTranslator(provider Provider) *ARBTranslator {
 	return &ARBTranslator{
 		provider:   provider,
-		batchSize:  20,             // Smaller batches to avoid rate limits
+		batchSize:  20,              // Smaller batches to avoid rate limits
 		batchDelay: 2 * time.Second, // Delay between batches
 	}
 }

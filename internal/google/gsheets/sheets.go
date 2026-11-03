@@ -59,20 +59,20 @@ type ValueRange struct {
 
 // GetResult contains the result of a get values operation
 type GetResult struct {
-	Success bool        `json:"success"`
-	Range   string      `json:"range,omitempty"`
+	Success bool            `json:"success"`
+	Range   string          `json:"range,omitempty"`
 	Values  [][]interface{} `json:"values,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Error   string          `json:"error,omitempty"`
 }
 
 // UpdateResult contains the result of an update operation
 type UpdateResult struct {
-	Success         bool   `json:"success"`
-	UpdatedRange    string `json:"updatedRange,omitempty"`
-	UpdatedRows     int    `json:"updatedRows,omitempty"`
-	UpdatedColumns  int    `json:"updatedColumns,omitempty"`
-	UpdatedCells    int    `json:"updatedCells,omitempty"`
-	Error           string `json:"error,omitempty"`
+	Success        bool   `json:"success"`
+	UpdatedRange   string `json:"updatedRange,omitempty"`
+	UpdatedRows    int    `json:"updatedRows,omitempty"`
+	UpdatedColumns int    `json:"updatedColumns,omitempty"`
+	UpdatedCells   int    `json:"updatedCells,omitempty"`
+	Error          string `json:"error,omitempty"`
 }
 
 // AppendResult contains the result of an append operation
