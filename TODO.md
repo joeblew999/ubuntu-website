@@ -178,12 +178,12 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
 
 ### Decisions needed
 
-- [ ] **Taskfile → mise tasks, the mise-cloudflare way** (you prefer mise; standard = `github.com/joeblew999/mise-cloudflare/mise_test.go`: one-line tasks that run Go, flags via mise `usage`, no shell in the mise file, checked by `TestMise`). Size: 33 live Taskfiles, ~6,800 lines, ~480 tasks; 3 dead ones (`Taskfile.coder*.yml`, not included anywhere). Plan:
-  - [ ] Cloudflare: adopt mise-cloudflare (`mise-cloudflare init`). It deploys a **Worker**, so the site moves from Cloudflare Pages to a Worker with static assets (`wrangler.jsonc` → `assets.directory = "public"`), built by Workers Builds; replaces `Taskfile.cf.yml`, `Taskfile.cf-r2.yml`, `Taskfile.workers.yml`, `Taskfile.wrangler.yml` and the `HUGO_VERSION` secrets. Needs you: one **Allow** click (its login), and a go-ahead to move www.ubuntusoftware.net from the Pages project to the Worker.
+- [ ] **Taskfile → mise tasks, with the TestMise checker** (you prefer mise; the checker approach of `github.com/joeblew999/mise-cloudflare/mise_test.go`, not mise-cloudflare itself, which isn't stable: one-line tasks, flags via mise `usage`, no shell in the mise file; mise tasks run Go, Go runs mise tasks by full name, and a task runs TestMise on the very mise file it's in, so every link is checked both ways). Size: 33 live Taskfiles, ~6,800 lines, ~480 tasks; 3 dead ones (`Taskfile.coder*.yml`, not included anywhere). Plan:
+  - [ ] Cloudflare stays on **Pages** (not mise-cloudflare, not a Worker): the `cf`, `cf-r2`, `workers` and `wrangler` tasks become one-line mise tasks calling wrangler directly.
   - [ ] Most tasks become one line: a call to an existing Go CLI (`go run ./cmd/google calendar today`) or a tool directly (`hugo --gc --minify`, `gh …`); flags via `usage`. Of 486 tasks, ~86 (install/version/build-the-tool) and ~25 (help/info/installer tests) disappear because mise does that; 23 open-a-URL shortcuts shrink to a few.
   - [ ] New Go only for multi-step logic that must also run on Windows (e.g. the theme updater, `scripts/theme-update.sh`).
   - [ ] Callers: 6 CI workflows, process-compose.yaml, CLAUDE.md/README, Go strings that say `task …`; then delete Taskfile.yml and the `task` pin.
-  - [ ] `TestMise` on our mise file in CI.
+  - [ ] The checker in this repo (a copy of mise_test.go's TestMise) and a task that runs it on our mise file, in CI; Go that runs our tasks (`task …` strings in internal/, e2e checks) names them in full and is checked as callers.
 - [x] **Global mise config**: `~/.config/mise/config.toml` got patch bumps at 2026-11-03 13:59 for ast-grep, cargo-binstall, git-lfs, pnpm, usage (during the project upgrade; cause unclear). Keep or revert. `task tools:upgrade` now passes an explicit project-only tool list. **Done:** kept (patch bumps of your own global tools; the project task can't touch them any more).
 
 ### Content
