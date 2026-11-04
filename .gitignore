@@ -63,3 +63,6 @@ static/airspace/tiles/
 # Compiled Go binaries (use go run instead)
 /claude
 /airspace
+
+# Binaries built by mise tasks (google:build) and release builds
+/bin/

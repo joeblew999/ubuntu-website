@@ -49,29 +49,40 @@ jq = "1.8.2"
 [env]
 # Google Cloud project (number) that owns the OAuth client. Not secret.
 UBUNTU_WEBSITE_GCP_PROJECT = "130034768106"
+# google:build puts google-mcp here; the google:* tasks run it by name.
+_.path = ["{{config_root}}/bin"]
+
+[tasks."google:build"]
+description = "Build google-mcp (cmd/google-mcp) into bin/: the google:* tasks run it"
+run = 'go build -o bin/ ./cmd/google-mcp'
 
 [tasks."google:secret"]
 description = "Store GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in the keychain (hidden prompt, or stdin)"
 usage = 'arg "<key>" help="GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET"'
-run = 'go run ./cmd/google-mcp secret "{{usage.key}}"'
+depends = ["google:build"]
+run = 'google-mcp secret "{{usage.key}}"'
 
 [tasks."google:console"]
 description = "Open the Google Cloud OAuth screens (Branding, Audience, client) and print the exact values to enter"
-run = 'go run ./cmd/google-mcp console'
+depends = ["google:build"]
+run = 'google-mcp console'
 
 [tasks."google:rotate"]
 description = "Rotate the OAuth client secret: you Add secret + copy it in the console; this stores, proves and cleans up"
-run = 'go run ./cmd/google-mcp rotate'
+depends = ["google:build"]
+run = 'google-mcp rotate'
 
 [tasks."google:auth"]
 description = "Sign a Google account in to the Google MCP server (opens the browser), then run google:check"
-run = 'go run ./cmd/google-mcp auth'
+depends = ["google:build"]
+run = 'google-mcp auth'
 
 [tasks."google:check"]
 description = "Prove the Google MCP setup end to end: token refresh at Google (client id + secret) and a real Calendar call"
-run = 'go run ./cmd/google-mcp check'
+depends = ["google:build"]
+run = 'google-mcp check'
 
 [tasks."root:check-mise"]
-description = "misecheck (github.com/joeblew999/mise-check) on this mise.toml, the file this task is in: each task one line, the Go it runs there, its usage passed by name, no POSIX shell syntax"
-env = { MISE_FILE = "mise.toml" }
+description = "misecheck (github.com/joeblew999/mise-check) on this mise.toml, the file this task is in, the strict way for google-mcp: each task one line, no POSIX shell syntax, usage passed by name; each google-mcp command (cmd/google-mcp/<command>.go) run by a task and each task's command there; and the task names google-mcp's Go prints all tasks here"
+env = { MISE_FILE = "mise.toml", GO_CMD = "cmd", GO_LAYOUT = "file", GO_BINARIES = "google-mcp", GO_CALLERS = "cmd/google-mcp" }
 run = 'go test . -run "^TestMise$" -count=1 -v'
