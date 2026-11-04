@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+// noise: fewer failed nodes than this is check-host.net's own nodes failing now and then, not the site. A check passes
+// below it, and the report raises no issue below it.
+const noise = 3
+
 // URL is what the checks check unless told otherwise: SITE_URL's robots.txt (the site's, without SITE_URL).
 func URL() string {
 	initConfig()
@@ -118,8 +122,7 @@ func runCheck(checkType, targetURL string, maxNodes, waitSecs int, stdout, stder
 	}
 	fmt.Fprintf(stdout, " - %s/check-report/%s\n", apiBase, requestID)
 
-	// Exit 1 only if 3+ failures (1-2 is noise)
-	return len(failures) < 3
+	return len(failures) < noise
 }
 
 // Report runs the HTTP check and compares it with the previous run's (.sitecheck-state.json), then saves this one's:
@@ -162,18 +165,18 @@ func generateMarkdownReport(current, previous *State, results []Result, requestI
 	// Check for issues
 	var issues []string
 
-	// Issue 1: Any failures
-	if current.FailedCount > 0 {
+	// Issue 1: failures beyond the noise
+	if current.FailedCount >= noise {
 		issues = append(issues, fmt.Sprintf("**%d nodes failed** to reach the site", current.FailedCount))
 		hasIssues = true
 	}
 
 	// Issue 2: New failures compared to previous
 	if previous != nil {
-		if previous.FailedCount == 0 && current.FailedCount > 0 {
-			issues = append(issues, "**New failures detected** (was 100% reachable)")
+		if previous.FailedCount < noise && current.FailedCount >= noise {
+			issues = append(issues, fmt.Sprintf("**New failures detected** (was %d, within the noise)", previous.FailedCount))
 			hasIssues = true
-		} else if current.FailedCount >= previous.FailedCount+3 {
+		} else if current.FailedCount >= previous.FailedCount+noise {
 			issues = append(issues, fmt.Sprintf("**Failure count increased** from %d to %d", previous.FailedCount, current.FailedCount))
 			hasIssues = true
 		}

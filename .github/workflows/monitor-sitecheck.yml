@@ -1,6 +1,7 @@
 # monitor-sitecheck: is the site reachable from around the world? Every 6 hours (or by hand) it runs
 # mise run sitecheck:issue (.mise/tasks/sitecheck.toml, cmd/sitecheck): check-host.net's nodes check the site over
-# HTTP, compared with the last run's state (kept as an artifact), and an issue is opened when that finds a problem.
+# HTTP, compared with the last run's state (kept as an artifact). A problem (3 nodes failing or more, below that is
+# check-host.net's noise) opens an issue, or is a comment on the one already open.
 # No secrets (check-host.net needs none); the repo variable SITE_URL checks another site. The Go itself is built,
 # vetted and held to its tasks by core-ci (mise run root:ci).
 name: monitor-sitecheck
@@ -50,9 +51,26 @@ jobs:
           overwrite: true
           include-hidden-files: true
 
-      - name: Open an issue
+      # One alert open at a time: a later report is a comment on it, until it's closed.
+      - name: The open alert, if any
+        id: open
         if: steps.check.outcome == 'failure' && hashFiles('report.md') != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          echo "number=$(gh issue list --label site-monitor --state open --limit 1 --json number --jq '.[0].number // empty')" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue
+        if: steps.open.conclusion == 'success' && steps.open.outputs.number == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           gh issue create --title "Site Alert: Reachability issue detected" --body-file report.md --label "site-monitor,automated"
+
+      - name: Comment on the open alert
+        if: steps.open.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ steps.open.outputs.number }}
+        run: |
+          gh issue comment "$NUMBER" --body-file report.md
