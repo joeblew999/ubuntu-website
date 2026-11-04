@@ -1,182 +1,43 @@
 # TODO
 
-Can Hugo help with capturing clicks out of the site ?
+## Ideas
 
-Can our cfanalytcis.
+Not started; each is yours to pick up or drop.
 
-We have many Now because of the partners page any otehrs that list drone stores, and i want my reports to tell me which are most popular, and also send a report to each of our Partners via email, to keep them in the loop. Needs to be polite because many are not signed up yet, but i am hoping that is we make it really NICE they will get curious and sign up or contact us !! 
+- **Partner reports**: which drone shops (the partners page, and the others that list shops) get the most clicks out of the site: Hugo can mark outbound links, `cfanalytics` reads Cloudflare's analytics. Then a monthly email to each shop with its numbers, polite and really nice, since many haven't signed up: the hope is they get curious and sign up or get in touch.
+- **Software by email**: release the software on GitHub, and email it to whoever fills in Get Started (Web3Forms → `worker/index.js` → MailerLite already adds them as subscribers; MailerLite's automation would send it). A sprint.
+- **Google verification**: finish the email system to pass Google's OAuth verification, so other people's Gmail and Drive can be reached without them setting anything up.
+- **LINE**: an MCP server like the Google one (we have a LINE account to test with; look for an existing Go one first), on [line-bot-sdk-go](https://github.com/line/line-bot-sdk-go) ([channel access tokens](https://developers.line.biz/en/docs/basics/channel-access-token/)); and a QR code to add us, as LINE does ([example](https://line.me/R/ti/p/@linedevth?from=page)).
+- **WhatsApp** click-to-chat button: issue #13.
+- **narun**: run the `cmd/*` tools on [narun](https://github.com/akhenakh/narun), with [nats2sse](https://github.com/akhenakh/nats2sse) for feeds and [nlock](https://github.com/akhenakh/nlock); a Linux jailer for it and for LLM workloads, with a blog post: issue #20.
+- **SCION**: a page on [SCION](https://www.scion.org) ([scionproto/scion](https://github.com/scionproto/scion)): high security without BGP's weaknesses.
+- **The bigger picture**: Via (a Datastar web GUI), a VS Code extension for Hugo content, a Datastar block editor for content and layouts: users and VS Code developers calling the same Go code, both changing git repos. Maybe [xtemplate](https://github.com/infogulch/xtemplate/tree/next).
+- **Logo changes** still need Bluesky and the Gmail signature updated by hand (`mise run genlogo:all` makes the files): could be automated.
 
----
+### GitHub organization: ubuntusoftware-net
 
-Current ubuntu-website state: You have significant uncommitted changes - looks like you've been refactoring CLI tools (moving things into internal/ packages, deleting duplicates). These appear to be separate from the xplat package manager work. Optional enhancements we could do:
-Clean up ubuntu-website - Commit the CLI refactoring work you have staged
-Add more packages - sitecheck, translate, autotranslate, vanityimport could be added to registry
-Create xplat v0.2.1 release - Include the local registry support changes
-Document the workflow - Add usage examples to CLAUDE.md
+Created (Dec 2024); moving the repo there is deferred, as people are looking at `joeblew999/ubuntu-website`. When ready:
 
-
----
-
-All our internal code is wrapped by a cmd.
-
-We need this to we easy to run using narun ? 
-
-https://github.com/akhenakh/narun
-https://github.com/akhenakh/nats2sse
-https://github.com/akhenakh/nlock
-
-
+1. Tell the people who matter.
+2. Transfer it (github.com/joeblew999/ubuntu-website/settings → Transfer → ubuntusoftware-net), then fork it back to personal (`gh repo fork ubuntusoftware-net/ubuntu-website --clone=false`).
+3. `git remote set-url origin https://github.com/ubuntusoftware-net/ubuntu-website`, and `git remote add personal https://github.com/joeblew999/ubuntu-website`.
+4. `repo_url` in `content/*/pkg/*.md` (all five languages).
+5. Workers Builds is connected to the repo by name: connect it again (`mise run cloudflare:09-connect-github`).
+6. Check: the workflows run on the org; vanity imports work (`go get www.ubuntusoftware.net/pkg/mailerlite`); old links redirect (GitHub does that for a while).
 
 ---
 
+## Follow-ups
 
-https://github.com/line/line-bot-sdk-go
-https://github.com/line/line-bot-sdk-go/releases/tag/v8.18.0
-
-https://developers.line.biz/en/docs/basics/channel-access-token/
+None open. A follow-up goes here, ticked when done.
 
 ---
 
-JUst like LINE has a QR system, we need them too
+## Done (2026-11-03 to 11-04: mise, the Cloudflare Worker, Hugo 0.169, Hugo Plate)
 
-https://line.me/R/ti/p/@linedevth?from=page
+The record. Upgrade commands are in CLAUDE.md ("Upgrading").
 
-
-
----
-
-Like the Google MCP, we need the same.
-
-We have a LINE account so can test it.
-
-Maybe someone already has a golang MPC that wraps this ? 
-
----
-
-Claude got an:
-
-MCP error -32602: Output validation error: Invalid structured content for tool directory_tree: [
-  {
-    "expected": "string",
-    "code": "invalid_type",
-    "path": [
-      "content"
-    ],
-    "message": "Invalid input: expected string, received array"
-  }
-]
-
-I wonder if our claude.json and our MCP server is messing things up ?
-
----
-
-SCION web page regarding high security to avoid BGP crappiness ? 
-https://www.scion.org
-https://github.com/scionproto/scion
-
-
-
----
-
-Finish the Email System ready for Google Verification !!!
-
-Need this so we can access other peoples google drive, email, etc without htem having to do anything.
-
-
----
-
-### GitHub Organization: ubuntusoftware-net
-
-**Status:** Org created, repo transfer DEFERRED
-
-**Created:** `github.com/ubuntusoftware-net` (Dec 2024)
-
-**Why deferred:** People are currently viewing `joeblew999/ubuntu-website`. Don't want broken links during evaluation period.
-
-**Transfer steps (when ready):**
-
-1. **Notify contacts** - Let key people know about the migration
-2. **Transfer repo:**
-   ```bash
-   # Via web: github.com/joeblew999/ubuntu-website/settings → Transfer
-   # Select: ubuntusoftware-net
-   ```
-3. **Fork back to personal:**
-   ```bash
-   gh repo fork ubuntusoftware-net/ubuntu-website --clone=false
-   ```
-4. **Update local remote:**
-   ```bash
-   git remote set-url origin https://github.com/ubuntusoftware-net/ubuntu-website
-   git remote add personal https://github.com/joeblew999/ubuntu-website
-   ```
-5. **Update package frontmatter** (repo_url in `content/english/pkg/*.md`):
-   ```bash
-   task pkg:update  # or manually edit repo_url fields
-   ```
-6. **Verify:**
-   - GitHub Actions still run on org
-   - Vanity imports work: `go get www.ubuntusoftware.net/pkg/mailerlite`
-   - Old links redirect (GitHub does this automatically)
-
-**Notes:**
-- GitHub Actions free tier is same for orgs (2000 min/month private, unlimited public)
-- Vanity URLs (`www.ubuntusoftware.net/pkg/*`) shield users from GitHub structure changes
-- GitHub auto-redirects old URLs for a period after transfer
-
----
-
-- https://github.com/romshark/toki might help use with Transaltion of pages ? 
-- He is currently updating a branch to add Datastar real time Web gui, which is perfert for us.
-
-It does not parse markdown yet, so we can fork and add that somehow, so that it will help with use translating markdown.
-
-I have an issue to add Date/Time at: https://github.com/romshark/toki/issues/18
-
-
----
-
-We need to ensure we release this via github and that we then finish the ability for anyone sending in an email from "Get Started" can have the software sent to them via email. I think we need to finsih the mailerlite stuff in order to do that . Will be a sprint ...
-
----
-
-BTW i noticed that your broke an GOLDNE run in the wrangler taskfile. I see "bun" used in it. We agreed thats NOT ok. I dont know how this was missed, but its vital you dont so this !!!!   I am not sure how your going to validate this, but now that your have Archetypes and fmt and lint, i think it will be pretty easy, and you know what task includes what task  ? 
-
-I need you to keep watch on where you see patterns or mistakes when you modify task file, and screw up, and then look at the xplat lint and fmt etc code to be updated. We dont want to go overboard and boil the ocean.
-
----
-
-Currently honing our testing of task files, archtype classification and task files conformance system.
-
-Getting single task file testing locally and in CI, will allow Me, other devs and claude to QUICKLY get things properly validated !!
-
---
-
-
-
-xplat is nearing prime time.
-
-We have "release" that does the release into github.
-
-But we want to release via winget and homebrew. Dont bother with linux yet.
-
-To make it such that we and any user can use xplat to release we want a smat way. We have the gh cli task file, and winget and homebew are github Repos, so maybe we can have a template inside xplat and push to these repos ?
-
-I am SURE i have left out a few aspects though, so i need help.
-
----
-
-Once oyu get the NON CGO FULLY working for the FULL lifecyle, Make sure that dummy cmd main.go can also require CGO. What i mean is that then you can test for both CGO and non CGO with the same binary for all the round tripping permutations. Its really easy. you just need to focus .  you could also make a 2nd main.go too of how ever you want to do it.   
-
-
-
----
-
-## Follow-ups (2026-11-03: mise tooling, upgrades, Hugo 0.169, Hugo Plate update)
-
-Upgrade commands are in CLAUDE.md ("Upgrading"). Tick items here when done.
-
-### Decisions needed
+### mise, Cloudflare, CI
 
 - [x] **Taskfile → mise tasks, with the TestMise checker** (you prefer mise; the checker approach of `github.com/joeblew999/mise-cloudflare/mise_test.go`, not mise-cloudflare itself, which isn't stable: one-line tasks, flags via mise `usage`, no shell in the mise file; mise tasks run Go, Go runs mise tasks by full name, and a task runs TestMise on the very mise file it's in, so every link is checked both ways). Size: 33 live Taskfiles, ~6,800 lines, ~480 tasks; 3 dead ones (`Taskfile.coder*.yml`, not included anywhere). Plan:
   - [x] ~~Cloudflare stays on **Pages**~~ (superseded 2026-11-04: the site is a Worker run by mise-cloudflare, below; the Cloudflare tasks are `cf.toml` (Cloudflare's CLI), `r2.toml` (wrangler on the repo's login), `url.toml`'s dashboards).
@@ -248,90 +109,5 @@ Upgrade commands are in CLAUDE.md ("Upgrading"). Tick items here when done.
 
 - Global `tailwindcss` mise shim stays: shadcn-templ-demo and go-htmx4 pin it.
 - The youtube CLI keeps downloading its own ffmpeg/yt-dlp into `.build/`: the standalone binary needs it.
-- `task google:auth:add` keeps writing the generic env-var MCP entry (standalone CLI) and never overwrites an existing entry.
+- `mise run google:auth add` keeps writing the generic env-var MCP entry (standalone CLI) and never overwrites an existing entry.
 - `go.mongodb.org/mongo-driver` v1 (deprecated) is indirect via playwright-go → golang-set: upstream's to fix.
-
----
-
-## Completed
-
-- [x] xplat v0.2.0 released with Windows support, mv command, unit tests
-- [x] Remote taskfile includes work (validated in CI)
-- [x] Cross-platform CI testing (Linux, macOS, Windows)
-- [x] gh CLI taskfile added (tools:gh:*) - releases, workflows, PRs, issues
-- [x] xplat release workflow migrated from softprops/action-gh-release to gh CLI
-- [x] TOOL_BIN pattern established ({{exeExt}} for Windows .exe support)
-- [x] Task version locked to 3.45.5 across all CI workflows
-- [x] Task version check taskfile added (tools:task:check:deps)
-- [x] Taskfile Registry validated via .github/workflows/remote-taskfile-test.yml
-- [x] Deprecated deploy.yml.old workflow deleted
-- [x] Centralized xplat.env - single source of truth for Task/Go versions
-- [x] Go version standardized to 1.25 across all workflows (matches go.mod)
-- [x] Version consistency check added (ci:check:versions)
-- [x] DRY version management - xplat.env loaded via root Taskfile dotenv
-  - Taskfile tasks read $GO_VERSION, $TASK_VERSION from xplat.env
-  - Workflow YAML still has hardcoded values (GitHub Actions limitation)
-  - ci:check:versions validates workflow values match xplat.env
-- [x] Go toolchain version management (rustup-style parity)
-  - Flexible mode (default): warns on version mismatch
-  - Strict mode: fails on version mismatch (GO_VERSION_STRICT=true)
-  - Bootstrap task: `task toolchain:golang:bootstrap` uses `golang.org/dl`
-- [x] Taskfile refactor - extracted domain modules from root (900→355 lines)
-  - New modules: hugo, cf, translate, seo, sitecheck, env, url
-  - gh:secret/var tasks merged into tools:gh
-  - All 146 tasks tested and working
-- [x] Google MCP server integration with turnkey OAuth
-  - Terraform creates GCP project with 6 Google APIs enabled
-  - cmd/google-auth binary handles OAuth with PKCE
-  - Three auth modes: manual (default), passkey (-assisted), auto (-auto with Playwright)
-  - Account pre-selection via -account=EMAIL flag (uses login_hint)
-  - Tasks: `google-mcp:tf:auth:passkey`, `google-mcp:tf:auth:auto`, `google-mcp:tf:plan/apply`
-  - No brew dependencies - cross-platform compatible
-
-## In Progress
-
-(nothing currently)
-
----
-
-## Broken/Incomplete
-
----
-
-## Future Ideas
-
-### Bigger Picture
-
-Via (Datastar web GUI) & Hugo extension work can leverage each other ? Maybe for collaboration aspects. real time, etc. Can redude what we are building to be simpler for inside vscode and outside in terms of code and compleyity. Def need to visit this !!
-
-Building toward:
-1. **Via** - User IDE web GUI using Datastar
-2. **Hugo extension** - VSCode extension for Hugo content editing
-3. **Block editor** - Datastar-based editor for Hugo content/layouts
-
-Users and VSCode devs call the same Go code, both modifying git repos.
-
-### Split Taskfiles to .github Repo?
-
-Could move reusable taskfiles to a dedicated repo so all repos can pull versioned taskfiles at runtime. Task supports this natively.
-
-### other weird ideas
-
-https://github.com/akhenakh/narun - could help generalize cmd/* tools
-
-https://github.com/akhenakh/nats2sse for feed off 
-
-https://github.com/infogulch/xtemplate/tree/next
-
-
-### gh CLI - Future Enhancements
-
-Now that we have `tools:gh:*` tasks and migrated xplat release to use gh CLI:
-- Consider migrating other workflows to use gh CLI
-- Add `gh:workflow:run` to trigger CI from local (useful for manual releases)
-- Explore `gh api` for more advanced GitHub integrations
-
-### Logo/Branding Updates
-
-When logo changes, need to update: Bluesky, Gmail signature.
-Could automate via Go code + task.
