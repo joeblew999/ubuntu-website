@@ -67,10 +67,10 @@ task cf:status     # Cloudflare Pages deployment status
 ## 🌐 Translation Workflow
 
 1. Edit English content in `content/english/`
-2. `task translate:content:status`: what changed since the last translation
-3. `task translate:content:next`: next file to translate
+2. `mise run translate:content status`: what changed since the last translation
+3. `mise run translate:content next`: next file to translate
 4. Translate it into each language (see CLAUDE.md, Translation Workflow)
-5. `task translate:content:done`: move the checkpoint
+5. `mise run translate:content done`: move the checkpoint
 
 ## 📦 Project Structure
 

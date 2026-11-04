@@ -12,6 +12,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/joeblew999/ubuntu-website/internal/cli"
 )
 
 // CLIOptions holds global CLI flags
@@ -37,7 +39,7 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 	fs.BoolVar(&opts.GithubIssue, "github-issue", false, "Output markdown for GitHub Issue (exits 1 if changes detected)")
 	fs.BoolVar(&opts.Version, "version", false, "Print version and exit")
 
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(cli.Ordered(fs, args[1:])); err != nil {
 		return 1
 	}
 

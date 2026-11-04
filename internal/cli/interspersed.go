@@ -42,3 +42,10 @@ func lookup(fs *flag.FlagSet, a string) (*flag.Flag, bool) {
 	}
 	return fs.Lookup(name), inline
 }
+
+// Ordered is args with the flags fs defines moved in front, for fs.Parse: then the flags count wherever they were, and
+// fs.Args() is the rest, in order.
+func Ordered(fs *flag.FlagSet, args []string) []string {
+	flags, rest := Interspersed(fs, args)
+	return append(flags, rest...)
+}

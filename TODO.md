@@ -187,6 +187,9 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
   - [x] git-lfs (the `static/videos/*.mp4` are LFS) was in your global mise config only. **Done:** pinned in `mise.toml` too (3.8.1, as global); keep the global one for other repos.
   - [x] **Taskfile → mise, batch 1** (repo maintenance + dev): `cmd/upgrade` (tools, modules, hugo; `upgrade:all`, `upgrade:actions`), `cmd/url`, `lanip:ip`, `pmtiles-server:serve`; Hugo and process-compose are tool-task files, `hugo.toml` (`hugo:dev`, …) and `dev.toml` (`dev:up`, …), which mise-check v0.3.0 holds to the rules every task is (it used to fail a file that runs no Go); `internal/cli.Interspersed` (a binary's global flags may follow its command, as mise passes arguments) and `internal/hugobuild`. Deleted: go, hugo, url, lanip, pmtiles, dev, process-compose, task, wrangler, release and the 3 dead coder Taskfiles.
   - [x] Closed the 205 old Site Alert issues (not planned).
+  - [x] **translate on mise**: `.mise/tasks/translate.toml` ↔ `cmd/translate/` (`content`, `menu`, `lang`, subcommands passed through; `check`, the weekly report, was `ci:translate`'s shell); `translate content done` now pushes the `last-translation` tag; the menu check's false positives fixed (off-site links, `pages/<name>.md` served at `/<name>/`, Vietnamese's folder from languages.toml); workflow `monitor-translate.yml`, one open issue at a time.
+  - [ ] The de/zh/ja/vi menus lack entries the English menu has (fleet, applications, advisors…): `translate:check` reports it every week. `mise run translate:menu sync` regenerates them from English, but the new entries' names need translating: decide.
+  - [ ] 19 open "Translation: Issues detected" issues (one a week since 2025-12, all the same report): close them, keep the newest? Ask.
   - [x] **Site alerts were noise**: 205 open "Site Alert" issues (2025-12 to 2026-11), ~90% for 1–2 failed check-host.net nodes, which `sitecheck:http` itself calls noise. The report now uses the same rule (`noise = 3`, `TestReportNoise`), and the workflow comments on the open alert instead of opening another.
   - [x] **GitHub Actions pinned and upgradable** (pinact, as go-mod-upgrade does): `root:check-actions` (offline: every `uses:` a SHA + version comment) in `root:ci`; `root:upgrade-actions` (in `task upgrade`) updates them to releases at least 7 days old (`.github/pinact.yaml`), with your gh login. 8 tag-only refs pinned; then upgraded: mise-action v5.2.4, upload-artifact v7.0.2, cache v6.1.0, action-download-artifact v27 (inputs checked unchanged). Watch the next scheduled runs of syndication-bluesky, cfanalytics and sync-airspace (cache v6, artifacts v7/v27), which only run on schedule.
   - [x] **Workflows linted in CI**: `root:check-workflows` (actionlint + shellcheck, both pinned) in `root:ci`, after `monitor-sitecheck.yml` reached main unparseable (an unquoted `: ` in a `run:` line). Unquoted `$GITHUB_OUTPUT`/`$GITHUB_PATH` fixed in cfanalytics, translate, sync-airspace.
@@ -228,7 +231,7 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
 - [x] `browser.GetProjectRoot` never matched `.git` (checked it as a file).
 - [x] Hugo module `min` raised to 0.158.0 (what Hugo Plate needs).
 
-- [ ] `translate done` moves the `last-translation` tag locally only: push it too (`git push -f origin last-translation`), or CI's weekly check has nothing to compare against. Fix when translate moves into mise.
+- [x] `translate done` moves the `last-translation` tag locally only. **Done:** `translate content done` pushes it.
 
 ### Decided (leave as is)
 

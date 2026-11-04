@@ -453,6 +453,11 @@ func (p *TerminalPresenter) Done(r DoneResult) {
 		return
 	}
 	fmt.Fprintln(p.w, "OK: Translation checkpoint updated to current commit")
+	if r.PushError != nil {
+		fmt.Fprintf(p.w, "WARN: the tag isn't on origin (%v): push it, git push -f origin %s\n", r.PushError, r.NewTag)
+	} else {
+		fmt.Fprintf(p.w, "OK: %s pushed to origin\n", r.NewTag)
+	}
 }
 
 // MenuSync formats menu sync for terminal.
@@ -495,9 +500,9 @@ func (p *TerminalPresenter) LangAdd(r LangAddResult) {
 	p.footer()
 	fmt.Fprintln(p.w)
 	fmt.Fprintln(p.w, "Next steps:")
-	fmt.Fprintln(p.w, "  1. Run 'task translate:missing' to see what needs translating")
+	fmt.Fprintln(p.w, "  1. Run 'mise run translate:content missing' to see what needs translating")
 	fmt.Fprintf(p.w, "  2. Translate content to %s\n", r.Name)
-	fmt.Fprintln(p.w, "  3. Run 'task translate:done' when complete")
+	fmt.Fprintln(p.w, "  3. Run 'mise run translate:content done' when complete")
 }
 
 // LangRemove formats language remove for terminal.
@@ -545,7 +550,7 @@ func (p *TerminalPresenter) LangInit(r LangInitResult) {
 	p.footer()
 	fmt.Fprintln(p.w)
 	fmt.Fprintln(p.w, "Next steps:")
-	fmt.Fprintln(p.w, "  Run 'task translate:missing' to see what needs translating")
+	fmt.Fprintln(p.w, "  Run 'mise run translate:content missing' to see what needs translating")
 }
 
 // ============================================================================
@@ -801,7 +806,7 @@ func (p *MarkdownPresenter) MenuCheck(r MenuCheckResult) {
 		fmt.Fprintln(p.w)
 	}
 
-	fmt.Fprintln(p.w, "Run `task translate:menu:sync` to regenerate menu files from English.")
+	fmt.Fprintln(p.w, "Run `mise run translate:menu sync` to regenerate menu files from English.")
 }
 
 // Clean formats orphan cleanup as markdown.

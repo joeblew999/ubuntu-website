@@ -207,27 +207,23 @@ func GetMenuFilePath(langCode string) string {
 	return fmt.Sprintf("config/_default/menus.%s.toml", langCode)
 }
 
-// ValidateMenuLinks checks if menu URLs correspond to existing content files
+// ValidateMenuLinks checks if menu URLs correspond to existing content files: a section (<url>/_index.md), a page
+// (<url>.md), or a page of the pages section, which hugo.toml's permalinks serve at /<name>/ (pages/<name>.md). A link
+// off the site (https://…, mailto:) has no content file to check.
 func ValidateMenuLinks(menu *MenuConfig, langCode string, contentDir string) []string {
 	var issues []string
 
-	langDir := "english" // Default for en
-	if langCode != "en" {
-		// Map lang codes to directory names
-		langDirMap := map[string]string{
-			"de": "german",
-			"zh": "chinese",
-			"ja": "japanese",
-		}
-		if dir, ok := langDirMap[langCode]; ok {
-			langDir = dir
-		} else {
-			langDir = langCode
-		}
+	// The language's content folder, as languages.toml says (contentDir = "content/german"); else the usual names.
+	langDir := map[string]string{"en": "english", "de": "german", "zh": "chinese", "ja": "japanese", "vi": "vietnamese"}[langCode]
+	if entry, err := GetLanguageByCode(langCode); err == nil && entry != nil && entry.ContentDir != "" {
+		langDir = strings.TrimPrefix(entry.ContentDir, "content/")
+	}
+	if langDir == "" {
+		langDir = langCode
 	}
 
 	checkURL := func(item MenuItem, menuType string) {
-		if item.URL == "" {
+		if item.URL == "" || strings.Contains(item.URL, "://") || strings.HasPrefix(item.URL, "mailto:") || strings.HasPrefix(item.URL, "#") {
 			return
 		}
 		// Convert URL to content path
@@ -239,10 +235,13 @@ func ValidateMenuLinks(menu *MenuConfig, langCode string, contentDir string) []s
 		indexPath := fmt.Sprintf("%s/%s/%s/_index.md", contentDir, langDir, urlPath)
 		pagePath := fmt.Sprintf("%s/%s/%s.md", contentDir, langDir, urlPath)
 
+		pagesPath := fmt.Sprintf("%s/%s/pages/%s.md", contentDir, langDir, urlPath)
+
 		_, indexErr := os.Stat(indexPath)
 		_, pageErr := os.Stat(pagePath)
+		_, pagesErr := os.Stat(pagesPath)
 
-		if indexErr != nil && pageErr != nil {
+		if indexErr != nil && pageErr != nil && pagesErr != nil {
 			issues = append(issues, fmt.Sprintf("[%s] %s: %s → no content file", menuType, item.Name, item.URL))
 		}
 	}

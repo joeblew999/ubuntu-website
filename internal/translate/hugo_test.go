@@ -239,13 +239,21 @@ func TestValidateMenuLinks(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(englishDir, "blog", "_index.md"), []byte("test"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.MkdirAll(filepath.Join(englishDir, "pages"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(englishDir, "pages", "privacy-policy.md"), []byte("test"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	menu := &MenuConfig{
 		Main: []MenuItem{
-			{Name: "Platform", URL: "/platform"}, // exists
-			{Name: "Blog", URL: "/blog"},         // exists
-			{Name: "Missing", URL: "/missing"},   // doesn't exist
-			{Name: "No URL", URL: ""},            // no URL, should skip
+			{Name: "Platform", URL: "/platform"},                     // exists
+			{Name: "Blog", URL: "/blog"},                             // exists
+			{Name: "Missing", URL: "/missing"},                       // doesn't exist
+			{Name: "No URL", URL: ""},                                // no URL, should skip
+			{Name: "GitHub", URL: "https://github.com/joeblew999/x"}, // off the site, should skip
+			{Name: "Privacy", URL: "/privacy-policy"},                // pages/privacy-policy.md, served at /privacy-policy/
 		},
 		Footer: []MenuItem{
 			{Name: "Contact", URL: "/contact"}, // doesn't exist

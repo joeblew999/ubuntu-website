@@ -1,0 +1,32 @@
+# The site's translations (de, zh, ja, vi): what changed in English since the last translation (the git tag
+# last-translation), what's missing, stale or orphaned, the menus, the languages. Each task runs one command of the
+# translate binary, cmd/translate/<command>.go; its subcommands and flags (--github-issue, --force) are passed through:
+#   mise run translate:content status     what changed in English since the last translation
+#   mise run translate:content next       the next page to translate
+#   mise run translate:content done       translations done: the checkpoint moves (and is pushed)
+#   mise run translate:menu check         the menus' links and structure
+# The weekly check is .github/workflows/translate.yml: mise run translate:check. Machine translation: autotranslate:*.
+
+["translate:build"]
+description = "Build translate (cmd/translate) into bin/: the translate:* tasks run it"
+run = 'go build -o bin/ ./cmd/translate'
+
+["translate:content"]
+description = "The English pages against their translations: status, diff <file>, changed, next, done, missing, orphans, stale, clean"
+depends = ["translate:build"]
+run = 'translate content'
+
+["translate:menu"]
+description = "The menus: check (broken links, structure against English), sync (generated from English)"
+depends = ["translate:build"]
+run = 'translate menu'
+
+["translate:lang"]
+description = "The languages: list, validate, add <code> <name> <dirname>, remove <code>, init <code>"
+depends = ["translate:build"]
+run = 'translate lang'
+
+["translate:check"]
+description = "Every check (missing, stale and orphaned pages, the menus) as one markdown report for a GitHub issue; fails if any finds something to do (the weekly workflow)"
+depends = ["translate:build"]
+run = 'translate check'

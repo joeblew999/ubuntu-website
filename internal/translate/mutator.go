@@ -61,7 +61,8 @@ func (c *Checker) DoClean(force bool, confirmed bool) CleanResult {
 	return result
 }
 
-// DoDone updates the checkpoint tag to current commit.
+// DoDone updates the checkpoint tag to current commit, and pushes it: CI's weekly check (translate check) compares
+// with origin's tag, so one moved only here leaves it comparing with the old one.
 func (c *Checker) DoDone() DoneResult {
 	result := DoneResult{
 		NewTag: c.config.CheckpointTag,
@@ -86,6 +87,9 @@ func (c *Checker) DoDone() DoneResult {
 		result.Commit = strings.TrimSpace(string(commitOut))[:7] // Short SHA
 	}
 
+	if out, err := exec.Command("git", "push", "-f", "origin", "refs/tags/"+c.config.CheckpointTag).CombinedOutput(); err != nil {
+		result.PushError = fmt.Errorf("%w: %s", err, strings.TrimSpace(string(out)))
+	}
 	return result
 }
 

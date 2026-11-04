@@ -527,7 +527,7 @@ Languages: de (German), zh (Chinese), ja (Japanese), vi (Vietnamese) - auto-load
 - `internal/translate/checker.go` - Pure query functions (CheckStatus, CheckMissing, etc.)
 - `internal/translate/mutator.go` - Side-effect functions (DoClean, DoDone, etc.)
 - `internal/translate/presenter.go` - Terminal and Markdown output formatting
-- `taskfiles/Taskfile.translate.yml` - CLI interface (calls Go binary)
+- `.mise/tasks/translate.toml` ↔ `cmd/translate/` - the tasks (`translate:content`, `translate:menu`, `translate:lang`, `translate:check`), subcommands passed through
 
 **Taskfile Commands (all namespaced):**
 
@@ -539,18 +539,18 @@ Languages: de (German), zh (Chinese), ja (Japanese), vi (Vietnamese) - auto-load
 | `lang:` | list, add, remove, init, validate | Manage languages |
 
 **Common Commands:**
-- `task translate:content:status` - what English files changed since last translation?
-- `task translate:content:missing` - what's missing in target languages?
-- `task translate:content:next` - which file should I translate next?
-- `task translate:content:done` - mark translations complete
-- `task translate:menu:check` - validate menus for broken links
-- `task translate:lang:list` - show configured languages
+- `mise run translate:content status` - what English files changed since last translation?
+- `mise run translate:content missing` - what's missing in target languages?
+- `mise run translate:content next` - which file should I translate next?
+- `mise run translate:content done` - mark translations complete (moves and pushes the `last-translation` tag)
+- `mise run translate:menu check` - validate menus for broken links
+- `mise run translate:lang list` - show configured languages
 
 **Lifecycle:**
-1. Edit English file → `translate:content:status` shows it
-2. Run `translate:content:next` → get next file to translate
+1. Edit English file → `translate:content status` shows it
+2. Run `translate:content next` → get next file to translate
 3. Translate to all languages, commit translations
-4. Run `translate:content:done` → moves checkpoint, status is clean
+4. Run `translate:content done` → moves checkpoint (pushed), status is clean
 
 **CI:** `monitor-translate.yml` runs weekly, creates GitHub Issue if missing translations.
 

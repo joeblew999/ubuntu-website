@@ -23,6 +23,8 @@ import (
 	"path/filepath"
 
 	"github.com/fogleman/gg"
+
+	"github.com/joeblew999/ubuntu-website/internal/cli"
 )
 
 // =============================================================================
@@ -87,7 +89,7 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 	fs.StringVar(&asset, "asset", "all", "Asset to generate: avatar, banner, favicon, logo-svg, email, og, or all")
 	fs.BoolVar(&ver, "version", false, "Print version and exit")
 
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(cli.Ordered(fs, args[1:])); err != nil {
 		return 1
 	}
 

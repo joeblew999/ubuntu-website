@@ -10,6 +10,8 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/browser"
 	"github.com/joeblew999/ubuntu-website/internal/browser/sites"
 	"github.com/joeblew999/ubuntu-website/internal/google/gmail"
+
+	"github.com/joeblew999/ubuntu-website/internal/cli"
 )
 
 // Run executes the playwright CLI with the given arguments.
@@ -28,7 +30,7 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 		showVersion = fs.Bool("version", false, "Show version")
 	)
 
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(cli.Ordered(fs, args[1:])); err != nil {
 		return 1
 	}
 

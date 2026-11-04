@@ -42,7 +42,6 @@ version: '3'
 includes:
   # Domain modules
   cf: ./taskfiles/Taskfile.cf.yml
-  translate: ./taskfiles/Taskfile.translate.yml
   autotranslate: ./taskfiles/Taskfile.autotranslate.yml
   cfanalytics: ./taskfiles/Taskfile.cfanalytics.yml
   genlogo: ./taskfiles/Taskfile.genlogo.yml
@@ -252,24 +251,6 @@ tasks:
     deps: [cfanalytics:check:deps]
     cmds:
       - '{{.HOME}}/.local/bin/cfanalytics{{exeExt}} -github-issue'
-
-  ci:translate:
-    desc: "[Monitor] Translate - Check translation status for CI"
-    deps: [translate:check:deps]
-    vars:
-      TRANSLATE: '{{.HOME}}/.local/bin/translate{{exeExt}}'
-    cmds:
-      # Run all checks, output markdown report
-      # Exits non-zero if ANY check finds issues
-      - |
-        echo "# Translation Status Report"
-        echo ""
-        FOUND=0
-        {{.TRANSLATE}} -github-issue content missing || FOUND=1
-        {{.TRANSLATE}} -github-issue content stale || FOUND=1
-        {{.TRANSLATE}} -github-issue content orphans || FOUND=1
-        {{.TRANSLATE}} -github-issue menu check || FOUND=1
-        [ $FOUND -eq 0 ]
 
   # ===========================================================================
   # Code Quality

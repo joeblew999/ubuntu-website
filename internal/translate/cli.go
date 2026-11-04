@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/joeblew999/ubuntu-website/internal/cli"
 )
 
 // CLIOptions holds global CLI flags
@@ -33,7 +35,7 @@ func Run(args []string, version string, stdout, stderr io.Writer, stdin io.Reade
 	fs.BoolVar(&opts.Force, "force", false, "Skip confirmation prompts (for CI)")
 	fs.BoolVar(&opts.Version, "version", false, "Print version and exit")
 
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(cli.Ordered(fs, args[1:])); err != nil {
 		return 1
 	}
 
@@ -492,9 +494,9 @@ func (ctx *cliContext) runLangAdd() int {
 	fmt.Fprintln(ctx.stdout, "========================================")
 	fmt.Fprintln(ctx.stdout)
 	fmt.Fprintln(ctx.stdout, "Next steps:")
-	fmt.Fprintln(ctx.stdout, "  1. Run 'task translate:content:missing' to see what needs translating")
+	fmt.Fprintln(ctx.stdout, "  1. Run 'mise run translate:content missing' to see what needs translating")
 	fmt.Fprintf(ctx.stdout, "  2. Translate content to %s\n", name)
-	fmt.Fprintln(ctx.stdout, "  3. Run 'task translate:content:done' when complete")
+	fmt.Fprintln(ctx.stdout, "  3. Run 'mise run translate:content done' when complete")
 	return 0
 }
 
@@ -616,7 +618,7 @@ func (ctx *cliContext) runLangInit() int {
 	fmt.Fprintln(ctx.stdout, "========================================")
 	fmt.Fprintln(ctx.stdout)
 	fmt.Fprintln(ctx.stdout, "Next steps:")
-	fmt.Fprintln(ctx.stdout, "  Run 'task translate:content:missing' to see what needs translating")
+	fmt.Fprintln(ctx.stdout, "  Run 'mise run translate:content missing' to see what needs translating")
 	return 0
 }
 

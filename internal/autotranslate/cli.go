@@ -14,6 +14,8 @@ import (
 	"strings"
 
 	"github.com/joeblew999/ubuntu-website/internal/translate"
+
+	appcli "github.com/joeblew999/ubuntu-website/internal/cli"
 )
 
 // CLIOptions holds the parsed CLI flags
@@ -54,7 +56,7 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "  CLAUDE_API_KEY   Claude API key (uses your subscription)\n")
 	}
 
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(appcli.Ordered(fs, args[1:])); err != nil {
 		return 1
 	}
 

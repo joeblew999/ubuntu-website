@@ -173,6 +173,8 @@ type DoneResult struct {
 	NewTag string // New checkpoint tag
 	Commit string // Commit SHA that was tagged
 	Error  error  // Any error during update
+	// PushError is why the tag didn't reach origin, if it didn't: CI's weekly check compares with origin's tag.
+	PushError error
 }
 
 // MenuSyncResult contains menu sync data

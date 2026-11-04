@@ -1,0 +1,59 @@
+# monitor-translate: are the translations (de, zh, ja, vi) in step with English? Every Monday (or by hand) it runs
+# mise run translate:check (.mise/tasks/translate.toml, cmd/translate): missing, stale and orphaned pages and the menus,
+# against English since the last translation (the git tag last-translation, which translate:content done moves and
+# pushes). Something to do opens an issue, or is a comment on the one already open. The Go itself is built, vetted and
+# held to its tasks by core-ci (mise run root:ci).
+name: monitor-translate
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9am UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0  # the history and tags: last-translation is what English is compared with
+
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        with:
+          version: 2026.9.15
+          cache: true
+
+      - name: mise run translate:check (fails when there's something to do; its report in report.md)
+        id: check
+        continue-on-error: true
+        run: |
+          mise run translate:check > report.md
+          cat report.md
+
+      # One issue open at a time: a later report is a comment on it, until it's closed.
+      - name: The open issue, if any
+        id: open
+        if: steps.check.outcome == 'failure' && hashFiles('report.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "number=$(gh issue list --label translation --state open --limit 1 --json number --jq '.[0].number // empty')" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue
+        if: steps.open.conclusion == 'success' && steps.open.outputs.number == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "Translation: Issues detected" --body-file report.md --label "translation,automated"
+
+      - name: Comment on the open issue
+        if: steps.open.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ steps.open.outputs.number }}
+        run: |
+          gh issue comment "$NUMBER" --body-file report.md

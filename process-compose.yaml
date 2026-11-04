@@ -21,13 +21,6 @@ processes:
       restart: on_failure
       max_restarts: 3
 
-  # Optional: Enable when actively translating
-  translate-watch:
-    command: task translate:watch
-    depends_on:
-      hugo:
-        condition: process_healthy
-    disabled: true
 
   # Optional: Enable for subscriber sync
   mailerlite-sync:
