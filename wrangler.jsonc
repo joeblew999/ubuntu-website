@@ -6,6 +6,9 @@
   "name": "ubuntusoftware-net",
   "main": "worker/index.js",
   "compatibility_date": "2026-11-01",
+  // www.ubuntusoftware.net, a Workers custom domain (its DNS record is the Worker's); ubuntusoftware.net redirects to it
+  // by a Cloudflare redirect rule.
+  "routes": [{ "pattern": "www.ubuntusoftware.net", "custom_domain": true }],
   "assets": {
     "directory": "public",
     "binding": "ASSETS",
