@@ -11,7 +11,7 @@ created_at: 2025-12-17T00:00:00Z
 updated_at: 2025-12-17T00:00:00Z
 has_binary: true
 binary_name: google
-taskfile_path: taskfiles/Taskfile.google.yml
+tasks_path: .mise/tasks/google.toml
 process:
   command: mise run google:gmail server
   port: 8087

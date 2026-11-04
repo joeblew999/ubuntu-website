@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/joeblew999/ubuntu-website/internal/googleauth"
 )
 
 // status is google-mcp status, the task google-mcp:status: each part of the setup, there or not: the server binary
@@ -17,7 +19,7 @@ func status() {
 		fmt.Println("❌ google-mcp-server: not installed (mise install)")
 	}
 	for _, key := range []string{"GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"} {
-		if _, err := secretValue(key); err == nil {
+		if _, err := googleauth.Keychain(key); err == nil {
 			fmt.Printf("✅ %s: in the keychain\n", key)
 		} else {
 			fmt.Printf("❌ %s: missing (mise run google-mcp:credentials)\n", key)

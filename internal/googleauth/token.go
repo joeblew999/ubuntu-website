@@ -29,7 +29,10 @@ type Token struct {
 }
 
 // IsExpired checks if the token is expired
-func (t *Token) IsExpired() bool {
+func (t *Token) IsExpired() bool { return t.ExpiresWithin(0) }
+
+// ExpiresWithin checks if the token is expired, or will be within d
+func (t *Token) ExpiresWithin(d time.Duration) bool {
 	if t.Expiry == "" {
 		return false // No expiry means we don't know
 	}
@@ -37,7 +40,7 @@ func (t *Token) IsExpired() bool {
 	if err != nil {
 		return false // Can't parse, assume not expired
 	}
-	return time.Now().After(expiry)
+	return time.Now().Add(d).After(expiry)
 }
 
 // LoadAccount loads a Google account from the token path
@@ -65,11 +68,19 @@ func LoadAccount(tokenPath string) (*Account, error) {
 	return &account, nil
 }
 
-// LoadAccessToken loads just the access token string (convenience function)
+// LoadAccessToken loads just the access token string. One that has expired, or will within a minute, is refreshed
+// at Google first (the keychain's client id and secret) and saved to the account's file, as google-mcp-server does.
 func LoadAccessToken(tokenPath string) (string, error) {
-	account, err := LoadAccount(tokenPath)
+	path, err := resolveTokenPath(tokenPath)
 	if err != nil {
 		return "", err
+	}
+	account, err := LoadAccount(path)
+	if err != nil {
+		return "", err
+	}
+	if account.Token.ExpiresWithin(time.Minute) {
+		return refreshAccount(path, account)
 	}
 	return account.Token.AccessToken, nil
 }

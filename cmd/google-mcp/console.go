@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/joeblew999/ubuntu-website/internal/googleauth"
 )
 
 const site = "https://www.ubuntusoftware.net"
@@ -21,7 +23,7 @@ func console() {
 			fail(fmt.Sprintf("%s%s answers %d: fix the page before using it on the Branding screen", site, path, code))
 		}
 	}
-	client, err := secretValue("GOOGLE_CLIENT_ID")
+	client, err := googleauth.Keychain("GOOGLE_CLIENT_ID")
 	if err != nil {
 		fail(err.Error())
 	}

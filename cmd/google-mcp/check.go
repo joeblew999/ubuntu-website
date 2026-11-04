@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/joeblew999/ubuntu-website/internal/googleauth"
 )
 
 // check is google-mcp check, the task google-mcp:check: the setup proved end to end, a token refresh at Google (so the
@@ -30,11 +30,11 @@ func checkAll() error {
 	if len(files) == 0 {
 		return errors.New("✗ no signed-in Google account: run mise run google-mcp:auth")
 	}
-	id, err := secretValue("GOOGLE_CLIENT_ID")
+	id, err := googleauth.Keychain("GOOGLE_CLIENT_ID")
 	if err != nil {
 		return errors.New("✗ " + err.Error())
 	}
-	secret, err := secretValue("GOOGLE_CLIENT_SECRET")
+	secret, err := googleauth.Keychain("GOOGLE_CLIENT_SECRET")
 	if err != nil {
 		return errors.New("✗ " + err.Error())
 	}
@@ -44,27 +44,8 @@ func checkAll() error {
 		if refresh == "" {
 			return fmt.Errorf("✗ %s: no refresh token: run mise run google-mcp:auth", filepath.Base(f))
 		}
-		resp, err := http.PostForm("https://oauth2.googleapis.com/token", url.Values{
-			"grant_type": {"refresh_token"}, "refresh_token": {refresh}, "client_id": {id}, "client_secret": {secret},
-		})
-		if err != nil {
-			return fmt.Errorf("✗ Google token endpoint: %v", err)
-		}
-		var body struct {
-			Error string `json:"error"`
-		}
-		_ = json.NewDecoder(resp.Body).Decode(&body)
-		resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			switch body.Error {
-			case "invalid_grant":
-				return fmt.Errorf("✗ %s: token expired or revoked: run mise run google-mcp:auth", name)
-			case "invalid_client":
-				return errors.New("✗ client id/secret rejected: run mise run google-mcp:rotate (or google-mcp:secret)")
-			case "":
-				body.Error = "unknown"
-			}
-			return fmt.Errorf("✗ Google token endpoint answered HTTP %d (%s)", resp.StatusCode, body.Error)
+		if _, err := googleauth.Refresh(refresh, id, secret); err != nil {
+			return fmt.Errorf("✗ %s: %w", name, err)
 		}
 		fmt.Printf("✓ %s: Google refreshed the token with the keychain client id + secret\n", name)
 	}

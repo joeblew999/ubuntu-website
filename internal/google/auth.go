@@ -15,6 +15,7 @@ import (
 
 	"github.com/joeblew999/ubuntu-website/internal/browser"
 	"github.com/joeblew999/ubuntu-website/internal/claude"
+	"github.com/joeblew999/ubuntu-website/internal/googleauth"
 )
 
 // OAuth constants for gcloud application-default credentials
@@ -212,17 +213,19 @@ func (c *cliContext) authCheck(args []string) {
 	// Check binary
 	if _, err := exec.LookPath(claude.GoogleServerCmd); err != nil {
 		fmt.Fprintln(c.stdout, "google-mcp-server: NOT INSTALLED")
-		fmt.Fprintln(c.stdout, "   Run: go install go.ngs.io/google-mcp-server@latest")
+		fmt.Fprintln(c.stdout, "   Run: mise install")
 	} else {
 		fmt.Fprintln(c.stdout, "google-mcp-server: installed")
 	}
 
-	// Check env vars
-	if os.Getenv("GOOGLE_CLIENT_ID") == "" || os.Getenv("GOOGLE_CLIENT_SECRET") == "" {
-		fmt.Fprintln(c.stdout, "Credentials: NOT SET")
-		fmt.Fprintln(c.stdout, "   Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env")
+	// Check the keychain (fnox.toml)
+	_, idErr := googleauth.Keychain("GOOGLE_CLIENT_ID")
+	_, secretErr := googleauth.Keychain("GOOGLE_CLIENT_SECRET")
+	if idErr != nil || secretErr != nil {
+		fmt.Fprintln(c.stdout, "Credentials: NOT IN THE KEYCHAIN")
+		fmt.Fprintln(c.stdout, "   Run: mise run google-mcp:credentials")
 	} else {
-		fmt.Fprintln(c.stdout, "Credentials: set in environment")
+		fmt.Fprintln(c.stdout, "Credentials: in the keychain")
 	}
 
 	// Check accounts
@@ -230,7 +233,7 @@ func (c *cliContext) authCheck(args []string) {
 	accounts, _ := filepath.Glob(filepath.Join(homeDir, claude.GoogleAccountsDir, "*.json"))
 	if len(accounts) == 0 {
 		fmt.Fprintln(c.stdout, "Accounts: NOT AUTHENTICATED")
-		fmt.Fprintln(c.stdout, "   Run: google-mcp-server")
+		fmt.Fprintln(c.stdout, "   Run: mise run google-mcp:auth")
 	} else {
 		fmt.Fprintf(c.stdout, "Accounts: %d authenticated\n", len(accounts))
 	}
@@ -261,15 +264,13 @@ STEP 4: Create OAuth Credentials
   - Application type: Desktop app
   - Copy Client ID and Secret
 
-STEP 5: Save Credentials
-  echo "GOOGLE_CLIENT_ID='your-id'" >> .env
-  echo "GOOGLE_CLIENT_SECRET='your-secret'" >> .env
-  source .env && google-mcp-server
+STEP 5: Save Credentials (into the keychain), then sign in
+  mise run google-mcp:credentials
+  mise run google-mcp:auth
 
-STEP 6: Add to Claude Code
-  google auth add
+STEP 6: Restart Claude Code (this repo's .mcp.json runs the server)
 
-Run 'google auth check' to see current status.`)
+Run 'mise run google:auth check' to see current status.`)
 }
 
 func (c *cliContext) authOpen(args []string) {

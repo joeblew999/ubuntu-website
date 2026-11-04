@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/joeblew999/ubuntu-website/internal/googleauth"
 )
 
 // rotate is google-mcp rotate, the task google-mcp:rotate: you click Add secret on the client page and copy the new
@@ -16,11 +18,11 @@ func rotate() {
 	if runtime.GOOS != "darwin" {
 		fail("rotate reads the clipboard with pbpaste: macOS only")
 	}
-	client, err := secretValue("GOOGLE_CLIENT_ID")
+	client, err := googleauth.Keychain("GOOGLE_CLIENT_ID")
 	if err != nil {
 		fail(err.Error())
 	}
-	old, err := secretValue("GOOGLE_CLIENT_SECRET")
+	old, err := googleauth.Keychain("GOOGLE_CLIENT_SECRET")
 	if err != nil {
 		fail(err.Error())
 	}

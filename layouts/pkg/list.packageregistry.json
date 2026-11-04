@@ -22,7 +22,7 @@
         "repo_url" (.Param "repo_url")
         "has_binary" (.Param "has_binary" | default false)
         "binary_name" (.Param "binary_name" | default "")
-        "taskfile_path" (.Param "taskfile_path" | default "")
+        "tasks_path" (.Param "tasks_path" | default "")
         "license" (.Param "license" | default "MIT")
         "author" (.Param "author" | default "")
     -}}

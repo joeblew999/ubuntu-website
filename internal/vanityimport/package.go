@@ -26,9 +26,9 @@ type Package struct {
 	CreatedAt        time.Time      `yaml:"created_at"`
 	UpdatedAt        time.Time      `yaml:"updated_at"`
 	HasBinary        bool           `yaml:"has_binary,omitempty"`
-	BinaryName       string         `yaml:"binary_name,omitempty"`   // CLI binary name (e.g., "mailerlite")
-	TaskfilePath     string         `yaml:"taskfile_path,omitempty"` // Path in repo (e.g., ".mise/tasks/mailerlite.toml")
-	Process          *ProcessConfig `yaml:"process,omitempty"`       // Process configuration for servers
+	BinaryName       string         `yaml:"binary_name,omitempty"` // CLI binary name (e.g., "mailerlite")
+	TasksPath        string         `yaml:"tasks_path,omitempty"`  // Path in repo (e.g., ".mise/tasks/mailerlite.toml")
+	Process          *ProcessConfig `yaml:"process,omitempty"`     // Process configuration for servers
 }
 
 // ProcessConfig defines how a package runs as a long-running process.
