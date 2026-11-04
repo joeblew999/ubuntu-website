@@ -67,3 +67,4 @@ static/airspace/tiles/
 
 # Binaries built by mise tasks (google:build) and release builds
 /bin/
+.cloudflare/
