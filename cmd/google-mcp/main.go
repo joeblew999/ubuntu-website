@@ -12,7 +12,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fail("usage: google-mcp setup | status | credentials | secret <key> | console | rotate | auth | check | accounts | reset [--yes]")
+		fail("usage: google-mcp setup | status | credentials | secret <key> | console | rotate | auth | check | accounts | reset [--yes] | tf-init | tf-plan | tf-apply | tf-destroy [terraform args]")
 	}
 	switch cmd, args := os.Args[1], os.Args[2:]; cmd {
 	case "secret":
@@ -35,6 +35,14 @@ func main() {
 		accounts()
 	case "reset":
 		reset(args)
+	case "tf-init":
+		tfInit(args)
+	case "tf-plan":
+		tfPlan(args)
+	case "tf-apply":
+		tfApply(args)
+	case "tf-destroy":
+		tfDestroy(args)
 	default:
 		fail("no command " + strconv.Quote(cmd))
 	}

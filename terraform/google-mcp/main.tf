@@ -30,7 +30,7 @@ variable "project_id" {
   type        = string
 }
 
-# APIs required for Google MCP Server
+# APIs required for Google MCP Server, and for the google CLI (cmd/google: search-console)
 locals {
   required_apis = [
     "gmail.googleapis.com",
@@ -39,6 +39,7 @@ locals {
     "sheets.googleapis.com",
     "docs.googleapis.com",
     "slides.googleapis.com",
+    "searchconsole.googleapis.com", # google search-console: indexing, sitemaps, search performance
   ]
 }
 

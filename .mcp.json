@@ -3,7 +3,26 @@
     "google": {
       "type": "stdio",
       "command": "mise",
-      "args": ["exec", "--", "fnox", "exec", "--", "google-mcp-server"]
+      "args": [
+        "exec",
+        "--",
+        "fnox",
+        "exec",
+        "--",
+        "google-mcp-server"
+      ]
+    },
+    "search-console": {
+      "type": "stdio",
+      "command": "mise",
+      "args": [
+        "exec",
+        "--",
+        "fnox",
+        "exec",
+        "--",
+        "search-console-mcp"
+      ]
     }
   }
 }

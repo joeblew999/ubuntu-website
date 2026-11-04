@@ -1,0 +1,19 @@
+# Google Search Console (+ Bing Webmaster Tools, GA4) through search-console-mcp, pinned in mise.toml: the MCP server
+# Claude reads (.mcp.json), and its CLI. It signs in through our OAuth client (fnox: GOOGLE_CLIENT_ID/SECRET from the
+# keychain), read-only unless setup grants more, its tokens in the macOS keychain; Google Cloud's Search Console API
+# is enabled by terraform/google-mcp (google-mcp:tf-apply). Arguments are passed through:
+#   mise run search-console:setup                        once per machine: sign in (interactive: run it in a terminal)
+#   mise run search-console:run site_health_check --siteUrl=sc-domain:ubuntusoftware.net --level=summary
+#   mise run search-console:run --help                   every tool, and each one's options (run <tool> --help)
+
+["search-console:setup"]
+description = "Sign in to Search Console (Google; --engine=bing|ga4 for the others), once per machine: interactive, run it in a terminal"
+run = 'fnox exec -- search-console-mcp setup'
+
+["search-console:accounts"]
+description = "The accounts search-console-mcp is signed in to, and their sites (list, add-site, remove)"
+run = 'fnox exec -- search-console-mcp accounts'
+
+["search-console:run"]
+description = "Any search-console-mcp tool from the CLI, its output as JSON, CSV or a table (run --help lists them)"
+run = 'fnox exec -- search-console-mcp run'

@@ -67,21 +67,21 @@ run = 'google-mcp reset{% if usage.yes %} --yes{% endif %}'
 # terraform.tfvars (from terraform.tfvars.example: the project id).
 
 ["google-mcp:tf-init"]
-description = "Terraform initialized for the Google APIs (terraform/google-mcp)"
-dir = "terraform/google-mcp"
-run = 'terraform init'
+description = "Terraform initialized (its providers) for the Google Cloud project's APIs (terraform/google-mcp)"
+depends = ["google-mcp:build"]
+run = 'google-mcp tf-init'
 
 ["google-mcp:tf-plan"]
-description = "What Terraform would enable (terraform/google-mcp; terraform.tfvars has the project id)"
-dir = "terraform/google-mcp"
-run = 'terraform plan'
+description = "What Terraform would change in the Google Cloud project's APIs (terraform/google-mcp; terraform.tfvars has the project id), after renewing its sign-in if it has expired"
+depends = ["google-mcp:build"]
+run = 'google-mcp tf-plan'
 
 ["google-mcp:tf-apply"]
-description = "The Google APIs enabled (terraform/google-mcp)"
-dir = "terraform/google-mcp"
-run = 'terraform apply'
+description = "The Google Cloud project's APIs enabled as Terraform says, after renewing its sign-in if it has expired (arguments passed to terraform: -auto-approve)"
+depends = ["google-mcp:build"]
+run = 'google-mcp tf-apply'
 
 ["google-mcp:tf-destroy"]
-description = "The Terraform-managed API enablement removed (terraform/google-mcp)"
-dir = "terraform/google-mcp"
-run = 'terraform destroy'
+description = "The Terraform-managed API enablement removed"
+depends = ["google-mcp:build"]
+run = 'google-mcp tf-destroy'

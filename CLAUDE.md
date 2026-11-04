@@ -252,6 +252,17 @@ mise run google-mcp:check    # Token refresh at Google + a real Calendar call
 mise run google-mcp:rotate   # New client secret (copy it in the console)
 ```
 
+### Search Console (search-console-mcp)
+
+Google Search Console (+ Bing Webmaster Tools, GA4) through **search-console-mcp** (pinned in `mise.toml`), chosen 2026-11-04 over the other community servers (there is no official one): MIT, versioned releases, read-only by default, signs in through **our** OAuth client (`GOOGLE_CLIENT_ID`/`SECRET` via fnox, as the Google MCP server does), tokens in the macOS keychain, and a CLI as well as the MCP server.
+
+- **For Claude**: the `search-console` server in `.mcp.json` (`mise exec -- fnox exec -- search-console-mcp`): index status, sitemaps, search performance, site health; ask, don't click through the console.
+- **Sign in** (once per machine, interactive, in a terminal): `mise run search-console:setup` (keep read-only).
+- **CLI**: `mise run search-console:run <tool> --siteUrl=sc-domain:ubuntusoftware.net …` (`run --help` lists the tools); `mise run search-console:accounts list`.
+- The Search Console API is enabled in the Google Cloud project by `terraform/google-mcp` (`mise run google-mcp:tf-apply`).
+
+**Google credentials renew themselves where they're used**: the `google-mcp:tf-*` tasks are Go (`cmd/google-mcp/tf_*.go`) that check the application-default credentials with Google first and, when expired or revoked, open the sign-in in the browser and carry on (`internal/google/auth.EnsureGcloudCredentials`); the Google CLI refreshes its access token (`internal/googleauth`). Clicking Allow is the only manual step.
+
 ### Email Sending (SMTP2GO)
 
 **Primary email relay service:** SMTP2GO (smtp2go.com)
