@@ -240,12 +240,13 @@ tasks:
   # ===========================================================================
 
   upgrade:
-    desc: Upgrade everything except Hugo - tools, Go version + modules, theme (each step is re-runnable)
+    desc: Upgrade everything except Hugo - tools, Go version + modules, theme, GitHub Actions (each step is re-runnable)
     cmds:
       - task: tools:upgrade
       - task: go:upgrade
         vars: { FORCE: 'true' }
       - mise run theme:update
+      - mise run root:upgrade-actions
       - 'echo "Hugo is separate (it also needs Cloudflare): task hugo:upgrade"'
 
   # Third-party tools (hugo, node, aube, wrangler, process-compose, ...) are pinned in mise.toml.

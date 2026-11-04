@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .bluesky-cache
           key: bluesky-cache-${{ github.run_id }}
@@ -25,7 +25,7 @@ jobs:
             bluesky-cache-
 
       - name: Post new blog entries to Bluesky
-        uses: joschi/blueskyfeedbot@v1
+        uses: joschi/blueskyfeedbot@ded1962e3afb0d7283f49a037bf4d4fd9d7b86ad # v0.0.7
         with:
           rss-feed: 'https://www.ubuntusoftware.net/blog/index.xml'
           username: 'ubuntusoftware.net'

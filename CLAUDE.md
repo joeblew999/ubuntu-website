@@ -23,7 +23,7 @@ Key points:
 ### mise tasks: the layout (all tasks move here from the Taskfiles)
 
 - **`mise.toml` is the control plane**: tool pins, settings, env (`bin/` on PATH), tasks that act on the whole repo (`root:*`), and `[task_config] includes = [".mise/tasks"]`.
-- **CI runs the control plane, nothing else** (SSOT): `.github/workflows/core-ci.yml` is `mise run root:ci`, and `root:ci` depends on every check (`root:check-mise`, `root:check-workflows` (actionlint), `root:test`, `root:test-worker`, `theme:check`, `root:build`, `root:check-taskfiles`). A new check is a task `root:ci` depends on; `mise run root:ci` locally does exactly what CI does.
+- **CI runs the control plane, nothing else** (SSOT): `.github/workflows/core-ci.yml` is `mise run root:ci`, and `root:ci` depends on every check (`root:check-mise`, `root:check-workflows` (actionlint), `root:check-actions` (pinact: actions pinned to SHAs), `root:test`, `root:test-worker`, `theme:check`, `root:build`, `root:check-taskfiles`). A new check is a task `root:ci` depends on; `mise run root:ci` locally does exactly what CI does.
 - **One task file per Go binary: `.mise/tasks/<binary>.toml`.** Tasks are `<binary>:<command>`, each one line running `<binary> <command>`, i.e. `cmd/<binary>/<command>.go` (a file per command, holding the function named for it); `<binary>:build` builds it into `bin/`, and the others `depends` on it. Flags are declared in the task's `usage` and passed by name (`{% if usage.x %} --x{% endif %}`); no shell syntax; logic in Go, not in the TOML. A domain that only runs tools (hugo, wrangler) gets a task file with no binary.
 - **misecheck holds it together** (`github.com/joeblew999/mise-check`; `mise_test.go`, `mise run root:check-mise`, in CI): `mise.toml` and every `.mise/tasks/*.toml`, each task file strictly against its own binary, both ways: every task's command is there, every command is run by a task, every flag on both sides, every task name the binary's Go prints is a task. A new task file is checked as soon as it exists.
 - Examples: `.mise/tasks/google-mcp.toml` ↔ `cmd/google-mcp/`, `.mise/tasks/theme.toml` ↔ `cmd/theme/`, `.mise/tasks/sitecheck.toml` ↔ `cmd/sitecheck/` (its scheduled workflow, `monitor-sitecheck.yml`, runs `mise run sitecheck:issue`).
@@ -34,11 +34,12 @@ Key points:
 
 | What | Command |
 |------|---------|
-| **Everything except Hugo** (the three rows below Hugo, in order) | `task upgrade` |
+| **Everything except Hugo** (every row but Hugo's, in order) | `task upgrade` |
 | Tools in `mise.toml` + Go (`toolchain` line in `go.mod`) | `task tools:upgrade` |
 | Go module dependencies (`go-mod-upgrade`, incl. major versions; build/vet/test after) | `task go:upgrade` (interactive) or `FORCE=true` |
 | Hugo (the mise pin; Cloudflare builds with it too) | `task hugo:upgrade` → branch + Cloudflare preview → main |
 | Theme: Hugo Plate + gethugothemes modules, and the npm packages they need | `mise run theme:update` |
+| GitHub Actions in `.github/workflows` (pinned to SHAs; releases at least 7 days old, `.github/pinact.yaml`) | `mise run root:upgrade-actions` |
 
 Each is safe to re-run: with nothing new upstream it changes nothing.
 - New machine: `task setup` (= `mise trust && mise install`, then `mise run root:deps` + `go mod download`).
