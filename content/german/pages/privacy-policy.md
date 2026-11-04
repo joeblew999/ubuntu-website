@@ -1,7 +1,7 @@
 ---
-title: "Datenschutzrichtlinie"
-meta_title: "Datenschutzrichtlinie | Ubuntu Software"
-description: "Datenschutzrichtlinie für Ubuntu Software - wie wir mit Ihren Daten und der Google API-Nutzung umgehen"
+title: "Datenschutzerklärung"
+meta_title: "Datenschutzerklärung | Ubuntu Software"
+description: "Datenschutzerklärung für Ubuntu Software – wie wir mit Ihren Daten und der Nutzung der Google API umgehen"
 draft: false
 ---
 
@@ -9,110 +9,110 @@ draft: false
 
 **Zuletzt aktualisiert:** Dezember 2024
 
-**Ubuntu Software** (ABN: 95 595 575 880) verpflichtet sich zum Schutz Ihrer Privatsphäre. Diese Richtlinie erklärt, wie wir mit Informationen umgehen, wenn Sie unsere Website besuchen und unsere Software-Tools verwenden.
+**Ubuntu Software** (ABN: 95 595 575 880) setzt sich für den Schutz Ihrer Privatsphäre ein. Diese Richtlinie erläutert, wie wir mit Informationen umgehen, wenn Sie unsere Website besuchen und unsere Software-Tools verwenden.
 
-## Informationen, die wir erfassen
+## Welche Informationen wir erheben
 
 ### Website
 
 Unsere Website unter www.ubuntusoftware.net ist statisch. Wir:
 
-- Erfassen keine persönlichen Informationen über die Website
-- Verwenden keine Tracking-Cookies
-- Benötigen keine Benutzerkonten oder Anmeldungen
-- Speichern keine Benutzerdaten auf unseren Servern
+- erheben keine personenbezogenen Daten über die Website
+- verwenden keine Tracking-Cookies
+- erfordern keine Benutzerkonten oder Anmeldungen
+- speichern keine Benutzerdaten auf unseren Servern
 
 ### Software-Tools
 
-Unsere Befehlszeilen-Tools (CLI) arbeiten vollständig auf Ihrem lokalen Gerät. Wenn Sie unsere Tools verwenden, um sich mit Drittanbieterdiensten wie Google Workspace zu verbinden, erfolgt die gesamte Datenverarbeitung lokal auf Ihrem Gerät.
+Unsere Kommandozeilen-Tools (CLI) laufen vollständig auf Ihrem lokalen Gerät. Wenn Sie unsere Tools verwenden, um sich mit Diensten von Drittanbietern wie Google Workspace zu verbinden, erfolgt die gesamte Datenverarbeitung lokal auf Ihrem Rechner.
 
-## Nutzung von Google API-Diensten
+## Nutzung der Google API-Dienste
 
-Unsere Software-Tools integrieren sich mit Google APIs, um Produktivitätsfunktionen bereitzustellen. Dieser Abschnitt beschreibt, wie wir Google-Benutzerdaten in Übereinstimmung mit der [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy) behandeln.
+Unsere Software-Tools sind mit Google APIs integriert, um Produktivitätsfunktionen bereitzustellen. Dieser Abschnitt beschreibt, wie wir mit Google-Nutzerdaten gemäß der [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy) umgehen.
 
 ### Daten, auf die wir zugreifen
 
-Wenn Sie unsere Tools zur Verbindung mit Ihrem Google-Konto autorisieren, können wir auf Folgendes zugreifen:
+Wenn Sie unsere Tools autorisieren, sich mit Ihrem Google-Konto zu verbinden, können wir auf Folgendes zugreifen:
 
-- **Gmail:** E-Mail-Versandfunktionen (Verfassen und Senden von E-Mails)
-- **Google Kalender:** Anzeigen und Erstellen von Kalenderereignissen
-- **Google Drive:** Auflisten, Hochladen, Herunterladen und Verwalten von Dateien
-- **Google Sheets:** Lesen und Schreiben von Tabellendaten
-- **Google Docs:** Lesen und Schreiben von Dokumentinhalten
-- **Google Slides:** Lesen und Erstellen von Präsentationen
+- **Gmail:** E-Mail-Versandfunktionen (E-Mails verfassen und senden)
+- **Google Kalender:** Kalendertermine anzeigen und erstellen
+- **Google Drive:** Dateien auflisten, hochladen, herunterladen und verwalten
+- **Google Tabellen:** Tabellendaten lesen und schreiben
+- **Google Docs:** Dokumentinhalte lesen und schreiben
+- **Google Präsentationen:** Präsentationen lesen und erstellen
 
 ### Wie wir Ihre Daten verwenden
 
 Ihre Google-Daten werden **ausschließlich** verwendet, um:
 
-- Die Befehle auszuführen, die Sie explizit über unsere CLI-Tools anfordern
-- Von Ihnen angeforderte Informationen anzuzeigen (Kalenderereignisse, Dateien usw.)
+- die Befehle auszuführen, die Sie über unsere CLI-Tools ausdrücklich anfordern
+- die von Ihnen angeforderten Informationen anzuzeigen (Kalendertermine, Dateien usw.)
 - E-Mails zu senden oder Inhalte zu erstellen, wenn Sie das Tool dazu anweisen
 
-**Wir tun NICHT:**
+**Wir tun NICHT Folgendes:**
 
 - Ihre Google-Daten auf externen Servern speichern
-- Ihre Daten an Dritte übertragen
+- Ihre Daten an Dritte übermitteln
 - Ihre Daten für Werbung oder Marketing verwenden
-- Ihre Daten für andere Zwecke als die Ausführung Ihrer Befehle analysieren
+- Ihre Daten zu einem anderen Zweck als der Ausführung Ihrer Befehle analysieren
 - Ihre Daten nach Abschluss der Befehlsausführung aufbewahren
 
-### Datenspeicherung und -aufbewahrung
+### Datenspeicherung und Aufbewahrung
 
 - **OAuth-Tokens** werden lokal auf Ihrem Gerät in Ihrem Home-Verzeichnis gespeichert
-- **Ihre Google-Daten** werden niemals dauerhaft gespeichert - sie werden nur während der Befehlsausführung im Speicher gehalten
+- **Ihre Google-Daten** werden niemals dauerhaft gespeichert – sie werden nur während der Befehlsausführung im Arbeitsspeicher gehalten
 - Sie können den Zugriff jederzeit über die [Google-Kontoeinstellungen](https://myaccount.google.com/permissions) widerrufen
 
-### Offenlegung der eingeschränkten Nutzung
+### Offenlegung zur eingeschränkten Nutzung (Limited Use)
 
-Unsere Nutzung und Übertragung von Informationen, die von Google APIs empfangen werden, entspricht der [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), einschließlich der Anforderungen zur eingeschränkten Nutzung.
+Unsere Nutzung und Übertragung von Informationen, die wir von Google APIs erhalten, entspricht der [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), einschließlich der Anforderungen zur eingeschränkten Nutzung (Limited Use).
 
 Im Einzelnen:
 
-1. Wir beschränken unsere Nutzung von Google-Benutzerdaten auf die Bereitstellung oder Verbesserung benutzerseitiger Funktionen
-2. Wir übertragen keine Google-Benutzerdaten an andere, es sei denn, dies ist zur Bereitstellung von Funktionen erforderlich, mit Benutzereinwilligung oder aus rechtlichen Gründen
-3. Wir verwenden keine Google-Benutzerdaten für Werbung
-4. Wir erlauben Menschen nicht, Google-Benutzerdaten zu lesen, es sei denn, mit Benutzereinwilligung, für Sicherheitszwecke oder zur Einhaltung von Gesetzen
+1. Wir beschränken die Nutzung von Google-Nutzerdaten auf die Bereitstellung oder Verbesserung nutzerseitiger Funktionen
+2. Wir übertragen Google-Nutzerdaten nicht an andere, es sei denn, dies ist zur Bereitstellung von Funktionen erforderlich, erfolgt mit Zustimmung des Nutzers oder aus rechtlichen Gründen
+3. Wir verwenden Google-Nutzerdaten nicht für Werbung
+4. Wir erlauben Menschen nicht, Google-Nutzerdaten zu lesen, es sei denn mit Zustimmung des Nutzers, aus Sicherheitsgründen oder zur Einhaltung gesetzlicher Vorschriften
 
-## Hosting und Drittanbieter-Dienste
+## Hosting und Dienste von Drittanbietern
 
-Unsere Website wird auf **Cloudflare Pages** gehostet. Cloudflare kann Standard-Webserver-Protokolle (IP-Adressen, Browsertyp, besuchte Seiten) für Sicherheits- und Leistungszwecke erfassen. Bitte beachten Sie die [Datenschutzrichtlinie von Cloudflare](https://www.cloudflare.com/privacy/) für Details zu deren Datenpraktiken.
+Unsere Website wird auf **Cloudflare Pages** gehostet. Cloudflare kann zu Sicherheits- und Leistungszwecken standardmäßige Webserver-Protokolle (IP-Adressen, Browsertyp, besuchte Seiten) erheben. Einzelheiten zu deren Datenpraktiken finden Sie in der [Datenschutzrichtlinie von Cloudflare](https://www.cloudflare.com/privacy/).
 
 ## Cookies
 
-Wir verwenden keine Cookies für Tracking oder Werbung. Alle vorhandenen Cookies sind ausschließlich funktional (wie z.B. die von Cloudflare für Sicherheitszwecke benötigten).
+Wir verwenden keine Cookies für Tracking oder Werbung. Alle vorhandenen Cookies sind rein funktional (beispielsweise solche, die Cloudflare aus Sicherheitsgründen benötigt).
 
 ## Ihre Rechte
 
 ### DSGVO (Europäische Union)
 
-Wenn Sie sich in der Europäischen Union befinden, haben Sie Rechte gemäß der Datenschutz-Grundverordnung (DSGVO), einschließlich:
+Wenn Sie sich in der Europäischen Union befinden, haben Sie Rechte gemäß der Datenschutz-Grundverordnung (DSGVO), darunter:
 
-- **Auskunftsrecht** - Anfrage von Informationen über alle über Sie gespeicherten Daten
-- **Recht auf Löschung** - Anfrage zur Löschung persönlicher Daten
-- **Recht auf Berichtigung** - Anfrage zur Korrektur ungenauer Daten
-- **Widerspruchsrecht** - Widerspruch gegen die Verarbeitung Ihrer Daten
-- **Recht auf Datenübertragbarkeit** - Erhalt Ihrer Daten in einem portablen Format
+- **Auskunftsrecht** – Informationen über alle zu Ihrer Person gespeicherten Daten anfordern
+- **Recht auf Löschung** – Die Löschung personenbezogener Daten verlangen
+- **Recht auf Berichtigung** – Die Korrektur unrichtiger Daten verlangen
+- **Widerspruchsrecht** – Der Verarbeitung Ihrer Daten widersprechen
+- **Recht auf Datenübertragbarkeit** – Ihre Daten in einem übertragbaren Format erhalten
 
-### Google-Datenrechte
+### Rechte in Bezug auf Google-Daten
 
 Für Daten, auf die über Google APIs zugegriffen wird:
 
-- **Zugriffssteuerung:** Sie kontrollieren, auf welche Google-Dienste unsere Tools zugreifen können, über den OAuth-Einwilligungsprozess
+- **Zugriffskontrolle:** Sie bestimmen über den OAuth-Zustimmungsprozess, auf welche Google-Dienste unsere Tools zugreifen dürfen
 - **Widerruf:** Sie können unseren Zugriff jederzeit über die [Google-Kontoeinstellungen](https://myaccount.google.com/permissions) widerrufen
 - **Transparenz:** Unsere Tools zeigen genau an, welche Aktionen sie mit Ihren Daten ausführen
 
 ## Datensicherheit
 
-Wir implementieren angemessene Sicherheitsmaßnahmen:
+Wir setzen angemessene Sicherheitsmaßnahmen um:
 
 - OAuth-Tokens werden mit eingeschränkten Dateiberechtigungen gespeichert (nur von Ihrem Benutzerkonto lesbar)
-- Die gesamte Kommunikation mit Google APIs verwendet HTTPS-Verschlüsselung
+- Die gesamte Kommunikation mit Google APIs erfolgt über HTTPS-Verschlüsselung
 - Es werden keine Daten an unsere Server übertragen
 
 ## Kontaktinformationen
 
-Für datenschutzbezogene Anfragen kontaktieren Sie uns bitte:
+Bei Fragen zum Datenschutz kontaktieren Sie uns bitte:
 
 - **Website:** [www.ubuntusoftware.net](https://www.ubuntusoftware.net)
 - **E-Mail:** [support@ubuntusoftware.net](mailto:support@ubuntusoftware.net)
@@ -122,6 +122,6 @@ Für datenschutzbezogene Anfragen kontaktieren Sie uns bitte:
 
 Wir können diese Datenschutzrichtlinie von Zeit zu Zeit aktualisieren. Alle Änderungen werden auf dieser Seite mit einem aktualisierten Gültigkeitsdatum veröffentlicht. Wesentliche Änderungen werden auf unserer Website hervorgehoben.
 
-## Australisches Datenschutzgesetz
+## Australisches Datenschutzgesetz (Privacy Act)
 
-Als australisches Unternehmen halten wir die Australian Privacy Principles (APPs) gemäß dem Privacy Act 1988 ein. Unser minimaler Datenerfassungsansatz übertrifft die Anforderungen dieser Grundsätze.
+Als australisches Unternehmen halten wir die Australian Privacy Principles (APPs) gemäß dem Privacy Act 1988 ein. Unser Ansatz der minimalen Datenerhebung übertrifft die Anforderungen dieser Grundsätze.

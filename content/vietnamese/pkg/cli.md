@@ -1,8 +1,8 @@
 ---
-title: cli
+title: "cli"
 import_path: www.ubuntusoftware.net/pkg/cli
 repo_url: https://github.com/joeblew999/ubuntu-website
-description: Khung giao diện dòng lệnh (CLI) chung cho các công cụ phần mềm Ubuntu. Các tùy chọn tiêu chuẩn, định dạng đầu ra và định dạng Markdown cho các vấn đề trên GitHub.
+description: "Framework CLI dùng chung cho các công cụ của Ubuntu Software. Các cờ tiêu chuẩn, định dạng đầu ra và markdown cho issue trên GitHub."
 version: v0.1.0
 documentation_url: https://pkg.go.dev/www.ubuntusoftware.net/pkg/cli
 license: MIT
@@ -14,11 +14,11 @@ has_binary: false
 
 ## Tính năng
 
-- **Cờ tiêu chuẩn* - `--github-issue`, `--verbose`, `--version` có sẵn ngay từ đầu
+- **Cờ tiêu chuẩn** - `--github-issue`, `--verbose`, `--version` có sẵn ngay từ đầu
 - **Định dạng đầu ra** - Bảng, danh sách, tiêu đề, khối mã
-- **Chế độ Markdown* - Đầu ra tương thích với GitHub Issue khi sử dụng tùy chọn `--github-issue`
+- **Chế độ Markdown** - Đầu ra thân thiện với GitHub issue bằng `--github-issue`
 - **Đa nền tảng** - Mở trình duyệt trên macOS, Linux, Windows
-- **Xử lý ngữ cảnh** - Thời gian chờ và hủy bỏ
+- **Xử lý context** - Thời gian chờ và hủy bỏ
 
 ## Cách sử dụng
 
@@ -62,9 +62,9 @@ func main() {
 }
 ```
 
-## Chế độ đầu ra
+## Các chế độ đầu ra
 
-**Đầu ra bình thường:**
+**Đầu ra thông thường:**
 
 ```
 Items
@@ -74,7 +74,7 @@ foo     bar
 baz     qux
 ```
 
-**Với tùy chọn `--github-issue`:**
+**Với cờ `--github-issue`:**
 
 ```markdown
 ## Items
@@ -85,15 +85,15 @@ baz     qux
 | baz | qux |
 ```
 
-## Phương pháp bối cảnh
+## Các phương thức của Context
 
-| Method | Description |
+| Phương thức | Mô tả |
 |--------|-------------|
-| `c.Header(title)` | Print section header |
-| `c.KeyValue(key, val)` | Print key-value pair |
-| `c.NewTable(headers...)` | Create table |
-| `c.List(items...)` | Print bulleted list |
-| `c.Code(code)` | Print code block |
-| `c.Success(msg)` | Print success message |
-| `c.Warning(msg)` | Print warning |
-| `c.Open(url)` | Open URL in browser |
+| `c.Header(title)` | In tiêu đề mục |
+| `c.KeyValue(key, val)` | In cặp khóa-giá trị |
+| `c.NewTable(headers...)` | Tạo bảng |
+| `c.List(items...)` | In danh sách gạch đầu dòng |
+| `c.Code(code)` | In khối mã |
+| `c.Success(msg)` | In thông báo thành công |
+| `c.Warning(msg)` | In cảnh báo |
+| `c.Open(url)` | Mở URL trong trình duyệt |

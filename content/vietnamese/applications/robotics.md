@@ -1,73 +1,73 @@
 ---
-title: "Robotics & Tự động hóa"
-meta_title: "Spatial Intelligence for Robotics | Ubuntu Software"
-description: "Mỗi robot đều cần hiểu không gian. Di chuyển trong không gian đó. Thao tác với các vật thể bên trong không gian đó. Hợp tác với con người bên trong không gian đó. We're building the infrastructure for the robotics explosion."
+title: "Robot & Tự động hóa"
+meta_title: "Trí tuệ không gian cho robot | Ubuntu Software"
+description: "Mọi robot đều cần hiểu không gian. Di chuyển trong đó. Thao tác với các vật thể bên trong đó. Cộng tác với con người ngay trong đó. Chúng tôi đang xây dựng cơ sở hạ tầng cho sự bùng nổ của ngành robot."
 image: "/images/robotics.svg"
 draft: false
 ---
 
 ## Trí tuệ không gian cho những cỗ máy sẽ định hình thế giới của chúng ta
 
-Every robot needs to understand space. Navigate it. Manipulate objects within it. Collaborate with humans inside it.
+Mọi robot đều cần hiểu không gian. Di chuyển trong đó. Thao tác với các vật thể bên trong đó. Cộng tác với con người trong đó.
 
-Nhưng các chuỗi công cụ robotics hiện nay không được thiết kế cho trí tuệ nhân tạo (AI). Chúng không được thiết kế cho hợp tác thời gian thực. Chúng không được thiết kế cho sự bùng nổ sắp tới.
+Nhưng các chuỗi công cụ robot ngày nay không được xây dựng cho AI. Chúng không được xây dựng cho cộng tác thời gian thực. Chúng không được xây dựng cho sự bùng nổ sắp tới.
 
 ---
 
-## Khoảnh khắc
+## Thời điểm
 
-**Robotics đang bước vào giai đoạn phát triển theo cấp số nhân.**
+**Ngành robot đang bước vào giai đoạn tăng trưởng theo cấp số nhân.**
 
-- **Người máy hình người là có thật.** Tesla Optimus. Hình dạng. 1X. Nơi trú ẩn. Khả năng linh hoạt. Các nhà sản xuất Trung Quốc đang đua nhau đưa sản phẩm ra thị trường. Hàng tỷ đô la đầu tư. Hàng triệu đơn vị được lên kế hoạch.
-- **Tự động hóa kho hàng đang phát triển mạnh mẽ.** Mọi công ty logistics, mọi doanh nghiệp thương mại điện tử, mọi nhà sản xuất đều đang tự động hóa với tốc độ nhanh chóng.
-- **Robot phẫu thuật đang ngày càng phổ biến.** Y học chính xác đòi hỏi các thiết bị chính xác.
-- **Xe tự hành cần môi trường.** Không chỉ là đường phố—các bến bốc dỡ hàng hóa, kho bãi, công trường xây dựng, trang trại.
+- **Robot hình người đã trở thành hiện thực.** Tesla Optimus. Figure. 1X. Sanctuary. Agility. Các nhà sản xuất Trung Quốc đang chạy đua ra thị trường. Hàng tỷ đô la đầu tư. Hàng triệu đơn vị đã được lên kế hoạch.
+- **Tự động hóa kho bãi đang mở rộng quy mô.** Mọi công ty logistics, mọi doanh nghiệp thương mại điện tử, mọi nhà sản xuất đều đang tự động hóa với tốc độ nhanh chóng.
+- **Robot phẫu thuật đang phát triển mạnh mẽ.** Y học chính xác đòi hỏi những cỗ máy chính xác.
+- **Xe tự hành cần môi trường.** Không chỉ đường sá—mà còn bến bốc dỡ hàng, nhà kho, công trường xây dựng, trang trại.
 
-Tất cả đều có một yêu cầu chung: **Trí tuệ nhân tạo (AI) có khả năng hiểu và thiết kế trong không gian ba chiều.**
+Tất cả đều có chung một yêu cầu: **AI hiểu và thiết kế trong không gian ba chiều.**
 
 ---
 
 ## Vấn đề
 
-**Các công cụ hiện nay đang bị phân mảnh:**
+**Các công cụ ngày nay bị phân mảnh:**
 
-- **CAD hoạt động trong một môi trường duy nhất.** Thiết kế cơ khí, tệp tĩnh, chuyển giao thủ công.
-- **Mô phỏng tồn tại trong một môi trường khác.** Môi trường riêng biệt, định dạng riêng biệt, đội ngũ riêng biệt.
-- **AI chỉ chiếm một phần ba.** Được gắn thêm. Xem các ảnh chụp màn hình. Không có khả năng hiểu tự nhiên.
-- **Hợp tác?** Tệp đính kèm email. Cơn ác mộng về phiên bản tệp. "Phiên bản nào là mới nhất?"
+- **CAD sống trong một thế giới.** Thiết kế cơ khí, tệp tĩnh, bàn giao thủ công.
+- **Mô phỏng sống trong một thế giới khác.** Môi trường riêng biệt, định dạng riêng biệt, đội ngũ riêng biệt.
+- **AI sống trong thế giới thứ ba.** Được gắn thêm vào. Nhìn vào ảnh chụp màn hình. Không có khả năng hiểu biết nguyên bản.
+- **Cộng tác?** Tệp đính kèm email. Cơn ác mộng quản lý phiên bản tệp. "Mô hình nào là bản hiện hành?"
 
-Ngành công nghiệp robot đang xây dựng tương lai bằng những công cụ từ quá khứ.
+Ngành robot đang xây dựng tương lai bằng những công cụ của quá khứ.
 
 ---
 
-## Chúng tôi hỗ trợ
+## Những gì chúng tôi mang lại
 
-### Tư duy không gian bản địa AI
+### Suy luận không gian thuần AI
 
-**Robot không chỉ cần hình học—chúng cần trí tuệ nhân tạo (AI) có khả năng hiểu nó.**
+**Robot không chỉ cần hình học—chúng cần AI hiểu được hình học.**
 
 Tích hợp Model Context Protocol cho phép các hệ thống AI truy cập trực tiếp vào:
 
-- **Cấu trúc không gian làm việc* — Không phải hình ảnh của không gian làm việc. Cấu trúc 3D thực tế.
-- **Giới hạn va chạm** — Cánh tay có thể với tới đâu? Nó phải tránh những gì?
-- **Dãy chuyển động** — Giới hạn khớp, số bậc tự do, phân tích khả năng tiếp cận
-- **Hiểu biết ngữ nghĩa** — Đây là một bộ kẹp. Đó là một băng tải. Đây là khu vực dành cho con người.
+- **Hình học không gian làm việc** — Không phải hình ảnh của không gian làm việc. Mà là cấu trúc 3D thực tế.
+- **Ranh giới va chạm** — Cánh tay robot có thể vươn tới đâu? Nó phải tránh những gì?
+- **Chuỗi động học** — Giới hạn khớp, bậc tự do, phân tích khả năng vươn tới
+- **Hiểu biết ngữ nghĩa** — Đây là bộ kẹp. Kia là băng tải. Đây là khu vực dành cho con người.
 
-Trí tuệ nhân tạo có khả năng suy luận: *"Nếu chúng ta di chuyển bộ phận này sang trái 200mm, robot sẽ có thể tiếp cận bảng điều khiển phía sau mà không cần điều chỉnh lại hướng."*
+AI có thể suy luận: *"Nếu chúng ta dịch đồ gá này sang trái 200mm, robot sẽ tiếp cận được tấm panel phía sau mà không cần đổi hướng."*
 
 ---
 
-### Thiết kế tế bào làm việc
+### Thiết kế cell làm việc
 
 **Robot chỉ là một phần của hệ thống.**
 
-Thiết kế các đơn vị làm việc hoàn chỉnh với sự hỗ trợ của trí tuệ nhân tạo:
+Thiết kế các cell làm việc hoàn chỉnh với sự hỗ trợ của AI:
 
-- **Tối ưu hóa bố trí** — Đặt robot, thiết bị cố định, băng tải ở vị trí tối ưu để đạt hiệu suất cao nhất
-- **Phân tích khả năng tiếp cận* — Kiểm tra xem mọi mục tiêu có thể tiếp cận được trước khi xây dựng
-- **Mô phỏng thời gian chu kỳ* — Tối ưu hóa đường dẫn và trình tự
-- **Kế hoạch vùng an toàn** — Vùng hợp tác của con người, rèm ánh sáng, cơ chế khóa liên động
-- **Thiết kế chuyển đổi* — Các tế bào linh hoạt có khả năng thích ứng với các biến thể sản phẩm
+- **Tối ưu hóa bố trí** — Định vị robot, đồ gá, băng tải để đạt hiệu quả tối đa
+- **Phân tích tầm với** — Xác minh mọi mục tiêu đều có thể tiếp cận trước khi xây dựng
+- **Mô phỏng thời gian chu kỳ** — Tối ưu hóa đường đi và trình tự
+- **Lập kế hoạch vùng an toàn** — Vùng cộng tác với con người, rèm ánh sáng, khóa liên động
+- **Thiết kế chuyển đổi** — Các cell linh hoạt, thích ứng với các biến thể sản phẩm
 
 ---
 
@@ -75,88 +75,90 @@ Thiết kế các đơn vị làm việc hoàn chỉnh với sự hỗ trợ c�
 
 **Từ thiết kế đến chuyển động.**
 
-- **Tạo đường đi không va chạm* — Lập kế hoạch quỹ đạo có sự hỗ trợ của trí tuệ nhân tạo (AI)
-- **Phối hợp đa robot* — Chuyển động đồng bộ, không xung đột
-- **Xác thực mô hình số** — Kiểm tra trong mô phỏng trước khi triển khai thực tế
-- **Các tình huống giả định* — Thay đổi bố cục, xem tác động ngay lập tức
+- **Tạo đường đi không va chạm** — Lập kế hoạch quỹ đạo với sự hỗ trợ của AI
+- **Phối hợp đa robot** — Chuyển động đồng bộ, không xung đột
+- **Xác thực bản sao số** — Kiểm thử trong mô phỏng trước khi triển khai thực tế
+- **Kịch bản giả định** — Thay đổi bố trí, thấy ngay tác động
 
 ---
 
-### Hợp tác thời gian thực
+### Cộng tác thời gian thực
 
-**Robotics là một môn thể thao đồng đội.**
+**Robot là một môn thể thao đồng đội.**
 
-Kỹ sư cơ khí. Kỹ sư điều khiển. Chuyên gia tích hợp. Khách hàng cuối. Thường phân bố trên toàn cầu.
+Kỹ sư cơ khí. Kỹ sư điều khiển. Chuyên gia tích hợp. Khách hàng cuối. Thường phân tán trên toàn cầu.
 
-Tự động hợp nhất đồng bộ hóa CRDT:
+Đồng bộ hóa Automerge CRDT:
 
-- Tất cả mọi người đang làm việc trên cùng một mô hình cùng một lúc
-- Không khóa tệp. Không xung đột khi hợp nhất. Không cần hỏi "Ai có phiên bản mới nhất?"
-- Các thay đổi được hiển thị theo thời gian thực trên toàn đội
-- Lịch sử đầy đủ của mọi quyết định
+- Mọi người cùng làm việc đồng thời trên cùng một mô hình
+- Không khóa tệp. Không xung đột hợp nhất. Không còn câu hỏi "ai có phiên bản mới nhất?"
+- Các thay đổi hiển thị theo thời gian thực trên toàn đội
+- Lịch sử phiên bản đầy đủ cho mọi quyết định
 
 ---
 
 ### Tiêu chuẩn mở
 
-**Không bị ràng buộc bởi nhà cung cấp. Tính tương thích hoàn toàn.**
+**Không bị khóa chặt vào nhà cung cấp. Khả năng tương tác hoàn toàn.**
 
-STEP geometry tương thích với tất cả các hệ thống CAD và mô phỏng chính. Xuất sang các công cụ của nhà sản xuất robot OEM. Nhập từ thiết kế của khách hàng. Không mất dữ liệu khi chuyển đổi.
+Hình học STEP hoạt động với mọi hệ thống CAD và mô phỏng lớn. Xuất sang công cụ của OEM robot của bạn. Nhập từ thiết kế của khách hàng. Không mất mát khi chuyển đổi.
 
-Thiết kế ô làm việc của bạn không bị giới hạn trong một định dạng độc quyền. Nó thuộc về bạn.
+Thiết kế cell làm việc của bạn không bị mắc kẹt trong một định dạng độc quyền. Nó là của bạn.
 
 ---
 
 ### Từ mô phỏng đến thực tế
 
-**Đóng khoảng cách.**
+**Thu hẹp khoảng cách.**
 
-Kiến trúc NATS JetStream kết nối mô hình số của bạn với tế bào vật lý:
+Kết nối bản sao số của bạn với cell vật lý:
 
-- Truyền dữ liệu cảm biến thực tế vào mô phỏng
-- Kiểm tra mô hình so với hiệu suất thực tế
-- Dự đoán bảo trì trước khi xảy ra sự cố
-- Vòng lặp cải tiến liên tục từ sản xuất quay trở lại thiết kế
+- Truyền dữ liệu cảm biến thực vào mô phỏng
+- Xác thực mô hình dựa trên hiệu suất thực tế
+- Dự đoán nhu cầu bảo trì trước khi xảy ra sự cố
+- Vòng lặp cải tiến liên tục từ sản xuất quay lại thiết kế
+
+Đối với robot bay và xe tự hành, hãy xem [Kiến trúc đội bay drone]({{< relref "/fleet" >}}) của chúng tôi—cùng một hạ tầng NATS JetStream vận hành cả nền tảng mặt đất và trên không.
 
 ---
 
-## Các trường hợp sử dụng
+## Trường hợp sử dụng
 
-| Application | Description |
+| Ứng dụng | Mô tả |
 |-------------|-------------|
-| **Humanoid Deployment** | Design the environments humanoids will work in. AI-assisted layout for human-robot collaboration. Simulation before deployment. |
-| **Warehouse Automation** | Mobile robots, goods-to-person systems, automated storage. Design, simulate, and optimize at scale. |
-| **Manufacturing Cells** | Welding, assembly, machine tending, palletizing. Complete work cell design with AI assistance. |
-| **Surgical Robotics** | Precision environments for precision machines. Spatial constraints, sterile zones, equipment integration. |
-| **Field Robotics** | Agricultural, construction, mining. Design for unstructured environments. |
+| **Triển khai robot hình người** | Thiết kế môi trường mà robot hình người sẽ làm việc. Bố trí với sự hỗ trợ của AI cho cộng tác người-robot. Mô phỏng trước khi triển khai. |
+| **Tự động hóa kho bãi** | Robot di động, hệ thống hàng-đến-người, kho lưu trữ tự động. Thiết kế, mô phỏng và tối ưu hóa ở quy mô lớn. |
+| **Cell sản xuất** | Hàn, lắp ráp, cấp phôi máy, xếp pallet. Thiết kế cell làm việc hoàn chỉnh với sự hỗ trợ của AI. |
+| **Robot phẫu thuật** | Môi trường chính xác cho những cỗ máy chính xác. Ràng buộc không gian, vùng vô trùng, tích hợp thiết bị. |
+| **Robot thực địa** | Nông nghiệp, xây dựng, khai thác mỏ. Thiết kế cho môi trường phi cấu trúc. |
 
 ---
 
-## Dành cho các nhà sản xuất robot
+## Dành cho nhà sản xuất robot
 
-**Đang xây dựng robot? Khách hàng của bạn cần thiết kế môi trường cho chúng.**
+**Đang chế tạo robot? Khách hàng của bạn cần thiết kế môi trường cho chúng.**
 
-Cung cấp cho họ các công cụ mà:
+Cung cấp cho họ các công cụ:
 
-- Tích hợp các mô hình robot của bạn một cách bản địa
+- Tích hợp nguyên bản các mô hình robot của bạn
 - Mô phỏng với động học chính xác
 - Xuất sang các hệ thống hiện có của họ
-- Hợp tác theo thời gian thực giữa các tổ chức
+- Cộng tác thời gian thực giữa các tổ chức
 
-Hợp tác với chúng tôi để giúp việc triển khai robot của bạn trở nên dễ dàng hơn.
+Hợp tác với chúng tôi để giúp robot của bạn dễ triển khai hơn.
 
 ---
 
-## Dành cho các nhà tích hợp
+## Dành cho nhà tích hợp
 
-**Triển khai robot vào các địa điểm của khách hàng?**
+**Đang triển khai robot tại địa điểm của khách hàng?**
 
-- Thiết kế tế bào nhanh hơn với sự hỗ trợ của trí tuệ nhân tạo (AI)
-- Kiểm tra trước khi xây dựng
-- Hợp tác với khách hàng theo thời gian thực
-- Bàn giao các sản phẩm đầu ra sạch sẽ, tuân thủ tiêu chuẩn mở
+- Thiết kế cell nhanh hơn với sự hỗ trợ của AI
+- Xác thực trước khi xây dựng
+- Cộng tác với khách hàng theo thời gian thực
+- Bàn giao sản phẩm gọn gàng, theo tiêu chuẩn mở
 
-Giảm thời gian tích hợp. Tăng lợi nhuận.
+Giảm thời gian tích hợp. Tăng biên lợi nhuận.
 
 ---
 
@@ -164,34 +166,51 @@ Giảm thời gian tích hợp. Tăng lợi nhuận.
 
 **Đưa tự động hóa vào nội bộ?**
 
-- Hình dung xem tự động hóa sẽ trông như thế nào trong cơ sở của bạn
+- Hình dung tự động hóa sẽ trông như thế nào trong cơ sở của bạn
 - Tham gia trực tiếp vào quá trình thiết kế
-- Hiểu rõ các sự đánh đổi trước khi quyết định
-- Sở hữu thiết kế của bạn dưới các định dạng mở
+- Hiểu rõ các đánh đổi trước khi cam kết
+- Sở hữu thiết kế của bạn ở định dạng mở
 
 Cơ sở của bạn. Tự động hóa của bạn. Dữ liệu của bạn.
 
 ---
 
-## Hoàn tất quy trình với việc xuất bản
+## Hoàn thiện vòng lặp với Publish
 
-Robotics không chỉ là mô hình 3D—nó còn là tài liệu kỹ thuật.
+Robot không chỉ là mô hình 3D—mà còn là tài liệu.
 
-- **Hướng dẫn công việc** — Hướng dẫn lắp ráp được tạo ra từ mô hình
+- **Hướng dẫn công việc** — Hướng dẫn lắp ráp được tạo từ mô hình
 - **Tài liệu an toàn** — Quy trình, danh sách kiểm tra, biểu mẫu tuân thủ
-- **Sổ tay bảo trì** — Thông số kỹ thuật thiết bị, số phụ tùng, khoảng thời gian bảo dưỡng
-- **Tài liệu đào tạo** — Hướng dẫn sử dụng cho người vận hành kèm theo hình ảnh từ mô phỏng
+- **Sổ tay bảo trì** — Thông số thiết bị, mã linh kiện, chu kỳ bảo dưỡng
+- **Tài liệu đào tạo** — Hướng dẫn vận hành với hình ảnh trực quan từ mô phỏng
 
-Tất cả từ một nguồn duy nhất. Tất cả đều được thiết kế phù hợp với thiết kế tế bào làm việc 3D của bạn.
+Tất cả từ một nguồn duy nhất. Tất cả đều nhất quán với thiết kế cell làm việc 3D của bạn.
 
-[Khám phá → Xuất bản](/vi/platform/publish/)
+[Khám phá Publish →]({{< relref "/platform/publish" >}})
+
+---
+
+## Chủ quyền dữ liệu
+
+Dữ liệu robot của bạn luôn là của bạn:
+
+| Cách tiếp cận truyền thống | Với WellKnown |
+|---------------------|----------------|
+| Thiết kế cell làm việc trên đám mây của nhà cung cấp | Thiết kế trên hạ tầng của bạn |
+| OEM robot sở hữu dữ liệu tích hợp | Bạn sở hữu tài sản trí tuệ về tự động hóa của mình |
+| Chuyển nền tảng = xây dựng lại | Chuyển nền tảng = kết nối lại gateway |
+| Tài sản trí tuệ phân tán khắp các nhà cung cấp | Bạn kiểm soát lợi thế cạnh tranh của mình |
+
+Xuất sang STEP. Xuất bản LÊN các nền tảng. Không bao giờ bị khóa BÊN TRONG.
+
+[Tìm hiểu thêm về WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
 
 ---
 
 ## Bắt đầu
 
-Sự bùng nổ của robotics đòi hỏi cơ sở hạ tầng. Chúng tôi đang xây dựng nó.
+Sự bùng nổ robot cần hạ tầng. Chúng tôi đang xây dựng nó.
 
-Dù bạn đang thiết kế robot hình người, triển khai cobot hay tự động hóa kho hàng—hãy cùng thảo luận.
+Dù bạn đang thiết kế robot hình người, triển khai cobot hay tự động hóa kho bãi—hãy cùng trò chuyện.
 
-[Liên hệ với chúng tôi →](/vi/contact)
+[Liên hệ với chúng tôi →](/contact)

@@ -1,7 +1,7 @@
 ---
-title: "Google Workspace thông qua MCP: Tích hợp Trí tuệ Nhân tạo (AI) không cần cấu hình"
-meta_title: "Google Workspace thông qua MCP: Tích hợp Trí tuệ Nhân tạo (AI) không cần cấu hình | Ubuntu Software"
-description: "Kết nối bất kỳ hệ thống AI nào—đám mây, cục bộ hoặc của riêng bạn—với Gmail, Lịch, Drive, Trang tính, Tài liệu và Trang trình bày chỉ với một lệnh. MCP có nghĩa là không bị ràng buộc bởi nhà cung cấp. Chỉ cần cung cấp địa chỉ email của bạn."
+title: "Google Workspace qua MCP: Tích hợp AI không cần cấu hình"
+meta_title: "Google Workspace qua MCP: Tích hợp AI không cần cấu hình | Ubuntu Software"
+description: "Kết nối bất kỳ AI nào—trên đám mây, cục bộ hay của riêng bạn—với Gmail, Calendar, Drive, Sheets, Docs và Slides chỉ bằng một lệnh. MCP giúp bạn không bị phụ thuộc vào nhà cung cấp. Bạn chỉ cần cung cấp email của mình."
 date: 2025-12-15T10:00:00Z
 image: "/images/blog/google-mcp-integration.svg"
 categories: ["Publish", "AI"]
@@ -10,112 +10,112 @@ tags: ["google", "mcp", "automation", "gmail", "calendar", "drive", "ai", "local
 draft: true
 ---
 
-Nếu việc kết nối trợ lý AI của bạn với toàn bộ Google Workspace chỉ cần một lệnh duy nhất thì sao?
+Điều gì sẽ xảy ra nếu việc kết nối trợ lý AI với toàn bộ Google Workspace của bạn chỉ cần đúng một lệnh?
 
-Không cần "cấu hình các thông tin đăng nhập này, kích hoạt các API này, thiết lập các quyền này, rồi khởi động lại." Chỉ cần: cung cấp địa chỉ email của bạn, và mọi thứ sẽ hoạt động.
+Không phải "cấu hình các thông tin xác thực này, bật các API này, đặt các quyền này, rồi khởi động lại." Chỉ cần: cung cấp email của bạn, và mọi thứ đều hoạt động.
 
 Đó chính là những gì chúng tôi đã xây dựng.
 
-## Vấn đề với việc tích hợp trí tuệ nhân tạo (AI)
+## Vấn đề với các tích hợp AI
 
-Mỗi câu chuyện về tích hợp trí tuệ nhân tạo (AI) đều tuân theo cùng một mô hình mệt mỏi:
+Mọi câu chuyện tích hợp AI đều lặp lại cùng một khuôn mẫu mệt mỏi:
 
-1. Tạo thông tin đăng nhập API trong bảng điều khiển dành cho nhà phát triển
-2. Kích hoạt một chục API theo cách thủ công
-3. Cấu hình màn hình đồng ý OAuth
-4. Cấu hình các URL chuyển hướng
-5. Lưu trữ thông tin bí mật ở một nơi an toàn
-6. Kết nối cấu hình kết nối
+1. Tạo thông tin xác thực API trong một bảng điều khiển dành cho nhà phát triển nào đó
+2. Bật thủ công hàng chục API
+3. Cấu hình màn hình xin quyền OAuth
+4. Thiết lập các URI chuyển hướng
+5. Lưu trữ các khóa bí mật ở một nơi an toàn nào đó
+6. Đấu nối cấu hình kết nối
 7. Khởi động lại các công cụ của bạn
-8. Kiểm tra lỗi để xác định nguyên nhân tại sao nó không hoạt động
-9. Bạn đã bỏ qua bước 3b
-10. Bắt đầu lại
+8. Gỡ lỗi xem tại sao nó không hoạt động
+9. Nhận ra bạn đã bỏ sót bước 3b
+10. Làm lại từ đầu
 
-Khi bạn hoàn thành, bạn đã dành nhiều thời gian cho việc cài đặt hơn là thời gian bạn sẽ tiết kiệm được trong tháng tới. Và bạn vẫn chưa chắc chắn liệu nó có hoạt động đúng cách hay không.
+Đến khi hoàn tất, bạn đã tốn cho việc thiết lập nhiều thời gian hơn cả thời gian bạn sẽ tiết kiệm được trong tháng tới. Và bạn vẫn không chắc liệu nó có hoạt động đúng hay không.
 
-## WellKnown + MCP: Một phương pháp tiếp cận khác biệt
+## WellKnown + MCP: Một cách tiếp cận khác
 
-[Model Context Protocol (MCP)]({{< relref "/platform/foundation" >}}) cung cấp một phương thức tiêu chuẩn cho các trợ lý AI truy cập các công cụ và dữ liệu bên ngoài. Dự án WellKnown mở rộng điều này: thiết lập tự động xử lý toàn bộ sự phức tạp phía sau hậu trường.
+[Model Context Protocol (MCP)]({{< relref "/platform/foundation" >}}) cung cấp một phương thức chuẩn để các trợ lý AI truy cập công cụ và dữ liệu bên ngoài. Dự án WellKnown còn tiến xa hơn: thiết lập tự động, xử lý mọi sự phức tạp ở phía sau.
 
-Dưới đây là quy trình cài đặt đầy đủ:
+Đây là toàn bộ quy trình thiết lập:
 
 ```bash
 task google-mcp:setup
 ```
 
-Đó là tất cả. Hệ thống:
+Vậy là xong. Hệ thống sẽ:
 
-1. **Cài đặt một phiên bản máy chủ MCP được ghim cố định** (nếu chưa có)
-2. **Lưu thông tin OAuth Google của bạn vào keychain của hệ điều hành**, không bao giờ lưu trong tệp văn bản thường
-3. **Mở xác thực có hướng dẫn** trong trình duyệt của bạn
-4. **Kiểm tra mọi thứ hoạt động** bằng một lệnh gọi Calendar thực tế
+1. **Cài đặt một bản phát hành máy chủ MCP đã ghim phiên bản** (nếu chưa có)
+2. **Lưu OAuth client Google của bạn trong keychain của hệ điều hành**, không bao giờ lưu trong một tệp văn bản thường
+3. **Mở quy trình xác thực có hướng dẫn** trong trình duyệt của bạn
+4. **Xác minh mọi thứ hoạt động** bằng một lệnh gọi Calendar thực tế
 
-Cấu hình trợ lý AI đi kèm sẵn trong dự án (`.mcp.json`), nên bạn không cần thiết lập thêm gì.
+Cấu hình cho trợ lý AI của bạn được đóng gói sẵn cùng dự án (`.mcp.json`), nên không còn gì phải đấu nối.
 
-Không kích hoạt API thủ công. Không chỉnh sửa tệp JSON. Không cần khởi động lại.
+Không bật API thủ công. Không chỉnh sửa tệp JSON. Không phải loay hoay khởi động lại.
 
-## Bất kỳ AI nào. Tích hợp giống nhau.
+## Bất kỳ AI nào. Cùng một tích hợp.
 
-Đây là điều khiến MCP khác biệt cơ bản so với các giải pháp tích hợp độc quyền: **nó tương thích với bất kỳ hệ thống AI nào**.
+Đây là điều khiến MCP khác biệt căn bản so với các tích hợp độc quyền: **nó hoạt động với bất kỳ AI nào**.
 
-| AI Type | Examples | Same MCP Integration |
+| Loại AI | Ví dụ | Cùng một tích hợp MCP |
 |---------|----------|---------------------|
-| **Cloud AI** | Claude, GPT-4, Gemini | ✓ |
-| **Local AI** | Ollama, LM Studio, llama.cpp | ✓ |
-| **Hybrid** | Cloud reasoning + local execution | ✓ |
-| **Specialized** | Spatial reasoning, domain-specific models | ✓ |
-| **Your own** | Custom models, fine-tuned deployments | ✓ |
+| **AI đám mây** | Claude, GPT-4, Gemini | ✓ |
+| **AI cục bộ** | Ollama, LM Studio, llama.cpp | ✓ |
+| **Kết hợp** | Suy luận trên đám mây + thực thi cục bộ | ✓ |
+| **Chuyên biệt** | Suy luận không gian, mô hình chuyên ngành | ✓ |
+| **Của riêng bạn** | Mô hình tùy chỉnh, bản triển khai đã tinh chỉnh | ✓ |
 
-Máy chủ MCP không quan tâm đến việc AI nào đang gọi nó. Cloud Claude yêu cầu lịch của bạn? Hoạt động bình thường. Local Llama chạy trên laptop của bạn? Cùng một tích hợp. Mô hình riêng của công ty bạn chạy trong trung tâm dữ liệu của bạn? Cấu hình giống hệt.
+Máy chủ MCP không quan tâm AI nào đang gọi nó. Claude trên đám mây hỏi về lịch của bạn? Hoạt động. Llama cục bộ chạy trên laptop của bạn? Cùng một tích hợp. Mô hình riêng của công ty bạn chạy trong trung tâm dữ liệu? Thiết lập y hệt.
 
-Đây là điều ngược lại với tình trạng bị khóa vào nhà cung cấp. Bạn chỉ cần tích hợp Google Workspace một lần, và nó sẽ hoạt động với bất kỳ mô hình AI nào bạn chọn - hôm nay, ngày mai hoặc thậm chí sau năm năm nữa khi có những mô hình hoàn toàn mới xuất hiện.
+Đây là điều ngược lại với việc bị khóa chặt vào nhà cung cấp. Xây dựng tích hợp Google Workspace một lần, và nó hoạt động với bất kỳ AI nào bạn chọn—hôm nay, ngày mai, hay năm năm nữa khi những mô hình hoàn toàn mới ra đời.
 
-**Chuyển đổi nhà cung cấp AI mà không cần thay đổi các tích hợp hiện có.** Lớp MCP vẫn giữ nguyên trong khi bạn thử nghiệm các mô hình khác nhau, nâng cấp khả năng hoặc chuyển đổi giữa xử lý trên đám mây và xử lý tại chỗ dựa trên yêu cầu về quyền riêng tư.
+**Chuyển đổi nhà cung cấp AI mà không cần động đến các tích hợp của bạn.** Lớp MCP luôn giữ nguyên trong khi bạn thử nghiệm các mô hình khác nhau, nâng cấp khả năng, hoặc chuyển giữa xử lý trên đám mây và cục bộ tùy theo yêu cầu về quyền riêng tư.
 
-### Trí tuệ nhân tạo chuyên biệt: Suy luận không gian
+### AI chuyên biệt: Suy luận không gian
 
-Nền tảng không gian của chúng tôi [Spatial Platform]({{< relref "/platform/spatial" >}}) bao gồm trí tuệ nhân tạo (AI) cục bộ với các khả năng mà các mô hình đám mây thông thường không có:
+[Spatial Platform]({{< relref "/platform/spatial" >}}) của chúng tôi bao gồm AI cục bộ với những khả năng mà các mô hình đám mây đa dụng không có:
 
-- **Tư duy không gian** - Hiểu các mối quan hệ 3D, các ràng buộc hình học, và trình tự lắp ráp
-- **Tích hợp cảm biến* - Xử lý dữ liệu thời gian thực từ các thiết bị IoT, camera và thiết bị công nghiệp
-- **Kiến thức chuyên môn** - Định dạng CAD, dung sai sản xuất, tiêu chuẩn kỹ thuật xây dựng
+- **Suy luận không gian** - Hiểu các mối quan hệ 3D, ràng buộc hình học, trình tự lắp ráp
+- **Tích hợp cảm biến** - Xử lý dữ liệu thời gian thực từ thiết bị IoT, camera và thiết bị công nghiệp
+- **Kiến thức chuyên ngành** - Định dạng CAD, dung sai sản xuất, thông số kỹ thuật xây dựng
 
-Khi trí tuệ nhân tạo (AI) chuyên biệt địa phương này kết nối với Google Workspace của bạn thông qua MCP, bạn sẽ có được những kết hợp mạnh mẽ:
+Khi AI cục bộ chuyên biệt này kết nối với Google Workspace của bạn qua MCP, bạn có được những kết hợp mạnh mẽ:
 
-> "Trích xuất dữ liệu cảm biến từ Drive, phân tích các mẫu nhiệt, và soạn thảo cảnh báo bảo trì gửi đến đội vận hành."
+> "Lấy dữ liệu cảm biến từ Drive, phân tích các mẫu nhiệt và soạn cảnh báo bảo trì gửi đến đội vận hành"
 
-> "Tạo bản trình bày từ bản vẽ CAD, ghi chú các thành phần vượt quá giới hạn dung sai dựa trên bảng kiểm tra."
+> "Tạo bản trình bày từ cụm lắp ráp CAD, chú thích các chi tiết vượt quá dung sai dựa trên bảng tính kiểm tra"
 
-Cùng một tích hợp MCP hoạt động với Claude hoặc GPT cũng hoạt động với các mô hình cục bộ có khả năng nhận thức không gian — ngoại trừ bây giờ AI của bạn hiểu được hình học, không chỉ văn bản.
+Cùng một tích hợp MCP hoạt động với Claude hay GPT cũng hoạt động với các mô hình cục bộ có khả năng nhận thức không gian—chỉ khác là giờ đây AI của bạn hiểu cả hình học, chứ không chỉ văn bản.
 
-### Bạn sẽ nhận được gì
+### Những gì bạn nhận được
 
-Sau khi kết nối, trợ lý AI của bạn có quyền truy cập gốc vào:
+Sau khi kết nối, trợ lý AI của bạn có quyền truy cập trực tiếp vào:
 
-| Service | Capabilities |
+| Dịch vụ | Khả năng |
 |---------|-------------|
-| **Gmail** | Read, search, send, draft emails |
-| **Calendar** | View events, create meetings, check availability |
-| **Drive** | List files, search, download, upload |
-| **Sheets** | Read data, update cells, query ranges |
-| **Docs** | Read content, create documents, edit text |
-| **Slides** | Create presentations, add slides, export PDF |
+| **Gmail** | Đọc, tìm kiếm, gửi, soạn nháp email |
+| **Calendar** | Xem sự kiện, tạo cuộc họp, kiểm tra lịch trống |
+| **Drive** | Liệt kê tệp, tìm kiếm, tải xuống, tải lên |
+| **Sheets** | Đọc dữ liệu, cập nhật ô, truy vấn vùng dữ liệu |
+| **Docs** | Đọc nội dung, tạo tài liệu, chỉnh sửa văn bản |
+| **Slides** | Tạo bản trình bày, thêm trang chiếu, xuất PDF |
 
-Trong suốt cuộc trò chuyện tự nhiên:
+Tất cả thông qua hội thoại tự nhiên:
 
-> "Hãy cho tôi xem các email từ tuần trước liên quan đến đề xuất dự án."
+> "Cho tôi xem các email trong tuần qua về đề xuất dự án"
 
-> "Tôi có những cuộc họp nào vào ngày mai?"
+> "Ngày mai tôi có những cuộc họp nào?"
 
-> "Tạo một tài liệu Google Doc tóm tắt tệp PDF đính kèm"
+> "Tạo một Google Doc tóm tắt tệp PDF đính kèm"
 
-> "Thêm một hàng vào bảng tính ngân sách với các số liệu sau"
+> "Thêm một hàng vào bảng tính ngân sách với các số liệu này"
 
 ## Hỗ trợ nhiều tài khoản
 
-Đây là phần thú vị cho các doanh nghiệp: **bạn có thể kết nối nhiều tài khoản Google**.
+Đây là lúc mọi thứ trở nên thú vị với doanh nghiệp: **bạn có thể kết nối nhiều tài khoản Google**.
 
-Tài khoản Gmail cá nhân. Tài khoản Google Workspace cho công việc. Tài khoản khách hàng. Mỗi tài khoản được xác thực độc lập và có thể truy cập bởi trợ lý AI của bạn với ngữ cảnh phù hợp.
+Gmail cá nhân. Google Workspace công việc. Tài khoản khách hàng. Mỗi tài khoản được xác thực độc lập, và trợ lý AI của bạn đều có thể truy cập từng tài khoản với ngữ cảnh phù hợp.
 
 ```
 task google-mcp:auth
@@ -126,61 +126,61 @@ task google-mcp:auth
 # The system tracks both
 ```
 
-Trợ lý AI của bạn có thể hoạt động trên nhiều tài khoản:
+Sau đó, trợ lý AI của bạn có thể làm việc trên nhiều tài khoản:
 
-> "Kiểm tra lịch làm việc và lịch cá nhân của tôi để xem có xung đột nào vào thứ Ba tuần sau không."
+> "Kiểm tra lịch công việc và lịch cá nhân của tôi xem thứ Ba tuần sau có bị trùng lịch không"
 
-> "Chuyển tiếp email của khách hàng đó đến tài khoản công việc của tôi"
+> "Chuyển tiếp email của khách hàng đó sang tài khoản công việc của tôi"
 
-> "Hiển thị danh sách các tệp gần đây từ cả Drive cá nhân và Drive doanh nghiệp của tôi"
+> "Liệt kê các tệp gần đây từ cả Drive cá nhân lẫn Drive doanh nghiệp của tôi"
 
-## Kết nối Xuất bản
+## Kết nối với quy trình xuất bản
 
-Điều này tích hợp trực tiếp với [hệ thống xuất bản nguồn duy nhất của WellKnown]({{< relref "/blog/one-source-every-screen" >}}). Quy trình xuất bản nội dung của bạn giờ đây có Google Workspace là đích đến chính thức:
+Tính năng này tích hợp trực tiếp với [xuất bản từ một nguồn duy nhất của WellKnown]({{< relref "/blog/one-source-every-screen" >}}). Quy trình nội dung của bạn có thêm Google Workspace như một đích đến hạng nhất:
 
-**Nguồn Markdown → Chuyển đổi WellKnown → Google Docs**
+**Nguồn markdown → Chuyển đổi WellKnown → Google Docs**
 
-Viết bằng Markdown, xuất bản lên Google Docs với định dạng được giữ nguyên. Không sao chép và dán. Không chỉnh sửa định dạng thủ công. Nguồn dữ liệu tạo ra trang web của bạn cũng có thể tự động cập nhật vào Google Drive.
+Viết bằng markdown, xuất bản lên Docs mà vẫn giữ nguyên định dạng. Không sao chép-dán. Không định dạng lại thủ công. Cùng một nguồn tạo ra trang web của bạn cũng có thể đưa nội dung vào Google Drive của bạn.
 
 **Dữ liệu bảng tính → Quy trình xuất bản**
 
-Nhập dữ liệu trực tiếp từ Sheets vào nội dung của bạn. Danh mục sản phẩm, bảng giá, danh sách đội ngũ—luôn cập nhật, luôn đồng bộ.
+Lấy dữ liệu từ Sheets trực tiếp vào nội dung của bạn. Danh mục sản phẩm, bảng giá, danh bạ nhóm—luôn cập nhật, luôn đồng bộ.
 
-**Lịch → Lập lịch tự động**
+**Calendar → Lên lịch tự động**
 
-Các bài đăng trên blog được lên lịch cho các ngày trong tương lai có thể kích hoạt các sự kiện lịch, lời nhắc nhở và thậm chí là các email nháp gửi đến các bên liên quan.
+Các bài blog được lên lịch đăng vào ngày trong tương lai có thể kích hoạt sự kiện lịch, lời nhắc, và thậm chí cả email nháp gửi đến các bên liên quan.
 
 ## Tự chủ, không phụ thuộc
 
-Đây là điểm khác biệt quan trọng so với các tích hợp đám mây thông thường: **thông tin đăng nhập và dữ liệu của bạn vẫn được lưu trữ trên máy tính của bạn**.
+Đây là điểm khác biệt then chốt so với các tích hợp đám mây thông thường: **thông tin xác thực và dữ liệu của bạn ở lại trên máy của bạn**.
 
-Máy chủ MCP chạy trên máy tính cục bộ. Các token xác thực được lưu trữ trong thư mục cá nhân của bạn, còn khóa bí mật OAuth được lưu trong keychain của hệ điều hành. Không có dịch vụ đám mây trung gian nào truy cập dữ liệu Google của bạn. Không có bên thứ ba nào có quyền truy cập vào email hoặc tệp tin của bạn.
+Máy chủ MCP chạy cục bộ. Token xác thực được lưu trong thư mục home của bạn, còn client secret OAuth được lưu trong keychain của hệ điều hành. Không có dịch vụ đám mây trung gian nào nhìn thấy dữ liệu Google của bạn. Không bên thứ ba nào có quyền truy cập vào email hay tệp của bạn.
 
-Bạn đang sử dụng các dịch vụ của Google, nhưng thông qua hạ tầng do bạn kiểm soát. Nếu bạn quyết định ngắt kết nối, chỉ cần xóa các thông tin đăng nhập cục bộ và bạn đã hoàn tất. Không cần liên hệ với nhà cung cấp. Không cần yêu cầu xuất dữ liệu.
+Bạn vẫn dùng các dịch vụ của Google, nhưng thông qua hạ tầng do chính bạn kiểm soát. Nếu muốn ngắt kết nối, chỉ cần xóa thông tin xác thực cục bộ là xong. Không cần liên hệ nhà cung cấp. Không cần yêu cầu xuất dữ liệu.
 
-Điều này phù hợp với các nguyên tắc chúng ta đã thảo luận trong [hệ thống email tự chủ]({{< relref "/blog/self-sovereign-email-ai-automation" >}}): sử dụng các dịch vụ bạn cần, nhưng vẫn duy trì quyền kiểm soát đối với lớp tích hợp.
+Điều này phù hợp với các nguyên tắc chúng tôi đã thảo luận trong [hạ tầng email tự chủ]({{< relref "/blog/self-sovereign-email-ai-automation" >}}): sử dụng những dịch vụ bạn cần, nhưng giữ quyền kiểm soát lớp tích hợp.
 
-## Các cấp độ tự động hóa AI được áp dụng
+## Áp dụng các cấp độ tự động hóa AI
 
-Bạn còn nhớ các [mức độ tự động hóa]({{< relref "/blog/self-sovereign-email-ai-automation" >}})? Chúng được áp dụng trực tiếp tại đây:
+Bạn còn nhớ các [cấp độ tự động hóa]({{< relref "/blog/self-sovereign-email-ai-automation" >}}) chứ? Chúng áp dụng trực tiếp ở đây:
 
-**Cấp độ 1 - Nhận dạng mẫu**
-> "Bạn có 3 email chưa đọc từ đội của mình. Một trong số đó có ghi 'cấp bách'. Bạn có muốn tôi tóm tắt nội dung của chúng không?"
+**Cấp độ 1 - Nhận diện mẫu**
+> "Bạn có 3 email chưa đọc từ nhóm của mình. Một email có nhắc đến 'khẩn cấp'. Bạn có muốn tôi tóm tắt chúng không?"
 
 **Cấp độ 2 - Tạo bản nháp**
-> dựa trên email của Sarah về hạn chót nộp đề xuất, tôi đã soạn thảo một phản hồi xác nhận việc giao hàng vào thứ Tư. Bạn có thể xem qua không?
+> "Dựa trên email của Sarah về hạn chót nộp đề xuất, tôi đã soạn một phản hồi xác nhận sẽ giao vào thứ Tư. Bạn có muốn xem lại không?"
 
 **Cấp độ 3 - Hành động tự chủ**
-> "Bảng tính báo cáo hàng tuần đã được cập nhật. Tôi đã xuất bản tóm tắt sang tài liệu cho các bên liên quan và lên lịch gửi email phân phối vào lúc 9 giờ sáng thứ Hai."
+> "Bảng tính báo cáo hàng tuần đã được cập nhật. Tôi đã xuất phần tóm tắt sang Doc dành cho các bên liên quan và lên lịch gửi email phân phối lúc 9 giờ sáng thứ Hai."
 
 **Cấp độ 4 - Trí tuệ chủ động**
-> "Tôi thấy anh có cuộc họp với khách hàng vào ngày mai nhưng không có tài liệu chuẩn bị. Tôi có nên tạo một tài liệu từ ba chuỗi email gần đây và lịch trình dự án trong Drive không?"
+> "Tôi thấy ngày mai bạn có cuộc họp với khách hàng nhưng chưa có tài liệu chuẩn bị. Tôi có nên tạo một tài liệu từ ba chuỗi email gần nhất và tiến độ dự án trong Drive không?"
 
-Mỗi cấp độ sẽ trở nên mạnh mẽ hơn khi AI có thể truy cập toàn bộ Google Workspace của bạn, không chỉ các dịch vụ riêng lẻ.
+Mỗi cấp độ càng trở nên mạnh mẽ hơn khi AI có thể nhìn thấy toàn bộ Google Workspace của bạn, chứ không chỉ từng dịch vụ riêng lẻ.
 
 ## Kiến trúc kỹ thuật
 
-Đối với những ai muốn hiểu rõ những gì đang diễn ra bên trong:
+Dành cho những ai muốn hiểu những gì đang diễn ra bên dưới:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -210,27 +210,27 @@ Mỗi cấp độ sẽ trở nên mạnh mẽ hơn khi AI có thể truy cập t
 └─────────────────────────────────────────────────────────────┘
 ```
 
-MCP server đóng vai trò là cầu nối giữa trợ lý AI của bạn và các API của Google. Nó xử lý:
+Máy chủ MCP đóng vai trò cầu nối giữa trợ lý AI của bạn và các API của Google. Nó đảm nhận:
 
-- **Cập nhật token OAuth** (tự động, không cần can thiệp)
-- **Gộp yêu cầu** (sử dụng API hiệu quả)
-- **Định dạng phản hồi** (được cấu trúc để AI có thể xử lý)
-- **Định tuyến nhiều tài khoản** (hướng các yêu cầu đến tài khoản đúng)
+- **Làm mới token OAuth** (tự động, trong suốt)
+- **Gộp yêu cầu theo lô** (sử dụng API hiệu quả)
+- **Định dạng phản hồi** (có cấu trúc để AI dễ xử lý)
+- **Định tuyến đa tài khoản** (chuyển yêu cầu đến đúng tài khoản)
 
-Tất cả đều chạy trên máy cục bộ. Tất cả đều nằm dưới sự kiểm soát của bạn.
+Tất cả đều chạy cục bộ. Tất cả đều dưới sự kiểm soát của bạn.
 
 ## Bắt đầu
 
-### Bắt đầu nhanh (Đa số người dùng)
+### Bắt đầu nhanh (Hầu hết người dùng)
 
 ```bash
 # From your project directory
 task google-mcp:setup
 ```
 
-Làm theo các hướng dẫn. Khởi động lại trợ lý AI của bạn. Xong.
+Làm theo hướng dẫn. Khởi động lại trợ lý AI của bạn. Xong.
 
-### Bước từng bước (Nếu bạn muốn kiểm soát)
+### Từng bước (Nếu bạn muốn tự kiểm soát)
 
 ```bash
 # 1. Install the MCP server (pinned release)
@@ -246,7 +246,7 @@ task google-mcp:auth
 task google-mcp:status
 ```
 
-### Kiểm tra các thiết bị đang kết nối
+### Kiểm tra những gì đã được kết nối
 
 ```bash
 task google-mcp:accounts:list
@@ -256,7 +256,7 @@ task google-mcp:status
 # Full status: binary, keychain secrets, accounts, configuration
 ```
 
-### Xóa quyền truy cập
+### Thu hồi quyền truy cập
 
 ```bash
 task google-mcp:reset CONFIRM=y
@@ -264,27 +264,27 @@ task google-mcp:reset CONFIRM=y
 # Revoke the app itself in your Google Account's third-party access settings
 ```
 
-## Ngoài Google
+## Không chỉ dừng lại ở Google
 
-Cùng một mô hình áp dụng cho các dịch vụ khác. MCP cung cấp giao thức; WellKnown cung cấp cài đặt tự động. Chúng tôi đang phát triển tích hợp cho:
+Cùng một mô hình này áp dụng cho các dịch vụ khác. MCP cung cấp giao thức; WellKnown cung cấp thiết lập tự động. Chúng tôi đang xây dựng các tích hợp cho:
 
-- **GitHub** - Vấn đề, Yêu cầu kéo, Tìm kiếm mã nguồn
+- **GitHub** - Issue, PR, tìm kiếm mã nguồn
 - **Notion** - Trang, cơ sở dữ liệu, không gian làm việc
-- **Slack** - Kênh, tin nhắn, chuỗi tin nhắn
-- **Linear** - Vấn đề, dự án, lộ trình
+- **Slack** - Kênh, tin nhắn, luồng thảo luận
+- **Linear** - Issue, dự án, lộ trình
 
-Mỗi thiết bị đều tuân theo nguyên tắc tương tự: một lệnh để kết nối, truy cập đầy đủ vào AI, và điều khiển cục bộ.
+Mỗi tích hợp đều tuân theo cùng một nguyên tắc: một lệnh để kết nối, AI truy cập đầy đủ, kiểm soát cục bộ.
 
-## Những thay đổi
+## Những gì thay đổi
 
-Khi trợ lý AI của bạn có thể truy cập mượt mà vào Google Workspace, quy trình làm việc sẽ thay đổi một cách cơ bản:
+Khi trợ lý AI của bạn có thể truy cập liền mạch vào Google Workspace, quy trình làm việc thay đổi tận gốc:
 
-**Trước đây**: Bạn phải chuyển đổi giữa các công cụ. Kiểm tra email. Mở lịch. Tìm kiếm trên Drive. Sao chép dữ liệu vào AI. Nhận phản hồi. Dán lại.
+**Trước đây**: Bạn liên tục chuyển qua lại giữa các công cụ. Kiểm tra email. Mở lịch. Tìm kiếm trong Drive. Sao chép dữ liệu sang AI. Nhận phản hồi. Dán ngược lại.
 
-**Sau đó:** Bạn mô tả những gì bạn cần. Trí tuệ nhân tạo (AI) sẽ điều hướng giữa các dịch vụ, thu thập thông tin bối cảnh, thực hiện các hành động và báo cáo kết quả.
+**Bây giờ**: Bạn mô tả những gì mình cần. AI tự di chuyển giữa các dịch vụ, thu thập ngữ cảnh, thực hiện hành động và báo cáo lại.
 
-Chi phí nhận thức khi chuyển đổi công cụ biến mất. Bạn suy nghĩ về kết quả, không phải giao diện.
+Gánh nặng nhận thức do chuyển đổi công cụ biến mất. Bạn tư duy theo kết quả, chứ không phải theo giao diện.
 
-## Quý vị quan tâm?
+## Bạn quan tâm?
 
-We're currently onboarding early access partners to this integration. If you're using [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) or another MCP-compatible assistant and want zero-config Google Workspace access, [get in touch]({{< relref "/contact" >}})—we'll help you get connected.
+Chúng tôi hiện đang tiếp nhận các đối tác truy cập sớm cho tích hợp này. Nếu bạn đang sử dụng [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) hoặc một trợ lý tương thích MCP khác và muốn truy cập Google Workspace mà không cần cấu hình, [hãy liên hệ với chúng tôi]({{< relref "/contact" >}})—chúng tôi sẽ giúp bạn kết nối.

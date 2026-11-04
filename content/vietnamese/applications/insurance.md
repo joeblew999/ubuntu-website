@@ -1,220 +1,266 @@
 ---
 title: "Bảo hiểm"
-meta_title: "Bảo hiểm Forms & Publishing | Ubuntu Software"
-description: "Mọi kênh. Một hệ thống. Xuất bản từ một nguồn duy nhất cho các ứng dụng, yêu cầu bồi thường và tài liệu chính sách trên các kênh đại lý tại hiện trường, kỹ thuật số và giấy tờ."
+meta_title: "Biểu mẫu & Xuất bản Bảo hiểm | Ubuntu Software"
+description: "Mọi kênh. Một hệ thống. Xuất bản từ một nguồn duy nhất cho hồ sơ yêu cầu bảo hiểm, yêu cầu bồi thường và tài liệu hợp đồng bảo hiểm, trên mọi kênh: đại lý thực địa, kỹ thuật số và bản giấy."
 image: "/images/insurance.svg"
 draft: false
 ---
 
 ## Mọi kênh. Một hệ thống.
 
-Insurance happens everywhere—online, at the kitchen table with an agent, in the field after an accident. Yêu cầu bồi thường come by app, by mail, by fax. Your systems need to handle all of it without breaking.
+Bảo hiểm diễn ra ở khắp nơi—trực tuyến, bên bàn bếp cùng một đại lý, ngoài hiện trường sau một vụ tai nạn. Yêu cầu bồi thường đến qua ứng dụng, qua thư, qua fax. Hệ thống của bạn cần xử lý tất cả mà không bị gián đoạn.
 
-Xuất bản từ một nguồn duy nhất. Kết nối đồng bộ giữa hiện trường và văn phòng. Xử lý yêu cầu bồi thường được đẩy nhanh.
-
----
-
-## Thử thách
-
-Tài liệu bảo hiểm áp dụng cho các kênh và bối cảnh khác nhau:
-
-**Các nhân viên hiện trường làm việc offline.** Khu vực nông thôn. Các khu vực bị thiên tai. Nhà của khách hàng. Kết nối mạng không được đảm bảo.
-
-**Giấy tờ vẫn còn tồn tại.** Đơn đăng ký đã ký. Yêu cầu bồi thường gửi qua bưu điện. Tài liệu gửi qua fax. Nó sẽ không biến mất.
-
-**Speed matters.** Claims delayed are customers frustrated. Ứng dụng stuck are sales lost.
-
-**Độ chính xác là yếu tố quan trọng nhất.** Thông tin chính sách sai lệch. Điều kiện bị bỏ sót. Thanh toán không chính xác. Lỗi có thể gây tốn kém.
-
-**Các hệ thống hoạt động độc lập.** Quản lý chính sách. Xử lý yêu cầu bồi thường. Đánh giá rủi ro. Dịch vụ khách hàng. Mỗi bộ phận có góc nhìn riêng.*
+Xuất bản từ một nguồn duy nhất. Hiện trường và văn phòng hợp nhất. Xử lý bồi thường được tăng tốc.
 
 ---
 
-## Cách Publish Hỗ Trợ
+## Thách thức
 
-### Biểu mẫu sẵn sàng sử dụng trong thực tế
+Tài liệu bảo hiểm trải rộng trên nhiều kênh và bối cảnh:
 
-Các đại lý hoạt động ở những nơi có khách hàng:
+**Đại lý hiện trường làm việc ngoại tuyến.** Vùng nông thôn. Khu vực thảm họa. Nhà khách hàng. Kết nối không được đảm bảo.
 
-- Các biểu mẫu hoạt động ngoại tuyến on tablets
-- Bản sao lưu giấy luôn sẵn có
-- Đồng bộ hóa khi kết nối được khôi phục
-- Dữ liệu đích giống nhau trong cả hai trường hợp
+**Giấy tờ vẫn tồn tại.** Hồ sơ yêu cầu bảo hiểm có chữ ký. Yêu cầu bồi thường gửi qua bưu điện. Tài liệu gửi qua fax. Chúng sẽ không biến mất.
 
-**Bán hàng và cung cấp dịch vụ ở bất kỳ đâu.**
+**Tốc độ là yếu tố then chốt.** Bồi thường chậm trễ khiến khách hàng bực bội. Hồ sơ bị ách tắc là mất doanh số.
+
+**Độ chính xác là tất cả.** Sai chi tiết hợp đồng. Bỏ sót điều kiện. Chi trả không chính xác. Sai sót rất tốn kém.
+
+**Hệ thống bị cô lập.** Quản trị hợp đồng. Bồi thường. Thẩm định. Dịch vụ khách hàng. Mỗi bộ phận có góc nhìn riêng.
 
 ---
 
-### Yêu cầu bồi thường từ bất kỳ kênh nào
+## Publish giúp ích như thế nào
+
+### Biểu mẫu sẵn sàng cho hiện trường
+
+Đại lý làm việc ở nơi khách hàng có mặt:
+
+- Biểu mẫu hoạt động ngoại tuyến trên máy tính bảng
+- Luôn có bản giấy dự phòng
+- Đồng bộ khi có kết nối trở lại
+- Dữ liệu đến cùng một đích dù theo cách nào
+
+**Bán hàng và phục vụ ở bất cứ đâu.**
+
+---
+
+### Yêu cầu bồi thường từ mọi kênh
 
 Khách hàng báo cáo tổn thất theo cách của họ:
 
-- Ứng dụng di động có tính năng chụp ảnh
-- Biểu mẫu trực tuyến có chức năng tải lên tài liệu
-- Các đơn yêu cầu bồi thường bằng văn bản đã được gửi đi
-- Các yêu cầu về điện thoại được nhân viên ghi nhận
+- Ứng dụng di động có chụp ảnh
+- Biểu mẫu trực tuyến có tải lên tài liệu
+- Yêu cầu bồi thường bằng giấy gửi qua bưu điện
+- Yêu cầu bồi thường qua điện thoại do nhân viên ghi nhận
 
-Tất cả các yêu cầu đều được chuyển đến cùng một hàng đợi yêu cầu.
+Tất cả đều đổ về cùng một hàng đợi bồi thường.
 
 ---
 
-### Nhận dạng ký tự quang học (OCR) cho tài liệu giấy
+### OCR cho giấy tờ
 
-Yêu cầu bằng văn bản không có nghĩa là xử lý thủ công:
+Yêu cầu bồi thường bằng giấy không có nghĩa là phải xử lý thủ công:
 
-- Các tài liệu được quét đã được nhận diện
+- Tài liệu quét được nhận dạng
 - Dữ liệu được trích xuất chính xác
 - Xác thực được áp dụng tự động
-- Trực tiếp vào hàng đợi xét xử
+- Chuyển thẳng đến hàng đợi xét duyệt
 
-**Thông báo đầu tiên về tổn thất trong vòng vài phút, không phải vài ngày.**
+**Thông báo tổn thất đầu tiên chỉ trong vài phút, không phải vài ngày.**
 
 ---
 
-### Hệ thống tích hợp chính sách
+### Tích hợp hệ thống hợp đồng
 
-Kết nối với các hệ thống chính của bạn:
+Kết nối với các hệ thống lõi của bạn:
 
-- Đọc dữ liệu chính sách để điền vào biểu mẫu
-- Ghi dữ liệu yêu cầu bồi thường vào hệ thống xử lý
-- Hỗ trợ các quy trình làm việc hiện có
+- Đọc dữ liệu hợp đồng để điền sẵn biểu mẫu
+- Ghi dữ liệu bồi thường vào hệ thống xử lý
+- Hỗ trợ quy trình làm việc hiện có
 - Không cần thay thế nền tảng
 
 ---
 
 ### Tạo tài liệu
 
-Cung cấp những gì khách hàng và cơ quan quản lý cần:
+Tạo ra những gì khách hàng và cơ quan quản lý cần:
 
-- Các tài liệu chính sách dựa trên dữ liệu thẩm định
-- Trang khai báo theo yêu cầu
-- Tự động hóa việc xử lý các yêu cầu bồi thường
-- Tuân thủ documentation complete
+- Tài liệu hợp đồng từ dữ liệu thẩm định
+- Trang tóm tắt hợp đồng theo yêu cầu
+- Thư từ bồi thường được tự động hóa
+- Tài liệu tuân thủ đầy đủ
 
 ---
 
 ## Các trường hợp sử dụng
 
-### Applications
+### Hồ sơ yêu cầu bảo hiểm
 
-Doanh nghiệp mới. Gia hạn. Chứng nhận.
+Hợp đồng mới. Tái tục. Sửa đổi bổ sung.
 
-- Các nhân viên điều tra thu thập hồ sơ đầy đủ
-- Quy trình bán hàng trực tuyến trực tiếp đến người tiêu dùng
-- Các đơn đăng ký bằng giấy từ các đối tác đã được xử lý
-- Dữ liệu bảo lãnh được xác minh tại thời điểm nhập liệu
+- Đại lý hiện trường thu thập hồ sơ đầy đủ
+- Quy trình trực tuyến trực tiếp đến người tiêu dùng
+- Hồ sơ giấy từ đối tác được xử lý
+- Dữ liệu thẩm định được xác thực ngay khi nhập
 
 ---
 
-### Claims
+### Bồi thường
 
-Thông báo đầu tiên. Thông tin bổ sung. Tài liệu.
+Thông báo đầu tiên. Thông tin bổ sung. Hồ sơ chứng từ.
 
-- Hệ thống tiếp nhận đa kênh được tích hợp thống nhất
-- Đính kèm hình ảnh và tài liệu
+- Tiếp nhận đa kênh được hợp nhất
+- Đính kèm ảnh và tài liệu
 - Theo dõi trạng thái cho khách hàng
-- Phân công nhân viên điều chỉnh tự động
+- Phân công giám định viên tự động
 
 ---
 
-### Dịch vụ Chính sách
+### Dịch vụ hợp đồng
 
-Thay đổi địa chỉ. Điều chỉnh phạm vi bảo hiểm. Cập nhật thông tin người thụ hưởng.
+Thay đổi địa chỉ. Điều chỉnh phạm vi bảo hiểm. Cập nhật người thụ hưởng.
 
-- Dịch vụ tự phục vụ trực tuyến
-- Hỗ trợ trực tiếp bởi nhân viên
-- Yêu cầu giấy tờ đã được xử lý
-- Cập nhật toàn bộ hồ sơ chính sách
+- Tự phục vụ trực tuyến
+- Đại lý hỗ trợ trực tiếp
+- Yêu cầu bằng giấy được xử lý
+- Tất cả đều cập nhật vào hồ sơ hợp đồng
 
 ---
 
 ### Kiểm tra
 
-Khảo sát tài sản. Đánh giá thiệt hại. Kiểm tra định kỳ.
+Khảo sát tài sản. Đánh giá tổn thất. Kiểm tra khi tái tục.
 
-- Biểu mẫu kiểm tra tương thích với thiết bị di động
-- Chức năng chụp ảnh tích hợp
-- Khả năng hoạt động ngoại tuyến cho công việc thực địa
-- Dữ liệu đồng bộ hóa với bộ phận thẩm định/bồi thường
-
----
-
-### Compliance
-
-Hồ sơ đăng ký nhà nước. Tài liệu về tỷ lệ. Hồ sơ của nhà sản xuất.
-
-- Các biểu mẫu bắt buộc được duy trì
-- Quản lý phiên bản cho các quy định
-- Danh sách theo dõi kiểm toán hoàn chỉnh
-- Theo dõi phân phối
+- Biểu mẫu kiểm tra sẵn sàng cho thiết bị di động
+- Tích hợp chụp ảnh
+- Khả năng ngoại tuyến cho công việc hiện trường
+- Dữ liệu đồng bộ đến bộ phận thẩm định/bồi thường
 
 ---
 
-## Bạn sẽ nhận được gì
+### Tuân thủ
 
-### Dành cho Khách hàng
+Hồ sơ nộp cấp tiểu bang. Tài liệu về biểu phí. Hồ sơ đại lý.
 
-- Nộp đơn theo cách họ mong muốn
-- Xử lý nhanh hơn, ít phải chờ đợi hơn
-- Giao tiếp rõ ràng
-- Tình trạng hiển thị
+- Duy trì các biểu mẫu bắt buộc
+- Kiểm soát phiên bản theo quy định
+- Nhật ký kiểm toán đầy đủ
+- Theo dõi việc phân phối
 
-### Dành cho các đại lý
+---
 
-- Sell and service anywhere
-- Forms work offline
-- Giảm bớt thủ tục giấy tờ khi trở lại văn phòng
-- Dành nhiều thời gian hơn cho khách hàng
+## Bạn nhận được gì
 
-### Cho Hoạt động
+### Cho khách hàng
 
-- Danh sách chờ duy nhất cho tất cả các kênh
-- Giấy được xử lý tự động
-- Ít lỗi hơn để sửa chữa
-- Tăng cường hiệu suất có thể đo lường được
+- Nộp yêu cầu bồi thường theo bất kỳ cách nào họ muốn
+- Xử lý nhanh hơn, ít chờ đợi hơn
+- Thông tin liên lạc rõ ràng
+- Nắm rõ trạng thái
 
-### Đối với CNTT
+### Cho đại lý
 
-- Kết nối với quản trị chính sách
-- Các mẫu tích hợp tiêu chuẩn
+- Bán hàng và phục vụ ở bất cứ đâu
+- Biểu mẫu hoạt động ngoại tuyến
+- Ít giấy tờ hơn khi về văn phòng
+- Nhiều thời gian hơn với khách hàng
+
+### Cho bộ phận vận hành
+
+- Một hàng đợi duy nhất cho mọi kênh
+- Giấy tờ được xử lý tự động
+- Ít lỗi cần sửa hơn
+- Năng suất tăng có thể đo lường được
+
+### Cho bộ phận CNTT
+
+- Kết nối với hệ thống quản trị hợp đồng
+- Mô hình tích hợp tiêu chuẩn
 - Tùy chọn tự lưu trữ
-- Dễ bảo trì trong dài hạn
+- Dễ bảo trì lâu dài
 
 ---
 
-## Các con số
+## Những con số
 
-**Trước khi đăng:**
-- 3-5 ngày để xử lý các yêu cầu bồi thường bằng giấy tờ
+**Trước khi có Publish:**
+- 3-5 ngày để xử lý yêu cầu bồi thường bằng giấy
 - Nhiều điểm nhập liệu
-- Các nhân viên điều tra tại hiện trường phải làm việc tại văn phòng để hoàn thành các thủ tục giấy tờ
-- Danh sách công việc tồn đọng theo kênh
+- Đại lý hiện trường bị ràng buộc với văn phòng vì giấy tờ
+- Tồn đọng theo từng kênh
 
-**Sau khi đăng:**
-- Các yêu cầu bồi thường bằng giấy được xử lý trong ngày
-- Điểm thu thập duy nhất
-- Công việc thực địa thực sự di động
-- Tất cả các kênh đều hợp lưu lại với nhau
+**Sau khi có Publish:**
+- Yêu cầu bồi thường bằng giấy được xử lý trong ngày
+- Một điểm thu thập duy nhất
+- Công việc hiện trường thực sự di động
+- Mọi kênh cùng chảy về một luồng
 
 ---
 
-## Hoàn thiện vòng lặp với Spatial
+## Xử lý bằng AI
 
-Một số công việc bảo hiểm mang tính chất không gian:
+Bồi thường nhanh hơn, chính xác hơn:
 
-- **Kiểm tra tài sản** — Các tòa nhà được ghi chép dưới dạng 3D
-- **Đánh giá rủi ro** — Các cơ sở được đánh giá bằng mắt thường
-- **Điều tra khiếu nại** — Phục dựng hiện trường tai nạn
+| Khả năng | Ứng dụng trong bảo hiểm |
+|------------|----------------------|
+| **Phân loại bồi thường** | Chuyển đến đúng giám định viên theo loại, mức độ nghiêm trọng |
+| **Phân tích tài liệu** | Trích xuất dữ liệu từ ảnh, PDF, ghi chú viết tay |
+| **Dấu hiệu gian lận** | Phát hiện mẫu bất thường trên các hồ sơ |
+| **Dịch thuật** | Phục vụ chủ hợp đồng bằng ngôn ngữ của họ |
+| **Đối chiếu hợp đồng** | Tự động xác thực yêu cầu bồi thường theo phạm vi bảo hiểm |
+
+Mọi xử lý đều diễn ra trên hạ tầng của bạn. Dữ liệu nhạy cảm của khách hàng được giữ kín.
+
+---
+
+## Hoạt động hiện trường
+
+Giám định viên và đại lý tại hiện trường với quyền truy cập hệ thống đầy đủ:
+
+- **Hoạt động ngoại tuyến** — Khu vực thảm họa, tài sản ở nông thôn, nhà khách hàng
+- **Ghi chép bằng giọng nói** — Ghi nhận phát hiện mà không cần dùng tay
+- **Ảnh/video** — Tài liệu về thiệt hại được đính kèm vào yêu cầu bồi thường
+- **Đồng bộ thời gian thực** — Hồ sơ được cập nhật khi có kết nối
+
+[Xem chi tiết về Human-in-Loop →]({{< relref "/platform/publish#human-in-loop-real-time-field-operations" >}})
+
+---
+
+## Chủ quyền dữ liệu
+
+Dữ liệu của bạn vẫn là của bạn:
+
+| Cách tiếp cận truyền thống | Với WellKnown |
+|---------------------|----------------|
+| Dữ liệu nằm trên cổng thông tin của nhà cung cấp | Dữ liệu nằm trên hạ tầng của bạn |
+| Nhà cung cấp sở hữu mối quan hệ với chủ hợp đồng | Bạn sở hữu mối quan hệ với chủ hợp đồng |
+| Đổi nhà cung cấp = xây dựng lại | Đổi nhà cung cấp = kết nối lại gateway |
+| Việc tuân thủ phụ thuộc vào nhà cung cấp | Bạn kiểm soát việc tuân thủ |
+
+Xuất bản ĐẾN các nền tảng bên ngoài khi cần. Không bao giờ bị KHÓA CHẶT vào đó.
+
+[Tìm hiểu thêm về WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
+
+---
+
+## Khép kín quy trình với Spatial
+
+Một số công việc bảo hiểm vốn mang tính không gian:
+
+- **Kiểm tra tài sản** — Công trình được ghi lại dưới dạng 3D
+- **Đánh giá rủi ro** — Cơ sở vật chất được đánh giá trực quan
+- **Điều tra bồi thường** — Tái dựng hiện trường tai nạn
 - **Quản lý tài sản** — Danh mục tài sản được bảo hiểm
 
 Khi nhu cầu của bạn mở rộng sang 3D, Spatial đã sẵn sàng.
 
-[Khám phá Không gian →](/vi/platform/spatial/)
+[Khám phá Spatial →]({{< relref "/platform/spatial" >}})
 
 ---
 
 ## Bắt đầu
 
-Bảo hiểm hoạt động trên mọi nền tảng: trực tiếp, trực tuyến và trên giấy tờ. Mọi kênh, một hệ thống.
+Bảo hiểm hoạt động tại hiện trường, trực tuyến và trên giấy. Mọi kênh, một hệ thống.
 
-[Liên hệ với chúng tôi →](/vi/contact/)
+[Liên hệ với chúng tôi →](/contact/)

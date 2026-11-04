@@ -1,28 +1,31 @@
 ---
-title: máy chủ google-mcp
-import_path: www.ubuntusoftware.net/pkg/máy chủ google-mcp
-repo_url: https://github.com/joeblew999/máy chủ google-mcp
-description: MCP server cho tích hợp Google Workspace. Gmail, Lịch, Drive, Docs, Sheets và Slides.
+title: "google-mcp-server"
+import_path: www.ubuntusoftware.net/pkg/google-mcp-server
+repo_url: https://github.com/joeblew999/google-mcp-server
+description: "Máy chủ MCP để tích hợp Google Workspace. Gmail, Calendar, Drive, Docs, Sheets và Slides."
 version: v0.1.0
-documentation_url: https://github.com/joeblew999/máy chủ google-mcp#readme
+documentation_url: https://github.com/joeblew999/google-mcp-server#readme
 license: MIT
 author: Gerard Webb
 created_at: 2024-12-16T00:00:00Z
 updated_at: 2024-12-16T00:00:00Z
+has_binary: true
+binary_name: google-mcp-server
+taskfile_path: taskfiles/tools/Taskfile.google-mcp.yml
 ---
 
-## Về
+## Giới thiệu
 
-Fork of [ngs/google-mcp-server](https://github.com/ngs/google-mcp-server) - an MCP (Model Context Protocol) server that provides Claude and other AI assistants with access to Google Workspace services.
+Bản fork của [ngs/google-mcp-server](https://github.com/ngs/google-mcp-server) - một máy chủ MCP (Model Context Protocol) giúp Claude và các trợ lý AI khác truy cập các dịch vụ Google Workspace.
 
 ## Tính năng
 
 - **Gmail** - Đọc, gửi và quản lý email
-- **Lịch** - Xem và tạo sự kiện
-- **Drive** - Duyệt, tải lên và tải xuống tệp tin
-- **Tài liệu** - Đọc và tạo tài liệu
-- **Bảng tính** - Đọc và cập nhật bảng tính
-- **Slides** - Tạo và quản lý bài thuyết trình
+- **Calendar** - Xem và tạo sự kiện
+- **Drive** - Duyệt, tải lên và tải xuống tệp
+- **Docs** - Đọc và tạo tài liệu
+- **Sheets** - Đọc và cập nhật bảng tính
+- **Slides** - Tạo và quản lý bản trình bày
 
 ## Cài đặt
 
@@ -32,7 +35,7 @@ go install github.com/joeblew999/google-mcp-server@latest
 
 ## Cấu hình
 
-Thêm vào cài đặt Claude Code MCP của bạn:
+Thêm vào phần cài đặt MCP của Claude Code:
 
 ```json
 {
@@ -47,4 +50,4 @@ Thêm vào cài đặt Claude Code MCP của bạn:
 
 ## Đóng góp
 
-Đây là một nhánh được duy trì bởi Ubuntu Software. Chúng tôi hoan nghênh các đóng góp thông qua yêu cầu kéo (pull requests).
+Đây là bản fork do Ubuntu Software duy trì. Chúng tôi hoan nghênh mọi đóng góp qua pull request.

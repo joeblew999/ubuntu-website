@@ -1,88 +1,106 @@
 ---
-title: "Ứng dụng"
-meta_title: "Ứng dụng | Ubuntu Software"
-description: "Hai nền tảng, mười ngành công nghiệp. Spatial dành cho thiết kế 3D và robotics. Publish dành cho tài liệu và biểu mẫu. Cả hai đều được hỗ trợ bởi trí tuệ nhân tạo (AI), ưu tiên hoạt động offline, và được xây dựng trên các tiêu chuẩn mở."
+title: "Giải pháp"
+meta_title: "Giải pháp quản lý đội thiết bị IoT & doanh nghiệp | Phần mềm Ubuntu"
+description: "Giải pháp quản lý đội thiết bị IoT cho nông nghiệp, xây dựng, an toàn công cộng và logistics. Drone, phương tiện, hệ thống tòa nhà—tất cả được quản lý bằng một kiến trúc thống nhất. Nền tảng doanh nghiệp cho sản xuất, chính phủ, y tế và dịch vụ tài chính."
 image: "/images/applications.svg"
 draft: false
 ---
 
-## Hai nền tảng. Mười ngành công nghiệp.
+## Giải pháp đội thiết bị IoT
 
-Dù bạn đang thiết kế các tế bào làm việc robot hay xử lý các yêu cầu bồi thường bảo hiểm, chúng tôi đều có hạ tầng phù hợp cho bạn.
+Triển khai các đội thiết bị tự hành—**drone, phương tiện, hệ thống tòa nhà, thiết bị công nghiệp**—với **AI tích hợp trên thiết bị** để ra quyết định theo thời gian thực và **AI đám mây** để mang lại trí tuệ trên toàn đội. Kiến trúc này không phụ thuộc vào loại thiết bị: cùng một mô hình cho IoT trên không, mặt đất và cố định.
 
-**Spatial** — Thiết kế 3D dựa trên AI dành cho các ngành công nghiệp hoạt động trong không gian vật lý.
+| Loại đội | Ví dụ |
+|------------|----------|
+| **Trên không** | Drone, UAV, máy bay kiểm tra |
+| **Phương tiện mặt đất** | Xe tải, AGV, xe nâng, máy kéo |
+| **IoT tòa nhà** | HVAC, kiểm soát ra vào, cảm biến, đồng hồ đo |
+| **Công nghiệp** | Thiết bị sản xuất, robot, băng tải |
 
-**Publish** — Quản lý nội dung từ một nguồn duy nhất cho việc xuất bản đa kênh và thu thập dữ liệu.
-
-Cả hai nền tảng đều chia sẻ nền tảng cốt lõi của chúng tôi: Trợ lý AI, kiến trúc ưu tiên ngoại tuyến, đồng bộ hóa Automerge và tiêu chuẩn mở.
-
----
-
-## Ứng dụng không gian
-
-**Dành cho các ngành công nghiệp hoạt động trong không gian ba chiều.**
-
-### [Robotics & Tự động hóa](/vi/applications/robotics)
-Khả năng suy luận không gian cho các hệ thống máy móc sẽ định hình thế giới của chúng ta. Thiết kế tế bào làm việc, lập kế hoạch đường đi và phối hợp đa robot.
-
-### [Mô phỏng & Đào tạo](/vi/applications/simulation)
-Nơi trí tuệ nhân tạo (AI) học tập trong không gian ảo trước khi áp dụng vào thế giới thực. Môi trường tổng hợp, dữ liệu đào tạo quy mô lớn, quy trình chuyển đổi từ mô phỏng sang thực tế.
-
-### [Bản sao kỹ thuật số](/vi/applications/digital-twins)
-Thiết kế cầu và thực tế. Mô hình sống kết nối với cảm biến, bảo trì dự đoán, quản lý cơ sở vật chất với trí tuệ không gian.
-
-### [Sản xuất](/vi/applications/manufacturing)
-Từ thiết kế đến gia công với trí tuệ nhân tạo (AI) hiểu rõ các hạn chế sản xuất. CAM, lập kế hoạch quy trình, tích hợp chất lượng.
-
-### [Xây dựng](/vi/applications/construction)
-Thiết kế công trình mô-đun, tiền chế và thông minh. Đội ngũ toàn cầu, hợp tác thời gian thực, tích hợp nhà máy.
+Tất cả các loại thiết bị đều dùng chung một kiến trúc: AI biên, nhắn tin NATS JetStream, bản sao số (digital twin) và quản lý đội thống nhất. Các trang dưới đây cho thấy cách áp dụng kiến trúc này cho từng ngành cụ thể.
 
 ---
 
-## Đăng tải ứng dụng
+### [Nông nghiệp & Canh tác]({{< relref "/applications/fleet-agriculture" >}})
+Nông nghiệp chính xác ở quy mô lớn. Giám sát cây trồng, phát hiện sâu bệnh và phun thuốc theo liều lượng biến đổi với AI hiểu rõ cánh đồng của bạn.
 
-**Dành cho các ngành nghề quản lý nội dung trên nhiều kênh.**
+### [Xây dựng & Cơ sở hạ tầng]({{< relref "/applications/fleet-construction" >}})
+Khảo sát công trường, theo dõi tiến độ và kiểm tra cơ sở hạ tầng. So sánh bản sao số với điều kiện thực tế.
 
-### [Chính phủ & Khu vực công](/vi/applications/government)
-Phục vụ mọi công dân. Hệ thống giấy tờ và kỹ thuật số được tích hợp thống nhất. Định dạng dễ tiếp cận, tuân thủ quy định lưu trữ, tích hợp với hệ thống cũ.
+### [An toàn công cộng & Khẩn cấp]({{< relref "/applications/fleet-safety" >}})
+Tìm kiếm cứu nạn, ứng phó thảm họa và nhận thức tình huống. Ảnh nhiệt, phát hiện người và phối hợp ứng phó.
 
-### [Y tế](/vi/applications/healthcare)
-Giảm bớt thủ tục hành chính, ít sai sót hơn, chăm sóc tốt hơn. Tiếp nhận bệnh nhân, quản lý sự đồng ý, tích hợp hệ thống quản lý hồ sơ y tế điện tử (EMR).
+### [Hậu cần & Giao hàng]({{< relref "/applications/fleet-logistics" >}})
+Giao hàng chặng cuối, vận hành kho bãi và quản lý hàng tồn kho. Điều hướng tự hành với tối ưu hóa trên toàn đội.
 
-### [Dịch vụ tài chính](/vi/applications/financial)
-Tuân thủ mà không phức tạp. Đơn xin vay, thông báo, tài liệu tuân thủ quy định với đầy đủ hồ sơ kiểm toán.
+### [Năng lượng & Tiện ích]({{< relref "/applications/fleet-energy" >}})
+Kiểm tra đường dây điện, phân tích tấm pin mặt trời và giám sát đường ống. Phát hiện lỗi trước khi chúng trở thành sự cố.
 
-### [Giáo dục](/vi/applications/education)
-Quản lý hiện đại, các tùy chọn truyền thống. Đăng ký, quyền truy cập, hồ sơ học sinh — giấy tờ và cổng thông tin được tích hợp thống nhất.
+### [Khai khoáng & Tài nguyên]({{< relref "/applications/fleet-mining" >}})
+Đo lường bãi chứa vật liệu, khảo sát hiện trường và giám sát an toàn. Tính toán khối lượng chính xác và theo dõi tiến độ.
 
-### [Bảo hiểm](/vi/applications/insurance)
-Mọi kênh, một hệ thống. Nhân viên hiện trường, khách hàng trực tuyến, yêu cầu bồi thường qua bưu điện—tất cả đều được xử lý thống nhất.
-
----
-
-## Nền tảng chung
-
-Cả hai nền tảng đều được xây dựng trên cùng một công nghệ lõi:
-
-| Capability | How It Helps |
-|------------|--------------|
-| **AI Assistance** | Natural language interaction with your documents or designs |
-| **Offline-First** | Work without connectivity, sync automatically when reconnected |
-| **Automerge Sync** | Real-time collaboration without conflicts |
-| **Open Standards** | No lock-in, export everything, own your work |
+### [Giám sát môi trường]({{< relref "/applications/fleet-environment" >}})
+Khảo sát động vật hoang dã, phát hiện ô nhiễm và quản lý lâm nghiệp. Phân tích xu hướng dài hạn với báo cáo tuân thủ tự động.
 
 ---
 
-## Tìm kiếm sự phù hợp của bạn
+## Lợi thế của AI
 
-**Working in 3D?** Start with [Spatial](/vi/platform/spatial/).
+Mỗi giải pháp đội thiết bị IoT kết hợp hai lớp AI:
 
-**Working with documents?** Start with [Publish](/vi/platform/publish/).
+| Lớp | Vị trí | Khả năng |
+|-------|----------|------------|
+| **AI biên** | Trên thiết bị (Jetson, Pi, hệ thống nhúng) | Suy luận thời gian thực, phát hiện vật thể, ra quyết định tức thì mà không cần kết nối |
+| **AI đám mây** | Backend NATS JetStream | Phân tích toàn đội, xu hướng lịch sử, bảo trì dự đoán, điều phối |
 
-**Cần cả hai?** Chúng tích hợp một cách mượt mà. Bản vẽ kỹ thuật từ mô hình 3D. Danh sách vật liệu (BOM) được chuyển sang biểu mẫu. Tài liệu được đồng bộ hóa với thiết kế.
+Xử lý tại biên đảm nhận các quyết định tính bằng mili giây. Xử lý trên đám mây đảm nhận trí tuệ toàn đội. Cùng một mô hình dù thiết bị bay trên không, chạy trên bánh xe hay được gắn cố định trên tường.
+
+[Kiến trúc kỹ thuật →]({{< relref "/fleet" >}})
 
 ---
 
-## Hãy cùng trò chuyện
+## Nền tảng doanh nghiệp
 
-[Contact us](/vi/contact) to discuss which applications fit your organization.
+Ngoài các đội drone, chúng tôi còn cung cấp giải pháp quản lý tài liệu và dữ liệu cho các ngành chịu sự quản lý chặt chẽ.
+
+---
+
+### [Sản xuất]({{< relref "/applications/manufacturing" >}})
+Từ thiết kế đến chế tạo với AI hiểu rõ các ràng buộc sản xuất. Tích hợp CAM, lập kế hoạch quy trình, theo dõi chất lượng.
+
+### [Robot & Mô phỏng]({{< relref "/applications/robotics" >}})
+Suy luận không gian cho robot. Thiết kế ô làm việc, lập kế hoạch đường đi và quy trình chuyển từ mô phỏng sang thực tế.
+
+### [Dịch vụ tài chính]({{< relref "/applications/financial" >}})
+Tuân thủ mà không phức tạp. Hồ sơ vay vốn, công bố thông tin, tài liệu pháp quy với nhật ký kiểm toán đầy đủ.
+
+### [Chính phủ & Khu vực công]({{< relref "/applications/government" >}})
+Phục vụ mọi công dân. Thống nhất giấy tờ và kỹ thuật số. Định dạng dễ tiếp cận, tuân thủ quy định lưu trữ, tích hợp hệ thống cũ.
+
+### [Y tế]({{< relref "/applications/healthcare" >}})
+Ít thủ tục hành chính hơn, ít sai sót hơn, chăm sóc tốt hơn. Tiếp nhận bệnh nhân, quản lý sự đồng ý, tích hợp EMR.
+
+### [Giáo dục]({{< relref "/applications/education" >}})
+Quản lý hiện đại, vẫn giữ các lựa chọn truyền thống. Tuyển sinh, phiếu chấp thuận, hồ sơ học sinh—giấy tờ và cổng thông tin được thống nhất.
+
+### [Bảo hiểm]({{< relref "/applications/insurance" >}})
+Mọi kênh, một hệ thống. Đại lý hiện trường, khách hàng trực tuyến, yêu cầu bồi thường gửi qua bưu điện—tất cả đều được xử lý thống nhất.
+
+---
+
+## Xây dựng trên các tiêu chuẩn mở
+
+Tất cả các giải pháp đều dùng chung nền tảng cốt lõi của chúng tôi:
+
+| Khả năng | Lợi ích |
+|------------|---------|
+| **NATS JetStream** | Nhắn tin thời gian thực, luồng dữ liệu bền vững, khả năng hoạt động khi mất kết nối |
+| **Giao thức mở** | MAVLink, STEP, IFC—không bị phụ thuộc vào nhà cung cấp |
+| **Tự chủ** | Triển khai trên hạ tầng của bạn, làm chủ dữ liệu của bạn |
+| **AI nguyên bản** | Model Context Protocol để hỗ trợ thông minh |
+
+---
+
+## Bắt đầu
+
+[Liên hệ với chúng tôi](/contact) để thảo luận về những giải pháp phù hợp với tổ chức của bạn.

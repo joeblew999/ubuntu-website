@@ -1,30 +1,33 @@
 ---
 title: "Công ty"
-meta_title: "About Phần mềm Ubuntu"
-description: "25 năm kinh nghiệm trong lĩnh vực hệ thống thời gian thực. Hiện đang phát triển nền tảng nơi trí tuệ nhân tạo (AI) thiết kế thực tế."
+meta_title: "Giới thiệu về Ubuntu Software"
+description: "25 năm kinh nghiệm về hệ thống thời gian thực. Hiện đang xây dựng nền tảng nơi AI thiết kế thực tại."
 image: "/images/company.svg"
 draft: false
 ---
 
 ## Ubuntu Software
 
-Chúng tôi đang xây dựng nền tảng nơi trí tuệ nhân tạo (AI) học cách thiết kế thực tế - kết nối trí tuệ nhân tạo với thế giới vật lý ba chiều.
+Chúng tôi đang xây dựng nền tảng nơi AI học cách thiết kế thực tại—kết nối trí tuệ nhân tạo với thế giới vật lý ba chiều.
 
 ---
 
 ## Tìm hiểu thêm
 
-### [Kinh nghiệm](/vi/company/experience)
-25 năm cung cấp các hệ thống quan trọng cho các tổ chức hàng đầu trên toàn thế giới.
+### [Kinh nghiệm](/company/experience)
+25 năm xây dựng các hệ thống trọng yếu cho những tổ chức hàng đầu trên toàn thế giới.
 
-### [Người sáng lập](/vi/company/founder)
-Hãy gặp gỡ người đang phát triển Ubuntu Software—từ Flame trên SGI đến trí tuệ nhân tạo không gian.
+### [Nhà sáng lập](/company/founder)
+Gặp gỡ người đang xây dựng Ubuntu Software—từ Flame trên SGI đến AI không gian.
 
-### [Cố vấn](/vi/company/advisors)
-Các nhà lãnh đạo ngành chia sẻ tầm nhìn của chúng tôi và hợp tác với chúng tôi.
+### [Cố vấn](/company/advisors)
+Những nhà lãnh đạo trong ngành cùng chung tầm nhìn và hợp tác với chúng tôi.
+
+### [Giám sát](/company/surveillance)
+Nhận thức tình huống theo thời gian thực từ máy bay không người lái, vệ tinh và cảm biến—với AI làm nổi bật những điều quan trọng.
 
 ---
 
-## Liên hệ với chúng tôi
+## Liên hệ
 
-[Contact us](/vi/contact) to discuss how spatial AI can apply to your domain.
+[Liên hệ với chúng tôi](/contact) để thảo luận cách AI không gian có thể ứng dụng vào lĩnh vực của bạn.

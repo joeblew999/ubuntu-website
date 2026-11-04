@@ -1,65 +1,65 @@
 ---
 title: "Sản xuất"
-meta_title: "AI-Powered Sản xuất | Ubuntu Software"
-description: "Từ thiết kế đến sản xuất. Trí tuệ nhân tạo (AI) có khả năng hiểu về hình học, dung sai và các hạn chế trong quá trình sản xuất."
+meta_title: "Sản xuất ứng dụng AI | Ubuntu Software"
+description: "Từ thiết kế đến chế tạo. AI hiểu hình học, dung sai và các ràng buộc sản xuất."
 image: "/images/manufacturing.svg"
 draft: false
 ---
 
-## Từ Thiết kế đến Sản xuất
+## Từ Thiết kế đến Chế tạo
 
-Một thiết kế chỉ tốt đến mức độ có thể sản xuất được. Hình dạng tinh tế nhất cũng không có ý nghĩa gì nếu không thể cắt, uốn, in hoặc lắp ráp. Khoảng cách giữa thiết kế và sản phẩm hoàn thiện chính là nơi chi phí tăng vọt, tiến độ bị chậm trễ và chất lượng không đạt yêu cầu.
+Một thiết kế chỉ tốt khi nó có thể sản xuất được. Hình học tinh tế nhất cũng vô nghĩa nếu không thể cắt, tạo hình, in hoặc lắp ráp. Khoảng cách giữa những gì được thiết kế và những gì được sản xuất chính là nơi chi phí bùng nổ, tiến độ bị trễ và chất lượng không đạt.
 
-Trí tuệ nhân tạo (AI) hiểu về sản xuất không chỉ vẽ hình dạng. Nó thiết kế cho quá trình sản xuất.
+AI hiểu về sản xuất không chỉ vẽ hình dạng. Nó thiết kế cho sản xuất.
 
 ---
 
 ## Khoảng cách
 
-Thiết kế và sản xuất sử dụng những ngôn ngữ khác nhau:
+Thiết kế và sản xuất nói những ngôn ngữ khác nhau:
 
-**Thiết kế cho biết:** "Đây là hình học."
+**Thiết kế nói:** "Đây là hình học."
 
-**Sản xuất đặt câu hỏi:** "Làm thế nào để sản xuất sản phẩm này? Độ chính xác yêu cầu là bao nhiêu? Các công đoạn sản xuất là gì? Thứ tự thực hiện như thế nào? Công cụ sản xuất cần thiết là gì? Chi phí sản xuất sẽ là bao nhiêu?"
+**Sản xuất hỏi:** "Làm sao để chế tạo cái này? Dung sai là bao nhiêu? Những nguyên công nào? Theo trình tự nào? Dụng cụ gì? Chi phí sẽ là bao nhiêu?"
 
-Hiện nay, việc dịch thuật giữa các thế giới này vẫn được thực hiện thủ công:
+Ngày nay, việc chuyển đổi giữa hai thế giới này được thực hiện thủ công:
 
-- Các kỹ sư đánh giá thiết kế về khả năng sản xuất—một cách chậm rãi
-- Các lập trình viên CAM chuyển đổi hình học thành đường chạy dao—thực hiện thủ công
-- Các nhà ước tính tính toán chi phí dựa trên kinh nghiệm và phỏng đoán
-- Các vấn đề được phát hiện trên dây chuyền sản xuất—quá muộn
+- Kỹ sư rà soát thiết kế về khả năng sản xuất—một cách chậm chạp
+- Lập trình viên CAM diễn giải hình học thành đường chạy dao—một cách thủ công
+- Người lập dự toán tính chi phí—dựa trên kinh nghiệm và phỏng đoán
+- Vấn đề được phát hiện tại xưởng—khi đã quá muộn
 
-**Mỗi lần chuyển giao đều tiềm ẩn nguy cơ sai sót. Mỗi bản dịch đều mất mát thông tin.**
-
----
-
-## Chúng tôi hỗ trợ
-
-### Thiết kế cho khả năng sản xuất
-
-Trí tuệ nhân tạo (AI) có khả năng hiểu các hạn chế sản xuất ngay từ giai đoạn thiết kế.
-
-Không có đánh giá cuối cùng. Phản hồi liên tục trong quá trình thiết kế:
-
-- **Nhận thức về quy trình* — Liệu hình học này có phù hợp cho CNC? Kim loại tấm? Đúc? In 3D?
-- **Phân tích khả năng chịu đựng** — Có thể duy trì điều này không? Với chi phí bao nhiêu?
-- **Nhận dạng đặc điểm** — Lỗ, túi, và các phần nhô ra được phân tích tự động
-- **Hậu quả về chi phí** — Các lựa chọn thiết kế được liên kết với chi phí sản xuất theo thời gian thực
-
-**Phát hiện các vấn đề về khả năng sản xuất trong giai đoạn thiết kế, không phải trên dây chuyền sản xuất.**
+**Mỗi lần bàn giao là một cơ hội phát sinh lỗi. Mỗi lần chuyển đổi đều làm mất thông tin.**
 
 ---
 
-### Hệ thống CAM thông minh
+## Những gì chúng tôi mang lại
 
-Từ hình học đến đường chạy dao với sự hỗ trợ của trí tuệ nhân tạo.
+### Thiết kế hướng đến khả năng sản xuất
 
-- **Nhận dạng tính năng tự động** — Trí tuệ nhân tạo (AI) xác định các tính năng sản xuất từ hình học rắn
-- **Thứ tự thực hiện các thao tác** — Thứ tự tối ưu của các thao tác được tạo ra
-- **Tối ưu hóa đường chạy dao* — Giảm thiểu thời gian chu kỳ, tối đa hóa tuổi thọ dao
-- **Chiến lược đa trục** — Hình học phức tạp, phương pháp thông minh
+AI hiểu các ràng buộc sản xuất ngay tại thời điểm thiết kế.
 
-**Nhập dữ liệu hình học STEP. Xuất mã G tối ưu hóa.**
+Không phải một bước kiểm tra ở cuối. Phản hồi liên tục trong khi bạn thiết kế:
+
+- **Nhận thức quy trình** — Hình học này có phù hợp với CNC? Kim loại tấm? Đúc? Sản xuất bồi đắp?
+- **Phân tích dung sai** — Có thể đảm bảo dung sai này không? Với chi phí bao nhiêu?
+- **Nhận dạng đặc trưng** — Lỗ, hốc, vấu được phân tích tự động
+- **Tác động chi phí** — Các lựa chọn thiết kế được ánh xạ sang chi phí sản xuất theo thời gian thực
+
+**Phát hiện vấn đề về khả năng sản xuất ngay ở khâu thiết kế, không phải tại xưởng.**
+
+---
+
+### CAM thông minh
+
+Từ hình học đến đường chạy dao với sự hỗ trợ của AI.
+
+- **Nhận dạng đặc trưng tự động** — AI xác định các đặc trưng gia công từ hình học khối đặc
+- **Sắp xếp trình tự nguyên công** — Tạo ra thứ tự nguyên công tối ưu
+- **Tối ưu hóa đường chạy dao** — Giảm thiểu thời gian chu kỳ, tối đa hóa tuổi thọ dụng cụ
+- **Chiến lược đa trục** — Hình học phức tạp, cách tiếp cận thông minh
+
+**Đầu vào là hình học STEP. Đầu ra là G-code đã tối ưu.**
 
 ---
 
@@ -67,54 +67,54 @@ Từ hình học đến đường chạy dao với sự hỗ trợ của trí tu
 
 Cầu nối giữa kỹ thuật và sản xuất.
 
-- **Định tuyến hoạt động** — Các máy nào, thứ tự nào
-- **Lập kế hoạch thiết lập** — Thiết bị cố định, dụng cụ kẹp, điểm tham chiếu
-- **Dự đoán thời gian** — Thời gian chu kỳ chính xác trước khi gia công phôi*
-- **Phân bổ tài nguyên** — Phân công công việc phù hợp với khả năng sẵn có
+- **Định tuyến nguyên công** — Máy nào, trình tự nào
+- **Lập kế hoạch gá đặt** — Đồ gá, kẹp phôi, chuẩn
+- **Ước tính thời gian** — Thời gian chu kỳ chính xác trước khi bắt đầu cắt gọt
+- **Phân bổ nguồn lực** — Khớp công việc với năng lực sẵn có
 
-**Trí tuệ nhân tạo (AI) hiểu rõ cửa hàng của bạn, không phải các mẫu chung chung.**
+**AI hiểu xưởng của bạn, không phải các mẫu chung chung.**
 
 ---
 
-### Sản xuất gia công
+### Sản xuất bồi đắp
 
-in ấn 3D ở quy mô sản xuất đòi hỏi tư duy sản xuất.
+In 3D ở quy mô sản xuất cần tư duy sản xuất.
 
-- **Tối ưu hóa định hướng xây dựng** — Giảm thiểu hỗ trợ, tối đa hóa độ bền
-- **Nesting và đóng gói** — Tối ưu hóa việc sử dụng không gian in 3D
-- **Hỗ trợ tạo ra** — Đặt vị trí thông minh, tháo gỡ dễ dàng
-- **Tối ưu hóa thông số quy trình** — Phù hợp với vật liệu, nhận biết hình học*
-- **Quy trình làm việc kết hợp** — Kết hợp giữa phương pháp cộng và trừ
+- **Tối ưu hóa hướng in** — Giảm thiểu giá đỡ, tối đa hóa độ bền
+- **Sắp xếp và xếp chồng** — Lấp đầy thể tích buồng in một cách hiệu quả
+- **Tạo giá đỡ** — Bố trí thông minh, dễ tháo bỏ
+- **Tối ưu hóa thông số quy trình** — Theo từng loại vật liệu, nhận biết hình học
+- **Quy trình lai** — Kết hợp sản xuất bồi đắp và gia công cắt gọt
 
-**Phụ gia như một quy trình sản xuất thực tế, không phải là quy trình tạo mẫu.**
+**Sản xuất bồi đắp là một quy trình sản xuất thực thụ, không chỉ để làm mẫu thử.**
 
 ---
 
 ### Tích hợp chất lượng
 
-Kiểm tra không phải là việc làm sau cùng.
+Kiểm tra không phải là việc tính đến sau cùng.
 
-- **Giải thích GD&T** — Hiểu kích thước hình học một cách bản địa
-- **Kế hoạch kiểm tra** — Chương trình CMM được tạo ra từ ý định thiết kế
-- **Kiểm tra trong quá trình sản xuất* — Kiểm tra các tính năng quan trọng trong quá trình sản xuất
-- **Kiểm soát quá trình thống kê** — Dữ liệu chất lượng được phản hồi trở lại thiết kế
+- **Diễn giải GD&T** — Hiểu dung sai hình học một cách tự nhiên
+- **Lập kế hoạch kiểm tra** — Chương trình CMM được tạo từ ý đồ thiết kế
+- **Xác minh trong quá trình** — Kiểm tra các đặc trưng quan trọng trong khi sản xuất
+- **Kiểm soát quy trình bằng thống kê** — Dữ liệu chất lượng phản hồi ngược về thiết kế
 
-**Từ ý định thiết kế đến kế hoạch kiểm tra. Quy trình khép kín.**
+**Từ ý đồ thiết kế đến kế hoạch kiểm tra. Vòng lặp khép kín.**
 
 ---
 
-### Kết nối sàn nhà máy
+### Kết nối với xưởng sản xuất
 
-Quyết định thiết kế gặp phải thực tế sản xuất.
+Quyết định thiết kế gặp thực tế sản xuất.
 
-**NATS JetStream** kết nối thiết kế với nhà máy sản xuất:
+**NATS JetStream** kết nối thiết kế với xưởng sản xuất:
 
-- **Giám sát máy móc** — Trạng thái thời gian thực, hiệu suất sử dụng, hiệu suất hoạt động
-- **Phân phối chương trình* — Tự động phân phối chương trình phù hợp đến máy tính phù hợp
-- **Phản hồi sản xuất** — Thực tế so với kế hoạch, liên tục
-- **Nâng cấp vấn đề** — Vấn đề xuất hiện ngay lập tức, không phải khi giao hàng
+- **Giám sát máy** — Trạng thái, mức độ sử dụng, hiệu suất theo thời gian thực
+- **Phân phối chương trình** — Đúng chương trình đến đúng máy một cách tự động
+- **Phản hồi sản xuất** — So sánh thực tế với kế hoạch, liên tục
+- **Chuyển cấp xử lý sự cố** — Vấn đề được phát hiện ngay lập tức, không phải lúc giao hàng
 
-**Dòng dữ liệu số từ thiết kế đến sản xuất.**
+**Luồng số xuyên suốt từ thiết kế đến sản xuất.**
 
 ---
 
@@ -122,162 +122,179 @@ Quyết định thiết kế gặp phải thực tế sản xuất.
 
 Dữ liệu sản xuất của bạn thuộc về bạn.
 
-**STEP (ISO 10303)** — Định dạng trao đổi hình học được các nhà sản xuất tin cậy. AP203, AP214, AP242. Độ chính xác cao, không mất mát dữ liệu.
+**STEP (ISO 10303)** — Định dạng trao đổi hình học mà ngành sản xuất tin cậy. AP203, AP214, AP242. Độ trung thực đầy đủ, không mất mát khi chuyển đổi.
 
 **Định dạng gốc** — Nhập từ bất kỳ hệ thống CAD nào. Xuất sang bất kỳ hệ thống CAM nào.
 
-**Tích hợp mở** — Kết nối với hệ thống ERP, MES và hệ thống quản lý chất lượng của bạn thông qua các giao diện lập trình ứng dụng (API) tiêu chuẩn.
+**Tích hợp mở** — Kết nối với hệ thống ERP, MES, quản lý chất lượng của bạn qua các API tiêu chuẩn.
 
-Không có ràng buộc độc quyền. Thiết kế của bạn, đường chạy dao của bạn, dữ liệu của bạn.
+Không bị khóa chặt bởi giải pháp độc quyền. Thiết kế của bạn, đường chạy dao của bạn, dữ liệu của bạn.
 
 ---
 
 ## Các trường hợp sử dụng
 
-### Chế tạo CNC
+### Gia công CNC
 
-Máy tiện, máy phay, trung tâm gia công đa trục. Nơi độ chính xác gặp gỡ sản xuất.
+Máy phay, máy tiện, trung tâm gia công đa trục. Nơi độ chính xác gặp sản xuất.
 
-- Chế tạo dựa trên đặc tính từ mô hình 3D
-- Tự động tạo đường chạy dao
+- Gia công dựa trên đặc trưng từ mô hình khối đặc
+- Tạo đường chạy dao tự động
 - Tối ưu hóa thời gian chu kỳ
-- Độ linh hoạt của bộ xử lý sau
+- Linh hoạt về bộ hậu xử lý
 
 ---
 
-### Tấm kim loại
+### Kim loại tấm
 
-Laser, plasma, đục lỗ, uốn cong. Sản lượng cao, biên lợi nhuận thấp.
+Laser, plasma, đột, uốn. Sản lượng lớn, biên lợi nhuận mỏng.
 
-- Tạo mẫu phẳng với bù cong
-- Tối ưu hóa xếp chồng để tăng hiệu suất sử dụng vật liệu
-- Lập kế hoạch chuỗi uốn cong
-- Tính toán chi phí tích hợp
+- Tạo hình trải phẳng có bù uốn
+- Tối ưu hóa sắp xếp để tận dụng vật liệu
+- Lập kế hoạch trình tự uốn
+- Tính giá thành tích hợp
 
 ---
 
-### Sản xuất & Hàn
+### Chế tạo & Hàn
 
-Cấu trúc, cụm lắp ráp, kết cấu hàn.
+Kết cấu, cụm lắp ráp, kết cấu hàn.
 
-- Phân tích thiết kế và truy cập chung
+- Thiết kế mối nối và phân tích khả năng tiếp cận
 - Tối ưu hóa trình tự hàn
-- Dự đoán méo dạng
-- Lắp ráp sequencing
+- Dự đoán biến dạng
+- Sắp xếp trình tự lắp ráp
 
 ---
 
-### Sản xuất gia công
+### Sản xuất bồi đắp
 
-Giường bột, FDM, nhựa, kim loại. Phụ gia sản xuất.
+Giường bột, FDM, nhựa resin, kim loại. Sản xuất bồi đắp ở quy mô sản xuất.
 
-- Chuẩn bị và định hướng cho việc xây dựng
-- Tối ưu hóa hỗ trợ
-- Nesting nhiều phần
-- Kế hoạch xử lý sau
+- Chuẩn bị bản in và định hướng
+- Tối ưu hóa giá đỡ
+- Sắp xếp nhiều chi tiết
+- Lập kế hoạch hậu xử lý
 
 ---
 
-### Assembly
+### Lắp ráp
 
-Các thành phần trở thành sản phẩm.
+Linh kiện trở thành sản phẩm.
 
 - Tối ưu hóa trình tự lắp ráp
-- Kiểm tra can thiệp và va chạm
-- Thiết kế dụng cụ và khuôn mẫu
+- Kiểm tra giao thoa và va chạm
+- Thiết kế dụng cụ và đồ gá
 - Tạo hướng dẫn công việc
 
 ---
 
-## Dành cho các xưởng gia công
+## Dành cho xưởng gia công theo đơn hàng
 
-Mỗi công việc đều khác nhau. Mỗi báo giá đều là một canh bạc.
+Mỗi công việc mỗi khác. Mỗi báo giá là một canh bạc.
 
-- **Báo giá nhanh hơn** — Ước tính hỗ trợ bởi trí tuệ nhân tạo (AI) từ mô hình 3D
-- **Giảm thời gian lập trình** — Phần mềm CAM thông minh giúp giảm thời gian từ hàng giờ xuống còn vài phút
-- **Ít bất ngờ hơn** — Khả năng sản xuất được đánh giá trước khi cam kết
-- **Lợi nhuận cao hơn** — Định giá chính xác, sản xuất hiệu quả
+- **Báo giá nhanh hơn** — Ước tính có sự hỗ trợ của AI từ mô hình 3D
+- **Giảm thời gian lập trình** — CAM thông minh rút ngắn hàng giờ xuống còn vài phút
+- **Ít bất ngờ hơn** — Phát hiện vấn đề về khả năng sản xuất trước khi cam kết
+- **Biên lợi nhuận tốt hơn** — Định giá chính xác, sản xuất hiệu quả
 
-**Cạnh tranh về tốc độ và độ chính xác, không chỉ về giá cả.**
-
----
-
-## Cho các xưởng sản xuất
-
-Khối lượng đòi hỏi sự nhất quán.
-
-- **Quy trình tối ưu hóa** — Mỗi chu kỳ được rút ngắn
-- **Chất lượng được tích hợp sẵn** — Không được kiểm tra**
-- **Cải tiến liên tục* — Dữ liệu sản xuất thúc đẩy việc tinh chỉnh thiết kế
-- **Tự động hóa linh hoạt* — Thích ứng với sự thay đổi của sản phẩm mà không cần bắt đầu lại từ đầu
-
-**Mở rộng quy mô mà không làm giảm chất lượng.**
+**Cạnh tranh bằng tốc độ và độ chính xác, không chỉ bằng giá.**
 
 ---
 
-## Đối với các nhà sản xuất thiết bị gốc (OEM)
+## Dành cho xưởng sản xuất hàng loạt
 
-Thiết kế và sản xuất dưới một mái nhà—hoặc trong chuỗi cung ứng.
+Sản lượng lớn đòi hỏi sự nhất quán.
 
-- **Kỹ thuật đồng thời* — Thiết kế và sản xuất được thực hiện song song
-- **Hợp tác với nhà cung cấp* — Chia sẻ thiết kế mà không mất quyền kiểm soát
-- **Thiết kế tối ưu chi phí** — Chi phí sản xuất được hiển thị theo thời gian thực
-- **Dây chuyền số** — Khả năng truy xuất nguồn gốc từ yêu cầu đến sản phẩm hoàn thiện
+- **Quy trình được tối ưu** — Mọi thời gian chu kỳ đều được rút ngắn tối đa
+- **Chất lượng được tích hợp từ đầu** — Không phải dựa vào khâu kiểm tra
+- **Cải tiến liên tục** — Dữ liệu sản xuất thúc đẩy việc tinh chỉnh thiết kế
+- **Tự động hóa linh hoạt** — Thích ứng với thay đổi sản phẩm mà không phải bắt đầu lại từ đầu
 
-**Thiết kế những gì bạn có thể xây dựng. Xây dựng những gì bạn đã thiết kế.**
+**Mở rộng quy mô mà không hy sinh chất lượng.**
 
 ---
 
-## Cách mạng Công nghiệp 4.0
+## Dành cho OEM
 
-Nhà máy của tương lai cần trí tuệ nhân tạo (AI) có khả năng hiểu không gian.
+Thiết kế và sản xuất dưới cùng một mái nhà—hoặc trải dài khắp chuỗi cung ứng.
 
-Không phải bảng điều khiển và thuật ngữ thời thượng. Khả năng thực sự:
+- **Kỹ thuật đồng thời** — Thiết kế và sản xuất làm việc song song
+- **Hợp tác với nhà cung cấp** — Chia sẻ thiết kế mà không mất quyền kiểm soát
+- **Thiết kế theo chi phí** — Chi phí sản xuất hiển thị theo thời gian thực
+- **Luồng số** — Truy xuất nguồn gốc từ yêu cầu đến chi tiết được giao
 
-- **Bản sao kỹ thuật số của quy trình sản xuất** — Nhà máy của bạn trên nền tảng
-- **Bảo trì dự đoán** — Tình trạng sức khỏe của thiết bị dựa trên dữ liệu từ cảm biến
-- **Lịch trình thích ứng* — Phản hồi kịp thời với những thay đổi trong thời gian thực
-- **Tối ưu hóa liên tục* — Trí tuệ nhân tạo (AI) phát hiện các cải tiến mà con người bỏ qua
+**Thiết kế những gì bạn có thể chế tạo. Chế tạo những gì bạn đã thiết kế.**
 
-**Cách mạng Công nghiệp 4.0 được xây dựng trên trí tuệ không gian, không chỉ đơn thuần là kết nối.**
+---
+
+## Công nghiệp 4.0
+
+Nhà máy của tương lai cần AI hiểu về không gian.
+
+Không phải bảng điều khiển và những từ ngữ thời thượng. Mà là năng lực thực sự:
+
+- **Bản sao số của hoạt động sản xuất** — Xưởng sản xuất của bạn trên nền tảng
+- **Bảo trì dự đoán** — Tình trạng thiết bị từ dữ liệu cảm biến
+- **Lập lịch thích ứng** — Phản ứng với thay đổi theo thời gian thực
+- **Tối ưu hóa liên tục** — AI tìm ra những cải tiến mà con người bỏ sót
+
+**Công nghiệp 4.0 xây dựng trên trí tuệ không gian, không chỉ là kết nối.**
 
 ---
 
 ## Kiến trúc
 
-Hạ tầng công nghiệp.
+Hạ tầng đạt chuẩn sản xuất.
 
-| Layer | Technology | Purpose |
+| Lớp | Công nghệ | Mục đích |
 |-------|------------|---------|
-| Geometry | STEP native | Precision CAD data, full fidelity |
-| Collaboration | Automerge CRDT | Engineering and shop floor in sync |
-| Messaging | NATS JetStream | Machine connectivity, real-time events |
-| AI | Model Context Protocol | Manufacturing-aware intelligence |
-| Integration | Open APIs | ERP, MES, quality systems |
+| Hình học | STEP gốc | Dữ liệu CAD chính xác, độ trung thực đầy đủ |
+| Cộng tác | Automerge CRDT | Kỹ thuật và xưởng sản xuất đồng bộ |
+| Nhắn tin | NATS JetStream | Kết nối máy móc, sự kiện thời gian thực |
+| AI | Model Context Protocol | Trí tuệ am hiểu sản xuất |
+| Tích hợp | API mở | Hệ thống ERP, MES, quản lý chất lượng |
 
-**Được thiết kế để đáp ứng các yêu cầu của sản xuất.**
+**Được xây dựng cho những đòi hỏi của sản xuất.**
 
 ---
 
-## Hoàn tất quy trình với việc xuất bản
+## Khép kín vòng lặp với Publish
 
-Sản xuất phụ thuộc vào giấy tờ không kém gì máy móc.
+Sản xuất vận hành dựa trên giấy tờ không kém gì máy móc.
 
-- **Hướng dẫn lắp ráp** — Hướng dẫn lắp ráp từng bước được tạo ra từ bản vẽ CAD
-- **Danh sách kiểm tra chất lượng* — Biểu mẫu kiểm tra được ghi lại dưới dạng kỹ thuật số hoặc trên giấy, được tích hợp trở lại Hệ thống Quản lý Chất lượng (QMS) của bạn
-- **BOMs và danh sách cắt** — Tài liệu về các bộ phận được đồng bộ hóa với mô hình 3D
-- **Hồ sơ tuân thủ** — Chứng nhận, kết quả kiểm tra, tài liệu truy xuất nguồn gốc
+- **Hướng dẫn công việc** — Hướng dẫn lắp ráp từng bước được tạo từ CAD
+- **Danh mục kiểm tra chất lượng** — Biểu mẫu kiểm tra được ghi nhận dạng số hoặc trên giấy, đưa trở lại QMS của bạn
+- **BOM và danh sách cắt** — Tài liệu chi tiết khớp với mô hình 3D
+- **Hồ sơ tuân thủ** — Chứng nhận, kết quả thử nghiệm, tài liệu truy xuất nguồn gốc
 
-Tất cả từ một nguồn duy nhất. Tất cả được kết nối với dữ liệu sản xuất của bạn.
+Tất cả từ một nguồn duy nhất. Tất cả kết nối với dữ liệu sản xuất của bạn.
 
-[Khám phá → Xuất bản](/vi/platform/publish/)
+[Khám phá Publish →]({{< relref "/platform/publish" >}})
+
+---
+
+## Chủ quyền dữ liệu
+
+Dữ liệu sản xuất của bạn luôn thuộc về bạn:
+
+| Cách tiếp cận truyền thống | Với WellKnown |
+|---------------------|----------------|
+| Thiết kế nằm trên đám mây của nhà cung cấp | Thiết kế nằm trên hạ tầng của bạn |
+| Nhà cung cấp sở hữu mối quan hệ | Bạn sở hữu mối quan hệ khách hàng |
+| Chuyển đổi CAD = xây dựng lại | Chuyển đổi = kết nối lại gateway |
+| Sở hữu trí tuệ bị lộ cho nhà cung cấp | Bạn kiểm soát việc bảo vệ sở hữu trí tuệ |
+
+Xuất sang STEP. Xuất bản LÊN các nền tảng. Không bao giờ bị khóa BÊN TRONG.
+
+[Tìm hiểu thêm về WellKnown →]({{< relref "/platform/publish#wellknown-gateway-data-sovereignty" >}})
 
 ---
 
 ## Bắt đầu
 
-Sản xuất là nơi thiết kế gặp gỡ thực tế. Nơi hình học trở thành sản phẩm. Nơi độ chính xác là yếu tố quan trọng.
+Sản xuất là nơi thiết kế gặp thực tế. Nơi hình học trở thành sản phẩm. Nơi độ chính xác là yếu tố quyết định.
 
-Trí tuệ nhân tạo (AI) có khả năng hiểu cả thiết kế và sản xuất. Đó chính là điều chúng tôi đang xây dựng.
+AI hiểu cả thiết kế lẫn sản xuất. Đó là những gì chúng tôi đang xây dựng.
 
-[Liên hệ với chúng tôi →](/vi/contact/)
+[Liên hệ với chúng tôi →](/contact/)

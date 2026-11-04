@@ -1,77 +1,144 @@
 ---
 title: "Lịch sử công ty"
-meta_title: "Lịch sử công ty | Ubuntu Software - Established 1999"
-description: "Ubuntu Software đã hoạt động từ năm 1999, sớm hơn Ubuntu Linux năm năm. Các hồ sơ chính thức của Cục Đăng ký Doanh nghiệp Vương quốc Anh (UK Companies House) ghi nhận lịch sử của chúng tôi."
+meta_title: "Lịch sử công ty | Ubuntu Software - Thành lập năm 1999"
+description: "Ubuntu Software đã hoạt động từ năm 1999, trước Ubuntu Linux năm năm. Hồ sơ chính thức của Companies House Vương quốc Anh ghi lại lịch sử của chúng tôi."
 draft: false
+aliases:
+  - "/company-history/"
 ---
 
-**Ubuntu Software** đã hoạt động trong ngành công nghệ thông tin từ năm **1999** - tức là năm năm trước khi hệ điều hành Ubuntu Linux được phát hành.
+**Ubuntu Software** đã hoạt động trong ngành công nghệ thông tin từ năm **1999** - năm năm trước khi Ubuntu Linux được phát hành.
 
-## Thời gian biểu
+## Dòng thời gian
 
-| Year | Ubuntu Software | Ubuntu Linux |
+| Năm | Ubuntu Software | Ubuntu Linux |
 |------|-----------------|--------------|
-| **1999** | Ubuntu Software Design Limited incorporated (UK) | - |
-| 2000 | Operating as IT consultancy | - |
-| 2001 | Operating as IT consultancy | - |
-| 2002 | Operating as IT consultancy | - |
-| 2003 | Operating as IT consultancy | - |
-| **2004** | Operating as IT consultancy | First release (October) |
-| 2005-2012 | Continued operations | Growing popularity |
-| 2012 | UK company voluntarily dissolved | - |
-| **2024** | Relaunched as Ubuntu Software (Australia) | - |
+| **1999** | Thành lập Ubuntu Software Design Limited (Vương quốc Anh) | - |
+| 2000 | Hoạt động như một công ty tư vấn CNTT | - |
+| 2001 | Hoạt động như một công ty tư vấn CNTT | - |
+| 2002 | Hoạt động như một công ty tư vấn CNTT | - |
+| 2003 | Hoạt động như một công ty tư vấn CNTT | - |
+| **2004** | Hoạt động như một công ty tư vấn CNTT | Phát hành phiên bản đầu tiên (tháng 10) |
+| 2005-2012 | Tiếp tục hoạt động | Ngày càng phổ biến |
+| 2012 | Công ty tại Vương quốc Anh tự nguyện giải thể | - |
+| **2012-2017** | Kiến trúc sư Bảo mật tại ECDC (Trung tâm Phòng ngừa và Kiểm soát Dịch bệnh Châu Âu) | - |
+| **2017-2021** | Hệ thống Quan sát Trái Đất cho Quỹ Khí hậu Châu Âu | - |
+| **2024** | Tái khởi động với tên Ubuntu Software (Úc) | - |
 
-## Bản ghi chép về công ty tại Vương quốc Anh (1999-2012)
+## Hồ sơ Công ty tại Vương quốc Anh (1999-2012)
 
-Công ty ban đầu của chúng tôi đã được đăng ký tại Cục Đăng ký Doanh nghiệp Vương quốc Anh:
+Công ty ban đầu của chúng tôi đã được đăng ký với Companies House của Vương quốc Anh:
 
-| Field | Value |
+| Trường | Giá trị |
 |-------|-------|
-| **Company Name** | Ubuntu Software Design Limited |
-| **Company Number** | 03724740 |
-| **Incorporated** | 3 March 1999 |
-| **Dissolved** | 23 October 2012 |
-| **Business Activity** | Information technology consultancy |
+| **Tên công ty** | Ubuntu Software Design Limited |
+| **Số hiệu công ty** | 03724740 |
+| **Ngày thành lập** | 3 tháng 3 năm 1999 |
+| **Ngày giải thể** | 23 tháng 10 năm 2012 |
+| **Lĩnh vực kinh doanh** | Tư vấn công nghệ thông tin |
 
 ### Giám đốc
 
-**Gerard Joseph Webb** đã giữ chức Giám đốc từ ngày 15 tháng 3 năm 1999 cho đến khi tổ chức bị giải thể.
+**Gerard Joseph Webb** giữ chức Giám đốc từ ngày 15 tháng 3 năm 1999 cho đến khi công ty giải thể.
 
 ### Hồ sơ chính thức
 
-All company records are publicly available from [UK Companies House](https://find-and-update.company-information.service.gov.uk/company/03724740):
+Toàn bộ hồ sơ công ty được công khai tại [UK Companies House](https://find-and-update.company-information.service.gov.uk/company/03724740):
 
 - [Lịch sử nộp hồ sơ](https://find-and-update.company-information.service.gov.uk/company/03724740/filing-history)
-- [Cán bộ](https://find-and-update.company-information.service.gov.uk/company/03724740/officers)
+- [Cán bộ quản lý](https://find-and-update.company-information.service.gov.uk/company/03724740/officers)
 
 ### Kho lưu trữ tài liệu
 
-Chúng tôi lưu trữ bản sao của các tài liệu quan trọng chứng minh lịch sử phát triển của công ty:
+Chúng tôi lưu giữ bản sao các tài liệu quan trọng chứng minh lịch sử công ty:
 
-| Document | Description |
+| Tài liệu | Mô tả |
 |----------|-------------|
-| [Company Certificate (PDF)](/vi/companies-house/ubuntu-software-design-ltd-certificate.pdf) | Certificate of Incorporation |
-| [Company Certificate (Image)](/vi/companies-house/ubuntu-design-ltd-certificate.png) | Certificate scan |
-| [Annual Return 2012](/vi/companies-house/ar01-2012-03-07-shareholders.pdf) | Shareholder list |
-| [Annual Return 2011](/vi/companies-house/ar01-2011-03-24-shareholders.pdf) | Shareholder list |
-| [Annual Return 2010](/vi/companies-house/ar01-2010-04-20-shareholders.pdf) | Shareholder list |
-| [Strike-off Application](/vi/companies-house/ds01-2012-06-29-strike-off.pdf) | Voluntary dissolution |
+| [Giấy chứng nhận công ty (PDF)](/companies-house/ubuntu-software-design-ltd-certificate.pdf) | Giấy chứng nhận thành lập |
+| [Giấy chứng nhận công ty (Hình ảnh)](/companies-house/ubuntu-design-ltd-certificate.png) | Bản quét giấy chứng nhận |
+| [Báo cáo thường niên 2012](/companies-house/ar01-2012-03-07-shareholders.pdf) | Danh sách cổ đông |
+| [Báo cáo thường niên 2011](/companies-house/ar01-2011-03-24-shareholders.pdf) | Danh sách cổ đông |
+| [Báo cáo thường niên 2010](/companies-house/ar01-2010-04-20-shareholders.pdf) | Danh sách cổ đông |
+| [Đơn xin xóa tên](/companies-house/ds01-2012-06-29-strike-off.pdf) | Giải thể tự nguyện |
 
-## Về tên "Ubuntu"
+## Về cái tên "Ubuntu"
 
-"Ubuntu" là một thuật ngữ Nguni Bantu từ Nam Phi, thường được dịch là "Tôi là vì chúng ta là" hoặc "tình người đối với người khác." Nó thể hiện một triết lý về sự gắn kết giữa con người.
+"Ubuntu" là một thuật ngữ thuộc ngữ hệ Nguni Bantu ở miền Nam châu Phi, thường được dịch là "Tôi tồn tại vì chúng ta tồn tại" hoặc "lòng nhân ái đối với người khác". Nó thể hiện triết lý về sự gắn kết giữa con người với nhau.
 
-Chúng tôi đã chọn tên này vào năm 1999 vì nó thể hiện niềm tin của chúng tôi vào công nghệ phục vụ con người - phát triển phần mềm giúp con người và cộng đồng phát triển.
+Chúng tôi chọn cái tên này vào năm 1999 vì nó phản ánh niềm tin của chúng tôi vào công nghệ phục vụ nhân loại - xây dựng phần mềm trao quyền cho con người và cộng đồng.
 
-## Hoạt động hiện tại
+## Công việc tại ECDC (2012-2017)
 
-Ubuntu Software hiện đang hoạt động tại Úc (ABN: 95 595 575 880), tiếp tục sứ mệnh phát triển các công cụ phần mềm nhằm nâng cao hiệu suất làm việc và tôn trọng quyền riêng tư của người dùng.
+Sau khi công ty tại Vương quốc Anh giải thể, Gerard đảm nhiệm vai trò **Kiến trúc sư Bảo mật** tại **Trung tâm Phòng ngừa và Kiểm soát Dịch bệnh Châu Âu** ([ECDC](https://www.ecdc.europa.eu/en/about-ecdc)) ở Stockholm, Thụy Điển.
 
-Các lĩnh vực trọng tâm của chúng tôi bao gồm:
-- Phần mềm trí tuệ nhân tạo (AI) địa phương và bảo vệ quyền riêng tư
-- Công cụ tăng cường năng suất cho nhà phát triển
+| Trường | Giá trị |
+|-------|-------|
+| **Thời gian** | 5 năm (2012-2017) |
+| **Tổ chức** | Trung tâm Phòng ngừa và Kiểm soát Dịch bệnh Châu Âu |
+| **Vai trò** | Kiến trúc sư Bảo mật |
+| **Địa điểm** | Stockholm, Thụy Điển |
+| **Trọng tâm** | Kiến trúc bảo mật cho các hệ thống giám sát dịch bệnh |
+
+ECDC là một cơ quan của EU bảo vệ hơn 500 triệu người khỏi các bệnh truyền nhiễm. Cơ quan này vận hành **Hệ thống Giám sát Châu Âu (TESSy)**, thu thập và phân tích dữ liệu về 52 bệnh truyền nhiễm từ tất cả các quốc gia thành viên EU. Vai trò Kiến trúc sư Bảo mật của Gerard bao gồm việc bảo vệ các hệ thống thông tin y tế công cộng quan trọng này và đảm bảo trao đổi dữ liệu an toàn giữa hơn 27 cơ quan y tế quốc gia.
+
+---
+
+## Công việc Quan sát Trái Đất (2017-2021)
+
+Sau ECDC, Gerard làm việc về các hệ thống quan sát Trái Đất cho **Quỹ Khí hậu Châu Âu** (ECF).
+
+| Trường | Giá trị |
+|-------|-------|
+| **Thời gian** | 4 năm (2017-2021) |
+| **Tổ chức** | Quỹ Khí hậu Châu Âu |
+| **Trưởng nhóm kỹ thuật** | Tom Brookes (Giám đốc Điều hành, Truyền thông Chiến lược) |
+| **Trọng tâm** | Xử lý dữ liệu vệ tinh, phân tích viễn thám |
+| **Công nghệ** | Golang, các đường ống dữ liệu không gian địa lý |
+| **Tài liệu tham chiếu** | [Thư giới thiệu công việc (PDF)](/projects/ecf-reference-letter.pdf) |
+
+**Phạm vi dự án:**
+- Giám sát và trực quan hóa ô nhiễm
+- Hệ thống phát hiện khí mêtan
+- Công cụ phân tích khí quyển
+- Tích hợp dữ liệu vệ tinh đa nguồn
+
+Công việc này áp dụng cùng các nguyên tắc tư duy không gian—xử lý hình học ở quy mô lớn—mà sau này đã định hình cách tiếp cận của Ubuntu Software đối với thiết kế 3D và các hệ thống hợp nhất cảm biến.
+
+---
+
+## Hoạt động hiện tại (Úc)
+
+Ubuntu Software hiện hoạt động tại Úc, tiếp tục sứ mệnh phát triển các công cụ phần mềm giúp nâng cao năng suất và tôn trọng quyền riêng tư của người dùng.
+
+### Đăng ký kinh doanh tại Úc
+
+| Trường | Giá trị |
+|-------|-------|
+| **Tên doanh nghiệp** | Ubuntu Software |
+| **ABN** | 95 595 575 880 |
+| **Số D-U-N-S** | 891770992 |
+| **Năm đăng ký** | 2024 |
+| **Người đứng đầu** | Gerard Joseph Webb |
+
+### Hồ sơ chính thức
+
+- [Tra cứu ABN](https://abr.business.gov.au/ABN/View?id=95595575880) - Cơ quan Đăng ký Kinh doanh Úc
+- [ASIC Connect Online](https://connectonline.asic.gov.au/RegistrySearch/faces/landing/bySearchId.jspx?searchIdType=BUSN&searchId=682774223) - Tra cứu tên doanh nghiệp (ID: 682774223)
+- [Đăng ký tên doanh nghiệp (PDF)](/company-australia/ubuntusoftware-registration-of-business-name.pdf) - Giấy chứng nhận đăng ký ASIC
+
+### Xác minh D-U-N-S
+
+Số D-U-N-S® **891770992** của chúng tôi được cấp bởi [illion](https://www.illion.com.au/), đối tác chính thức của Dun & Bradstreet tại Úc.
+
+**Xác minh:** [illion Company Express](https://express.illion.com.au/company) (tìm kiếm theo ABN 95 595 575 880)
+
+### Lĩnh vực trọng tâm
+
+- AI cục bộ và phần mềm bảo vệ quyền riêng tư
+- Công cụ nâng cao năng suất cho nhà phát triển
+- Ứng dụng di động đa nền tảng (iOS, Android)
 - Đóng góp mã nguồn mở
 
 ---
 
-*For verification of our UK company history, please refer to [Companies House](https://find-and-update.company-information.service.gov.uk/company/03724740).*
+*Để xác minh lịch sử công ty của chúng tôi tại Vương quốc Anh, vui lòng tham khảo [Companies House](https://find-and-update.company-information.service.gov.uk/company/03724740). Để biết thông tin chi tiết về doanh nghiệp tại Úc, xem [Tra cứu ABN](https://abr.business.gov.au/ABN/View?id=95595575880).*
