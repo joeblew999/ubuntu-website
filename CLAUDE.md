@@ -16,7 +16,7 @@ Key points:
 
 ### Tools: mise installs, Taskfile runs
 
-- Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq, git-lfs, go-mod-upgrade) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
+- Every third-party tool (task, hugo, node, aube, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq, git-lfs, go-mod-upgrade) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
 - Taskfiles call tools by name and never install them (no `brew install`, `curl | bash`, `bun add -g`, `go install` for third-party tools). A `check:deps` for a mise tool runs `mise install <tool>`.
 - New tool → add it to `[tools]` in `mise.toml` with an exact version.
 
@@ -28,7 +28,7 @@ Key points:
 - **misecheck holds it together** (`github.com/joeblew999/mise-check`; `mise_test.go`, `mise run root:check-mise`, in CI): `mise.toml` and every `.mise/tasks/*.toml`, each task file strictly against its own binary, both ways: every task's command is there, every command is run by a task, every flag on both sides, every task name the binary's Go prints is a task. A new task file is checked as soon as it exists.
 - Examples: `.mise/tasks/google-mcp.toml` ↔ `cmd/google-mcp/`, `.mise/tasks/theme.toml` ↔ `cmd/theme/`.
 - **No scripts, no shell logic**: there is no `scripts/` folder. Where each piece goes: a step on the whole repo that only runs a tool → a `root:*` task in `mise.toml` (`root:build` is `hugo …`); anything with logic → Go, a command of its domain's binary (`cmd/<binary>/<command>.go`) with its task in that binary's `.mise/tasks/<binary>.toml` (the theme scripts became `cmd/theme/update.go`, `css.go`); a file from upstream that we run unmodified sits beside the Go that runs it (`cmd/theme/themeGenerator.js`). Taskfile shell moves the same way as each domain migrates.
-- **Cloudflare Pages builds with the control plane**: its build command (project setting) is `MISE_TRUSTED_CONFIG_PATHS=$PWD npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages`; `root:pages` installs only hugo-extended, node and bun, then runs `root:build`, the same build CI runs. Production and preview are the same build (Hugo's build environment is production either way). `min_version` in `mise.toml` is the mise version CI and Cloudflare run.
+- **Cloudflare Pages builds with the control plane**: its build command (project setting) is `MISE_TRUSTED_CONFIG_PATHS=$PWD npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages`; `root:pages` installs only hugo-extended, node and aube, then runs `root:build`, the same build CI runs. Production and preview are the same build (Hugo's build environment is production either way). `min_version` in `mise.toml` is the mise version CI and Cloudflare run.
 
 **Upgrading: always through Taskfile** (mise only pins/installs underneath):
 
@@ -41,7 +41,8 @@ Key points:
 | Theme: Hugo Plate + gethugothemes modules, and the npm packages they need | `mise run theme:update` |
 
 Each is safe to re-run: with nothing new upstream it changes nothing.
-- New machine: `task setup` (= `mise trust && mise install`, then `bun install` + `go mod download`).
+- New machine: `task setup` (= `mise trust && mise install`, then `mise run root:deps` + `go mod download`).
+- **npm packages: aube, node the runtime.** aube (pinned in `mise.toml`) installs the site's npm packages from `aube-lock.yaml` (`mise run root:deps` = `aube install --frozen-lockfile`) and mise's `npm:` tools (wrangler) with its embedded aube; node is the one JavaScript runtime. No bun, no npm installs. Dependency build scripts run only if aube's built-in list or `aube-workspace.yaml` allows them; `strictDepBuilds` fails the install on an unreviewed one (`aube ignored-builds`, `aube approve-builds`). Add or bump a package with `aube add -D <pkg>` and commit `package.json` + `aube-lock.yaml`.
 - Not available through mise, so documented instead: tippecanoe (optional, `task airspace:install:tippecanoe`), gcloud (optional, only for `google-mcp:tf:auth:manual`). The Claude CLI is your machine-wide tool (Anthropic's installer, `task claude-cli:install`), not a project pin. The project's own Go CLIs (`cmd/*`) are built by Taskfile.
 
 ### Code Structure (internal vs pkg)
@@ -600,7 +601,7 @@ Correct paths:
 
 **Upgrade:** `task hugo:upgrade` (pins, proves a production build) → commit on a branch, push, check the Cloudflare preview build (it builds with the new pin) → merge to main.
 
-Hugo >= 0.165 removed `tailwindcss` from the default `security.exec.allow`; `hugo.toml` re-adds it (`[security.exec]`, per gohugoio/hugo#15178, reported upstream as zeon-studio/hugoplate#250). Hugo then requires `tailwindcss` to be the npm package (`bun install`), not a standalone binary on PATH.
+Hugo >= 0.165 removed `tailwindcss` from the default `security.exec.allow`; `hugo.toml` re-adds it (`[security.exec]`, per gohugoio/hugo#15178, reported upstream as zeon-studio/hugoplate#250). Hugo then requires `tailwindcss` to be the npm package (`mise run root:deps`), not a standalone binary on PATH.
 
 ### Updating Hugo Plate (repeatable)
 

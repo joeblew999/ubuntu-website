@@ -118,9 +118,8 @@ tasks:
         {{.FILE_HUGO_LOCK}}
         {{.FILE_HUGO_STATS}}
 
-        # Node/Bun
+        # Node
         {{.DIR_NODE_MODULES}}/
-        {{.FILE_BUN_LOCK}}
         {{.FILE_NPM_LOCK}}
 
         # Go

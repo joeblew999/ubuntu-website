@@ -65,9 +65,9 @@ func update(args []string) {
 	if len(add) == 0 {
 		fmt.Println("    up to date")
 	} else {
-		fmt.Println("    bun add -d " + strings.Join(add, " "))
-		if err := run("bun", append([]string{"add", "-d"}, add...)...); err != nil {
-			fail("bun add: " + err.Error())
+		fmt.Println("    aube add -D " + strings.Join(add, " "))
+		if err := run("aube", append([]string{"add", "-D"}, add...)...); err != nil {
+			fail("aube add: " + err.Error())
 		}
 	}
 
@@ -93,11 +93,11 @@ func update(args []string) {
 		fail(fmt.Sprintf("%d template conflict(s): resolve the files in .theme-merge/ into layouts/, then run it again", conflicts))
 	}
 	untracked, _ := output("git", "ls-files", "--others", "--exclude-standard", "--", "_vendor")
-	if run("git", "diff", "--quiet", "--", "_vendor", "package.json", "bun.lock", generator, themeCSS, "layouts") == nil && untracked == "" {
+	if run("git", "diff", "--quiet", "--", "_vendor", "package.json", "aube-lock.yaml", generator, themeCSS, "layouts") == nil && untracked == "" {
 		fmt.Printf("✓ Already up to date (hugoplate %s)\n", sha)
 		return
 	}
-	fmt.Println("✓ Updated. Review: git diff --stat -- _vendor package.json bun.lock cmd/theme assets/css layouts")
+	fmt.Println("✓ Updated. Review: git diff --stat -- _vendor package.json aube-lock.yaml cmd/theme assets/css layouts")
 	fmt.Println("  Ship: push a branch, check the Cloudflare preview build, then merge to main.")
 }
 
@@ -157,7 +157,7 @@ func syncGenerator(version, sha string) (bool, error) {
 }
 
 // packagesToAdd are the npm packages of upstream's package.json, as vendored, that ours lacks or has older:
-// name@range, upstream's range, for bun add -d.
+// name@range, upstream's range, for aube add -D.
 func packagesToAdd() ([]string, error) {
 	type packageJSON struct{ Dependencies, DevDependencies map[string]string }
 	read := func(path string) (map[string]string, error) {

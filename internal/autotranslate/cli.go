@@ -464,7 +464,7 @@ func (c *cliRunner) runStatus() int {
 		fmt.Fprintln(c.stdout, "Binary: claude")
 	} else {
 		fmt.Fprintln(c.stdout, "Status: Not available")
-		fmt.Fprintln(c.stdout, "Install: bun add -g @anthropic-ai/claude-code")
+		fmt.Fprintln(c.stdout, "Install: task claude-cli:install")
 	}
 	fmt.Fprintln(c.stdout)
 

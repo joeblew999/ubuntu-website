@@ -33,7 +33,7 @@ func NewClaudeCLIProvider() (*ClaudeCLIProvider, error) {
 		}
 	}
 	if err != nil {
-		return nil, fmt.Errorf("claude CLI not found (install: bun add -g @anthropic-ai/claude-code)")
+		return nil, fmt.Errorf("claude CLI not found (install: task claude-cli:install)")
 	}
 
 	return &ClaudeCLIProvider{

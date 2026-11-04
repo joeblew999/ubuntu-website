@@ -41,7 +41,7 @@ task          # or: task info
 ## 🚀 Quick Start
 
 ```bash
-task setup      # mise install (pinned tools) + bun/go deps
+task setup      # mise install (pinned tools) + npm packages (aube) + Go modules
 task dev:up     # Hugo + tools via process-compose (task dev:down to stop)
 ```
 

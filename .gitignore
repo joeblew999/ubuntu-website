@@ -4,10 +4,13 @@ resources/
 .hugo_build.lock
 hugo_stats.json
 
-# Node/Bun
+# Node: aube installs node_modules/ from aube-lock.yaml; other package managers' lockfiles never belong here
 node_modules/
+bun.lock
 bun.lockb
 package-lock.json
+pnpm-lock.yaml
+yarn.lock
 
 # Go
 .build/

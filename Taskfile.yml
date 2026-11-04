@@ -135,7 +135,6 @@ vars:
   # Files (gitignored)
   FILE_HUGO_LOCK: .hugo_build.lock
   FILE_HUGO_STATS: hugo_stats.json
-  FILE_BUN_LOCK: bun.lockb
   FILE_NPM_LOCK: package-lock.json
   FILE_ENV: .env
   FILE_ANALYTICS_STATE: .analytics-state.json
@@ -251,7 +250,7 @@ tasks:
       - mise run theme:update
       - 'echo "Hugo is separate (it also needs Cloudflare): task hugo:upgrade"'
 
-  # Third-party tools (hugo, bun, wrangler, process-compose, ...) are pinned in mise.toml.
+  # Third-party tools (hugo, node, aube, wrangler, process-compose, ...) are pinned in mise.toml.
   # Taskfiles call them by name and never install them; add new tools to mise.toml.
   setup:
     desc: Complete setup - install pinned tools (mise) and dependencies
@@ -271,7 +270,7 @@ tasks:
   install:deps:
     desc: Install dependencies
     cmds:
-      - bun install
+      - mise run root:deps
       - go mod download
 
   # ===========================================================================

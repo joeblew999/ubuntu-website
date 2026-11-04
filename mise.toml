@@ -19,8 +19,10 @@
 min_version = "2026.9.15"
 
 [settings]
-# The `go` line in go.mod is the Go pin; this makes `mise install` honour it.
+# go.mod's toolchain line is the Go pin; this makes `mise install` honour it.
 idiomatic_version_file_enable_tools = ["go"]
+# npm: tools (wrangler) are installed by mise's own embedded aube, the package manager the site uses too.
+npm.package_manager = "aube"
 
 [tools]
 # CI + Taskfile tools (were installed by separate GitHub Actions / npm -g)
@@ -28,8 +30,10 @@ task = "3.54.0"
 # Local, CI and Cloudflare Pages (root:pages installs it there); see CLAUDE.md Hugo Version.
 hugo-extended = "0.169.0"
 "npm:wrangler" = "4.156.1"
-bun = "1.4.4"
+# node is the one JavaScript runtime (Hugo's Tailwind, the theme generator); aube installs the site's npm packages
+# (package.json, aube-lock.yaml, build approvals in aube-workspace.yaml), and only that.
 node = "26.13.0"
+aube = "2.9.0"
 # Dev process orchestration (task dev:up / process-compose.yaml); not in Homebrew core.
 process-compose = "1.124.0"
 # GitHub CLI (tools:gh:*, release tasks).
@@ -75,8 +79,8 @@ env = { GOOS = "js", GOARCH = "wasm" }
 run = 'go vet ./cmd/worker-tiler'
 
 [tasks."root:deps"]
-description = "The site's npm packages (Tailwind and its plugins), from bun.lock"
-run = 'bun install --frozen-lockfile'
+description = "The site's npm packages (Tailwind and its plugins), with aube from aube-lock.yaml: it fails if the lockfile and package.json disagree, and on any dependency build script not reviewed (aube-workspace.yaml)"
+run = 'aube install --frozen-lockfile'
 
 [tasks."root:build"]
 description = "The site as production builds it (hugo -e production --gc --minify) into public/, with the theme CSS as committed (theme:check): refLinksErrorLevel makes a broken relref fail it. Preview builds are the same build"
@@ -85,7 +89,7 @@ run = 'hugo -e production --gc --minify'
 
 [tasks."root:pages"]
 description = "Cloudflare Pages' build, production and preview: its build command is npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages. It installs only the tools root:build runs, not every pin, then runs it"
-run = 'mise install hugo-extended node bun && mise run --skip-tools root:build'
+run = 'mise install hugo-extended node aube && mise run --skip-tools root:build'
 
 [tasks."root:check-taskfiles"]
 description = "The Taskfiles still parse, until their tasks have all moved here (TODO.md)"
