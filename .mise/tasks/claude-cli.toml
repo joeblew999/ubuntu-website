@@ -1,0 +1,46 @@
+# The Claude CLI on this machine: Anthropic's native binary, a machine-wide tool (not pinned here). Each task runs one
+# command of the claude-cli binary, cmd/claude-cli (named so it never shadows Anthropic's claude on a task's PATH);
+# its arguments pass through:
+#   mise run claude-cli:status          what's installed, and what needs doing
+#   mise run claude-cli:ensure          installed (Anthropic's installer for this OS), at least 2.0.0; ensure <version>
+#   mise run claude-cli:cleanup         the old npm/bun installations removed
+#   mise run claude-cli:mcp list        the MCP servers
+
+["claude-cli:build"]
+description = "Build claude-cli (cmd/claude-cli) into bin/: the claude-cli:* tasks run it"
+run = 'go build -o bin/ ./cmd/claude-cli'
+
+["claude-cli:status"]
+description = "The Claude CLI installations found, and what needs doing (--dev, --ci)"
+depends = ["claude-cli:build"]
+run = 'claude-cli status'
+
+["claude-cli:check"]
+description = "Whether the native binary is installed"
+depends = ["claude-cli:build"]
+run = 'claude-cli check'
+
+["claude-cli:detect"]
+description = "Every installation found (--json)"
+depends = ["claude-cli:build"]
+run = 'claude-cli detect'
+
+["claude-cli:cleanup"]
+description = "The old npm/bun installations removed"
+depends = ["claude-cli:build"]
+run = 'claude-cli cleanup'
+
+["claude-cli:version-check"]
+description = "Whether the installed version is at least the one given"
+depends = ["claude-cli:build"]
+run = 'claude-cli version-check'
+
+["claude-cli:ensure"]
+description = "The native CLI installed with Anthropic's installer for this OS, or upgraded, to at least a version (default 2.0.0)"
+depends = ["claude-cli:build"]
+run = 'claude-cli ensure'
+
+["claude-cli:mcp"]
+description = "The MCP servers Claude Code runs: list, status, add, enable, restart, refresh-tokens, kill"
+depends = ["claude-cli:build"]
+run = 'claude-cli mcp'

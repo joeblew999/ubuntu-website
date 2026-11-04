@@ -28,8 +28,6 @@ tokibundle/
 # Logs
 logs/
 
-# Task (checksum cache)
-.task/
 .theme-merge/
 
 # Testing

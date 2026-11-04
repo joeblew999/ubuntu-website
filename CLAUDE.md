@@ -6,21 +6,15 @@
 
 Apex domain (`ubuntusoftware.net`) redirects to www via Cloudflare redirect rule.
 
-USE TASKFILE - it makes conventions for development.
+USE MISE: every task is `mise run <task>` (`mise tasks` lists them), and the root `mise.toml` is the control plane. There are no Taskfiles and no scripts.
 
-### Taskfile Conventions
+### Tools: mise installs and runs
 
-Key points:
-- Use `status:` for idempotent `check:deps` tasks
-- Use `deps:` for declarative dependencies
-
-### Tools: mise installs, Taskfile runs
-
-- Every third-party tool (task, hugo, node, aube, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq, git-lfs, go-mod-upgrade) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
-- Taskfiles call tools by name and never install them (no `brew install`, `curl | bash`, `bun add -g`, `go install` for third-party tools). A `check:deps` for a mise tool runs `mise install <tool>`.
+- Every third-party tool (hugo, node, aube, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq, git-lfs, go-mod-upgrade) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
+- Tasks call tools by name and never install them (no `brew install`, `curl | bash`, `go install` for third-party tools): mise installs every pin (`mise install`, or `mise run root:setup`).
 - New tool → add it to `[tools]` in `mise.toml` with an exact version.
 
-### mise tasks: the layout (all tasks move here from the Taskfiles)
+### mise tasks: the layout
 
 - **`mise.toml` is the control plane**: tool pins, settings, env (`bin/` on PATH), tasks that act on the whole repo (`root:*`), and `[task_config] includes = [".mise/tasks"]`.
 - **CI runs the control plane, nothing else** (SSOT): `.github/workflows/core-ci.yml` is `mise run root:ci`, and `root:ci` depends on every check (`root:check-mise`, `root:check-workflows` (actionlint), `root:check-actions` (pinact: actions pinned to SHAs), `root:test`, `root:test-worker`, `theme:check`, `root:build`, `root:check-taskfiles`). A new check is a task `root:ci` depends on; `mise run root:ci` locally does exactly what CI does.
@@ -44,7 +38,7 @@ Key points:
 Each is safe to re-run: with nothing new upstream it changes nothing.
 - New machine: `mise trust && mise run root:setup` (every pinned tool, the npm packages, the Go modules).
 - **npm packages: aube, node the runtime.** aube (pinned in `mise.toml`) installs the site's npm packages from `aube-lock.yaml` (`mise run root:deps` = `aube install --frozen-lockfile`) and mise's `npm:` tools (wrangler) with its embedded aube; node is the one JavaScript runtime. No bun, no npm installs. `aube-workspace.yaml` also turns off aube's global virtual store: Hugo runs Tailwind under Node's permission model, which reads only inside the project. Dependency build scripts run only if aube's built-in list or `aube-workspace.yaml` allows them; `strictDepBuilds` fails the install on an unreviewed one (`aube ignored-builds`, `aube approve-builds`). Add or bump a package with `aube add -D <pkg>` and commit `package.json` + `aube-lock.yaml`.
-- Not available through mise, so documented instead: tippecanoe (optional, `brew install tippecanoe`; without it airspace uses its Go tiler), gcloud (optional, only for `google-mcp:tf:auth:manual`). The Claude CLI is your machine-wide tool (Anthropic's installer, `task claude-cli:install`), not a project pin. The project's own Go CLIs (`cmd/*`) are built by Taskfile.
+- Not available through mise, so documented instead: tippecanoe (optional, `brew install tippecanoe`; without it airspace uses its Go tiler), gcloud (not needed: `mise run google:auth login` writes Terraform's credentials). The Claude CLI is your machine-wide tool (Anthropic's installer, `mise run claude-cli:ensure`), not a project pin. The project's own Go CLIs (`cmd/*`) are built by their `<binary>:build` tasks, into `bin/`.
 
 ### Code Structure (internal vs pkg)
 - Keep project-only helpers in `internal/` (e.g., `internal/codecinstaller`), not API-stable.
@@ -220,7 +214,7 @@ Used by `cmd/google` (`google auth login`) for automated Google OAuth flows.
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-`task google-mcp:*` names are stable wrappers over the `mise run google-mcp:*` tasks (a published blog post uses them).
+The draft blog post (`content/*/blog/google-workspace-mcp-zero-config.md`) uses these `mise run google-mcp:*` names.
 `google:*` is a different thing: the unified Google CLI, `cmd/google` (`.mise/tasks/google.toml`: `google:gmail`, `google:calendar`, `google:auth`, …).
 
 **Why tokens are at `~/.google-mcp-accounts/`:**
@@ -230,31 +224,31 @@ Used by `cmd/google` (`google auth login`) for automated Google OAuth flows.
 
 **One-Command Setup:**
 ```bash
-task google-mcp:setup    # Full guided setup (interactive)
+mise run google-mcp:setup    # Full guided setup (interactive)
 ```
 
 **Manual Setup Steps:**
 ```bash
 # 1. Install the pinned MCP server, fnox, jq
-task google-mcp:install
+mise install
 
 # 2. Google Cloud OAuth screens + exact values to enter (opens browser)
-task google-mcp:console
+mise run google-mcp:console
 
 # 3. Store client id + secret in the keychain (hidden prompts)
-task google-mcp:credentials
+mise run google-mcp:credentials
 
 # 4. Authenticate (opens browser for Google sign-in), ends with a check
-task google-mcp:auth
+mise run google-mcp:auth
 ```
 
 No step 5: `.mcp.json` is checked in. Restart Claude Code to pick up the server.
 
 **Status Check:**
 ```bash
-task google-mcp:status   # Binary, keychain secrets, accounts, MCP config
-task google-mcp:check    # Token refresh at Google + a real Calendar call
-task google-mcp:rotate   # New client secret (copy it in the console)
+mise run google-mcp:status   # Binary, keychain secrets, accounts, MCP config
+mise run google-mcp:check    # Token refresh at Google + a real Calendar call
+mise run google-mcp:rotate   # New client secret (copy it in the console)
 ```
 
 ### Email Sending (SMTP2GO)
@@ -480,19 +474,15 @@ The airspace demo page auto-detects the local server and falls back to R2 if una
 
 R2 object storage for static assets that exceed Cloudflare Pages' 25MB file limit.
 
-**Taskfile:** `taskfiles/Taskfile.cf-r2.yml`
+**Tasks:** `.mise/tasks/r2.toml` (wrangler's, as tool tasks)
 
 **Key Commands:**
 ```bash
-task r2:status          # Show bucket status and dashboard URLs
-task r2:list            # List bucket contents
-task r2:endpoints       # List all asset endpoints
-task r2:endpoints:test  # Test endpoint accessibility
-task r2:upload FILE=x   # Upload single file
-task r2:sync DIR=x      # Sync directory to R2
-task r2:open            # Open R2 dashboard
-task r2:open:bucket     # Open bucket browser
-task r2:open:settings   # Open bucket settings
+mise run r2:status              # The account's buckets
+mise run r2:list                # List bucket contents
+mise run r2:upload <key> <file> # Upload a file (then at the public URL/<key>)
+mise run r2:cors-set            # CORS rules from r2-cors.json (browsers need them)
+mise run url:cf-r2              # Open the R2 dashboard
 ```
 
 **Configuration:**
@@ -518,14 +508,14 @@ Languages: de (German), zh (Chinese), ja (Japanese), vi (Vietnamese) - auto-load
 - `internal/translate/presenter.go` - Terminal and Markdown output formatting
 - `.mise/tasks/translate.toml` ↔ `cmd/translate/` - the tasks (`translate:content`, `translate:menu`, `translate:lang`, `translate:check`), subcommands passed through
 
-**Taskfile Commands (all namespaced):**
+**Tasks** (`mise run translate:<task> <subcommand>`):
 
-| Namespace | Commands | Purpose |
+| Task | Subcommands | Purpose |
 |-----------|----------|---------|
-| `content:` | status, diff, changed, next, done | Track English source changes |
-| `content:` | missing, orphans, stale, clean | Find translation problems |
-| `menu:` | check, sync | Manage navigation menus |
-| `lang:` | list, add, remove, init, validate | Manage languages |
+| `translate:content` | status, diff, changed, next, done | Track English source changes |
+| `translate:content` | missing, orphans, stale, clean | Find translation problems |
+| `translate:menu` | check, sync | Manage navigation menus |
+| `translate:lang` | list, add, remove, init, validate | Manage languages |
 
 **Common Commands:**
 - `mise run translate:content status` - what English files changed since last translation?

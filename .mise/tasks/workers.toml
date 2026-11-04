@@ -1,0 +1,17 @@
+# The Cloudflare Worker that takes Web3Forms' webhook into MailerLite (workers/mailerlite-webhook.js, workers/wrangler.toml):
+# wrangler's, as tool tasks, in workers/. Its MailerLite key: wrangler secret put MAILERLITE_API_KEY there (it prompts).
+
+["workers:deploy"]
+description = "The webhook Worker deployed (wrangler deploy, in workers/)"
+dir = "workers"
+run = 'wrangler deploy'
+
+["workers:dev"]
+description = "The webhook Worker run locally (wrangler dev, in workers/)"
+dir = "workers"
+run = 'wrangler dev'
+
+["workers:tail"]
+description = "The deployed webhook Worker's logs, as they come"
+dir = "workers"
+run = 'wrangler tail'

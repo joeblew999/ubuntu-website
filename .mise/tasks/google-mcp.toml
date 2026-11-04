@@ -1,11 +1,10 @@
 # The Google MCP server Claude Code runs from .mcp.json (mise exec -- fnox exec -- google-mcp-server): its setup and
 # its check. Each task runs one command of the google-mcp binary, cmd/google-mcp/<command>.go; misecheck holds the two
 # together (mise run root:check-mise). New machine, once the Google Cloud side exists:
-#   mise run google-mcp:secret GOOGLE_CLIENT_ID       # hidden prompt → keychain (fnox.toml)
-#   mise run google-mcp:secret GOOGLE_CLIENT_SECRET
-#   mise run google-mcp:auth                          # browser sign-in, ends with google-mcp:check
-# Google Cloud side (no API for these screens): mise run google-mcp:console
-# Routine: google-mcp:check, google-mcp:rotate (new client secret), google-mcp:auth (after invalid_grant).
+#   mise run google-mcp:setup                         # client id/secret → keychain (hidden prompts), sign in, check
+# Google Cloud side (no API for these screens): mise run google-mcp:console; its APIs: google-mcp:tf-apply.
+# Routine: google-mcp:status, google-mcp:check, google-mcp:rotate (new client secret), google-mcp:auth (after
+# invalid_grant), google-mcp:reset --yes (every account signed out).
 
 ["google-mcp:build"]
 description = "Build google-mcp (cmd/google-mcp) into bin/: the google-mcp:* tasks run it"
@@ -36,3 +35,53 @@ run = 'google-mcp auth'
 description = "Prove the Google MCP setup end to end: token refresh at Google (client id + secret) and a real Calendar call"
 depends = ["google-mcp:build"]
 run = 'google-mcp check'
+
+["google-mcp:setup"]
+description = "The whole setup on a new machine: the OAuth client into the keychain (only what's missing), a Google account signed in, then google-mcp:check"
+depends = ["google-mcp:build"]
+run = 'google-mcp setup'
+
+["google-mcp:status"]
+description = "Each part of the setup, there or not: the server binary, the keychain's client id and secret, the accounts, .mcp.json"
+depends = ["google-mcp:build"]
+run = 'google-mcp status'
+
+["google-mcp:credentials"]
+description = "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET into the keychain, prompting only for whichever is missing"
+depends = ["google-mcp:build"]
+run = 'google-mcp credentials'
+
+["google-mcp:accounts"]
+description = "The Google accounts signed in to the MCP server (~/.google-mcp-accounts)"
+depends = ["google-mcp:build"]
+run = 'google-mcp accounts'
+
+["google-mcp:reset"]
+description = "Every Google account signed out (~/.google-mcp-accounts removed); without --yes, only what it would remove"
+usage = 'flag "--yes" help="Really remove them"'
+depends = ["google-mcp:build"]
+run = 'google-mcp reset{% if usage.yes %} --yes{% endif %}'
+
+# The Google Cloud project's APIs (Gmail, Calendar, Drive, …), enabled by Terraform in terraform/google-mcp. Its
+# credentials: mise run google:auth login (application-default credentials, no gcloud). Its variables:
+# terraform.tfvars (from terraform.tfvars.example: the project id).
+
+["google-mcp:tf-init"]
+description = "Terraform initialized for the Google APIs (terraform/google-mcp)"
+dir = "terraform/google-mcp"
+run = 'terraform init'
+
+["google-mcp:tf-plan"]
+description = "What Terraform would enable (terraform/google-mcp; terraform.tfvars has the project id)"
+dir = "terraform/google-mcp"
+run = 'terraform plan'
+
+["google-mcp:tf-apply"]
+description = "The Google APIs enabled (terraform/google-mcp)"
+dir = "terraform/google-mcp"
+run = 'terraform apply'
+
+["google-mcp:tf-destroy"]
+description = "The Terraform-managed API enablement removed (terraform/google-mcp)"
+dir = "terraform/google-mcp"
+run = 'terraform destroy'

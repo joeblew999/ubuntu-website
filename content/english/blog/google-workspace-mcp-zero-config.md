@@ -40,7 +40,7 @@ By the time you're done, you've spent more time on setup than you'll save in the
 Here's the complete setup flow:
 
 ```bash
-task google-mcp:setup
+mise run google-mcp:setup
 ```
 
 That's it. The system:
@@ -118,10 +118,10 @@ Here's where it gets interesting for businesses: **you can connect multiple Goog
 Personal Gmail. Work Google Workspace. Client accounts. Each authenticated independently, each accessible to your AI assistant with proper context.
 
 ```
-task google-mcp:auth
+mise run google-mcp:auth
 # Authenticate first account
 
-task google-mcp:auth
+mise run google-mcp:auth
 # Authenticate second account
 # The system tracks both
 ```
@@ -225,7 +225,7 @@ All running locally. All under your control.
 
 ```bash
 # From your project directory
-task google-mcp:setup
+mise run google-mcp:setup
 ```
 
 Follow the prompts. Restart your AI assistant. Done.
@@ -234,32 +234,32 @@ Follow the prompts. Restart your AI assistant. Done.
 
 ```bash
 # 1. Install the MCP server (pinned release)
-task google-mcp:install
+mise install
 
 # 2. Store your Google OAuth client in the OS keychain
-task google-mcp:credentials
+mise run google-mcp:credentials
 
 # 3. Authenticate with Google (opens the browser, then checks)
-task google-mcp:auth
+mise run google-mcp:auth
 
 # 4. Verify everything works
-task google-mcp:status
+mise run google-mcp:status
 ```
 
 ### Checking What's Connected
 
 ```bash
-task google-mcp:accounts:list
+mise run google-mcp:accounts
 # Shows all authenticated Google accounts
 
-task google-mcp:status
+mise run google-mcp:status
 # Full status: binary, keychain secrets, accounts, configuration
 ```
 
 ### Removing Access
 
 ```bash
-task google-mcp:reset CONFIRM=y
+mise run google-mcp:reset --yes
 # Removes the signed-in account tokens from this machine
 # Revoke the app itself in your Google Account's third-party access settings
 ```

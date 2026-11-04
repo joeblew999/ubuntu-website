@@ -40,7 +40,7 @@ Mọi câu chuyện tích hợp AI đều lặp lại cùng một khuôn mẫu m
 Đây là toàn bộ quy trình thiết lập:
 
 ```bash
-task google-mcp:setup
+mise run google-mcp:setup
 ```
 
 Vậy là xong. Hệ thống sẽ:
@@ -118,10 +118,10 @@ Tất cả thông qua hội thoại tự nhiên:
 Gmail cá nhân. Google Workspace công việc. Tài khoản khách hàng. Mỗi tài khoản được xác thực độc lập, và trợ lý AI của bạn đều có thể truy cập từng tài khoản với ngữ cảnh phù hợp.
 
 ```
-task google-mcp:auth
+mise run google-mcp:auth
 # Authenticate first account
 
-task google-mcp:auth
+mise run google-mcp:auth
 # Authenticate second account
 # The system tracks both
 ```
@@ -225,7 +225,7 @@ Tất cả đều chạy cục bộ. Tất cả đều dưới sự kiểm soát
 
 ```bash
 # From your project directory
-task google-mcp:setup
+mise run google-mcp:setup
 ```
 
 Làm theo hướng dẫn. Khởi động lại trợ lý AI của bạn. Xong.
@@ -234,32 +234,32 @@ Làm theo hướng dẫn. Khởi động lại trợ lý AI của bạn. Xong.
 
 ```bash
 # 1. Install the MCP server (pinned release)
-task google-mcp:install
+mise install
 
 # 2. Store your Google OAuth client in the OS keychain
-task google-mcp:credentials
+mise run google-mcp:credentials
 
 # 3. Authenticate with Google (opens the browser, then checks)
-task google-mcp:auth
+mise run google-mcp:auth
 
 # 4. Verify everything works
-task google-mcp:status
+mise run google-mcp:status
 ```
 
 ### Kiểm tra những gì đã được kết nối
 
 ```bash
-task google-mcp:accounts:list
+mise run google-mcp:accounts
 # Shows all authenticated Google accounts
 
-task google-mcp:status
+mise run google-mcp:status
 # Full status: binary, keychain secrets, accounts, configuration
 ```
 
 ### Thu hồi quyền truy cập
 
 ```bash
-task google-mcp:reset CONFIRM=y
+mise run google-mcp:reset --yes
 # Removes the signed-in account tokens from this machine
 # Revoke the app itself in your Google Account's third-party access settings
 ```

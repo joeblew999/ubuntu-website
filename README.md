@@ -91,7 +91,8 @@ task cf:status     # Cloudflare Pages deployment status
 ├── _vendor/                # Hugo Plate + modules, pinned (task theme:update)
 ├── .github/workflows/      # CI (tools installed by mise)
 ├── mise.toml               # Pinned tools
-├── Taskfile.yml            # Task definitions
+├── mise.toml               # The control plane: tool pins, env, repo-wide tasks
+├── .mise/tasks/            # A task file per Go binary (cmd/<binary>), checked by misecheck
 └── wrangler.toml           # Cloudflare Pages config
 ```
 
@@ -100,7 +101,7 @@ task cf:status     # Cloudflare Pages deployment status
 Secrets are never committed:
 
 - `.env` (gitignored): e.g. `CLOUDFLARE_API_TOKEN` (read by wrangler and the `cf:*` tasks), `DEEPL_API_KEY` (autotranslate)
-- Google MCP OAuth client: macOS keychain via fnox (`fnox.toml`; `task google-mcp:credentials`)
+- Google MCP OAuth client: macOS keychain via fnox (`fnox.toml`; `mise run google-mcp:credentials`)
 
 ## 🔗 References
 

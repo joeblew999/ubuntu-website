@@ -34,3 +34,23 @@ run = 'url search-console'
 description = "Open Cloudflare Web Analytics for the site"
 depends = ["url:build"]
 run = 'url cf-analytics'
+
+["url:cf-pages"]
+description = "Open the Cloudflare Pages project's dashboard"
+depends = ["url:build"]
+run = 'url cf-pages'
+
+["url:cf-domain"]
+description = "Open the domain's Cloudflare dashboard (DNS, rules, email)"
+depends = ["url:build"]
+run = 'url cf-domain'
+
+["url:cf-ai"]
+description = "Open Cloudflare's AI Crawl Control (which AI crawlers may read the site)"
+depends = ["url:build"]
+run = 'url cf-ai'
+
+["url:cf-r2"]
+description = "Open the R2 dashboard (the bucket of large assets, ubuntu-website-assets)"
+depends = ["url:build"]
+run = 'url cf-r2'

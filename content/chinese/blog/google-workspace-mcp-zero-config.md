@@ -40,7 +40,7 @@ draft: true
 以下是完整的设置流程：
 
 ```bash
-task google-mcp:setup
+mise run google-mcp:setup
 ```
 
 就是这样。系统会：
@@ -118,10 +118,10 @@ MCP 服务器并不关心是哪个 AI 在调用它。云端 Claude 查询您的�
 个人 Gmail。工作用的 Google Workspace。客户账户。每个账户独立认证，您的 AI 助手可以在正确的上下文中访问每一个账户。
 
 ```
-task google-mcp:auth
+mise run google-mcp:auth
 # Authenticate first account
 
-task google-mcp:auth
+mise run google-mcp:auth
 # Authenticate second account
 # The system tracks both
 ```
@@ -225,7 +225,7 @@ MCP 服务器充当您的 AI 助手与 Google API 之间的桥梁。它负责处
 
 ```bash
 # From your project directory
-task google-mcp:setup
+mise run google-mcp:setup
 ```
 
 按照提示操作。重启您的 AI 助手。完成。
@@ -234,32 +234,32 @@ task google-mcp:setup
 
 ```bash
 # 1. Install the MCP server (pinned release)
-task google-mcp:install
+mise install
 
 # 2. Store your Google OAuth client in the OS keychain
-task google-mcp:credentials
+mise run google-mcp:credentials
 
 # 3. Authenticate with Google (opens the browser, then checks)
-task google-mcp:auth
+mise run google-mcp:auth
 
 # 4. Verify everything works
-task google-mcp:status
+mise run google-mcp:status
 ```
 
 ### 检查已连接的内容
 
 ```bash
-task google-mcp:accounts:list
+mise run google-mcp:accounts
 # Shows all authenticated Google accounts
 
-task google-mcp:status
+mise run google-mcp:status
 # Full status: binary, keychain secrets, accounts, configuration
 ```
 
 ### 撤销访问权限
 
 ```bash
-task google-mcp:reset CONFIRM=y
+mise run google-mcp:reset --yes
 # Removes the signed-in account tokens from this machine
 # Revoke the app itself in your Google Account's third-party access settings
 ```

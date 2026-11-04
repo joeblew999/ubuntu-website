@@ -33,7 +33,7 @@ func NewClaudeCLIProvider() (*ClaudeCLIProvider, error) {
 		}
 	}
 	if err != nil {
-		return nil, fmt.Errorf("claude CLI not found (install: task claude-cli:install)")
+		return nil, fmt.Errorf("claude CLI not found (install: mise run claude-cli:ensure)")
 	}
 
 	return &ClaudeCLIProvider{

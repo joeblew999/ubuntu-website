@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -199,7 +200,7 @@ func (c *CLI) cmdStatus(args []string) int {
 	if !status.Installed {
 		fmt.Fprintln(c.stdout, "❌ Claude CLI is not installed")
 		fmt.Fprintln(c.stdout)
-		fmt.Fprintln(c.stdout, "Install with: task claude-cli:install")
+		fmt.Fprintln(c.stdout, "Install with: mise run claude-cli:ensure")
 		return 1
 	}
 
@@ -246,13 +247,13 @@ func (c *CLI) cmdStatus(args []string) int {
 	fmt.Fprintln(c.stdout)
 
 	if status.NeedsMigration {
-		fmt.Fprintln(c.stdout, "⚠️  Migration needed: Run 'task claude-cli:cleanup:all' to remove npm/bun versions")
+		fmt.Fprintln(c.stdout, "⚠️  Migration needed: Run 'mise run claude-cli:cleanup' to remove npm/bun versions")
 	}
 	if status.NeedsUpgrade {
-		fmt.Fprintln(c.stdout, "⚠️  Upgrade needed: Run 'task claude-cli:upgrade' to update")
+		fmt.Fprintln(c.stdout, "⚠️  Upgrade needed: Run 'mise run claude-cli:ensure' to update")
 	}
 	if !status.NativeInstalled {
-		fmt.Fprintln(c.stdout, "⚠️  Native binary not installed: Run 'task claude-cli:install'")
+		fmt.Fprintln(c.stdout, "⚠️  Native binary not installed: Run 'mise run claude-cli:ensure'")
 	}
 	if status.NativeInstalled && !status.NeedsMigration && !status.NeedsUpgrade {
 		fmt.Fprintln(c.stdout, "✅ All good! Native binary installed and up to date.")
@@ -261,10 +262,7 @@ func (c *CLI) cmdStatus(args []string) int {
 	if c.actor == ActorDev {
 		fmt.Fprintln(c.stdout)
 		fmt.Fprintln(c.stdout, "Developer Commands:")
-		fmt.Fprintln(c.stdout, "  task claude-cli:test:install-npm    # Install npm version for testing")
-		fmt.Fprintln(c.stdout, "  task claude-cli:test:install-bun    # Install bun version for testing")
-		fmt.Fprintln(c.stdout, "  task claude-cli:test:migration      # Full migration test")
-		fmt.Fprintln(c.stdout, "  task claude-cli:test:detect-json    # JSON output for debugging")
+		fmt.Fprintln(c.stdout, "  mise run claude-cli:detect --json   # Every installation, as JSON, for debugging")
 	}
 
 	return 0
@@ -518,15 +516,28 @@ func (c *CLI) doCleanup() int {
 	return 0
 }
 
-func (c *CLI) doInstall() error {
-	cmd := exec.Command("bash", "-c", "curl -fsSL https://claude.ai/install.sh | bash")
-	cmd.Stdout = c.stdout
-	cmd.Stderr = c.stderr
-	return cmd.Run()
-}
+// doInstall runs Anthropic's installer for the native Claude CLI: install.sh on macOS and Linux, install.ps1 on Windows.
+func (c *CLI) doInstall() error { return c.installer("") }
 
-func (c *CLI) doUpgrade() error {
-	cmd := exec.Command("bash", "-c", "curl -fsSL https://claude.ai/install.sh | bash -s latest")
+// doUpgrade runs Anthropic's installer for the latest native Claude CLI.
+func (c *CLI) doUpgrade() error { return c.installer("latest") }
+
+// installer runs Anthropic's installer for this OS, for version ("" its default, or latest).
+func (c *CLI) installer(version string) error {
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		script := "irm https://claude.ai/install.ps1 | iex"
+		if version != "" {
+			script = "& ([scriptblock]::Create((irm https://claude.ai/install.ps1))) " + version
+		}
+		cmd = exec.Command("powershell", "-NoProfile", "-Command", script)
+	} else {
+		script := "curl -fsSL https://claude.ai/install.sh | bash"
+		if version != "" {
+			script += " -s " + version
+		}
+		cmd = exec.Command("bash", "-c", script)
+	}
 	cmd.Stdout = c.stdout
 	cmd.Stderr = c.stderr
 	return cmd.Run()

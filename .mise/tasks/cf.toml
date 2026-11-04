@@ -1,0 +1,46 @@
+# Cloudflare: what has no wrangler command of its own is the cf binary, cmd/cf/<command>.go (Cloudflare's API with
+# CLOUDFLARE_API_TOKEN from .env); the rest is wrangler's, as tool tasks here. Deploys happen on git push (Cloudflare
+# Pages' Git integration, its build command root:pages). R2: r2:*; the webhook Worker: workers:*; dashboards: url:cf-*.
+
+["cf:build"]
+description = "Build cf (cmd/cf) into bin/: the cf:* tasks run it"
+run = 'go build -o bin/ ./cmd/cf'
+
+["cf:purge"]
+description = "Everything in the CDN cache for ubuntusoftware.net purged"
+depends = ["cf:build"]
+run = 'cf purge'
+
+["cf:email-status"]
+description = "Email Routing for ubuntusoftware.net: on or off, its rules (from → to), its destinations"
+depends = ["cf:build"]
+run = 'cf email-status'
+
+["cf:email-add"]
+description = "Mail to <from> forwarded to <to> (a new destination is emailed to verify first)"
+usage = 'arg "<from>" help="An address of ubuntusoftware.net"; arg "<to>" help="Where to forward it"'
+depends = ["cf:build"]
+run = 'cf email-add "{{usage.from}}" "{{usage.to}}"'
+
+["cf:email-remove"]
+description = "The Email Routing rule for <from> removed"
+usage = 'arg "<from>" help="The address whose rule to remove"'
+depends = ["cf:build"]
+run = 'cf email-remove "{{usage.from}}"'
+
+["cf:preview"]
+description = "The latest preview deployment: its URL and branch, opened in the browser"
+depends = ["cf:build"]
+run = 'cf preview'
+
+["cf:deployments"]
+description = "The Pages project's deployments (wrangler)"
+run = 'wrangler pages deployment list --project-name=ubuntu-website'
+
+["cf:tail"]
+description = "The latest deployment's logs, as they come (wrangler)"
+run = 'wrangler pages deployment tail --project-name=ubuntu-website'
+
+["cf:secrets"]
+description = "The Pages project's secrets, by name (wrangler)"
+run = 'wrangler pages secret list --project-name=ubuntu-website'

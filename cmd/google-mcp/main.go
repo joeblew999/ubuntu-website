@@ -12,7 +12,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fail("usage: google-mcp secret <key> | console | rotate | auth | check")
+		fail("usage: google-mcp setup | status | credentials | secret <key> | console | rotate | auth | check | accounts | reset [--yes]")
 	}
 	switch cmd, args := os.Args[1], os.Args[2:]; cmd {
 	case "secret":
@@ -25,6 +25,16 @@ func main() {
 		auth()
 	case "check":
 		check()
+	case "setup":
+		setup()
+	case "status":
+		status()
+	case "credentials":
+		credentials()
+	case "accounts":
+		accounts()
+	case "reset":
+		reset(args)
 	default:
 		fail("no command " + strconv.Quote(cmd))
 	}

@@ -64,7 +64,7 @@ internal/claude/                # Core logic (moved from internal/mcp/)
 The current token expires at `2025-12-19T16:38:39+07:00`. If expired:
 ```bash
 # Re-authenticate (will open browser)
-task google-mcp:auth
+mise run google-mcp:auth
 ```
 
 ### Future Enhancements
@@ -113,7 +113,7 @@ cd .src/google-mcp-server && go build -o ../../.build/google-mcp-server .
 rm -rf ~/.google-mcp-accounts/*.json
 
 # Re-authenticate
-task google-mcp:auth
+mise run google-mcp:auth
 
 # Restart Claude Code
 ```

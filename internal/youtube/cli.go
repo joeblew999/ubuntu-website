@@ -118,7 +118,7 @@ func runDownload(args []string, stdout, stderr io.Writer) int {
 	fs.BoolVar(&githubIssue, "github-issue", false, "Output markdown suitable for GitHub Issues")
 	fs.StringVar(&format, "format", "", "yt-dlp format selector (overrides other selectors)")
 	fs.StringVar(&quality, "quality", "", "Target max height (e.g. 720, 1080). Ignored when -format is set")
-	fs.StringVar(&output, "output", "", "Output path/template (Taskfile usually sets this)")
+	fs.StringVar(&output, "output", "", "Output path/template (e.g. static/videos/cache/%(title)s.%(ext)s)")
 	fs.BoolVar(&audioOnly, "audio-only", false, "Download audio only")
 	fs.BoolVar(&force, "force", false, "Overwrite existing files")
 
@@ -917,7 +917,7 @@ Download flags:
   -format         yt-dlp format selector (overrides quality/audio flags)
   -quality        Target max height (e.g. 720, 1080) when -format is not set
   -audio-only     Download audio only
-  -output         Output path/template (Taskfile typically sets this)
+  -output         Output path/template (e.g. static/videos/cache/%(title)s.%(ext)s)
   -force          Overwrite existing files
   -dir            Directory for list/refresh commands (default: current dir)
 
