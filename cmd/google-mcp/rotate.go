@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// rotate is google-mcp rotate, the task google:rotate: you click Add secret on the client page and copy the new
+// rotate is google-mcp rotate, the task google-mcp:rotate: you click Add secret on the client page and copy the new
 // secret; this picks it up from the clipboard, stores it, proves it at Google, and clears the clipboard. If the new
 // secret never works, the old one goes back.
 func rotate() {
@@ -50,7 +50,7 @@ func rotate() {
 	for try := 1; try <= 6; try++ {
 		err := checkAll()
 		if err == nil {
-			fmt.Println("✓ rotated. Now delete the OLD secret on the client page, then run: mise run google:check")
+			fmt.Println("✓ rotated. Now delete the OLD secret on the client page, then run: mise run google-mcp:check")
 			return
 		}
 		fmt.Println(err)

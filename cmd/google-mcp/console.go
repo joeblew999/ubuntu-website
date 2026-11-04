@@ -8,7 +8,7 @@ import (
 
 const site = "https://www.ubuntusoftware.net"
 
-// console is google-mcp console, the task google:console: the Google Cloud OAuth screens (Branding, Audience,
+// console is google-mcp console, the task google-mcp:console: the Google Cloud OAuth screens (Branding, Audience,
 // client) opened, and the exact values to enter on them printed. Google has no API for these screens.
 func console() {
 	for _, path := range []string{"/", "/privacy-policy/", "/terms-of-service/"} {
@@ -38,9 +38,9 @@ func console() {
      → Save
 2. Audience  https://console.cloud.google.com/auth/audience?project=%[1]s
      Publishing status must be "In production" → Publish app → Confirm
-     ("Testing" refresh tokens expire after 7 days). After publishing: mise run google:auth
+     ("Testing" refresh tokens expire after 7 days). After publishing: mise run google-mcp:auth
 3. Client    https://console.cloud.google.com/auth/clients/%[3]s?project=%[1]s
-     Type: Desktop app. Secrets: mise run google:rotate
+     Type: Desktop app. Secrets: mise run google-mcp:rotate
 `, p, site, client)
 	browse("https://console.cloud.google.com/auth/branding?project=" + p)
 	browse("https://console.cloud.google.com/auth/audience?project=" + p)

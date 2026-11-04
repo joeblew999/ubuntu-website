@@ -15,6 +15,7 @@ on:
       - '.github/workflows/taskfile.yml'
       # misecheck: mise.toml and the Go its tasks run
       - 'mise.toml'
+      - '.mise/**'
       - 'mise_test.go'
       - 'go.mod'
       - 'go.sum'
@@ -26,6 +27,7 @@ on:
       - '.github/workflows/taskfile.yml'
       # misecheck: mise.toml and the Go its tasks run
       - 'mise.toml'
+      - '.mise/**'
       - 'mise_test.go'
       - 'go.mod'
       - 'go.sum'

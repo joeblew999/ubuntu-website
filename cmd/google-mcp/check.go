@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// check is google-mcp check, the task google:check: the setup proved end to end, a token refresh at Google (so the
+// check is google-mcp check, the task google-mcp:check: the setup proved end to end, a token refresh at Google (so the
 // keychain's client id and secret are right) and a real Calendar call through the server.
 func check() {
 	if err := checkAll(); err != nil {
@@ -28,7 +28,7 @@ func checkAll() error {
 	home, _ := os.UserHomeDir()
 	files, _ := filepath.Glob(filepath.Join(home, ".google-mcp-accounts", "*.json"))
 	if len(files) == 0 {
-		return errors.New("✗ no signed-in Google account: run mise run google:auth")
+		return errors.New("✗ no signed-in Google account: run mise run google-mcp:auth")
 	}
 	id, err := secretValue("GOOGLE_CLIENT_ID")
 	if err != nil {
@@ -42,7 +42,7 @@ func checkAll() error {
 		name := strings.TrimSuffix(filepath.Base(f), ".json")
 		refresh := refreshToken(f)
 		if refresh == "" {
-			return fmt.Errorf("✗ %s: no refresh token: run mise run google:auth", filepath.Base(f))
+			return fmt.Errorf("✗ %s: no refresh token: run mise run google-mcp:auth", filepath.Base(f))
 		}
 		resp, err := http.PostForm("https://oauth2.googleapis.com/token", url.Values{
 			"grant_type": {"refresh_token"}, "refresh_token": {refresh}, "client_id": {id}, "client_secret": {secret},
@@ -58,9 +58,9 @@ func checkAll() error {
 		if resp.StatusCode != http.StatusOK {
 			switch body.Error {
 			case "invalid_grant":
-				return fmt.Errorf("✗ %s: token expired or revoked: run mise run google:auth", name)
+				return fmt.Errorf("✗ %s: token expired or revoked: run mise run google-mcp:auth", name)
 			case "invalid_client":
-				return errors.New("✗ client id/secret rejected: run mise run google:rotate (or google:secret)")
+				return errors.New("✗ client id/secret rejected: run mise run google-mcp:rotate (or google-mcp:secret)")
 			case "":
 				body.Error = "unknown"
 			}

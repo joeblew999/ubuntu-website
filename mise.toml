@@ -1,23 +1,15 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 
-# ubuntu-website: every third-party tool the Taskfiles and CI call is pinned here (Taskfiles never
-# install tools: add new ones to [tools]), plus the Google MCP server's setup tasks (the site's own
-# tasks stay in Taskfile.yml). Claude Code starts the server from .mcp.json
-# (`mise exec -- fnox exec -- google-mcp-server`).
+# ubuntu-website's control plane: every tool pinned (Taskfiles never install tools: add new ones to [tools]), the
+# settings and env every task runs with, and the tasks that act on the whole repo. The work itself is in task files,
+# one per Go binary, .mise/tasks/<binary>.toml: tasks named <binary>:<command>, each running <binary> <command>
+# (cmd/<binary>/<command>.go), built into bin/ by <binary>:build. They carry no tools or env of their own.
 #
-# New machine (the Google Cloud side already exists):
-#   mise trust && mise install
-#   mise run google:secret GOOGLE_CLIENT_ID          # hidden prompt → keychain (fnox.toml)
-#   mise run google:secret GOOGLE_CLIENT_SECRET
-#   mise run google:auth                             # browser sign-in, ends with google:check
+#   mise run root:check-mise    misecheck on this file and every task file: each held to its own binary, both ways
+#   mise tasks                  every task, with its file
 #
-# Google Cloud side (Google has no API for these screens, so the task opens them and prints what to paste):
-#   mise run google:console    # Branding + Audience ("Publish app": Testing tokens die after 7 days) + OAuth client
-#
-# Routine:
-#   mise run google:check      # token refresh at Google (proves client id + secret) + a real Calendar call
-#   mise run google:rotate     # new client secret: Add secret + copy in the console, the task does the rest
-#   mise run google:auth       # after "invalid_grant" (expired/revoked token) or to add another account
+# New machine: mise trust && mise install, then the domain's own first steps (e.g. .mise/tasks/google-mcp.toml's).
+# Not yet moved here: the Taskfiles (task …), domain by domain (TODO.md).
 
 [settings]
 # The `go` line in go.mod is the Go pin; this makes `mise install` honour it.
@@ -49,40 +41,13 @@ jq = "1.8.2"
 [env]
 # Google Cloud project (number) that owns the OAuth client. Not secret.
 UBUNTU_WEBSITE_GCP_PROJECT = "130034768106"
-# google:build puts google-mcp here; the google:* tasks run it by name.
+# Each <binary>:build puts its binary here; the tasks run it by name.
 _.path = ["{{config_root}}/bin"]
 
-[tasks."google:build"]
-description = "Build google-mcp (cmd/google-mcp) into bin/: the google:* tasks run it"
-run = 'go build -o bin/ ./cmd/google-mcp'
-
-[tasks."google:secret"]
-description = "Store GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in the keychain (hidden prompt, or stdin)"
-usage = 'arg "<key>" help="GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET"'
-depends = ["google:build"]
-run = 'google-mcp secret "{{usage.key}}"'
-
-[tasks."google:console"]
-description = "Open the Google Cloud OAuth screens (Branding, Audience, client) and print the exact values to enter"
-depends = ["google:build"]
-run = 'google-mcp console'
-
-[tasks."google:rotate"]
-description = "Rotate the OAuth client secret: you Add secret + copy it in the console; this stores, proves and cleans up"
-depends = ["google:build"]
-run = 'google-mcp rotate'
-
-[tasks."google:auth"]
-description = "Sign a Google account in to the Google MCP server (opens the browser), then run google:check"
-depends = ["google:build"]
-run = 'google-mcp auth'
-
-[tasks."google:check"]
-description = "Prove the Google MCP setup end to end: token refresh at Google (client id + secret) and a real Calendar call"
-depends = ["google:build"]
-run = 'google-mcp check'
+[task_config]
+# The task files, one per Go binary (mise loads this folder by default; named here so the control plane says so).
+includes = [".mise/tasks"]
 
 [tasks."root:check-mise"]
-description = "misecheck (github.com/joeblew999/mise-check) on this mise.toml, the file this task is in, the strict way for google-mcp: each task one line, no POSIX shell syntax, usage passed by name; each google-mcp command (cmd/google-mcp/<command>.go) run by a task and each task's command there; and the task names google-mcp's Go prints all tasks here"
-env = { MISE_FILE = "mise.toml", GO_CMD = "cmd", GO_LAYOUT = "file", GO_BINARIES = "google-mcp", GO_CALLERS = "cmd/google-mcp" }
+description = "misecheck (github.com/joeblew999/mise-check) on every mise file here: this one, and each .mise/tasks/<binary>.toml strictly against cmd/<binary>/ (each command a task, each task's command there, the task names its Go prints all tasks): one line each, usage passed by name, no POSIX shell syntax"
 run = 'go test . -run "^TestMise$" -count=1 -v'

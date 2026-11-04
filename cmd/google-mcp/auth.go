@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// auth is google-mcp auth, the task google:auth: a Google account signed in to the Google MCP server (it opens the
+// auth is google-mcp auth, the task google-mcp:auth: a Google account signed in to the Google MCP server (it opens the
 // browser), then check.
 func auth() {
 	srv, err := startServer()

@@ -1,7 +1,7 @@
 // Command google-mcp sets up and checks the Google MCP server Claude Code runs from .mcp.json
 // (mise exec -- fnox exec -- google-mcp-server): the OAuth client in the keychain (fnox.toml), the accounts signed in
-// (~/.google-mcp-accounts) and the Google Cloud screens. Each command is a file of its own and a task of mise.toml
-// (google:<command>).
+// (~/.google-mcp-accounts) and the Google Cloud screens. Each command is a file of its own and a task of
+// .mise/tasks/google-mcp.toml (google-mcp:<command>).
 package main
 
 import (

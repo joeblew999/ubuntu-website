@@ -1,0 +1,38 @@
+# The Google MCP server Claude Code runs from .mcp.json (mise exec -- fnox exec -- google-mcp-server): its setup and
+# its check. Each task runs one command of the google-mcp binary, cmd/google-mcp/<command>.go; misecheck holds the two
+# together (mise run root:check-mise). New machine, once the Google Cloud side exists:
+#   mise run google-mcp:secret GOOGLE_CLIENT_ID       # hidden prompt → keychain (fnox.toml)
+#   mise run google-mcp:secret GOOGLE_CLIENT_SECRET
+#   mise run google-mcp:auth                          # browser sign-in, ends with google-mcp:check
+# Google Cloud side (no API for these screens): mise run google-mcp:console
+# Routine: google-mcp:check, google-mcp:rotate (new client secret), google-mcp:auth (after invalid_grant).
+
+["google-mcp:build"]
+description = "Build google-mcp (cmd/google-mcp) into bin/: the google-mcp:* tasks run it"
+run = 'go build -o bin/ ./cmd/google-mcp'
+
+["google-mcp:secret"]
+description = "Store GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in the keychain (hidden prompt, or stdin)"
+usage = 'arg "<key>" help="GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET"'
+depends = ["google-mcp:build"]
+run = 'google-mcp secret "{{usage.key}}"'
+
+["google-mcp:console"]
+description = "Open the Google Cloud OAuth screens (Branding, Audience, client) and print the exact values to enter"
+depends = ["google-mcp:build"]
+run = 'google-mcp console'
+
+["google-mcp:rotate"]
+description = "Rotate the OAuth client secret: you Add secret + copy it in the console; this stores, proves and cleans up"
+depends = ["google-mcp:build"]
+run = 'google-mcp rotate'
+
+["google-mcp:auth"]
+description = "Sign a Google account in to the Google MCP server (opens the browser), then google-mcp:check"
+depends = ["google-mcp:build"]
+run = 'google-mcp auth'
+
+["google-mcp:check"]
+description = "Prove the Google MCP setup end to end: token refresh at Google (client id + secret) and a real Calendar call"
+depends = ["google-mcp:build"]
+run = 'google-mcp check'

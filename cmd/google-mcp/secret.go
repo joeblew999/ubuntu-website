@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-// secret is google-mcp secret <key>, the task google:secret: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET into the
+// secret is google-mcp secret <key>, the task google-mcp:secret: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET into the
 // keychain, from a hidden prompt or stdin.
 func secret(args []string) {
 	if len(args) != 1 || (args[0] != "GOOGLE_CLIENT_ID" && args[0] != "GOOGLE_CLIENT_SECRET") {

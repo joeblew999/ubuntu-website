@@ -124,7 +124,7 @@ tasks:
       Stores GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the macOS keychain (fnox.toml),
       prompting with hidden input for whichever is missing.
 
-      Replace one:   mise run google:secret GOOGLE_CLIENT_SECRET
+      Replace one:   mise run google-mcp:secret GOOGLE_CLIENT_SECRET
       Rotate secret: task google-mcp:rotate
     deps: [install]
     interactive: true
@@ -132,9 +132,9 @@ tasks:
       - |
         for key in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
           if fnox get "$key" >/dev/null 2>&1; then
-            echo "✅ $key already in the keychain (replace: mise run google:secret $key)"
+            echo "✅ $key already in the keychain (replace: mise run google-mcp:secret $key)"
           else
-            mise run google:secret "$key"
+            mise run google-mcp:secret "$key"
           fi
         done
 
@@ -143,24 +143,24 @@ tasks:
     deps: [install]
     interactive: true
     cmds:
-      - mise run google:auth
+      - mise run google-mcp:auth
 
   check:
     desc: "Prove the setup end to end (token refresh at Google + a real Calendar call)"
     cmds:
-      - mise run google:check
+      - mise run google-mcp:check
 
   console:
     desc: "Open the Google Cloud OAuth screens and print the exact values to enter"
     aliases: [guide]
     cmds:
-      - mise run google:console
+      - mise run google-mcp:console
 
   rotate:
     desc: "Rotate the OAuth client secret (you copy the new one in the console)"
     interactive: true
     cmds:
-      - mise run google:rotate
+      - mise run google-mcp:rotate
 
   accounts:list:
     desc: List authenticated Google accounts

@@ -20,6 +20,13 @@ Key points:
 - Taskfiles call tools by name and never install them (no `brew install`, `curl | bash`, `bun add -g`, `go install` for third-party tools). A `check:deps` for a mise tool runs `mise install <tool>`.
 - New tool → add it to `[tools]` in `mise.toml` with an exact version.
 
+### mise tasks: the layout (all tasks move here from the Taskfiles)
+
+- **`mise.toml` is the control plane**: tool pins, settings, env (`bin/` on PATH), tasks that act on the whole repo (`root:check-mise`), and `[task_config] includes = [".mise/tasks"]`.
+- **One task file per Go binary: `.mise/tasks/<binary>.toml`.** Tasks are `<binary>:<command>`, each one line running `<binary> <command>`, i.e. `cmd/<binary>/<command>.go` (a file per command, holding the function named for it); `<binary>:build` builds it into `bin/`, and the others `depends` on it. Flags are declared in the task's `usage` and passed by name (`{% if usage.x %} --x{% endif %}`); no shell syntax; logic in Go, not in the TOML. A domain that only runs tools (hugo, wrangler) gets a task file with no binary.
+- **misecheck holds it together** (`github.com/joeblew999/mise-check`; `mise_test.go`, `mise run root:check-mise`, in CI): `mise.toml` and every `.mise/tasks/*.toml`, each task file strictly against its own binary, both ways: every task's command is there, every command is run by a task, every flag on both sides, every task name the binary's Go prints is a task. A new task file is checked as soon as it exists.
+- Example: `.mise/tasks/google-mcp.toml` ↔ `cmd/google-mcp/`.
+
 **Upgrading: always through Taskfile** (mise only pins/installs underneath):
 
 | What | Command |
@@ -187,8 +194,9 @@ Used by `cmd/google` (`google auth login`) for automated Google OAuth flows.
 ┌─────────────────────────────────────────────────────────────────┐
 │                        PROJECT FILES                             │
 ├─────────────────────────────────────────────────────────────────┤
-│ mise.toml               - Pins google-mcp-server, fnox, jq;     │
-│                           google:* setup tasks (mise run ...)   │
+│ mise.toml               - Pins google-mcp-server, fnox, jq      │
+│ .mise/tasks/google-mcp.toml - google-mcp:* setup tasks, each    │
+│                           running cmd/google-mcp/<command>.go   │
 │ fnox.toml               - OAuth client id/secret → keychain     │
 │ .mcp.json               - MCP server config (checked in):       │
 │                           mise exec -- fnox exec -- google-mcp- │
@@ -207,8 +215,8 @@ Used by `cmd/google` (`google auth login`) for automated Google OAuth flows.
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-`task google-mcp:*` names are stable wrappers over the `mise run google:*` tasks (a published blog post uses them).
-Note: `task google:check` (is the unified CLI built and working) is not `mise run google:check` (MCP server end-to-end proof).
+`task google-mcp:*` names are stable wrappers over the `mise run google-mcp:*` tasks (a published blog post uses them).
+`task google:*` is a different thing: the unified Google CLI, `cmd/google`.
 
 **Why tokens are at `~/.google-mcp-accounts/`:**
 - Security: Tokens contain access to Google account - NEVER commit to git
