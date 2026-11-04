@@ -13,9 +13,14 @@ import (
 )
 
 // arcgis is a FeatureServer query endpoint holding count features, answering pages of what page asks for; errAt, when
-// not negative, is the offset it answers ArcGIS's HTTP 200 error at, and serve caps the features it serves.
-func arcgis(t *testing.T, count, serve, errAt int) *httptest.Server {
+// not negative, is the offset it answers ArcGIS's HTTP 200 error at (failing times times, every time if negative),
+// and serve caps the features it serves.
+func arcgis(t *testing.T, count, serve, errAt, failing int) *httptest.Server {
 	t.Helper()
+	old := retryDelay
+	retryDelay = 0
+	t.Cleanup(func() { retryDelay = old })
+	failed := 0
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		if q.Get("returnCountOnly") == "true" {
@@ -24,7 +29,8 @@ func arcgis(t *testing.T, count, serve, errAt int) *httptest.Server {
 		}
 		offset, _ := strconv.Atoi(q.Get("resultOffset"))
 		size, _ := strconv.Atoi(q.Get("resultRecordCount"))
-		if offset == errAt {
+		if offset == errAt && (failing < 0 || failed < failing) {
+			failed++
 			w.Write([]byte(`{"error":{"code":499,"message":"Token Required"}}`))
 			return
 		}
@@ -40,18 +46,19 @@ func arcgis(t *testing.T, count, serve, errAt int) *httptest.Server {
 
 func TestDownloadPaginated(t *testing.T) {
 	for _, tc := range []struct {
-		name                string
-		count, serve, errAt int
-		want                string // "" = succeeds
+		name                         string
+		count, serve, errAt, failing int
+		want                         string // "" = succeeds
 	}{
-		{"every page", 5, 5, -1, ""},
-		{"an error page", 5, 5, 2, "ArcGIS error at offset 2: 499 Token Required"},
-		{"an error on the first page", 5, 5, 0, "ArcGIS error at offset 0"},
-		{"fewer than counted", 5, 3, -1, "got 3 of the 5 features"},
-		{"counts none", 0, 0, -1, "reports none"},
+		{"every page", 5, 5, -1, 0, ""},
+		{"a page that errs twice: retried", 5, 5, 2, 2, ""},
+		{"a page that keeps erring", 5, 5, 2, -1, "page at offset 2, after 3 attempts: ArcGIS error 499 Token Required"},
+		{"the first page keeps erring", 5, 5, 0, -1, "page at offset 0"},
+		{"fewer than counted", 5, 3, -1, 0, "got 3 of the 5 features"},
+		{"counts none", 0, 0, -1, 0, "reports none"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := arcgis(t, tc.count, tc.serve, tc.errAt)
+			srv := arcgis(t, tc.count, tc.serve, tc.errAt, tc.failing)
 			out := filepath.Join(t.TempDir(), "out.geojson")
 			err := DownloadPaginated(srv.Client(), Dataset{BaseURL: srv.URL, PageSize: 2}, out)
 			if tc.want != "" {

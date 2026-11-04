@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 )
 
 // DownloadDirect downloads a file directly (no pagination).
@@ -38,22 +39,31 @@ type arcgisError struct {
 	Message string `json:"message"`
 }
 
-// DownloadPaginated handles ArcGIS FeatureServer pagination. It fails, writing nothing, on an error ArcGIS answers in
-// place of a page, and when the pages hold fewer features than the service counts: an empty or partial file would be
-// tiled into nothing, or into a map with holes.
-func DownloadPaginated(client *http.Client, ds Dataset, outPath string) error {
-	type FeatureCollection struct {
-		Type     string       `json:"type"`
-		Features []any        `json:"features"`
-		Error    *arcgisError `json:"error,omitempty"`
-	}
+// pageAttempts is how many times a page is fetched before the download fails, retryDelay the wait before the next
+// (doubling): ArcGIS times out or errs now and then, and one bad page in hundreds shouldn't lose the whole download.
+var (
+	pageAttempts = 3
+	retryDelay   = 2 * time.Second
+)
 
+// featurePage is a page of a FeatureServer query: its features, or the error ArcGIS answered in their place.
+type featurePage struct {
+	Type     string       `json:"type"`
+	Features []any        `json:"features"`
+	Error    *arcgisError `json:"error,omitempty"`
+}
+
+// DownloadPaginated downloads a FeatureServer layer through its query, a page at a time, each retried (pageAttempts).
+// It fails, writing nothing, on a page that still errs after its retries (HTTP, a timeout, or an error ArcGIS answers
+// in place of a page, with HTTP 200), and when the pages hold fewer features than the service counts: an empty or
+// partial file would be tiled into nothing, or into a map with holes (doc.go, rule 4).
+func DownloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 	want, err := featureCount(client, ds)
 	if err != nil {
 		return err
 	}
 
-	collection := FeatureCollection{
+	collection := featurePage{
 		Type:     "FeatureCollection",
 		Features: make([]any, 0, want),
 	}
@@ -67,26 +77,13 @@ func DownloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 		params.Set("resultRecordCount", fmt.Sprintf("%d", ds.PageSize))
 		params.Set("resultOffset", fmt.Sprintf("%d", offset))
 
-		queryURL := ds.BaseURL + "?" + params.Encode()
-
-		resp, err := client.Get(queryURL)
+		page, err := fetchPage(client, ds.BaseURL+"?"+params.Encode())
+		for attempt, delay := 1, retryDelay; err != nil && attempt < pageAttempts; attempt, delay = attempt+1, delay*2 {
+			time.Sleep(delay)
+			page, err = fetchPage(client, ds.BaseURL+"?"+params.Encode())
+		}
 		if err != nil {
-			return fmt.Errorf("fetch page at offset %d: %w", offset, err)
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			resp.Body.Close()
-			return fmt.Errorf("HTTP %d at offset %d", resp.StatusCode, offset)
-		}
-
-		var page FeatureCollection
-		if err := json.NewDecoder(resp.Body).Decode(&page); err != nil {
-			resp.Body.Close()
-			return fmt.Errorf("decode page at offset %d: %w", offset, err)
-		}
-		resp.Body.Close()
-		if page.Error != nil {
-			return fmt.Errorf("ArcGIS error at offset %d: %d %s", offset, page.Error.Code, page.Error.Message)
+			return fmt.Errorf("page at offset %d, after %d attempts: %w", offset, pageAttempts, err)
 		}
 
 		collection.Features = append(collection.Features, page.Features...)
@@ -108,6 +105,26 @@ func DownloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 
 	encoder := json.NewEncoder(f)
 	return encoder.Encode(collection)
+}
+
+// fetchPage is one page of a FeatureServer query.
+func fetchPage(client *http.Client, pageURL string) (featurePage, error) {
+	var page featurePage
+	resp, err := client.Get(pageURL)
+	if err != nil {
+		return page, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return page, fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&page); err != nil {
+		return page, fmt.Errorf("decode: %w", err)
+	}
+	if page.Error != nil {
+		return page, fmt.Errorf("ArcGIS error %d %s", page.Error.Code, page.Error.Message)
+	}
+	return page, nil
 }
 
 // featureCount is how many features the service holds (returnCountOnly), the number a full download must reach.

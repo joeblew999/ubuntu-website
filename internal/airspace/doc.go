@@ -10,7 +10,9 @@
 //  1. A dataset's version is its FAA FeatureServer layer's editingInfo.dataLastEditDate (Dataset.LayerURL, ?f=json):
 //     when the FAA last changed its data. The FAA publishes no delta (the layers answer queries only: no sync, no
 //     extractChanges, no editor tracking) and republishes each layer whole every 28-day AIRAC cycle, so the version
-//     is all there is to know: a dataset changed or it didn't, and a changed one is downloaded whole.
+//     is all there is to know: a dataset changed or it didn't, and a changed one is downloaded whole, through its
+//     layer's query, in pages (each retried), not ArcGIS Hub's download files, which Hub builds on demand and
+//     which have taken over five minutes.
 //  2. What's published is the manifest in R2 (PublishedURL, airspace/manifest_usa.json): each layer's SourceVersion is
 //     the version its tiles there were built from. It lives beside the tiles it describes, so it's the same for CI,
 //     a laptop or a fresh clone; nothing is cached between runs.

@@ -7,9 +7,9 @@ type Dataset struct {
 	GeoJSON     string // GeoJSON filename
 	PMTiles     string // PMTiles filename
 	Layer       string // PMTiles layer name
-	BaseURL     string // Download URL
-	IsPaginated bool   // For FeatureServer APIs that require pagination
-	PageSize    int    // Page size for paginated APIs
+	BaseURL     string // Download URL: its FeatureServer layer's query (paginated), or a file
+	IsPaginated bool   // A FeatureServer query, downloaded in pages
+	PageSize    int    // The layer's maxRecordCount: the most a page holds
 	LayerURL    string // Its FAA FeatureServer layer, whose editingInfo.dataLastEditDate is its version (doc.go, rule 1)
 }
 
@@ -27,40 +27,48 @@ var Datasets = map[string]Dataset{
 		LayerURL:    "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/FAA_UAS_FacilityMap_Data/FeatureServer/0",
 	},
 	"boundary": {
-		Name:     "Airspace Boundary",
-		Key:      "boundary",
-		GeoJSON:  GeoJSONBoundary,
-		PMTiles:  PMTilesBoundary,
-		Layer:    LayerBoundary,
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/67885972e4e940b2aa6d74024901c561/geojson?layers=0",
-		LayerURL: "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/Boundary_Airspace/FeatureServer/0",
+		Name:        "Airspace Boundary",
+		Key:         "boundary",
+		GeoJSON:     GeoJSONBoundary,
+		PMTiles:     PMTilesBoundary,
+		Layer:       LayerBoundary,
+		BaseURL:     "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/Boundary_Airspace/FeatureServer/0/query",
+		IsPaginated: true,
+		PageSize:    2000,
+		LayerURL:    "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/Boundary_Airspace/FeatureServer/0",
 	},
 	"sua": {
-		Name:     "Special Use Airspace",
-		Key:      "sua",
-		GeoJSON:  GeoJSONSUA,
-		PMTiles:  PMTilesSUA,
-		Layer:    LayerSUA,
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/dd0d1b726e504137ab3c41b21835d05b/geojson?layers=0",
-		LayerURL: "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/Special_Use_Airspace/FeatureServer/0",
+		Name:        "Special Use Airspace",
+		Key:         "sua",
+		GeoJSON:     GeoJSONSUA,
+		PMTiles:     PMTilesSUA,
+		Layer:       LayerSUA,
+		BaseURL:     "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/Special_Use_Airspace/FeatureServer/0/query",
+		IsPaginated: true,
+		PageSize:    2000,
+		LayerURL:    "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/Special_Use_Airspace/FeatureServer/0",
 	},
 	"airports": {
-		Name:     "Airports",
-		Key:      "airports",
-		GeoJSON:  GeoJSONAirports,
-		PMTiles:  PMTilesAirports,
-		Layer:    LayerAirports,
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/e747ab91a11045e8b3f8a3efd093d3b5/geojson?layers=0",
-		LayerURL: "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/US_Airport/FeatureServer/0",
+		Name:        "Airports",
+		Key:         "airports",
+		GeoJSON:     GeoJSONAirports,
+		PMTiles:     PMTilesAirports,
+		Layer:       LayerAirports,
+		BaseURL:     "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/US_Airport/FeatureServer/0/query",
+		IsPaginated: true,
+		PageSize:    1000,
+		LayerURL:    "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/US_Airport/FeatureServer/0",
 	},
 	"navaids": {
-		Name:     "Navigation Aids",
-		Key:      "navaids",
-		GeoJSON:  GeoJSONNavaids,
-		PMTiles:  PMTilesNavaids,
-		Layer:    LayerNavaids,
-		BaseURL:  "https://adds-faa.opendata.arcgis.com/api/download/v1/items/990e238991b44dd08af27d7b43e70b92/geojson?layers=0",
-		LayerURL: "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/NAVAIDSystem/FeatureServer/0",
+		Name:        "Navigation Aids",
+		Key:         "navaids",
+		GeoJSON:     GeoJSONNavaids,
+		PMTiles:     PMTilesNavaids,
+		Layer:       LayerNavaids,
+		BaseURL:     "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/NAVAIDSystem/FeatureServer/0/query",
+		IsPaginated: true,
+		PageSize:    1000,
+		LayerURL:    "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/NAVAIDSystem/FeatureServer/0",
 	},
 	"obstacles": {
 		Name:    "Obstacles",
