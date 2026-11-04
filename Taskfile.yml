@@ -42,12 +42,6 @@ version: '3'
 includes:
   # Domain modules
   cf: ./taskfiles/Taskfile.cf.yml
-  autotranslate: ./taskfiles/Taskfile.autotranslate.yml
-  cfanalytics: ./taskfiles/Taskfile.cfanalytics.yml
-  genlogo: ./taskfiles/Taskfile.genlogo.yml
-  mailerlite: ./taskfiles/Taskfile.mailerlite.yml
-  google: ./taskfiles/Taskfile.google.yml
-  youtube: ./taskfiles/Taskfile.youtube.yml
 
   # Tools (git exposed at top-level for convenience: git:deploy, git:status)
   git:
@@ -61,16 +55,13 @@ includes:
   claude-cli: ./taskfiles/tools/Taskfile.claude-cli.yml
 
   # Browser automation
-  playwright: ./taskfiles/tools/Taskfile.playwright.yml
 
   # Cloudflare Workers (serverless webhooks)
   workers: ./taskfiles/Taskfile.workers.yml
 
   # Go vanity imports (/pkg/)
-  vanityimport: ./taskfiles/Taskfile.vanityimport.yml
 
   # Airspace demo (BVLOS development)
-  airspace: ./taskfiles/Taskfile.airspace.yml
 
   # R2 object storage (large static assets)
   r2: ./taskfiles/Taskfile.cf-r2.yml
@@ -245,12 +236,6 @@ tasks:
     cmds:
       - echo "Simulating health check failure..."
       - exit 1
-
-  ci:cfanalytics:
-    desc: "[Monitor] Cloudflare Analytics - Run analytics check for CI"
-    deps: [cfanalytics:check:deps]
-    cmds:
-      - '{{.HOME}}/.local/bin/cfanalytics{{exeExt}} -github-issue'
 
   # ===========================================================================
   # Code Quality

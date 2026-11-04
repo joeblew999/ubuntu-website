@@ -1,0 +1,40 @@
+# Machine translation of the site's Hugo markdown (DeepL, Claude's API, or the Claude CLI): front matter, shortcodes,
+# code and links kept as they are. Each task runs one command of the autotranslate binary, cmd/autotranslate; its
+# arguments and flags are passed through:
+#   mise run autotranslate:missing vi --provider claude-cli --dry-run
+#   mise run autotranslate:file content/english/blog/post.md de
+# DEEPL_API_KEY / CLAUDE_API_KEY from .env. Which pages need it: translate:content missing.
+
+["autotranslate:build"]
+description = "Build autotranslate (cmd/autotranslate) into bin/: the autotranslate:* tasks run it"
+run = 'go build -o bin/ ./cmd/autotranslate'
+
+["autotranslate:file"]
+description = "One page translated: file <path> <lang>"
+depends = ["autotranslate:build"]
+run = 'autotranslate file'
+
+["autotranslate:missing"]
+description = "Every page missing in a language translated: missing <lang>"
+depends = ["autotranslate:build"]
+run = 'autotranslate missing'
+
+["autotranslate:arb"]
+description = "A tokibundle's ARB strings translated: arb <lang>"
+depends = ["autotranslate:build"]
+run = 'autotranslate arb'
+
+["autotranslate:arb-status"]
+description = "The ARB strings' state per language"
+depends = ["autotranslate:build"]
+run = 'autotranslate arb-status'
+
+["autotranslate:languages"]
+description = "The languages the provider can translate to"
+depends = ["autotranslate:build"]
+run = 'autotranslate languages'
+
+["autotranslate:status"]
+description = "The provider's set-up and quota (DeepL's characters this month)"
+depends = ["autotranslate:build"]
+run = 'autotranslate status'

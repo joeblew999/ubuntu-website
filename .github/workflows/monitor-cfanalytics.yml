@@ -1,0 +1,80 @@
+# monitor-cfanalytics: has the site's traffic changed a lot? Every Sunday (or by hand) it runs mise run cfanalytics:issue
+# (.mise/tasks/cfanalytics.toml, cmd/cfanalytics): Cloudflare Web Analytics against the last report's state (kept as an
+# artifact). A change over 20% opens an issue, or is a comment on the one already open. The Go itself is built, vetted
+# and held to its tasks by core-ci (mise run root:ci).
+#
+# Secret CLOUDFLARE_API_TOKEN (Account Analytics:Read); variables CF_ACCOUNT_ID, CF_WEB_ANALYTICS_SITE_TAG.
+name: monitor-cfanalytics
+
+on:
+  schedule:
+    - cron: '0 9 * * 0'  # Sunday 9am UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        with:
+          version: 2026.9.15
+          cache: true
+
+      - name: Previous state
+        uses: dawidd6/action-download-artifact@eab87c9830c39eff17e5a6eadb20bfb4bc880477 # v27
+        with:
+          name: analytics-state
+          path: .
+          if_no_artifact_found: ignore
+          workflow_conclusion: success
+          search_artifacts: true
+
+      - name: mise run cfanalytics:issue (fails on a significant change; its report in report.md)
+        id: check
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
+          CF_WEB_ANALYTICS_SITE_TAG: ${{ vars.CF_WEB_ANALYTICS_SITE_TAG }}
+        run: |
+          mise run cfanalytics:issue > report.md
+          cat report.md
+
+      - name: Save state
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: analytics-state
+          path: .analytics-state.json
+          retention-days: 90
+          overwrite: true
+          include-hidden-files: true
+
+      # One issue open at a time: a later report is a comment on it, until it's closed.
+      - name: The open issue, if any
+        id: open
+        if: steps.check.outcome == 'failure' && hashFiles('report.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "number=$(gh issue list --label analytics --state open --limit 1 --json number --jq '.[0].number // empty')" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue
+        if: steps.open.conclusion == 'success' && steps.open.outputs.number == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "Analytics Alert: Significant traffic change detected" --body-file report.md --label "analytics,automated"
+
+      - name: Comment on the open issue
+        if: steps.open.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ steps.open.outputs.number }}
+        run: |
+          gh issue comment "$NUMBER" --body-file report.md

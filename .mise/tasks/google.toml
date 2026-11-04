@@ -1,0 +1,46 @@
+# One CLI for the Google services, on the accounts signed in (~/.google-mcp-accounts, shared with the Google MCP
+# server, google-mcp:*): each task is a service of the google binary, cmd/google, its subcommands and flags passed
+# through:
+#   mise run google:calendar today          mise run google:calendar create --title ... --start ... --end ...
+#   mise run google:gmail send --to x@y.com --subject Hello --body Message   (From is always gerard.webb@ubuntusoftware.net)
+#   mise run google:auth login
+# Never send email through a browser MCP directly: google:gmail fixes the From address.
+
+["google:build"]
+description = "Build google (cmd/google) into bin/: the google:* tasks run it"
+run = 'go build -o bin/ ./cmd/google'
+
+["google:auth"]
+description = "Signing in to Google: login, open, add, remove, status, check, guide"
+depends = ["google:build"]
+run = 'google auth'
+
+["google:calendar"]
+description = "Google Calendar: today, list, create, compose, open, server, check"
+depends = ["google:build"]
+run = 'google calendar'
+
+["google:gmail"]
+description = "Gmail: list, send, compose, server, check (From is always gerard.webb@ubuntusoftware.net)"
+depends = ["google:build"]
+run = 'google gmail'
+
+["google:drive"]
+description = "Google Drive: list, get, download, upload, mkdir, rm"
+depends = ["google:build"]
+run = 'google drive'
+
+["google:sheets"]
+description = "Google Sheets: info, get, set, append, clear"
+depends = ["google:build"]
+run = 'google sheets'
+
+["google:docs"]
+description = "Google Docs: get, create, append, insert, replace"
+depends = ["google:build"]
+run = 'google docs'
+
+["google:slides"]
+description = "Google Slides: get, create, add, delete"
+depends = ["google:build"]
+run = 'google slides'

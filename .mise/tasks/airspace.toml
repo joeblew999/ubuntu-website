@@ -1,0 +1,63 @@
+# The FAA airspace data behind the BVLOS demo (/fleet/airspace-demo/): FAA ArcGIS → GeoJSON (ETag-checked, so a sync
+# with nothing new changes nothing) → PMTiles (tippecanoe if installed, else the Go tiler) → R2. Each task runs one
+# command of the airspace binary, cmd/airspace/<command>.go; misecheck holds the two together.
+#   mise run airspace:pipeline            sync + tile + manifest, locally (no upload)
+#   mise run airspace:upload              the tiles and manifests to R2 (CLOUDFLARE_API_TOKEN from .env)
+# The weekly one is .github/workflows/sync-airspace.yml. Serving tiles locally: pmtiles-server:serve.
+
+["airspace:build"]
+description = "Build airspace (cmd/airspace) into bin/: the airspace:* tasks run it"
+run = 'go build -o bin/ ./cmd/airspace'
+
+["airspace:pipeline"]
+description = "Sync, tile and manifest, each step only if something changed (--force: all of them)"
+usage = 'flag "--force" help="Every step, changed or not"; flag "--tiler <tiler>" help="auto (default), tippecanoe or gotiler"'
+depends = ["airspace:build"]
+run = 'airspace pipeline{% if usage.force %} --force{% endif %}{% if usage.tiler %} --tiler "{{usage.tiler}}"{% endif %}'
+
+["airspace:sync"]
+description = "The FAA datasets downloaded, only those whose ETag changed"
+usage = 'flag "--force" help="Download even if unchanged"; flag "--skip-large <bool>" help="Skip the datasets over 100MB (default true)"; flag "--timeout <duration>" help="HTTP timeout (default 5m)"'
+depends = ["airspace:build"]
+run = 'airspace sync{% if usage.force %} --force{% endif %}{% if usage.skip_large %} --skip-large={{usage.skip_large}}{% endif %}{% if usage.timeout %} --timeout {{usage.timeout}}{% endif %}'
+
+["airspace:tile"]
+description = "The GeoJSON made into PMTiles, only what's out of date"
+usage = 'flag "--dataset <name>" help="One dataset (default: all)"; flag "--force" help="Regenerate even if up to date"; flag "--tiler <tiler>" help="auto (default), tippecanoe or gotiler"'
+depends = ["airspace:build"]
+run = 'airspace tile{% if usage.dataset %} --dataset "{{usage.dataset}}"{% endif %}{% if usage.force %} --force{% endif %}{% if usage.tiler %} --tiler "{{usage.tiler}}"{% endif %}'
+
+["airspace:manifest"]
+description = "The manifests the demo page loads (data/airspace/*manifest.json)"
+depends = ["airspace:build"]
+run = 'airspace manifest'
+
+["airspace:upload"]
+description = "The tiles and manifests uploaded to R2 (--test: the endpoints only)"
+usage = 'flag "--test" help="Test the endpoints, upload nothing"'
+depends = ["airspace:build"]
+run = 'airspace upload{% if usage.test %} --test{% endif %}'
+
+["airspace:upload-list"]
+description = "What's in R2 under airspace/"
+run = 'wrangler r2 object list ubuntu-website-assets --prefix airspace/'
+
+["airspace:status"]
+description = "The local data files"
+depends = ["airspace:build"]
+run = 'airspace status'
+
+["airspace:history"]
+description = "The sync history, for tuning the schedule"
+depends = ["airspace:build"]
+run = 'airspace history'
+
+["airspace:check"]
+description = "Whether the last sync changed anything, as changed=true|false for a workflow's output"
+depends = ["airspace:build"]
+run = 'airspace check'
+
+["airspace:summary"]
+description = "The last sync's summary, as markdown for a workflow's summary"
+depends = ["airspace:build"]
+run = 'airspace summary'

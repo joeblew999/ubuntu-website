@@ -1,27 +1,18 @@
-// Command airspace manages FAA airspace data for the BVLOS demo.
+// Command airspace manages the FAA airspace data behind the BVLOS demo (layouts/fleet/airspace-demo.html): FAA
+// ArcGIS → GeoJSON (ETag-checked) → PMTiles → R2. Each command is a file of its own and a task of
+// .mise/tasks/airspace.toml:
 //
-// Usage:
-//
-//	airspace pipeline    # Full pipeline: sync → tile → manifest (local dev)
-//	airspace upload      # Upload to R2 (production)
-//	airspace sync        # Smart sync (only download if changed)
-//	airspace tile        # Convert GeoJSON to PMTiles
-//	airspace manifest    # Generate manifest files
-//	airspace status      # Show data file status
-//
-// See also: layouts/fleet/airspace-demo.html
+//	mise run airspace:pipeline    sync → tile → manifest, each only if something changed (local dev)
+//	mise run airspace:upload      the tiles and manifests to R2 (production)
+//	mise run airspace:sync        download only the datasets that changed
+//	mise run airspace:tile        GeoJSON to PMTiles
+//	mise run airspace:manifest    the manifests
+//	mise run airspace:status      the local data files
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
-	"time"
-
-	"github.com/joeblew999/ubuntu-website/internal/airspace"
-	"github.com/joeblew999/ubuntu-website/internal/airspace/gotiler"
-	"github.com/joeblew999/ubuntu-website/internal/airspace/tiler"
 )
 
 // fatal prints an error and exits.
@@ -41,23 +32,23 @@ func main() {
 
 	switch cmd {
 	case "pipeline":
-		runPipeline()
+		pipeline()
 	case "sync":
-		runSync()
+		sync()
 	case "tile":
-		runTile()
+		tile()
 	case "manifest":
-		runManifest()
+		manifest()
 	case "upload":
-		runUpload()
+		upload()
 	case "status":
-		runStatus()
+		status()
 	case "history":
-		runHistory()
+		history()
 	case "summary":
-		runSummary()
+		summary()
 	case "check":
-		runCheck()
+		check()
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -100,265 +91,30 @@ func printUsage() {
 // Pipeline Command
 // ============================================================================
 
-func runPipeline() {
-	fs := flag.NewFlagSet("pipeline", flag.ExitOnError)
-	force := fs.Bool("force", false, "Force all steps even if no changes")
-	tilerFlag := fs.String("tiler", "auto", "Tiler: auto, tippecanoe, gotiler")
-	fs.Parse(os.Args[1:])
-
-	fmt.Println("╔════════════════════════════════════════╗")
-	fmt.Println("║   FAA Airspace Pipeline (Idempotent)   ║")
-	fmt.Println("╚════════════════════════════════════════╝")
-	fmt.Println()
-
-	// Select tiler
-	activeTiler, err := airspace.SelectTiler(*tilerFlag, tiler.New(), gotiler.New())
-	if err != nil {
-		fatal(err)
-	}
-	fmt.Printf("Tiler: %s\n\n", activeTiler.Name())
-
-	// Run pipeline
-	opts := airspace.PipelineOptions{
-		Force:     *force,
-		TilerName: *tilerFlag,
-	}
-
-	result, err := airspace.Pipeline(opts, activeTiler)
-	if err != nil {
-		fatal(err)
-	}
-
-	// Print summary
-	fmt.Println()
-	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-	if result.Skipped {
-		fmt.Println("✓ No changes detected - pipeline complete (idempotent)")
-		fmt.Println("  Skipped: tile generation, manifest update")
-	} else {
-		fmt.Printf("✓ Pipeline complete: %d synced, %d tiled\n",
-			result.SyncResult.Updated, result.TileCount)
-		fmt.Println("  Next: Run 'airspace upload' to push to R2")
-	}
-	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-}
-
 // ============================================================================
 // Sync Command
 // ============================================================================
-
-func runSync() {
-	fs := flag.NewFlagSet("sync", flag.ExitOnError)
-	force := fs.Bool("force", false, "Force re-download even if unchanged")
-	skipLarge := fs.Bool("skip-large", true, "Skip datasets >100MB (obstacles)")
-	timeout := fs.Duration("timeout", 5*time.Minute, "HTTP request timeout")
-	fs.Parse(os.Args[1:])
-
-	fmt.Println("Syncing FAA Airspace Data")
-	fmt.Println("=========================")
-	if *force {
-		fmt.Println("Mode: FORCE (re-downloading all)")
-	} else {
-		fmt.Println("Mode: Smart (ETag-based diff)")
-	}
-	fmt.Println()
-
-	opts := airspace.DefaultSyncOptions()
-	opts.Force = *force
-	opts.SkipLarge = *skipLarge
-	opts.Timeout = *timeout
-
-	if !*skipLarge {
-		opts.Datasets = airspace.AllDatasets
-	}
-
-	result, err := airspace.Sync(opts)
-	if err != nil {
-		fatal(err)
-	}
-
-	// Print dataset results
-	for key, ds := range result.Datasets {
-		switch ds.Status {
-		case "updated":
-			fmt.Printf("[%s] ✓ updated (%.1f MB)\n", key, ds.SizeMB)
-		case "unchanged":
-			fmt.Printf("[%s] unchanged\n", key)
-		case "missing":
-			fmt.Printf("[%s] downloaded (was missing)\n", key)
-		case "error":
-			fmt.Printf("[%s] ERROR: %s\n", key, ds.Error)
-		}
-	}
-
-	fmt.Println()
-	fmt.Printf("Done: %d updated, %d unchanged in %s\n", result.Updated, result.Skipped, result.Duration)
-	if result.HasChanges {
-		fmt.Printf("Downloaded: %.1f MB total\n", result.TotalSizeMB)
-		fmt.Println("\nRun 'airspace pipeline' to generate tiles.")
-	}
-}
 
 // ============================================================================
 // Tile Command
 // ============================================================================
 
-func runTile() {
-	fs := flag.NewFlagSet("tile", flag.ExitOnError)
-	datasetFlag := fs.String("dataset", "", "Specific dataset to tile (empty = all)")
-	force := fs.Bool("force", false, "Force regenerate even if up-to-date")
-	tilerFlag := fs.String("tiler", "auto", "Tiler: auto, tippecanoe, gotiler")
-	fs.Parse(os.Args[1:])
-
-	// Select tiler
-	activeTiler, err := airspace.SelectTiler(*tilerFlag, tiler.New(), gotiler.New())
-	if err != nil {
-		fatal(err)
-	}
-
-	fmt.Printf("Converting GeoJSON to PMTiles (using %s)\n", activeTiler.Name())
-	fmt.Println("=========================================")
-	fmt.Println()
-
-	if *datasetFlag != "" {
-		// Single dataset
-		if err := airspace.TileOne(activeTiler, *datasetFlag, *force); err != nil {
-			fatal(err)
-		}
-		fmt.Printf("[%s] ✓ done\n", *datasetFlag)
-	} else {
-		// All datasets
-		count, err := airspace.TileAll(activeTiler, *force)
-		if err != nil {
-			fatal(err)
-		}
-		fmt.Printf("\nDone: %d datasets tiled\n", count)
-	}
-}
-
 // ============================================================================
 // Manifest Command
 // ============================================================================
-
-func runManifest() {
-	fmt.Println("Generating Airspace Manifests")
-	fmt.Println("=============================")
-	fmt.Println()
-
-	if err := airspace.GenerateManifests(airspace.DirData, airspace.DirPMTiles, airspace.DirGeoJSON); err != nil {
-		fatal(err)
-	}
-
-	fmt.Printf("✓ %s\n", filepath.Join(airspace.DirData, airspace.FileManifest))
-	fmt.Printf("✓ %s\n", filepath.Join(airspace.DirData, airspace.FileUSAManifest))
-	fmt.Println("\nManifests updated.")
-}
 
 // ============================================================================
 // Status Command
 // ============================================================================
 
-func runStatus() {
-	fmt.Println("Airspace Data Status")
-	fmt.Println("====================")
-	fmt.Println()
-
-	found := 0
-	for _, key := range airspace.AllDatasets {
-		ds := airspace.Datasets[key]
-		path := filepath.Join(airspace.DirGeoJSON, ds.GeoJSON)
-		info, err := os.Stat(path)
-		if err != nil {
-			fmt.Printf("  [%s] %s: NOT FOUND\n", key, ds.Name)
-			continue
-		}
-
-		found++
-		age := time.Since(info.ModTime())
-		fmt.Printf("  [%s] %s: %.1f MB (%s old)\n",
-			key, ds.Name, float64(info.Size())/(1024*1024), airspace.FormatAge(age))
-	}
-
-	fmt.Println()
-	fmt.Printf("Found %d/%d datasets.\n", found, len(airspace.AllDatasets))
-}
-
 // ============================================================================
 // History Command
 // ============================================================================
-
-func runHistory() {
-	historyFile := filepath.Join(airspace.DirData, airspace.FileSyncHistory)
-	history := airspace.LoadSyncHistory(historyFile)
-
-	fmt.Println("FAA Airspace Sync History")
-	fmt.Println("=========================")
-	fmt.Println()
-
-	if history.TotalRuns == 0 {
-		fmt.Println("No sync history yet. Run 'airspace sync' to start tracking.")
-		return
-	}
-
-	fmt.Println("Summary:")
-	fmt.Printf("  Total sync runs: %d\n", history.TotalRuns)
-	fmt.Printf("  Changes detected: %d times (%.1f%%)\n", history.ChangeCount,
-		float64(history.ChangeCount)/float64(history.TotalRuns)*100)
-	fmt.Printf("  Last change: %s\n", airspace.FormatTimeSince(history.LastChange))
-	fmt.Printf("  Average duration: %s\n", history.AvgDuration)
-	fmt.Println()
-
-	fmt.Println("Recent Runs (newest first):")
-	fmt.Println("----------------------------")
-	for i, run := range history.Runs {
-		if i >= 10 {
-			fmt.Printf("  ... and %d more\n", len(history.Runs)-10)
-			break
-		}
-		status := "no changes"
-		if run.HasChanges {
-			status = fmt.Sprintf("%d updated, %.1f MB", run.Updated, run.TotalSizeMB)
-		}
-		fmt.Printf("  %s  %s  (%s)\n",
-			run.Timestamp.Format("2006-01-02 15:04"),
-			status,
-			run.Duration)
-	}
-}
 
 // ============================================================================
 // Upload Command
 // ============================================================================
 
-func runUpload() {
-	fs := flag.NewFlagSet("upload", flag.ExitOnError)
-	testOnly := fs.Bool("test", false, "Test endpoints only (don't upload)")
-	fs.Parse(os.Args[1:])
-
-	if *testOnly {
-		// Test mode - check if endpoints are accessible
-		if err := airspace.TestR2Endpoints(); err != nil {
-			fatal(err)
-		}
-		return
-	}
-
-	// Upload mode
-	if err := airspace.UploadToR2(); err != nil {
-		fatal(err)
-	}
-}
-
 // ============================================================================
 // CI Helpers
 // ============================================================================
-
-func runCheck() {
-	airspace.PrintCheckOutput(os.Stdout)
-}
-
-func runSummary() {
-	w, cleanup := airspace.GetSummaryWriter()
-	defer cleanup()
-	airspace.PrintSummary(w)
-}

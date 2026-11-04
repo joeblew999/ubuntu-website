@@ -142,7 +142,7 @@ Use the built-in mailerlite CLI server for development and testing.
 
 ```bash
 # Start server
-task mailerlite:server PORT=8086 GROUP_ID=173641063022462964
+mise run mailerlite:server PORT=8086 GROUP_ID=173641063022462964
 
 # Test with curl
 curl -X POST http://localhost:8086/webhook \
@@ -225,21 +225,21 @@ Or visit: https://github.com/joeblew999/ubuntu-website/releases/latest
 
 ```bash
 # Subscriber management
-task mailerlite:subscribers:list
-task mailerlite:subscribers:add EMAIL=user@example.com NAME="John Doe"
-task mailerlite:subscribers:delete EMAIL=user@example.com
+mise run mailerlite:subscribers list
+mise run mailerlite:subscribers add user@example.com "John Doe"
+mise run mailerlite:subscribers delete user@example.com
 
 # Group management
-task mailerlite:groups:list
-task mailerlite:groups:create NAME="Get Started"
-task mailerlite:groups:assign GROUP_ID=xxx EMAIL=user@example.com
+mise run mailerlite:groups list
+mise run mailerlite:groups create "Get Started"
+mise run mailerlite:groups assign xxx user@example.com
 
 # Webhook server (development)
-task mailerlite:server PORT=8086 GROUP_ID=xxx
+mise run mailerlite:server PORT=8086 GROUP_ID=xxx
 
 # GitHub releases info
-task mailerlite:releases:latest
-task mailerlite:releases:urls
+mise run mailerlite:releases latest
+mise run mailerlite:releases urls
 ```
 
 ## Current Configuration

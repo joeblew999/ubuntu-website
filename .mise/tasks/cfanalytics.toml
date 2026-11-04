@@ -1,0 +1,18 @@
+# The site's traffic from Cloudflare Web Analytics, against the last report (.analytics-state.json). Each task runs one
+# command of the cfanalytics binary, cmd/cfanalytics; flags pass through:
+#   mise run cfanalytics:report --days 30 -v
+# The weekly one is .github/workflows/monitor-cfanalytics.yml: mise run cfanalytics:issue. CLOUDFLARE_API_TOKEN from .env.
+
+["cfanalytics:build"]
+description = "Build cfanalytics (cmd/cfanalytics) into bin/: the cfanalytics:* tasks run it"
+run = 'go build -o bin/ ./cmd/cfanalytics'
+
+["cfanalytics:report"]
+description = "The traffic report (--days, -v, --webhook to post it)"
+depends = ["cfanalytics:build"]
+run = 'cfanalytics report'
+
+["cfanalytics:issue"]
+description = "The weekly report as markdown for a GitHub issue; fails when traffic changed significantly"
+depends = ["cfanalytics:build"]
+run = 'cfanalytics issue'

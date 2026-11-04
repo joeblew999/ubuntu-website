@@ -4,7 +4,7 @@
 //
 // This package generates all brand assets from a single set of inputs (brand symbol,
 // company name, colors, fonts). When branding needs to change, update the BRAND
-// INPUTS section and regenerate all assets with: task genlogo:all
+// INPUTS section and regenerate all assets with: mise run genlogo:all
 //
 // Output types:
 //   - SVG: For Hugo website (scalable, crisp text at any resolution)
@@ -53,7 +53,7 @@ const (
 // BRAND INPUTS - Change these to update all assets
 // =============================================================================
 //
-// To rebrand: Update these values and run `task genlogo:all`
+// To rebrand: Update these values and run `mise run genlogo:all`
 // All generated assets will automatically use the new branding.
 const (
 	// Brand identity

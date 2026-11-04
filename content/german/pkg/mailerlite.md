@@ -13,7 +13,7 @@ has_binary: true
 binary_name: mailerlite
 taskfile_path: taskfiles/Taskfile.mailerlite.yml
 process:
-  command: task mailerlite:server
+  command: mise run mailerlite:server
   port: 8086
   health_path: /health
   disabled: true

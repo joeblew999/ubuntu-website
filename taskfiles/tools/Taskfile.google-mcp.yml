@@ -21,7 +21,7 @@
 #   task google-mcp:status        # Binary, secrets, accounts, MCP config
 #   task google-mcp:console       # Google Cloud OAuth screens + the exact values to enter
 #
-# Other Cloud Console pages (project, APIs, ...): task google:auth:open TARGET=<target>
+# Other Cloud Console pages (project, APIs, ...): mise run google:auth open <target>
 
 version: '3'
 
@@ -328,7 +328,7 @@ tasks:
     desc: "Authenticate for Terraform (writes gcloud application-default credentials, no gcloud needed)"
     summary: |
       Opens your default browser (passkeys work) and saves application-default
-      credentials via the google CLI (task google:auth:login).
+      credentials via the google CLI (mise run google:auth login).
       Specify ACCOUNT to pre-select your Google account.
 
       Usage:
@@ -336,9 +336,7 @@ tasks:
         task google-mcp:tf:auth ACCOUNT=user@gmail.com   # Pre-selects account
     aliases: [tf:auth:passkey, tf:auth:assisted]
     cmds:
-      - task: :google:auth:login
-        vars:
-          ACCOUNT: '{{.ACCOUNT | default ""}}'
+      - mise run google:auth login{{if .ACCOUNT}} --account={{.ACCOUNT}}{{end}}
 
   tf:auth:manual:
     desc: "Authenticate using gcloud CLI (manual code entry)"

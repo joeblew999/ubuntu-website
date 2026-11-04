@@ -1,0 +1,71 @@
+# Browser automation for what has no API: OAuth sign-ins (the code from its callback), screenshots, Gmail's and
+# Cloudflare's settings screens. Each task runs one command of the playwright binary, cmd/playwright; its arguments and
+# flags are passed through:
+#   mise run playwright:install                                    the browsers, once
+#   mise run playwright:oauth https://...                          an OAuth flow, its code printed as JSON
+#   mise run playwright:screenshot https://... shot.png
+#   mise run playwright:gmail-sendas "Name" me@example.com smtp2go <user> <pass>
+
+["playwright:build"]
+description = "Build playwright (cmd/playwright) into bin/: the playwright:* tasks run it"
+run = 'go build -o bin/ ./cmd/playwright'
+
+["playwright:install"]
+description = "The browsers Playwright drives, installed"
+depends = ["playwright:build"]
+run = 'playwright install'
+
+["playwright:oauth"]
+description = "An OAuth flow in the browser, the code (and token, query) from its callback printed as JSON: oauth <url>"
+depends = ["playwright:build"]
+run = 'playwright oauth'
+
+["playwright:open"]
+description = "A URL opened in a Playwright browser: open <url>"
+depends = ["playwright:build"]
+run = 'playwright open'
+
+["playwright:screenshot"]
+description = "A page's screenshot: screenshot <url> <file>"
+depends = ["playwright:build"]
+run = 'playwright screenshot'
+
+["playwright:gmail-sendas"]
+description = "Gmail's Send mail as set up with an SMTP relay: gmail-sendas <name> <email> <provider> <user> <pass>"
+depends = ["playwright:build"]
+run = 'playwright gmail-sendas'
+
+["playwright:gmail-settings"]
+description = "Gmail's Settings, Accounts page opened, to set up by hand"
+depends = ["playwright:build"]
+run = 'playwright gmail-settings'
+
+["playwright:gmail-logout"]
+description = "Signed out of Gmail in the Playwright profile"
+depends = ["playwright:build"]
+run = 'playwright gmail-logout'
+
+["playwright:gmail-switch"]
+description = "Google's account chooser opened, to add or switch an account"
+depends = ["playwright:build"]
+run = 'playwright gmail-switch'
+
+["playwright:cloudflare"]
+description = "The Cloudflare dashboard opened"
+depends = ["playwright:build"]
+run = 'playwright cloudflare'
+
+["playwright:cloudflare-email"]
+description = "Cloudflare's Email Routing opened"
+depends = ["playwright:build"]
+run = 'playwright cloudflare-email'
+
+["playwright:cloudflare-email-add"]
+description = "An Email Routing destination address added"
+depends = ["playwright:build"]
+run = 'playwright cloudflare-email-add'
+
+["playwright:cloudflare-token"]
+description = "Cloudflare's API token page opened, to make one"
+depends = ["playwright:build"]
+run = 'playwright cloudflare-token'

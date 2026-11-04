@@ -1,21 +1,7 @@
-// cfanalytics fetches Cloudflare Web Analytics and reports changes.
-//
-// Compares current metrics to the previous run (stored in .analytics-state.json)
-// and reports significant changes (>20% threshold). Can run locally or in GitHub
-// Actions to create issues when traffic changes significantly.
-//
-// Usage:
-//
-//	go run cmd/cfanalytics/main.go                   # Print report to terminal
-//	go run cmd/cfanalytics/main.go -webhook URL     # Post to webhook if changed
-//	go run cmd/cfanalytics/main.go -days 14         # Compare last 14 days
-//	go run cmd/cfanalytics/main.go -github-issue   # Output markdown for GitHub Issue
-//	task seo:report                                  # Via Taskfile
-//
-// GitHub Actions:
-//
-//	Runs weekly via .github/workflows/analytics-report.yml
-//	Creates a GitHub Issue when visits or pageviews change >20%
+// Command cfanalytics reports the site's traffic from Cloudflare Web Analytics, against the last report
+// (.analytics-state.json): mise run cfanalytics:report by hand, and cfanalytics:issue, the weekly workflow's, as markdown
+// for a GitHub issue when traffic changed a lot. Each command is a file of its own and a task of
+// .mise/tasks/cfanalytics.toml. Flags, anywhere: --days, -v, --webhook (Slack/Discord). CLOUDFLARE_API_TOKEN from .env.
 package main
 
 import (
@@ -28,6 +14,20 @@ import (
 var version = "dev"
 
 func main() {
-	exitCode := cfanalytics.Run(os.Args, version, os.Stdout, os.Stderr)
-	os.Exit(exitCode)
+	if len(os.Args) < 2 {
+		os.Exit(run(nil))
+	}
+	switch os.Args[1] {
+	case "report":
+		report()
+	case "issue":
+		issue()
+	default:
+		os.Exit(run(os.Args[1:]))
+	}
+}
+
+// run is internal/cfanalytics's CLI on args (its flags anywhere, internal/cli.Interspersed).
+func run(args []string) int {
+	return cfanalytics.Run(append([]string{os.Args[0]}, args...), version, os.Stdout, os.Stderr)
 }

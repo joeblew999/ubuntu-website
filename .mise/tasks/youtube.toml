@@ -1,0 +1,102 @@
+# Videos for static/videos/ (LFS): downloaded (yt-dlp) and edited (ffmpeg), both fetched into .build/ on first use.
+# Each task runs one command of the youtube binary, cmd/youtube; its arguments and flags are passed through:
+#   mise run youtube:download <url> -output "static/videos/cache/%(title)s.%(ext)s"
+#   mise run youtube:probe static/videos/gps-free-vio-edited.mp4
+# How the site's two videos were made (sources in static/videos/cache/, logo assets/images/favicon.png):
+#   visual-inertial-nav-edited.mp4 (https://www.youtube.com/watch?v=cjNkLobw2Cw): trim -start 5, then
+#     overlay -image assets/images/favicon.png -pos bottomright
+#   gps-free-vio-edited.mp4 (https://www.youtube.com/watch?v=M2yySQxFG7c): trim -end 60, then the same overlay
+
+["youtube:build"]
+description = "Build youtube (cmd/youtube) into bin/: the youtube:* tasks run it"
+run = 'go build -o bin/ ./cmd/youtube'
+
+["youtube:info"]
+description = "A video's details, before downloading it"
+depends = ["youtube:build"]
+run = 'youtube info'
+
+["youtube:download"]
+description = "A video downloaded: download <url> (-audio-only, -output <template>)"
+depends = ["youtube:build"]
+run = 'youtube download'
+
+["youtube:list"]
+description = "The videos downloaded"
+depends = ["youtube:build"]
+run = 'youtube list'
+
+["youtube:refresh"]
+description = "Yt-dlp and ffmpeg fetched again (newest)"
+depends = ["youtube:build"]
+run = 'youtube refresh'
+
+["youtube:crop"]
+description = "A video cropped"
+depends = ["youtube:build"]
+run = 'youtube crop'
+
+["youtube:trim"]
+description = "A video trimmed (-start, -end)"
+depends = ["youtube:build"]
+run = 'youtube trim'
+
+["youtube:scale"]
+description = "A video scaled"
+depends = ["youtube:build"]
+run = 'youtube scale'
+
+["youtube:compress"]
+description = "A video compressed"
+depends = ["youtube:build"]
+run = 'youtube compress'
+
+["youtube:probe"]
+description = "A video's streams, size and length"
+depends = ["youtube:build"]
+run = 'youtube probe'
+
+["youtube:overlay"]
+description = "An image laid over a video (-image, -pos)"
+depends = ["youtube:build"]
+run = 'youtube overlay'
+
+["youtube:gif"]
+description = "A video made into a GIF"
+depends = ["youtube:build"]
+run = 'youtube gif'
+
+["youtube:thumbnail"]
+description = "A poster frame as JPG (-time)"
+depends = ["youtube:build"]
+run = 'youtube thumbnail'
+
+["youtube:speed"]
+description = "A video sped up or slowed down"
+depends = ["youtube:build"]
+run = 'youtube speed'
+
+["youtube:rotate"]
+description = "A video rotated"
+depends = ["youtube:build"]
+run = 'youtube rotate'
+
+["youtube:fade"]
+description = "A fade in or out"
+depends = ["youtube:build"]
+run = 'youtube fade'
+
+["youtube:concat"]
+description = "Videos joined"
+depends = ["youtube:build"]
+run = 'youtube concat'
+
+["youtube:mute"]
+description = "A video's sound removed"
+depends = ["youtube:build"]
+run = 'youtube mute'
+
+["youtube:audio"]
+description = "A video's sound extracted"
+depends = ["youtube:build"]
+run = 'youtube audio'

@@ -18,6 +18,9 @@
 # The mise CI (core-ci.yml) and Cloudflare Pages (its build command, root:pages) run, exactly; anywhere else, at least.
 min_version = "2026.9.15"
 
+# Values never shown in task output: the secrets .env and CI pass in, by name.
+redactions = ["*_TOKEN", "*_KEY", "*_PASSWORD", "*_SECRET"]
+
 [settings]
 # go.mod's toolchain line is the Go pin; this makes `mise install` honour it.
 idiomatic_version_file_enable_tools = ["go"]
@@ -57,6 +60,9 @@ git-lfs = "3.8.1"
 "aqua:oligot/go-mod-upgrade" = "0.13.0"
 
 [env]
+# API keys and tokens (DEEPL_API_KEY, CLOUDFLARE_API_TOKEN, MAILERLITE_API_KEY, …) from .env, gitignored, as the
+# Taskfiles had them; none in CI. The secret ones are redacted from task output (redactions, above).
+_.file = ".env"
 # Google Cloud project (number) that owns the OAuth client. Not secret.
 UBUNTU_WEBSITE_GCP_PROJECT = "130034768106"
 # Each <binary>:build puts its binary here; the tasks run it by name.

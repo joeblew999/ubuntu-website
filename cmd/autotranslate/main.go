@@ -1,27 +1,12 @@
-// Command autotranslate provides automatic translation of Hugo markdown content
-// using external translation APIs (DeepL or Claude).
+// Command autotranslate machine-translates the site's Hugo markdown (DeepL, Claude's API, or the Claude CLI), keeping
+// front matter, shortcodes, code and links as they are. Each command is a file of its own and a task of
+// .mise/tasks/autotranslate.toml; its arguments and flags are internal/autotranslate's, passed through:
 //
-// Usage:
+//	mise run autotranslate:missing vi                        every page missing in Vietnamese (DeepL)
+//	mise run autotranslate:missing vi --provider claude-cli  the same, with the Claude CLI
+//	mise run autotranslate:file content/english/blog/post.md de --dry-run
 //
-//	autotranslate [flags] <command> [args]
-//
-// Commands:
-//
-//	file     Translate a single file
-//	missing  Translate all missing files for a language
-//	batch    Translate multiple files
-//	status   Show translation quota/usage
-//
-// Examples:
-//
-//	# Translate a single file to Vietnamese using DeepL
-//	autotranslate file content/english/blog/post.md vi
-//
-//	# Translate using Claude (no per-character cost if you have subscription)
-//	autotranslate --provider=claude missing vi
-//
-//	# Dry-run to see what would be translated
-//	autotranslate missing vi --dry-run
+// Flags, anywhere: --provider (deepl, claude, claude-cli), --dry-run, --verbose, --api-key, --bundle.
 package main
 
 import (
@@ -34,6 +19,28 @@ import (
 var version = "dev"
 
 func main() {
-	exitCode := autotranslate.Run(os.Args, version, os.Stdout, os.Stderr)
-	os.Exit(exitCode)
+	if len(os.Args) < 2 {
+		os.Exit(run(nil))
+	}
+	switch os.Args[1] {
+	case "file":
+		file()
+	case "missing":
+		missing()
+	case "arb":
+		arb()
+	case "arb-status":
+		arbStatus()
+	case "languages":
+		languages()
+	case "status":
+		status()
+	default:
+		os.Exit(run(os.Args[1:]))
+	}
+}
+
+// run is internal/autotranslate's CLI on args (its flags anywhere, internal/cli.Interspersed).
+func run(args []string) int {
+	return autotranslate.Run(append([]string{os.Args[0]}, args...), version, os.Stdout, os.Stderr)
 }

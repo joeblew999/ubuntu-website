@@ -1,0 +1,33 @@
+# The site's Go vanity import pages, /pkg/<name> (www.ubuntusoftware.net/pkg/<name> as a Go module path). Each task
+# runs one command of the vanityimport binary, cmd/vanityimport; its arguments and flags are passed through:
+#   mise run vanityimport:list
+#   mise run vanityimport:add <package-name>
+
+["vanityimport:build"]
+description = "Build vanityimport (cmd/vanityimport) into bin/: the vanityimport:* tasks run it"
+run = 'go build -o bin/ ./cmd/vanityimport'
+
+["vanityimport:add"]
+description = "A package's vanity import page added: add <package-name>"
+depends = ["vanityimport:build"]
+run = 'vanityimport add'
+
+["vanityimport:list"]
+description = "The packages with a vanity import page"
+depends = ["vanityimport:build"]
+run = 'vanityimport list'
+
+["vanityimport:update"]
+description = "A package's page brought up to date (all of them, without a name)"
+depends = ["vanityimport:build"]
+run = 'vanityimport update'
+
+["vanityimport:info"]
+description = "A package's vanity import details: info <package-name>"
+depends = ["vanityimport:build"]
+run = 'vanityimport info'
+
+["vanityimport:docs"]
+description = "The packages' docs pages"
+depends = ["vanityimport:build"]
+run = 'vanityimport docs'

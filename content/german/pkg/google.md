@@ -13,7 +13,7 @@ has_binary: true
 binary_name: google
 taskfile_path: taskfiles/Taskfile.google.yml
 process:
-  command: task google:gmail:server
+  command: mise run google:gmail server
   port: 8087
   health_path: /health
   disabled: true
@@ -50,10 +50,10 @@ google drive search "report"         # Search files
 ## Taskfile-Nutzung
 
 ```bash
-task google:gmail:list
-task google:gmail:send TO=x SUBJECT=y BODY=z
-task google:gmail:server
+mise run google:gmail list
+mise run google:gmail send --to x --subject y --body z
+mise run google:gmail server
 
-task google:calendar:today
-task google:calendar:server
+mise run google:calendar today
+mise run google:calendar server
 ```

@@ -1,0 +1,42 @@
+# The site's branding, generated from Go (internal/genlogo), never edited by hand: logo SVGs, favicon, og-image, email
+# logo, Bluesky avatar and banner. Each task makes one asset with the genlogo binary, cmd/genlogo/<asset>.go:
+#   mise run genlogo:all      every asset, then the places to re-upload them by hand (Gmail signature, Bluesky)
+
+["genlogo:build"]
+description = "Build genlogo (cmd/genlogo) into bin/: the genlogo:* tasks run it"
+run = 'go build -o bin/ ./cmd/genlogo'
+
+["genlogo:all"]
+description = "Every asset, then the places to re-upload them by hand"
+depends = ["genlogo:build"]
+run = 'genlogo all'
+
+["genlogo:logo-svg"]
+description = "The logo SVGs, assets/images/logo.svg and logo-darkmode.svg"
+depends = ["genlogo:build"]
+run = 'genlogo logo-svg'
+
+["genlogo:favicon"]
+description = "The favicon, assets/images/favicon.png"
+depends = ["genlogo:build"]
+run = 'genlogo favicon'
+
+["genlogo:og"]
+description = "The Open Graph image, static/images/og-image.png (social cards)"
+depends = ["genlogo:build"]
+run = 'genlogo og'
+
+["genlogo:email"]
+description = "The email signature logo, static/images/email-logo.png"
+depends = ["genlogo:build"]
+run = 'genlogo email'
+
+["genlogo:avatar"]
+description = "The Bluesky avatar, static/images/bluesky-avatar.png"
+depends = ["genlogo:build"]
+run = 'genlogo avatar'
+
+["genlogo:banner"]
+description = "The Bluesky banner, static/images/bluesky-banner.png"
+depends = ["genlogo:build"]
+run = 'genlogo banner'

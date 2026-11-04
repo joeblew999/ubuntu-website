@@ -53,19 +53,18 @@ jobs:
       - name: Run pipeline
         id: pipeline
         run: |
-          # Single command does: sync → tile (if changed) → manifest
-          # Uses pure Go tiler (gotiler) - no tippecanoe needed
-          task airspace:pipeline TILER=gotiler FORCE=${{ inputs.force || 'false' }}
+          # mise run airspace:pipeline: sync → tile (if changed) → manifest, with the Go tiler (no tippecanoe needed)
+          mise run airspace:pipeline --tiler gotiler ${{ inputs.force == 'true' && '--force' || '' }}
 
       - name: Check for changes
         id: check_changes
-        run: task airspace:check >> "$GITHUB_OUTPUT"
+        run: mise run airspace:check >> "$GITHUB_OUTPUT"
 
       - name: Upload to R2
         if: steps.check_changes.outputs.has_changes == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: task airspace:upload
+        run: mise run airspace:upload
 
       - name: Skip notification
         if: steps.check_changes.outputs.has_changes != 'true'
@@ -79,4 +78,4 @@ jobs:
           key: airspace-sync-${{ github.run_id }}
 
       - name: Summary
-        run: task airspace:summary
+        run: mise run airspace:summary

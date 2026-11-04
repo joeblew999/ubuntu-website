@@ -1,0 +1,60 @@
+# The MailerLite account: subscribers, groups, forms, webhooks, automations, stats, the GitHub releases its emails link
+# to, and the webhook server that takes Web3Forms' submissions in as subscribers. Each task runs one command of the
+# mailerlite binary, cmd/mailerlite; its subcommands pass through:
+#   mise run mailerlite:subscribers list            mise run mailerlite:subscribers add x@y.com "Name"
+#   mise run mailerlite:server PORT=8086 GROUP_ID=12345   (expose it with a tunnel, set it as Web3Forms' webhook)
+# MAILERLITE_API_KEY from .env.
+
+["mailerlite:build"]
+description = "Build mailerlite (cmd/mailerlite) into bin/: the mailerlite:* tasks run it"
+run = 'go build -o bin/ ./cmd/mailerlite'
+
+["mailerlite:subscribers"]
+description = "Subscribers: list, count, get <email>, add <email> [name], delete <email>"
+depends = ["mailerlite:build"]
+run = 'mailerlite subscribers'
+
+["mailerlite:groups"]
+description = "Groups: list, create <name>, subscribers <id>, assign <id> <email>, unassign <id> <email>"
+depends = ["mailerlite:build"]
+run = 'mailerlite groups'
+
+["mailerlite:forms"]
+description = "Forms: list, subscribers <id>"
+depends = ["mailerlite:build"]
+run = 'mailerlite forms'
+
+["mailerlite:webhooks"]
+description = "Webhooks: list, create <url> [events], delete <id>"
+depends = ["mailerlite:build"]
+run = 'mailerlite webhooks'
+
+["mailerlite:automations"]
+description = "Automations: list, get <id>"
+depends = ["mailerlite:build"]
+run = 'mailerlite automations'
+
+["mailerlite:stats"]
+description = "The account's statistics"
+depends = ["mailerlite:build"]
+run = 'mailerlite stats'
+
+["mailerlite:open"]
+description = "The MailerLite dashboard opened (or a page of it)"
+depends = ["mailerlite:build"]
+run = 'mailerlite open'
+
+["mailerlite:releases"]
+description = "The GitHub releases emails link to: latest, list, urls"
+depends = ["mailerlite:build"]
+run = 'mailerlite releases'
+
+["mailerlite:server"]
+description = "The webhook server for Web3Forms' submissions (PORT=8086, GROUP_ID= to assign a group)"
+depends = ["mailerlite:build"]
+run = 'mailerlite server'
+
+["mailerlite:docs"]
+description = "The CLI's docs"
+depends = ["mailerlite:build"]
+run = 'mailerlite docs'

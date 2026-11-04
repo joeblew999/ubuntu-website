@@ -1,83 +1,55 @@
-// mailerlite - CLI tool for MailerLite subscriber management
+// Command mailerlite manages the MailerLite account: subscribers, groups, forms, webhooks, automations, stats, the
+// GitHub releases its emails link to, and the webhook server that takes Web3Forms submissions in as subscribers. Each
+// command is a file of its own and a task of .mise/tasks/mailerlite.toml; its subcommands and flags are
+// internal/mailerlite's, passed through:
 //
-// Usage:
+//	mise run mailerlite:subscribers list
+//	mise run mailerlite:subscribers add x@y.com "Name"
+//	mise run mailerlite:server PORT=8086 GROUP_ID=12345
 //
-//	mailerlite subscribers list         List all subscribers
-//	mailerlite subscribers count        Count total subscribers
-//	mailerlite subscribers get EMAIL    Get subscriber by email
-//	mailerlite subscribers add EMAIL    Add/update subscriber
-//	mailerlite subscribers delete EMAIL Delete subscriber
-//	mailerlite groups list              List all groups
-//	mailerlite groups create NAME       Create a group
-//	mailerlite groups subscribers ID    List subscribers in a group
-//	mailerlite groups assign ID EMAIL   Assign subscriber to group
-//	mailerlite groups unassign ID EMAIL Remove subscriber from group
-//	mailerlite forms list               List all forms
-//	mailerlite forms subscribers ID     List subscribers for a form
-//	mailerlite webhooks list            List all webhooks
-//	mailerlite webhooks create URL      Create a webhook
-//	mailerlite webhooks delete ID       Delete a webhook
-//	mailerlite automations list         List all automations
-//	mailerlite automations get ID       Get automation details
-//	mailerlite stats                    Show account statistics
-//	mailerlite open [TARGET]            Open dashboard in browser
-//	mailerlite releases latest          Show latest GitHub release
-//	mailerlite releases list            List all GitHub releases
-//	mailerlite releases urls            Show release URLs for emails
-//	mailerlite server [PORT=8086]       Start webhook server for Web3Forms
-//
-// Flags:
-//
-//	-github-issue    Output markdown for GitHub issue
-//	-v               Verbose output
-//	-version         Show version
-//
-// Environment:
-//
-//	MAILERLITE_API_KEY    API key (required)
+// Flags, anywhere: -github-issue, -v, -version. MAILERLITE_API_KEY from .env.
 package main
 
 import (
-	"flag"
-	"fmt"
 	"os"
 
 	"github.com/joeblew999/ubuntu-website/internal/mailerlite"
 )
 
+// version is set via ldflags at build time
 var version = "dev"
 
 func main() {
-	var (
-		githubIssue = flag.Bool("github-issue", false, "Output markdown for GitHub issue")
-		verbose     = flag.Bool("v", false, "Verbose output")
-		showVersion = flag.Bool("version", false, "Show version")
-	)
-	flag.Parse()
-
-	if *showVersion {
-		fmt.Printf("mailerlite %s\n", version)
-		return
+	if len(os.Args) < 2 {
+		os.Exit(run(nil))
 	}
-
-	args := flag.Args()
-	if len(args) == 0 {
-		mailerlite.PrintUsage()
-		os.Exit(1)
+	switch os.Args[1] {
+	case "subscribers":
+		subscribers()
+	case "groups":
+		groups()
+	case "forms":
+		forms()
+	case "webhooks":
+		webhooks()
+	case "automations":
+		automations()
+	case "stats":
+		stats()
+	case "open":
+		open()
+	case "releases":
+		releases()
+	case "server":
+		server()
+	case "docs":
+		docs()
+	default:
+		os.Exit(run(os.Args[1:]))
 	}
+}
 
-	cli, cancel, err := mailerlite.NewCLI(&mailerlite.CLIConfig{
-		GitHubIssue: *githubIssue,
-		Verbose:     *verbose,
-	})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
-		os.Exit(1)
-	}
-	defer cancel()
-
-	if err := cli.Run(args); err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
-		os.Exit(1)
-	}
+// run is internal/mailerlite's CLI on args (its flags anywhere, internal/cli.Interspersed).
+func run(args []string) int {
+	return mailerlite.Main(append([]string{os.Args[0]}, args...), version, os.Stdout, os.Stderr)
 }

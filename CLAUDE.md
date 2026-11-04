@@ -44,7 +44,7 @@ Key points:
 Each is safe to re-run: with nothing new upstream it changes nothing.
 - New machine: `mise trust && mise run root:setup` (every pinned tool, the npm packages, the Go modules).
 - **npm packages: aube, node the runtime.** aube (pinned in `mise.toml`) installs the site's npm packages from `aube-lock.yaml` (`mise run root:deps` = `aube install --frozen-lockfile`) and mise's `npm:` tools (wrangler) with its embedded aube; node is the one JavaScript runtime. No bun, no npm installs. `aube-workspace.yaml` also turns off aube's global virtual store: Hugo runs Tailwind under Node's permission model, which reads only inside the project. Dependency build scripts run only if aube's built-in list or `aube-workspace.yaml` allows them; `strictDepBuilds` fails the install on an unreviewed one (`aube ignored-builds`, `aube approve-builds`). Add or bump a package with `aube add -D <pkg>` and commit `package.json` + `aube-lock.yaml`.
-- Not available through mise, so documented instead: tippecanoe (optional, `task airspace:install:tippecanoe`), gcloud (optional, only for `google-mcp:tf:auth:manual`). The Claude CLI is your machine-wide tool (Anthropic's installer, `task claude-cli:install`), not a project pin. The project's own Go CLIs (`cmd/*`) are built by Taskfile.
+- Not available through mise, so documented instead: tippecanoe (optional, `brew install tippecanoe`; without it airspace uses its Go tiler), gcloud (optional, only for `google-mcp:tf:auth:manual`). The Claude CLI is your machine-wide tool (Anthropic's installer, `task claude-cli:install`), not a project pin. The project's own Go CLIs (`cmd/*`) are built by Taskfile.
 
 ### Code Structure (internal vs pkg)
 - Keep project-only helpers in `internal/` (e.g., `internal/codecinstaller`), not API-stable.
@@ -72,7 +72,7 @@ Each is safe to re-run: with nothing new upstream it changes nothing.
 **IMPORTANT:** Logo SVGs are generated from Go code, NOT edited directly!
 
 - Source of truth: `cmd/genlogo/main.go`
-- Regenerate: `task genlogo:all`
+- Regenerate: `mise run genlogo:all` (one asset: `genlogo:logo-svg`, `genlogo:favicon`, `genlogo:og`, …)
 - Generated files: `assets/images/logo.svg`, `logo-darkmode.svg`, `favicon.png`, `og-image.png`
 - DO NOT edit SVG files directly - changes will be overwritten
 
@@ -117,16 +117,16 @@ Link with `?subject=<key>` (e.g., `/contact/?subject=security`) to auto-fill.
 CLI tool for subscriber management and email automation.
 
 **CLI:** `cmd/mailerlite/main.go`
-**Taskfile:** `taskfiles/Taskfile.mailerlite.yml`
+**Tasks:** `.mise/tasks/mailerlite.toml` (subcommands passed through)
 
 **Key Commands:**
 ```bash
-task mailerlite:subscribers:list          # List subscribers
-task mailerlite:subscribers:add EMAIL=x   # Add subscriber
-task mailerlite:groups:list               # List groups
-task mailerlite:stats                     # Account stats
-task mailerlite:server                    # Start webhook server
-task mailerlite:releases:latest           # Show latest GitHub release
+mise run mailerlite:subscribers list         # List subscribers
+mise run mailerlite:subscribers add x@y.com  # Add subscriber
+mise run mailerlite:groups list              # List groups
+mise run mailerlite:stats                    # Account stats
+mise run mailerlite:server                   # Start webhook server
+mise run mailerlite:releases latest          # Show latest GitHub release
 ```
 
 **Web3Forms → MailerLite Flow:**
@@ -148,10 +148,10 @@ Adds subscriber to MailerLite via API
 **Running the webhook server:**
 ```bash
 # Development (local)
-task mailerlite:server PORT=8086
+mise run mailerlite:server PORT=8086
 
 # With auto-group assignment
-task mailerlite:server GROUP_ID=12345
+mise run mailerlite:server GROUP_ID=12345
 
 # Production: expose via tunnel
 ngrok http 8086
@@ -160,8 +160,8 @@ ngrok http 8086
 
 **GitHub Releases Integration:**
 ```bash
-task mailerlite:releases:latest     # Show latest release info
-task mailerlite:releases:urls       # Get URLs for email templates
+mise run mailerlite:releases latest     # Show latest release info
+mise run mailerlite:releases urls       # Get URLs for email templates
 ```
 
 ### Playwright Tool
@@ -169,14 +169,14 @@ task mailerlite:releases:urls       # Get URLs for email templates
 Reusable browser automation for OAuth flows and testing.
 
 **CLI:** `cmd/playwright/main.go`
-**Taskfile:** `taskfiles/tools/Taskfile.playwright.yml`
+**Tasks:** `.mise/tasks/playwright.toml` (arguments passed through)
 
 **Commands:**
 ```bash
-task playwright:install                    # Install browsers
-task playwright:oauth URL=https://...      # OAuth flow with callback
-task playwright:screenshot URL=x FILE=y   # Take screenshot
-task playwright:open URL=https://...       # Open URL in browser
+mise run playwright:install                # Install browsers
+mise run playwright:oauth https://...      # OAuth flow with callback
+mise run playwright:screenshot <url> <file> # Take screenshot
+mise run playwright:open https://...       # Open URL in browser
 ```
 
 **OAuth Output (JSON):**
@@ -221,7 +221,7 @@ Used by `cmd/google` (`google auth login`) for automated Google OAuth flows.
 ```
 
 `task google-mcp:*` names are stable wrappers over the `mise run google-mcp:*` tasks (a published blog post uses them).
-`task google:*` is a different thing: the unified Google CLI, `cmd/google`.
+`google:*` is a different thing: the unified Google CLI, `cmd/google` (`.mise/tasks/google.toml`: `google:gmail`, `google:calendar`, `google:auth`, …).
 
 **Why tokens are at `~/.google-mcp-accounts/`:**
 - Security: Tokens contain access to Google account - NEVER commit to git
@@ -282,9 +282,7 @@ Configured inside Gmail settings to send outbound email through SMTP2GO relay. T
 
 Unified email sending via the Gmail API, or via Gmail's compose window in your browser. **From address is always `gerard.webb@ubuntusoftware.net`** - hardcoded to prevent mistakes.
 
-**CLI:** `cmd/gmail/main.go`
-**Package:** `internal/gmail/`
-**Taskfile:** `taskfiles/Taskfile.gmail.yml`
+**CLI:** `cmd/google` (`google gmail …`), **Package:** `internal/google/gmail.go`, **Tasks:** `mise run google:gmail <subcommand>` (`.mise/tasks/google.toml`)
 
 **Modes:**
 | Mode | Command | Use Case |
@@ -294,35 +292,29 @@ Unified email sending via the Gmail API, or via Gmail's compose window in your b
 | Compose | `gmail compose` | Opens Gmail for user review before send |
 | Server | `gmail server` | HTTP webhook endpoint for external triggers |
 
-**TaskUI Quick Actions (no variables needed):**
+**Quick actions:**
 ```bash
-task gmail:check        # Verify API connection
-task gmail:open         # Open Gmail inbox
-task gmail:server       # Start webhook server (port 8087)
+mise run google:gmail check     # Verify API connection
+mise run google:gmail list      # Recent messages
+mise run google:gmail server    # Start webhook server (port 8087)
 ```
 
 **Send Commands:**
 ```bash
 # Send via API (recommended)
-task gmail:send TO=user@example.com SUBJECT="Hello" BODY="Message"
+mise run google:gmail send --to user@example.com --subject "Hello" --body "Message"
 
 # Open compose in your browser (fallback; you click Send)
-task gmail:send:browser TO=user@example.com SUBJECT="Hello" BODY="Message"
+mise run google:gmail send --mode=browser --to user@example.com --subject "Hello" --body "Message"
 
 # Open compose for review (user clicks send)
-task gmail:compose TO=user@example.com SUBJECT="Review" BODY="Please check"
-```
-
-**Templates:**
-```bash
-# Pre-defined blog update email
-task gmail:templates:blog-update TO=contact@example.com
+mise run google:gmail compose --to user@example.com --subject "Review" --body "Please check"
 ```
 
 **Server Mode (HTTP API):**
 ```bash
 # Start server
-task gmail:server PORT=8087
+mise run google:gmail server --port 8087
 
 # Send via HTTP
 curl -X POST http://localhost:8087/send \
@@ -332,7 +324,7 @@ curl -X POST http://localhost:8087/send \
 
 **Process Compose:** Add `gmail-server` to dev workflow by enabling in `process-compose.yaml`.
 
-**⚠️ NEVER use Playwright MCP directly for email!** Always use `task gmail:*` commands - they guarantee correct From address.
+**⚠️ NEVER use Playwright MCP directly for email!** Always use `mise run google:gmail …` - it guarantees the correct From address.
 
 **Signature:** "Ubuntu Software Local AI" (not "Claude")
 
@@ -340,9 +332,7 @@ curl -X POST http://localhost:8087/send \
 
 Unified Google Calendar management via API or browser automation.
 
-**CLI:** `cmd/calendar/main.go`
-**Package:** `internal/calendar/`
-**Taskfile:** `taskfiles/Taskfile.calendar.yml`
+**CLI:** `cmd/google` (`google calendar …`), **Package:** `internal/google/calendar.go`, **Tasks:** `mise run google:calendar <subcommand>` (`.mise/tasks/google.toml`)
 
 **Modes:**
 | Mode | Command | Use Case |
@@ -352,31 +342,30 @@ Unified Google Calendar management via API or browser automation.
 | Compose | `calendar compose` | Opens calendar for user review before save |
 | Server | `calendar server` | HTTP webhook endpoint for external triggers |
 
-**TaskUI Quick Actions (no variables needed):**
+**Quick actions:**
 ```bash
-task calendar:check        # Verify API connection
-task calendar:today        # List today's events
-task calendar:open         # Open Google Calendar in browser
-task calendar:server       # Start webhook server (port 8088)
+mise run google:calendar check     # Verify API connection
+mise run google:calendar today     # List today's events
+mise run google:calendar open      # Open Google Calendar in browser
+mise run google:calendar server    # Start webhook server (port 8088)
 ```
 
 **Create Commands:**
 ```bash
 # Create via API (recommended)
-task calendar:create TITLE="Meeting" START="tomorrow 2pm" END="tomorrow 3pm"
+mise run google:calendar create --title "Meeting" --start "tomorrow 2pm" --end "tomorrow 3pm"
 
 # Create via browser automation (fallback)
-task calendar:create:browser TITLE="Meeting" START="tomorrow 2pm" END="tomorrow 3pm"
+mise run google:calendar create --mode=browser --title "Meeting" --start "tomorrow 2pm" --end "tomorrow 3pm"
 
 # Open calendar for review (user saves)
-task calendar:compose TITLE="Review" START="tomorrow 10am" END="tomorrow 11am"
+mise run google:calendar compose --title "Review" --start "tomorrow 10am" --end "tomorrow 11am"
 ```
 
 **List Commands:**
 ```bash
-task calendar:list              # List upcoming events (default 10)
-task calendar:list:week         # List this week's events
-task calendar:today             # List today's events
+mise run google:calendar list --max 10   # List upcoming events
+mise run google:calendar today          # List today's events
 ```
 
 **Time Formats:**
@@ -386,7 +375,7 @@ task calendar:today             # List today's events
 **Server Mode (HTTP API):**
 ```bash
 # Start server
-task calendar:server PORT=8088
+mise run google:calendar server --port 8088
 
 # Create event via HTTP
 curl -X POST http://localhost:8088/create \
@@ -426,18 +415,18 @@ FAA ArcGIS APIs → Go sync → GeoJSON → tippecanoe → PMTiles → R2 → Fr
 **Key Commands:**
 ```bash
 # Sync pipeline (idempotent - skips if no FAA changes)
-task airspace:sync              # Check for changes, download if needed
-task airspace:pipeline          # Sync + tile + manifest (no upload)
-task airspace:pipeline:full     # Sync + tile + manifest + R2 upload
+mise run airspace:sync              # Check for changes, download if needed
+mise run airspace:pipeline          # Sync + tile + manifest (no upload)
+mise run airspace:upload            # Then R2
 
 # Data inspection
-task airspace:status            # Show local data files
-task airspace:history           # Show sync history (for cron tuning)
+mise run airspace:status            # Show local data files
+mise run airspace:history           # Show sync history (for cron tuning)
 go run ./cmd/airspace history   # Same, direct
 
 # Manual operations
-task airspace:download          # Force download all
-task airspace:tile              # Convert GeoJSON to PMTiles
+mise run airspace:sync --force      # Force download all
+mise run airspace:tile              # Convert GeoJSON to PMTiles
 task r2:airspace:upload         # Upload PMTiles to R2
 ```
 
@@ -564,17 +553,16 @@ Automatic translation of Hugo markdown using DeepL API. Preserves front matter, 
 
 **CLI:** `cmd/autotranslate/main.go`
 **Package:** `internal/autotranslate/`
-**Taskfile:** `taskfiles/Taskfile.autotranslate.yml`
+**Tasks:** `.mise/tasks/autotranslate.toml` (arguments and flags passed through)
 
 **Commands:**
 ```bash
-task autotranslate:status                    # Check API config
-task autotranslate:languages                 # List supported languages
-task autotranslate:missing LANG=vi           # Translate all missing Vietnamese
-task autotranslate:missing LANG=vi DRY_RUN=true  # Preview what would translate
-task autotranslate:file FILE=path LANG=vi    # Translate single file
-task autotranslate:vi                        # Shortcut: all missing Vietnamese
-task autotranslate:all DRY_RUN=true          # Preview all languages
+mise run autotranslate:status                       # Check API config
+mise run autotranslate:languages                    # List supported languages
+mise run autotranslate:missing vi                   # Translate all missing Vietnamese
+mise run autotranslate:missing vi --dry-run         # Preview what would translate
+mise run autotranslate:missing vi --provider claude-cli   # With the Claude CLI
+mise run autotranslate:file <path> vi               # Translate single file
 ```
 
 **What it preserves (won't translate):**
