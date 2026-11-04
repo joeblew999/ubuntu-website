@@ -178,6 +178,33 @@ func TestTranslateMenuName(t *testing.T) {
 	}
 }
 
+// TestMenuTranslationsComplete: every name in the real English menu has a translation in every target language, and
+// the names a menu's entries are told apart by (an entry without an identifier is known by its name) stay distinct.
+func TestMenuTranslationsComplete(t *testing.T) {
+	enMenu, err := ParseMenuFile(filepath.Join("..", "..", "config", "_default", "menus.en.toml"))
+	if err != nil {
+		t.Skipf("no English menu: %v", err)
+	}
+	for lang, names := range MenuTranslations {
+		seen := map[string]string{}
+		for _, item := range append(enMenu.Main, enMenu.Footer...) {
+			if _, ok := names[item.Name]; !ok {
+				t.Errorf("%s: no translation of %q (MenuTranslations)", lang, item.Name)
+			}
+		}
+		for _, item := range enMenu.Main {
+			if item.Identifier != "" {
+				continue
+			}
+			name := TranslateMenuName(item.Name, lang)
+			if other, ok := seen[name]; ok && other != item.Name {
+				t.Errorf("%s: %q and %q are both %q", lang, other, item.Name, name)
+			}
+			seen[name] = item.Name
+		}
+	}
+}
+
 func TestGenerateMenuFile(t *testing.T) {
 	enMenu := &MenuConfig{
 		Main: []MenuItem{

@@ -54,12 +54,12 @@ We maintain copies of key documents proving our company history:
 
 | Document | Description |
 |----------|-------------|
-| [Company Certificate (PDF)](/companies-house/ubuntu-software-design-ltd-certificate.pdf) | Certificate of Incorporation |
-| [Company Certificate (Image)](/companies-house/ubuntu-design-ltd-certificate.png) | Certificate scan |
-| [Annual Return 2012](/companies-house/ar01-2012-03-07-shareholders.pdf) | Shareholder list |
-| [Annual Return 2011](/companies-house/ar01-2011-03-24-shareholders.pdf) | Shareholder list |
-| [Annual Return 2010](/companies-house/ar01-2010-04-20-shareholders.pdf) | Shareholder list |
-| [Strike-off Application](/companies-house/ds01-2012-06-29-strike-off.pdf) | Voluntary dissolution |
+| [Company Certificate (PDF)](/companies-house-uk/ubuntu-software-design-ltd-certificate.pdf) | Certificate of Incorporation |
+| [Company Certificate (Image)](/companies-house-uk/ubuntu-design-ltd-certificate.png) | Certificate scan |
+| [Annual Return 2012](/companies-house-uk/ar01-2012-03-07-shareholders.pdf) | Shareholder list |
+| [Annual Return 2011](/companies-house-uk/ar01-2011-03-24-shareholders.pdf) | Shareholder list |
+| [Annual Return 2010](/companies-house-uk/ar01-2010-04-20-shareholders.pdf) | Shareholder list |
+| [Strike-off Application](/companies-house-uk/ds01-2012-06-29-strike-off.pdf) | Voluntary dissolution |
 
 ## About the Name "Ubuntu"
 

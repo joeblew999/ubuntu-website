@@ -1,7 +1,8 @@
 // Command sitecheck checks that the site is reachable from around the world, from check-host.net's nodes (no account,
 // no secret): over HTTP, DNS and TCP, the apex domain's redirect to www, all of them at once (mise run sitecheck:all),
 // and the report the scheduled workflow (.github/workflows/monitor-sitecheck.yml, mise run sitecheck:issue) opens a
-// GitHub issue with. SITE_URL checks another site. Each command is a file of its own and a task of
+// GitHub issue with. SITE_URL checks another site. And one with no network, links: every link of the built site
+// (public/) lands, in root:ci. Each command is a file of its own and a task of
 // .mise/tasks/sitecheck.toml (sitecheck:<command>); the checks are internal/sitecheck.
 package main
 
@@ -16,7 +17,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fail("usage: sitecheck http | dns | tcp | redirect | all | issue [--url <url>] [--nodes <n>] [--wait <seconds>]")
+		fail("usage: sitecheck http | dns | tcp | redirect | all | issue [--url <url>] [--nodes <n>] [--wait <seconds>] | links [--dir <dir>]")
 	}
 	switch cmd, args := os.Args[1], os.Args[2:]; cmd {
 	case "http":
@@ -31,6 +32,8 @@ func main() {
 		all(args)
 	case "issue":
 		issue(args)
+	case "links":
+		links(args)
 	default:
 		fail("no command " + strconv.Quote(cmd))
 	}

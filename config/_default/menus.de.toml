@@ -1,7 +1,7 @@
 ############# German navigation ##############
 
-# Main menu - 4 items + Get Started CTA button
-# Simplified for two audiences: Users (Platform, Solutions, Company) and Developers
+# main menu
+# Note: "Home" removed - logo already links to home, saves nav space
 
 [[main]]
 name = "Plattform"
@@ -10,33 +10,131 @@ weight = 1
 hasChildren = true
 
 [[main]]
+name = "Übersicht"
+identifier = "platform-overview"
+url = "/platform"
+parent = "Plattform"
+weight = 1
+
+[[main]]
 name = "Veröffentlichen"
 url = "/platform/publish"
 parent = "Plattform"
-weight = 1
+weight = 2
 
 [[main]]
 name = "Spatial"
 url = "/platform/spatial"
 parent = "Plattform"
-weight = 2
+weight = 3
 
 [[main]]
 name = "Foundation"
 url = "/platform/foundation"
 parent = "Plattform"
-weight = 3
+weight = 4
 
 [[main]]
 name = "Sensorik"
 url = "/platform/sensing"
 parent = "Plattform"
+weight = 5
+
+[[main]]
+name = "Flotte"
+url = "/fleet"
+weight = 2
+hasChildren = true
+
+[[main]]
+name = "Übersicht"
+identifier = "fleet-overview"
+url = "/fleet"
+parent = "Flotte"
+weight = 1
+
+[[main]]
+name = "Drohnen"
+url = "/fleet/platforms/drones"
+parent = "Flotte"
+weight = 2
+
+[[main]]
+name = "Bodenfahrzeuge"
+url = "/fleet/platforms/ground"
+parent = "Flotte"
+weight = 3
+
+[[main]]
+name = "Hardware (Stückliste)"
+url = "/fleet/hardware"
+parent = "Flotte"
 weight = 4
+
+[[main]]
+name = "Software-Stack"
+url = "/fleet/software"
+parent = "Flotte"
+weight = 5
+
+[[main]]
+name = "NATS-Topologie"
+url = "/fleet/nats-topology"
+parent = "Flotte"
+weight = 6
+
+[[main]]
+name = "Subject-Design"
+url = "/fleet/subjects"
+parent = "Flotte"
+weight = 7
+
+[[main]]
+name = "Streams & Ereignisse"
+url = "/fleet/streams"
+parent = "Flotte"
+weight = 8
+
+[[main]]
+name = "Fahrzeug-Gateway"
+url = "/fleet/gateway"
+parent = "Flotte"
+weight = 9
+
+[[main]]
+name = "DJI-Migration"
+url = "/fleet/dji-migration"
+parent = "Flotte"
+weight = 10
+
+[[main]]
+name = "BVLOS-Vorschriften"
+url = "/fleet/bvlos-regulations"
+parent = "Flotte"
+weight = 11
+
+[[main]]
+name = "Luftraum-Viewer"
+url = "/fleet/airspace-demo"
+parent = "Flotte"
+weight = 12
+
+[[main]]
+name = "Autorisierung"
+url = "/fleet/authorization"
+parent = "Flotte"
+weight = 13
+
+[[main]]
+name = "Sicherheitsmodell"
+url = "/fleet/safety"
+parent = "Flotte"
+weight = 14
 
 [[main]]
 name = "Lösungen"
 url = "/applications"
-weight = 2
+weight = 3
 hasChildren = true
 
 [[main]]
@@ -47,33 +145,99 @@ parent = "Lösungen"
 weight = 1
 
 [[main]]
-name = "Fertigung & Bauwesen"
-url = "/applications/manufacturing"
+name = "Landwirtschaft"
+url = "/applications/fleet-agriculture"
 parent = "Lösungen"
 weight = 2
 
 [[main]]
-name = "Robotik & Simulation"
-url = "/applications/robotics"
+name = "Bauwesen"
+url = "/applications/fleet-construction"
 parent = "Lösungen"
 weight = 3
 
 [[main]]
-name = "Regierung & Gesundheit"
-url = "/applications/government"
+name = "Öffentliche Sicherheit"
+url = "/applications/fleet-safety"
 parent = "Lösungen"
 weight = 4
 
 [[main]]
-name = "Finanzdienstleistungen"
-url = "/applications/financial"
+name = "Logistik"
+url = "/applications/fleet-logistics"
 parent = "Lösungen"
 weight = 5
 
 [[main]]
+name = "Energie"
+url = "/applications/fleet-energy"
+parent = "Lösungen"
+weight = 6
+
+[[main]]
+name = "Bergbau"
+url = "/applications/fleet-mining"
+parent = "Lösungen"
+weight = 7
+
+[[main]]
+name = "Umwelt"
+url = "/applications/fleet-environment"
+parent = "Lösungen"
+weight = 8
+
+[[main]]
+name = "Feldeinsätze"
+url = "/applications/logistics"
+parent = "Lösungen"
+weight = 9
+
+[[main]]
+name = "Fertigung"
+url = "/applications/manufacturing"
+parent = "Lösungen"
+weight = 10
+
+[[main]]
+name = "Robotik"
+url = "/applications/robotics"
+parent = "Lösungen"
+weight = 11
+
+[[main]]
+name = "Regierung"
+url = "/applications/government"
+parent = "Lösungen"
+weight = 12
+
+[[main]]
+name = "Gesundheitswesen"
+url = "/applications/healthcare"
+parent = "Lösungen"
+weight = 13
+
+[[main]]
+name = "Finanzwesen"
+url = "/applications/financial"
+parent = "Lösungen"
+weight = 14
+
+[[main]]
+name = "Bildung"
+url = "/applications/education"
+parent = "Lösungen"
+weight = 15
+
+[[main]]
+name = "Versicherung"
+url = "/applications/insurance"
+parent = "Lösungen"
+weight = 16
+
+[[main]]
 name = "Entwickler"
 url = "/pkg"
-weight = 3
+weight = 4
 hasChildren = true
 
 [[main]]
@@ -84,21 +248,27 @@ parent = "Entwickler"
 weight = 1
 
 [[main]]
-name = "Technologie-Stack"
+name = "Technologie"
 url = "/technology"
 parent = "Entwickler"
 weight = 2
 
 [[main]]
-name = "GitHub"
-url = "https://github.com/joeblew999/ubuntu-website"
+name = "Sicherheit"
+url = "/security"
 parent = "Entwickler"
 weight = 3
 
 [[main]]
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "Entwickler"
+weight = 4
+
+[[main]]
 name = "Unternehmen"
 url = "/company"
-weight = 4
+weight = 5
 hasChildren = true
 
 [[main]]
@@ -115,67 +285,101 @@ parent = "Unternehmen"
 weight = 2
 
 [[main]]
+name = "Berater"
+url = "/company/advisors"
+parent = "Unternehmen"
+weight = 3
+
+[[main]]
 name = "Erfahrung"
 url = "/company/experience"
 parent = "Unternehmen"
-weight = 3
+weight = 4
+
+[[main]]
+name = "Überwachung"
+url = "/company/surveillance"
+parent = "Unternehmen"
+weight = 5
+
+[[main]]
+name = "Geschichte"
+url = "/company-history"
+parent = "Unternehmen"
+weight = 6
+
+[[main]]
+name = "Partner"
+url = "/partners"
+parent = "Unternehmen"
+weight = 7
 
 [[main]]
 name = "Blog"
 url = "/blog"
 parent = "Unternehmen"
-weight = 4
+weight = 8
 
 [[main]]
 name = "Kontakt"
 url = "/contact"
 parent = "Unternehmen"
-weight = 5
+weight = 9
 
 
-# Footer menu - organized by section for discoverability
-
+# footer menu
 [[footer]]
 name = "Plattform"
 url = "/platform"
 weight = 1
 
 [[footer]]
+name = "Flotte"
+url = "/fleet"
+weight = 2
+
+[[footer]]
 name = "Lösungen"
 url = "/applications"
-weight = 2
+weight = 3
 
 [[footer]]
 name = "Entwickler"
 url = "/pkg"
-weight = 3
+weight = 4
 
 [[footer]]
 name = "Blog"
 url = "/blog"
-weight = 4
+weight = 5
 
 [[footer]]
 name = "Kontakt"
 url = "/contact"
-weight = 5
+weight = 6
+
+[[footer]]
+name = "Partner"
+url = "/partners"
+weight = 7
 
 [[footer]]
 name = "Loslegen"
 url = "/get-started"
-weight = 6
+weight = 8
 
 [[footer]]
 name = "Sicherheit"
 url = "/security"
-weight = 7
+weight = 9
 
 [[footer]]
 name = "Datenschutz"
 url = "/privacy-policy"
-weight = 8
+weight = 10
 
 [[footer]]
 name = "Nutzungsbedingungen"
 url = "/terms-of-service"
-weight = 9
+weight = 11
+

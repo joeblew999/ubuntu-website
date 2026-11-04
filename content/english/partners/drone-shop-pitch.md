@@ -118,12 +118,6 @@ Or send us a message: [partnerships@ubuntusoftware.net](mailto:partnerships@ubun
 
 ---
 
-## One-Page Summary
-
-Need something to print or share? [Download the partner one-pager (PDF)](/partners/drone-shop-pitch.pdf).
-
----
-
 ## Questions?
 
 [Contact us](/contact?subject=drone-shop-pitch) — We respond within 24 hours.

@@ -130,8 +130,6 @@ draft: false
 ## 实际应用
 
 - [机器人与自动化 →](/applications/robotics)
-- [仿真与培训 →](/applications/simulation)
-- [数字孪生 →](/applications/digital-twins)
 - [制造业 →](/applications/manufacturing)
 - [建筑业 →](/applications/construction)
 

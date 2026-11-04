@@ -1,7 +1,7 @@
 ############# Japanese navigation ##############
 
-# Main menu - 4 items + Get Started CTA button
-# Simplified for two audiences: Users (Platform, Solutions, Company) and Developers
+# main menu
+# Note: "Home" removed - logo already links to home, saves nav space
 
 [[main]]
 name = "プラットフォーム"
@@ -10,33 +10,131 @@ weight = 1
 hasChildren = true
 
 [[main]]
+name = "概要"
+identifier = "platform-overview"
+url = "/platform"
+parent = "プラットフォーム"
+weight = 1
+
+[[main]]
 name = "パブリッシュ"
 url = "/platform/publish"
 parent = "プラットフォーム"
-weight = 1
+weight = 2
 
 [[main]]
 name = "スペーシャル"
 url = "/platform/spatial"
 parent = "プラットフォーム"
-weight = 2
+weight = 3
 
 [[main]]
 name = "ファウンデーション"
 url = "/platform/foundation"
 parent = "プラットフォーム"
-weight = 3
+weight = 4
 
 [[main]]
 name = "センシング"
 url = "/platform/sensing"
 parent = "プラットフォーム"
+weight = 5
+
+[[main]]
+name = "フリート"
+url = "/fleet"
+weight = 2
+hasChildren = true
+
+[[main]]
+name = "概要"
+identifier = "fleet-overview"
+url = "/fleet"
+parent = "フリート"
+weight = 1
+
+[[main]]
+name = "ドローン"
+url = "/fleet/platforms/drones"
+parent = "フリート"
+weight = 2
+
+[[main]]
+name = "地上車両"
+url = "/fleet/platforms/ground"
+parent = "フリート"
+weight = 3
+
+[[main]]
+name = "ハードウェア（BOM）"
+url = "/fleet/hardware"
+parent = "フリート"
 weight = 4
+
+[[main]]
+name = "ソフトウェアスタック"
+url = "/fleet/software"
+parent = "フリート"
+weight = 5
+
+[[main]]
+name = "NATS トポロジー"
+url = "/fleet/nats-topology"
+parent = "フリート"
+weight = 6
+
+[[main]]
+name = "サブジェクト設計"
+url = "/fleet/subjects"
+parent = "フリート"
+weight = 7
+
+[[main]]
+name = "ストリームとイベント"
+url = "/fleet/streams"
+parent = "フリート"
+weight = 8
+
+[[main]]
+name = "車両ゲートウェイ"
+url = "/fleet/gateway"
+parent = "フリート"
+weight = 9
+
+[[main]]
+name = "DJI 移行"
+url = "/fleet/dji-migration"
+parent = "フリート"
+weight = 10
+
+[[main]]
+name = "BVLOS 規制"
+url = "/fleet/bvlos-regulations"
+parent = "フリート"
+weight = 11
+
+[[main]]
+name = "空域ビューアー"
+url = "/fleet/airspace-demo"
+parent = "フリート"
+weight = 12
+
+[[main]]
+name = "認可"
+url = "/fleet/authorization"
+parent = "フリート"
+weight = 13
+
+[[main]]
+name = "安全モデル"
+url = "/fleet/safety"
+parent = "フリート"
+weight = 14
 
 [[main]]
 name = "ソリューション"
 url = "/applications"
-weight = 2
+weight = 3
 hasChildren = true
 
 [[main]]
@@ -47,33 +145,99 @@ parent = "ソリューション"
 weight = 1
 
 [[main]]
-name = "製造業・建設"
-url = "/applications/manufacturing"
+name = "農業"
+url = "/applications/fleet-agriculture"
 parent = "ソリューション"
 weight = 2
 
 [[main]]
-name = "ロボティクス・シミュレーション"
-url = "/applications/robotics"
+name = "建設"
+url = "/applications/fleet-construction"
 parent = "ソリューション"
 weight = 3
 
 [[main]]
-name = "政府・ヘルスケア"
-url = "/applications/government"
+name = "公共安全"
+url = "/applications/fleet-safety"
 parent = "ソリューション"
 weight = 4
 
 [[main]]
-name = "金融サービス"
-url = "/applications/financial"
+name = "物流"
+url = "/applications/fleet-logistics"
 parent = "ソリューション"
 weight = 5
 
 [[main]]
+name = "エネルギー"
+url = "/applications/fleet-energy"
+parent = "ソリューション"
+weight = 6
+
+[[main]]
+name = "鉱業"
+url = "/applications/fleet-mining"
+parent = "ソリューション"
+weight = 7
+
+[[main]]
+name = "環境"
+url = "/applications/fleet-environment"
+parent = "ソリューション"
+weight = 8
+
+[[main]]
+name = "現場オペレーション"
+url = "/applications/logistics"
+parent = "ソリューション"
+weight = 9
+
+[[main]]
+name = "製造業"
+url = "/applications/manufacturing"
+parent = "ソリューション"
+weight = 10
+
+[[main]]
+name = "ロボティクス"
+url = "/applications/robotics"
+parent = "ソリューション"
+weight = 11
+
+[[main]]
+name = "政府"
+url = "/applications/government"
+parent = "ソリューション"
+weight = 12
+
+[[main]]
+name = "ヘルスケア"
+url = "/applications/healthcare"
+parent = "ソリューション"
+weight = 13
+
+[[main]]
+name = "金融"
+url = "/applications/financial"
+parent = "ソリューション"
+weight = 14
+
+[[main]]
+name = "教育"
+url = "/applications/education"
+parent = "ソリューション"
+weight = 15
+
+[[main]]
+name = "保険"
+url = "/applications/insurance"
+parent = "ソリューション"
+weight = 16
+
+[[main]]
 name = "開発者"
 url = "/pkg"
-weight = 3
+weight = 4
 hasChildren = true
 
 [[main]]
@@ -84,21 +248,27 @@ parent = "開発者"
 weight = 1
 
 [[main]]
-name = "テクノロジースタック"
+name = "テクノロジー"
 url = "/technology"
 parent = "開発者"
 weight = 2
 
 [[main]]
-name = "GitHub"
-url = "https://github.com/joeblew999/ubuntu-website"
+name = "セキュリティ"
+url = "/security"
 parent = "開発者"
 weight = 3
 
 [[main]]
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "開発者"
+weight = 4
+
+[[main]]
 name = "会社"
 url = "/company"
-weight = 4
+weight = 5
 hasChildren = true
 
 [[main]]
@@ -115,67 +285,101 @@ parent = "会社"
 weight = 2
 
 [[main]]
+name = "アドバイザー"
+url = "/company/advisors"
+parent = "会社"
+weight = 3
+
+[[main]]
 name = "経験"
 url = "/company/experience"
 parent = "会社"
-weight = 3
+weight = 4
+
+[[main]]
+name = "監視"
+url = "/company/surveillance"
+parent = "会社"
+weight = 5
+
+[[main]]
+name = "沿革"
+url = "/company-history"
+parent = "会社"
+weight = 6
+
+[[main]]
+name = "パートナー"
+url = "/partners"
+parent = "会社"
+weight = 7
 
 [[main]]
 name = "ブログ"
 url = "/blog"
 parent = "会社"
-weight = 4
+weight = 8
 
 [[main]]
 name = "お問い合わせ"
 url = "/contact"
 parent = "会社"
-weight = 5
+weight = 9
 
 
-# Footer menu - organized by section for discoverability
-
+# footer menu
 [[footer]]
 name = "プラットフォーム"
 url = "/platform"
 weight = 1
 
 [[footer]]
+name = "フリート"
+url = "/fleet"
+weight = 2
+
+[[footer]]
 name = "ソリューション"
 url = "/applications"
-weight = 2
+weight = 3
 
 [[footer]]
 name = "開発者"
 url = "/pkg"
-weight = 3
+weight = 4
 
 [[footer]]
 name = "ブログ"
 url = "/blog"
-weight = 4
+weight = 5
 
 [[footer]]
 name = "お問い合わせ"
 url = "/contact"
-weight = 5
+weight = 6
+
+[[footer]]
+name = "パートナー"
+url = "/partners"
+weight = 7
 
 [[footer]]
 name = "はじめる"
 url = "/get-started"
-weight = 6
+weight = 8
 
 [[footer]]
 name = "セキュリティ"
 url = "/security"
-weight = 7
+weight = 9
 
 [[footer]]
 name = "プライバシーポリシー"
 url = "/privacy-policy"
-weight = 8
+weight = 10
 
 [[footer]]
 name = "利用規約"
 url = "/terms-of-service"
-weight = 9
+weight = 11
+

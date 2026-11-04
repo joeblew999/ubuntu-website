@@ -1,7 +1,7 @@
 ############# Chinese navigation ##############
 
-# Main menu - 4 items + Get Started CTA button
-# Simplified for two audiences: Users (Platform, Solutions, Company) and Developers
+# main menu
+# Note: "Home" removed - logo already links to home, saves nav space
 
 [[main]]
 name = "平台"
@@ -10,33 +10,131 @@ weight = 1
 hasChildren = true
 
 [[main]]
+name = "概览"
+identifier = "platform-overview"
+url = "/platform"
+parent = "平台"
+weight = 1
+
+[[main]]
 name = "发布"
 url = "/platform/publish"
 parent = "平台"
-weight = 1
+weight = 2
 
 [[main]]
 name = "空间"
 url = "/platform/spatial"
 parent = "平台"
-weight = 2
+weight = 3
 
 [[main]]
 name = "基础"
 url = "/platform/foundation"
 parent = "平台"
-weight = 3
+weight = 4
 
 [[main]]
 name = "传感"
 url = "/platform/sensing"
 parent = "平台"
+weight = 5
+
+[[main]]
+name = "车队"
+url = "/fleet"
+weight = 2
+hasChildren = true
+
+[[main]]
+name = "概览"
+identifier = "fleet-overview"
+url = "/fleet"
+parent = "车队"
+weight = 1
+
+[[main]]
+name = "无人机"
+url = "/fleet/platforms/drones"
+parent = "车队"
+weight = 2
+
+[[main]]
+name = "地面车辆"
+url = "/fleet/platforms/ground"
+parent = "车队"
+weight = 3
+
+[[main]]
+name = "硬件（BOM）"
+url = "/fleet/hardware"
+parent = "车队"
 weight = 4
+
+[[main]]
+name = "软件栈"
+url = "/fleet/software"
+parent = "车队"
+weight = 5
+
+[[main]]
+name = "NATS 拓扑"
+url = "/fleet/nats-topology"
+parent = "车队"
+weight = 6
+
+[[main]]
+name = "主题设计"
+url = "/fleet/subjects"
+parent = "车队"
+weight = 7
+
+[[main]]
+name = "流与事件"
+url = "/fleet/streams"
+parent = "车队"
+weight = 8
+
+[[main]]
+name = "车辆网关"
+url = "/fleet/gateway"
+parent = "车队"
+weight = 9
+
+[[main]]
+name = "DJI 迁移"
+url = "/fleet/dji-migration"
+parent = "车队"
+weight = 10
+
+[[main]]
+name = "BVLOS 法规"
+url = "/fleet/bvlos-regulations"
+parent = "车队"
+weight = 11
+
+[[main]]
+name = "空域查看器"
+url = "/fleet/airspace-demo"
+parent = "车队"
+weight = 12
+
+[[main]]
+name = "授权"
+url = "/fleet/authorization"
+parent = "车队"
+weight = 13
+
+[[main]]
+name = "安全模型"
+url = "/fleet/safety"
+parent = "车队"
+weight = 14
 
 [[main]]
 name = "解决方案"
 url = "/applications"
-weight = 2
+weight = 3
 hasChildren = true
 
 [[main]]
@@ -47,33 +145,99 @@ parent = "解决方案"
 weight = 1
 
 [[main]]
-name = "制造业与建筑"
-url = "/applications/manufacturing"
+name = "农业"
+url = "/applications/fleet-agriculture"
 parent = "解决方案"
 weight = 2
 
 [[main]]
-name = "机器人与仿真"
-url = "/applications/robotics"
+name = "建筑"
+url = "/applications/fleet-construction"
 parent = "解决方案"
 weight = 3
 
 [[main]]
-name = "政府与医疗"
-url = "/applications/government"
+name = "公共安全"
+url = "/applications/fleet-safety"
 parent = "解决方案"
 weight = 4
 
 [[main]]
-name = "金融服务"
-url = "/applications/financial"
+name = "物流"
+url = "/applications/fleet-logistics"
 parent = "解决方案"
 weight = 5
 
 [[main]]
+name = "能源"
+url = "/applications/fleet-energy"
+parent = "解决方案"
+weight = 6
+
+[[main]]
+name = "采矿"
+url = "/applications/fleet-mining"
+parent = "解决方案"
+weight = 7
+
+[[main]]
+name = "环境"
+url = "/applications/fleet-environment"
+parent = "解决方案"
+weight = 8
+
+[[main]]
+name = "现场作业"
+url = "/applications/logistics"
+parent = "解决方案"
+weight = 9
+
+[[main]]
+name = "制造业"
+url = "/applications/manufacturing"
+parent = "解决方案"
+weight = 10
+
+[[main]]
+name = "机器人"
+url = "/applications/robotics"
+parent = "解决方案"
+weight = 11
+
+[[main]]
+name = "政府"
+url = "/applications/government"
+parent = "解决方案"
+weight = 12
+
+[[main]]
+name = "医疗"
+url = "/applications/healthcare"
+parent = "解决方案"
+weight = 13
+
+[[main]]
+name = "金融"
+url = "/applications/financial"
+parent = "解决方案"
+weight = 14
+
+[[main]]
+name = "教育"
+url = "/applications/education"
+parent = "解决方案"
+weight = 15
+
+[[main]]
+name = "保险"
+url = "/applications/insurance"
+parent = "解决方案"
+weight = 16
+
+[[main]]
 name = "开发者"
 url = "/pkg"
-weight = 3
+weight = 4
 hasChildren = true
 
 [[main]]
@@ -84,21 +248,27 @@ parent = "开发者"
 weight = 1
 
 [[main]]
-name = "技术栈"
+name = "技术"
 url = "/technology"
 parent = "开发者"
 weight = 2
 
 [[main]]
-name = "GitHub"
-url = "https://github.com/joeblew999/ubuntu-website"
+name = "安全"
+url = "/security"
 parent = "开发者"
 weight = 3
 
 [[main]]
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "开发者"
+weight = 4
+
+[[main]]
 name = "公司"
 url = "/company"
-weight = 4
+weight = 5
 hasChildren = true
 
 [[main]]
@@ -115,67 +285,101 @@ parent = "公司"
 weight = 2
 
 [[main]]
+name = "顾问"
+url = "/company/advisors"
+parent = "公司"
+weight = 3
+
+[[main]]
 name = "经验"
 url = "/company/experience"
 parent = "公司"
-weight = 3
+weight = 4
+
+[[main]]
+name = "监控"
+url = "/company/surveillance"
+parent = "公司"
+weight = 5
+
+[[main]]
+name = "历史"
+url = "/company-history"
+parent = "公司"
+weight = 6
+
+[[main]]
+name = "合作伙伴"
+url = "/partners"
+parent = "公司"
+weight = 7
 
 [[main]]
 name = "博客"
 url = "/blog"
 parent = "公司"
-weight = 4
+weight = 8
 
 [[main]]
 name = "联系我们"
 url = "/contact"
 parent = "公司"
-weight = 5
+weight = 9
 
 
-# Footer menu - organized by section for discoverability
-
+# footer menu
 [[footer]]
 name = "平台"
 url = "/platform"
 weight = 1
 
 [[footer]]
+name = "车队"
+url = "/fleet"
+weight = 2
+
+[[footer]]
 name = "解决方案"
 url = "/applications"
-weight = 2
+weight = 3
 
 [[footer]]
 name = "开发者"
 url = "/pkg"
-weight = 3
+weight = 4
 
 [[footer]]
 name = "博客"
 url = "/blog"
-weight = 4
+weight = 5
 
 [[footer]]
 name = "联系我们"
 url = "/contact"
-weight = 5
+weight = 6
+
+[[footer]]
+name = "合作伙伴"
+url = "/partners"
+weight = 7
 
 [[footer]]
 name = "开始使用"
 url = "/get-started"
-weight = 6
+weight = 8
 
 [[footer]]
 name = "安全"
 url = "/security"
-weight = 7
+weight = 9
 
 [[footer]]
 name = "隐私政策"
 url = "/privacy-policy"
-weight = 8
+weight = 10
 
 [[footer]]
 name = "服务条款"
 url = "/terms-of-service"
-weight = 9
+weight = 11
+

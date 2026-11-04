@@ -54,12 +54,12 @@ aliases:
 
 | 文件 | 说明 |
 |----------|-------------|
-| [公司证书（PDF）](/companies-house/ubuntu-software-design-ltd-certificate.pdf) | 公司注册证书 |
-| [公司证书（图片）](/companies-house/ubuntu-design-ltd-certificate.png) | 证书扫描件 |
-| [2012 年年度申报表](/companies-house/ar01-2012-03-07-shareholders.pdf) | 股东名单 |
-| [2011 年年度申报表](/companies-house/ar01-2011-03-24-shareholders.pdf) | 股东名单 |
-| [2010 年年度申报表](/companies-house/ar01-2010-04-20-shareholders.pdf) | 股东名单 |
-| [注销申请](/companies-house/ds01-2012-06-29-strike-off.pdf) | 自愿解散 |
+| [公司证书（PDF）](/companies-house-uk/ubuntu-software-design-ltd-certificate.pdf) | 公司注册证书 |
+| [公司证书（图片）](/companies-house-uk/ubuntu-design-ltd-certificate.png) | 证书扫描件 |
+| [2012 年年度申报表](/companies-house-uk/ar01-2012-03-07-shareholders.pdf) | 股东名单 |
+| [2011 年年度申报表](/companies-house-uk/ar01-2011-03-24-shareholders.pdf) | 股东名单 |
+| [2010 年年度申报表](/companies-house-uk/ar01-2010-04-20-shareholders.pdf) | 股东名单 |
+| [注销申请](/companies-house-uk/ds01-2012-06-29-strike-off.pdf) | 自愿解散 |
 
 ## 关于“Ubuntu”这个名字
 

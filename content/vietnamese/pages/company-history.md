@@ -54,12 +54,12 @@ Chúng tôi lưu giữ bản sao các tài liệu quan trọng chứng minh lị
 
 | Tài liệu | Mô tả |
 |----------|-------------|
-| [Giấy chứng nhận công ty (PDF)](/companies-house/ubuntu-software-design-ltd-certificate.pdf) | Giấy chứng nhận thành lập |
-| [Giấy chứng nhận công ty (Hình ảnh)](/companies-house/ubuntu-design-ltd-certificate.png) | Bản quét giấy chứng nhận |
-| [Báo cáo thường niên 2012](/companies-house/ar01-2012-03-07-shareholders.pdf) | Danh sách cổ đông |
-| [Báo cáo thường niên 2011](/companies-house/ar01-2011-03-24-shareholders.pdf) | Danh sách cổ đông |
-| [Báo cáo thường niên 2010](/companies-house/ar01-2010-04-20-shareholders.pdf) | Danh sách cổ đông |
-| [Đơn xin xóa tên](/companies-house/ds01-2012-06-29-strike-off.pdf) | Giải thể tự nguyện |
+| [Giấy chứng nhận công ty (PDF)](/companies-house-uk/ubuntu-software-design-ltd-certificate.pdf) | Giấy chứng nhận thành lập |
+| [Giấy chứng nhận công ty (Hình ảnh)](/companies-house-uk/ubuntu-design-ltd-certificate.png) | Bản quét giấy chứng nhận |
+| [Báo cáo thường niên 2012](/companies-house-uk/ar01-2012-03-07-shareholders.pdf) | Danh sách cổ đông |
+| [Báo cáo thường niên 2011](/companies-house-uk/ar01-2011-03-24-shareholders.pdf) | Danh sách cổ đông |
+| [Báo cáo thường niên 2010](/companies-house-uk/ar01-2010-04-20-shareholders.pdf) | Danh sách cổ đông |
+| [Đơn xin xóa tên](/companies-house-uk/ds01-2012-06-29-strike-off.pdf) | Giải thể tự nguyện |
 
 ## Về cái tên "Ubuntu"
 

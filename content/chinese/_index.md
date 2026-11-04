@@ -1,57 +1,69 @@
 ---
+title: "Ubuntu Software"
+meta_title: "Ubuntu Software | Linux 开发与跨平台应用"
+description: "25 年 Linux 应用开发经验。AI 驱动的 3D 设计（Spatial）+ 文档发布（Publish）。适用于 Linux、Windows、Mac、iOS、Android 的原生软件。"
+
 # Banner
 banner:
-  title: "专业IT咨询与软件架构"
-  content: "Ubuntu Software为分布式系统、云基础设施和DevOps提供企业级解决方案。超过25年的成熟专业经验，服务于财富500强企业和国际组织。"
-  image: "/images/banner.png"
+  title: "面向设计与文档的 AI 基础设施"
+  content: "两个平台，一个基础。Spatial 用于 3D 设计和机器人，Publish 用于文档和表单。两者均由 AI 驱动、离线优先，并基于开放标准构建。"
+  image: "/images/banner.svg"
   button:
     enable: true
-    label: "了解更多"
-    link: "/about"
+    label: "探索平台"
+    link: "/platform"
+  button2:
+    enable: true
+    label: "开始使用"
+    link: "/get-started"
 
 # Features
 features:
-  - title: "世界级技术专业知识"
-    image: "/images/service-1.png"
-    content: "资深IT顾问和软件架构师，拥有丰富的国际经验，为全球领先组织交付复杂系统。"
+  - title: "Spatial：AI 原生 3D 设计"
+    image: "/images/service-1.svg"
+    content: "建筑、机器人、工厂、城市——它们都存在于三维空间中。AI 要真正塑造我们的世界，就必须以 3D 方式思考。"
     bulletpoints:
-      - "超过25年专业经验"
-      - "分布式系统和实时架构"
-      - "云平台：AWS、GCP、Azure"
-      - "容器编排：Kubernetes、Docker"
-      - "企业级系统交付"
-      - "领导多达70名开发人员的技术团队"
-    button:
-      enable: false
-      label: ""
-      link: ""
-
-  - title: "知名客户经验"
-    image: "/images/service-2.png"
-    content: "为欧洲及其他地区的政府组织、大型企业和财富500强公司交付关键任务系统的成功记录。"
-    bulletpoints:
-      - "德国联邦卫生部 (BMG)"
-      - "欧盟和欧洲气候基金会"
-      - "Metro AG - 7,000台Kubernetes服务器部署"
-      - "奥迪AG - 自动驾驶运输系统"
-      - "英国石油、野村银行、荷兰银行"
+      - "3D 原生 AI — 用于真正空间推理的 Model Context Protocol"
+      - "开放标准 — STEP 和 IFC。几何数据归您所有，无锁定"
+      - "实时协作 — Automerge CRDT。分布式团队，零冲突"
+      - "离线优先 — 随处工作，自动同步"
     button:
       enable: true
-      label: "查看完整作品集"
-      link: "/about"
+      label: "探索 Spatial"
+      link: "/platform/spatial"
 
-  - title: "现代技术栈"
-    image: "/images/service-3.png"
-    content: "专注于前沿技术和现代开发实践，交付高性能、可扩展的解决方案。"
+  - title: "Publish：单一来源文档"
+    image: "/images/service-2.svg"
+    content: "用 Markdown 写一次，即可生成网页、PDF 和表单。从数字或纸质提交中采集数据，写回您的数据库。"
     bulletpoints:
-      - "Go、Rust、C#/.NET、JavaScript/TypeScript、Python"
-      - "分布式系统和事件驱动架构"
-      - "实时系统和流处理技术"
-      - "基础设施即代码和CI/CD自动化"
-      - "移动和桌面应用开发 (Flutter)"
-      - "SQL和NoSQL数据库"
+      - "单一来源 — 一个文件驱动网页、PDF 和表单"
+      - "纸质 + 数字 — 两种渠道，同一数据目的地"
+      - "OCR 采集 — 自动提取扫描表单中的数据"
+      - "AI 辅助 — 用自然语言与文档交互"
     button:
-      enable: false
-      label: ""
-      link: ""
+      enable: true
+      label: "探索 Publish"
+      link: "/platform/publish"
+
+  - title: "跨行业应用"
+    image: "/images/service-3.svg"
+    content: "从机器人到医疗再到保险——凡是 AI 能在设计或文档上提供帮助的地方。"
+    bulletpoints:
+      - "Spatial：机器人、仿真、数字孪生、制造业、建筑"
+      - "Publish：政府、医疗、金融、教育、保险"
+      - "跨平台 — 原生支持 Linux、Windows、Mac、iOS、Android"
+      - "共享基础 — 相同的 AI、相同的同步、相同的离线能力"
+    button:
+      enable: true
+      label: "查看应用"
+      link: "/applications"
+
+# Founder
+founder:
+  enable: false
+  title: "Gerard Webb"
+  role: "创始人"
+  image: "/images/team/gerard-passport.jpg"
+  content: "25 年为全球企业构建实时分布式系统的经验，如今将这些经验应用于 AI 与 3D 设计的融合。"
+  link: "/company/founder/gerard-webb"
 ---

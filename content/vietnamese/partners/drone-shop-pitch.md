@@ -118,12 +118,6 @@ Hoặc gửi tin nhắn cho chúng tôi: [partnerships@ubuntusoftware.net](mailt
 
 ---
 
-## Tóm tắt một trang
-
-Cần tài liệu để in hoặc chia sẻ? [Tải bản tóm tắt một trang dành cho đối tác (PDF)](/partners/drone-shop-pitch.pdf).
-
----
-
 ## Có câu hỏi?
 
 [Liên hệ với chúng tôi](/contact?subject=drone-shop-pitch). Chúng tôi phản hồi trong vòng 24 giờ.

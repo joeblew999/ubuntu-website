@@ -78,8 +78,8 @@ description = "misecheck (github.com/joeblew999/mise-check) on every mise file h
 run = 'go test . -run "^TestMise$" -count=1 -v'
 
 [tasks."root:ci"]
-description = "What CI runs, and the same here: misecheck, the workflows linted and their actions pinned, the Go, the theme CSS current, the site's production build. CI's workflow runs only this task"
-depends = ["root:check-mise", "root:check-workflows", "root:check-actions", "root:test", "root:test-worker", "theme:check", "root:build"]
+description = "What CI runs, and the same here: misecheck, the workflows linted and their actions pinned, the Go, the theme CSS current, the site's production build and every link in it landing. CI's workflow runs only this task"
+depends = ["root:check-mise", "root:check-workflows", "root:check-actions", "root:test", "root:test-worker", "theme:check", "root:build", "sitecheck:links"]
 
 [tasks."root:check-workflows"]
 description = "The GitHub workflows (.github/workflows/*.yml) linted with actionlint: YAML, expressions, action inputs, and the shell of their run steps"
@@ -112,9 +112,9 @@ description = "The site's npm packages (Tailwind, its plugins, wrangler), with a
 run = 'aube install --frozen-lockfile'
 
 [tasks."root:build"]
-description = "The site as production builds it (hugo -e production --gc --minify) into public/, with the theme CSS as committed (theme:check): refLinksErrorLevel makes a broken relref fail it. Preview builds are the same build"
+description = "The site as production builds it (hugo -e production --gc --minify) into public/, emptied first (no page a dev server or an older build left there), with the theme CSS as committed (theme:check): refLinksErrorLevel makes a broken relref fail it, sitecheck:links any other link. Preview builds are the same build"
 depends = ["root:deps"]
-run = 'hugo -e production --gc --minify'
+run = 'hugo -e production --gc --minify --cleanDestinationDir'
 
 [tasks."root:cloudflare-build"]
 description = "Cloudflare's build of the Worker (Workers Builds, production and every branch's preview): its build command is npx -y @jdxcode/mise@<min_version> run --skip-tools root:cloudflare-build. Cloudflare's image brings node and installs the npm packages itself (pnpm, from pnpm-lock.yaml), so this installs only Hugo, then the build without root:deps; wrangler deploys what it built"

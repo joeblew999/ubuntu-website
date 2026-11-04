@@ -130,8 +130,6 @@ Cửa sổ đang mở. Chúng ta đang xây dựng qua nó.
 ## Xem nó hoạt động như thế nào
 
 - [Robotics & Automation →](/vi/applications/robotics)
-- [Mô phỏng & Đào tạo →](/vi/applications/simulation)
-- [Bản sao kỹ thuật số →](/vi/applications/digital-twins)
 - [Sản xuất →](/vi/applications/manufacturing)
 - [Xây dựng →](/vi/applications/construction)
 

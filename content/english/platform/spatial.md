@@ -130,8 +130,6 @@ The window is open. We're building through it.
 ## See It In Action
 
 - [Robotics & Automation →](/applications/robotics)
-- [Simulation & Training →](/applications/simulation)
-- [Digital Twins →](/applications/digital-twins)
 - [Manufacturing →](/applications/manufacturing)
 - [Construction →](/applications/construction)
 

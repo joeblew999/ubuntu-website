@@ -1,57 +1,69 @@
 ---
+title: "Ubuntu Software"
+meta_title: "Ubuntu Software | Linux-Entwicklung & plattformübergreifende Anwendungen"
+description: "25 Jahre Entwicklung von Linux-Anwendungen. KI-gestütztes 3D-Design (Spatial) + Dokumenten-Publishing (Publish). Native Software für Linux, Windows, Mac, iOS, Android."
+
 # Banner
 banner:
-  title: "IT-Beratung & Software-Architektur auf Expertenniveau"
-  content: "Ubuntu Software liefert Unternehmenslösungen in den Bereichen verteilte Systeme, Cloud-Infrastruktur und DevOps. Über 25 Jahre bewährte Expertise für Fortune-500-Unternehmen und internationale Organisationen."
-  image: "/images/banner.png"
+  title: "KI-Infrastruktur für Design und Dokumente"
+  content: "Zwei Plattformen. Ein Fundament. Spatial für 3D-Design und Robotik. Publish für Dokumente und Formulare. Beide KI-gestützt, offline-first und auf offenen Standards aufgebaut."
+  image: "/images/banner.svg"
   button:
     enable: true
-    label: "Mehr erfahren"
-    link: "/about"
+    label: "Plattform entdecken"
+    link: "/platform"
+  button2:
+    enable: true
+    label: "Loslegen"
+    link: "/get-started"
 
 # Features
 features:
-  - title: "Technische Expertise auf Weltklasse-Niveau"
-    image: "/images/service-1.png"
-    content: "Senior IT-Berater und Software-Architekt mit umfangreicher internationaler Erfahrung in der Entwicklung komplexer Systeme für führende Organisationen weltweit."
+  - title: "Spatial: KI-natives 3D-Design"
+    image: "/images/service-1.svg"
+    content: "Gebäude, Roboter, Fabriken, Städte – sie existieren in drei Dimensionen. Damit KI unsere Welt wirklich gestalten kann, muss sie in 3D denken."
     bulletpoints:
-      - "Über 25 Jahre Berufserfahrung"
-      - "Verteilte Systeme und Echtzeit-Architekturen"
-      - "Cloud-Plattformen: AWS, GCP, Azure"
-      - "Container-Orchestrierung: Kubernetes, Docker"
-      - "Bereitstellung von Unternehmenssystemen"
-      - "Technische Führung von Teams mit bis zu 70 Entwicklern"
-    button:
-      enable: false
-      label: ""
-      link: ""
-
-  - title: "Namhafte Kundenerfahrung"
-    image: "/images/service-2.png"
-    content: "Nachgewiesene Erfolgsbilanz bei der Bereitstellung geschäftskritischer Systeme für Regierungsorganisationen, große Konzerne und Fortune-500-Unternehmen in Europa und darüber hinaus."
-    bulletpoints:
-      - "Bundesministerium für Gesundheit (BMG)"
-      - "Europäische Union und European Climate Foundation"
-      - "Metro AG - Bereitstellung von 7.000 Kubernetes-Servern"
-      - "Audi AG - Autonome Transportsysteme"
-      - "BP, Nomura Bank, ABN AMRO Bank"
+      - "3D-native KI — Model Context Protocol für echtes räumliches Denken"
+      - "Offene Standards — STEP und IFC. Ihre Geometrie, kein Lock-in"
+      - "Echtzeit-Zusammenarbeit — Automerge CRDT. Verteilte Teams, keine Konflikte"
+      - "Offline-first — Überall arbeiten, automatisch synchronisieren"
     button:
       enable: true
-      label: "Vollständiges Portfolio anzeigen"
-      link: "/about"
+      label: "Spatial entdecken"
+      link: "/platform/spatial"
 
-  - title: "Moderner Technologie-Stack"
-    image: "/images/service-3.png"
-    content: "Spezialisierung auf modernste Technologien und zeitgemäße Entwicklungspraktiken zur Bereitstellung leistungsstarker, skalierbarer Lösungen."
+  - title: "Publish: Dokumente aus einer Quelle"
+    image: "/images/service-2.svg"
+    content: "Einmal in Markdown schreiben. Web, PDF und Formulare erzeugen. Daten aus digitalen oder papierbasierten Einreichungen erfassen. Zurück in Ihre Datenbank."
     bulletpoints:
-      - "Go, Rust, C#/.NET, JavaScript/TypeScript, Python"
-      - "Verteilte Systeme und ereignisgesteuerte Architektur"
-      - "Echtzeitsysteme und Streaming-Technologien"
-      - "Infrastructure as Code und CI/CD-Automatisierung"
-      - "Mobile und Desktop-Anwendungsentwicklung (Flutter)"
-      - "SQL- und NoSQL-Datenbanken"
+      - "Eine Quelle — Eine Datei steuert Web, PDF und Formulare"
+      - "Papier + Digital — Beide Kanäle, dasselbe Datenziel"
+      - "OCR-Erfassung — Gescannte Formulare automatisch ausgelesen"
+      - "KI-Unterstützung — Mit Dokumenten in natürlicher Sprache arbeiten"
     button:
-      enable: false
-      label: ""
-      link: ""
+      enable: true
+      label: "Publish entdecken"
+      link: "/platform/publish"
+
+  - title: "Anwendungen in allen Branchen"
+    image: "/images/service-3.svg"
+    content: "Von Robotik über Gesundheitswesen bis Versicherung – überall dort, wo KI bei Design oder Dokumenten helfen kann."
+    bulletpoints:
+      - "Spatial: Robotik, Simulation, Digitale Zwillinge, Fertigung, Bauwesen"
+      - "Publish: Regierung, Gesundheitswesen, Finanzwesen, Bildung, Versicherung"
+      - "Plattformübergreifend — Nativ auf Linux, Windows, Mac, iOS, Android"
+      - "Gemeinsames Fundament — Dieselbe KI, dieselbe Synchronisierung, dieselbe Offline-Fähigkeit"
+    button:
+      enable: true
+      label: "Anwendungen ansehen"
+      link: "/applications"
+
+# Founder
+founder:
+  enable: false
+  title: "Gerard Webb"
+  role: "Gründer"
+  image: "/images/team/gerard-passport.jpg"
+  content: "25 Jahre Entwicklung verteilter Echtzeitsysteme für globale Unternehmen. Heute bringt er diese Erfahrung in die Verbindung von KI und 3D-Design ein."
+  link: "/company/founder/gerard-webb"
 ---

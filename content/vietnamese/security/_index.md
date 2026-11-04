@@ -99,4 +99,4 @@ Hiện tại, chúng tôi không cung cấp phần thưởng tiền mặt, nhưn
 
 ## Chính sách có thể đọc được bằng máy
 
-Security researchers can find our [security.txt](/vi/.well-known/security.txt) file at the standard location per [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
+Các nhà nghiên cứu bảo mật có thể tìm tệp [security.txt](/.well-known/security.txt) của chúng tôi tại vị trí tiêu chuẩn theo [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).

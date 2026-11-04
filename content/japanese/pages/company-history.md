@@ -54,12 +54,12 @@ aliases:
 
 | 書類 | 説明 |
 |----------|-------------|
-| [会社証明書（PDF）](/companies-house/ubuntu-software-design-ltd-certificate.pdf) | 設立証明書 |
-| [会社証明書（画像）](/companies-house/ubuntu-design-ltd-certificate.png) | 証明書のスキャン |
-| [年次報告書 2012](/companies-house/ar01-2012-03-07-shareholders.pdf) | 株主名簿 |
-| [年次報告書 2011](/companies-house/ar01-2011-03-24-shareholders.pdf) | 株主名簿 |
-| [年次報告書 2010](/companies-house/ar01-2010-04-20-shareholders.pdf) | 株主名簿 |
-| [登記抹消申請書](/companies-house/ds01-2012-06-29-strike-off.pdf) | 任意解散 |
+| [会社証明書（PDF）](/companies-house-uk/ubuntu-software-design-ltd-certificate.pdf) | 設立証明書 |
+| [会社証明書（画像）](/companies-house-uk/ubuntu-design-ltd-certificate.png) | 証明書のスキャン |
+| [年次報告書 2012](/companies-house-uk/ar01-2012-03-07-shareholders.pdf) | 株主名簿 |
+| [年次報告書 2011](/companies-house-uk/ar01-2011-03-24-shareholders.pdf) | 株主名簿 |
+| [年次報告書 2010](/companies-house-uk/ar01-2010-04-20-shareholders.pdf) | 株主名簿 |
+| [登記抹消申請書](/companies-house-uk/ds01-2012-06-29-strike-off.pdf) | 任意解散 |
 
 ## 「Ubuntu」という名前について
 

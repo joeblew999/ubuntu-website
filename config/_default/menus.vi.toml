@@ -1,4 +1,4 @@
-############# vi navigation ##############
+############# Vietnamese navigation ##############
 
 # main menu
 # Note: "Home" removed - logo already links to home, saves nav space
@@ -10,33 +10,131 @@ weight = 1
 hasChildren = true
 
 [[main]]
+name = "Tổng quan"
+identifier = "platform-overview"
+url = "/platform"
+parent = "Nền tảng"
+weight = 1
+
+[[main]]
 name = "Xuất bản"
 url = "/platform/publish"
 parent = "Nền tảng"
-weight = 1
+weight = 2
 
 [[main]]
 name = "Không gian"
 url = "/platform/spatial"
 parent = "Nền tảng"
-weight = 2
+weight = 3
 
 [[main]]
 name = "Nền móng"
 url = "/platform/foundation"
 parent = "Nền tảng"
-weight = 3
+weight = 4
 
 [[main]]
 name = "Cảm biến"
 url = "/platform/sensing"
 parent = "Nền tảng"
+weight = 5
+
+[[main]]
+name = "Đội xe"
+url = "/fleet"
+weight = 2
+hasChildren = true
+
+[[main]]
+name = "Tổng quan"
+identifier = "fleet-overview"
+url = "/fleet"
+parent = "Đội xe"
+weight = 1
+
+[[main]]
+name = "Drone"
+url = "/fleet/platforms/drones"
+parent = "Đội xe"
+weight = 2
+
+[[main]]
+name = "Phương tiện mặt đất"
+url = "/fleet/platforms/ground"
+parent = "Đội xe"
+weight = 3
+
+[[main]]
+name = "Phần cứng (BOM)"
+url = "/fleet/hardware"
+parent = "Đội xe"
 weight = 4
+
+[[main]]
+name = "Ngăn xếp phần mềm"
+url = "/fleet/software"
+parent = "Đội xe"
+weight = 5
+
+[[main]]
+name = "Cấu trúc liên kết NATS"
+url = "/fleet/nats-topology"
+parent = "Đội xe"
+weight = 6
+
+[[main]]
+name = "Thiết kế chủ đề"
+url = "/fleet/subjects"
+parent = "Đội xe"
+weight = 7
+
+[[main]]
+name = "Luồng & Sự kiện"
+url = "/fleet/streams"
+parent = "Đội xe"
+weight = 8
+
+[[main]]
+name = "Cổng kết nối phương tiện"
+url = "/fleet/gateway"
+parent = "Đội xe"
+weight = 9
+
+[[main]]
+name = "Chuyển đổi từ DJI"
+url = "/fleet/dji-migration"
+parent = "Đội xe"
+weight = 10
+
+[[main]]
+name = "Quy định BVLOS"
+url = "/fleet/bvlos-regulations"
+parent = "Đội xe"
+weight = 11
+
+[[main]]
+name = "Trình xem không phận"
+url = "/fleet/airspace-demo"
+parent = "Đội xe"
+weight = 12
+
+[[main]]
+name = "Ủy quyền"
+url = "/fleet/authorization"
+parent = "Đội xe"
+weight = 13
+
+[[main]]
+name = "Mô hình an toàn"
+url = "/fleet/safety"
+parent = "Đội xe"
+weight = 14
 
 [[main]]
 name = "Giải pháp"
 url = "/applications"
-weight = 2
+weight = 3
 hasChildren = true
 
 [[main]]
@@ -47,33 +145,99 @@ parent = "Giải pháp"
 weight = 1
 
 [[main]]
-name = "Sản xuất & Xây dựng"
-url = "/applications/manufacturing"
+name = "Nông nghiệp"
+url = "/applications/fleet-agriculture"
 parent = "Giải pháp"
 weight = 2
 
 [[main]]
-name = "Robot & Mô phỏng"
-url = "/applications/robotics"
+name = "Xây dựng"
+url = "/applications/fleet-construction"
 parent = "Giải pháp"
 weight = 3
 
 [[main]]
-name = "Chính phủ & Y tế"
-url = "/applications/government"
+name = "An toàn công cộng"
+url = "/applications/fleet-safety"
 parent = "Giải pháp"
 weight = 4
 
 [[main]]
-name = "Dịch vụ Tài chính"
-url = "/applications/financial"
+name = "Hậu cần"
+url = "/applications/fleet-logistics"
 parent = "Giải pháp"
 weight = 5
 
 [[main]]
+name = "Năng lượng"
+url = "/applications/fleet-energy"
+parent = "Giải pháp"
+weight = 6
+
+[[main]]
+name = "Khai khoáng"
+url = "/applications/fleet-mining"
+parent = "Giải pháp"
+weight = 7
+
+[[main]]
+name = "Môi trường"
+url = "/applications/fleet-environment"
+parent = "Giải pháp"
+weight = 8
+
+[[main]]
+name = "Hoạt động hiện trường"
+url = "/applications/logistics"
+parent = "Giải pháp"
+weight = 9
+
+[[main]]
+name = "Sản xuất"
+url = "/applications/manufacturing"
+parent = "Giải pháp"
+weight = 10
+
+[[main]]
+name = "Robot"
+url = "/applications/robotics"
+parent = "Giải pháp"
+weight = 11
+
+[[main]]
+name = "Chính phủ"
+url = "/applications/government"
+parent = "Giải pháp"
+weight = 12
+
+[[main]]
+name = "Y tế"
+url = "/applications/healthcare"
+parent = "Giải pháp"
+weight = 13
+
+[[main]]
+name = "Tài chính"
+url = "/applications/financial"
+parent = "Giải pháp"
+weight = 14
+
+[[main]]
+name = "Giáo dục"
+url = "/applications/education"
+parent = "Giải pháp"
+weight = 15
+
+[[main]]
+name = "Bảo hiểm"
+url = "/applications/insurance"
+parent = "Giải pháp"
+weight = 16
+
+[[main]]
 name = "Nhà phát triển"
 url = "/pkg"
-weight = 3
+weight = 4
 hasChildren = true
 
 [[main]]
@@ -90,15 +254,21 @@ parent = "Nhà phát triển"
 weight = 2
 
 [[main]]
-name = "GitHub"
-url = "https://github.com/joeblew999/ubuntu-website"
+name = "Bảo mật"
+url = "/security"
 parent = "Nhà phát triển"
 weight = 3
 
 [[main]]
+name = "GitHub"
+url = "https://github.com/joeblew999/ubuntu-website"
+parent = "Nhà phát triển"
+weight = 4
+
+[[main]]
 name = "Công ty"
 url = "/company"
-weight = 4
+weight = 5
 hasChildren = true
 
 [[main]]
@@ -115,22 +285,46 @@ parent = "Công ty"
 weight = 2
 
 [[main]]
+name = "Cố vấn"
+url = "/company/advisors"
+parent = "Công ty"
+weight = 3
+
+[[main]]
 name = "Kinh nghiệm"
 url = "/company/experience"
 parent = "Công ty"
-weight = 3
+weight = 4
+
+[[main]]
+name = "Giám sát"
+url = "/company/surveillance"
+parent = "Công ty"
+weight = 5
+
+[[main]]
+name = "Lịch sử"
+url = "/company-history"
+parent = "Công ty"
+weight = 6
+
+[[main]]
+name = "Đối tác"
+url = "/partners"
+parent = "Công ty"
+weight = 7
 
 [[main]]
 name = "Blog"
 url = "/blog"
 parent = "Công ty"
-weight = 4
+weight = 8
 
 [[main]]
 name = "Liên hệ"
 url = "/contact"
 parent = "Công ty"
-weight = 5
+weight = 9
 
 
 # footer menu
@@ -140,42 +334,52 @@ url = "/platform"
 weight = 1
 
 [[footer]]
+name = "Đội xe"
+url = "/fleet"
+weight = 2
+
+[[footer]]
 name = "Giải pháp"
 url = "/applications"
-weight = 2
+weight = 3
 
 [[footer]]
 name = "Nhà phát triển"
 url = "/pkg"
-weight = 3
+weight = 4
 
 [[footer]]
 name = "Blog"
 url = "/blog"
-weight = 4
+weight = 5
 
 [[footer]]
 name = "Liên hệ"
 url = "/contact"
-weight = 5
+weight = 6
+
+[[footer]]
+name = "Đối tác"
+url = "/partners"
+weight = 7
 
 [[footer]]
 name = "Bắt đầu"
 url = "/get-started"
-weight = 6
+weight = 8
 
 [[footer]]
 name = "Bảo mật"
 url = "/security"
-weight = 7
+weight = 9
 
 [[footer]]
 name = "Chính sách Bảo mật"
 url = "/privacy-policy"
-weight = 8
+weight = 10
 
 [[footer]]
 name = "Điều khoản Dịch vụ"
 url = "/terms-of-service"
-weight = 9
+weight = 11
 

@@ -130,8 +130,6 @@ NATS JetStream のイベント駆動型メッセージングが、デザイン�
 ## 実際の活用例
 
 - [ロボティクスとオートメーション →](/applications/robotics)
-- [シミュレーションとトレーニング →](/applications/simulation)
-- [デジタルツイン →](/applications/digital-twins)
 - [製造業 →](/applications/manufacturing)
 - [建設業 →](/applications/construction)
 

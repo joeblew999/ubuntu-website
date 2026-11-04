@@ -118,12 +118,6 @@ Oder senden Sie uns eine Nachricht: [partnerships@ubuntusoftware.net](mailto:par
 
 ---
 
-## Zusammenfassung auf einer Seite
-
-Brauchen Sie etwas zum Ausdrucken oder Weitergeben? [Laden Sie den Partner-Onepager herunter (PDF)](/partners/drone-shop-pitch.pdf).
-
----
-
 ## Fragen?
 
 [Kontaktieren Sie uns](/contact?subject=drone-shop-pitch) — wir antworten innerhalb von 24 Stunden.

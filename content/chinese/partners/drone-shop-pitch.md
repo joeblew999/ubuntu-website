@@ -118,12 +118,6 @@ draft: false
 
 ---
 
-## 单页摘要
-
-需要打印或分享的资料？[下载合作伙伴单页介绍（PDF）](/partners/drone-shop-pitch.pdf)。
-
----
-
 ## 有疑问？
 
 [联系我们](/contact?subject=drone-shop-pitch)：我们会在 24 小时内回复。

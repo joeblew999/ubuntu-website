@@ -4,6 +4,7 @@
 #   mise run sitecheck:all                       every check
 #   mise run sitecheck:http --nodes 10 --wait 5   a quick one
 # The scheduled one, every 6 hours, is .github/workflows/monitor-sitecheck.yml: mise run sitecheck:issue.
+# sitecheck:links checks the build instead (public/, no network), in root:ci: every link lands.
 
 ["sitecheck:build"]
 description = "Build sitecheck (cmd/sitecheck) into bin/: the sitecheck:* tasks run it"
@@ -44,3 +45,9 @@ description = "The scheduled check (monitor-sitecheck.yml): HTTP from every node
 usage = 'flag "--report <file>" help="Also write the markdown report to this file"; flag "--url <url>" help="URL to check (default: SITE_URL robots.txt)"; flag "--nodes <n>" help="Most nodes to check from (default 56)"; flag "--wait <seconds>" help="Seconds to wait for their results (default 8)"'
 depends = ["sitecheck:build"]
 run = 'sitecheck issue{% if usage.report %} --report "{{usage.report}}"{% endif %}{% if usage.url %} --url "{{usage.url}}"{% endif %}{% if usage.nodes %} --nodes {{usage.nodes}}{% endif %}{% if usage.wait %} --wait {{usage.wait}}{% endif %}'
+
+["sitecheck:links"]
+description = "Every link of the built site (public/, root:build) lands on a page or file the build made: no network, in root:ci"
+usage = 'flag "--dir <dir>" help="The built site (default public)"'
+depends = ["sitecheck:build", "root:build"]
+run = 'sitecheck links{% if usage.dir %} --dir "{{usage.dir}}"{% endif %}'

@@ -54,12 +54,12 @@ Wir bewahren Kopien wichtiger Dokumente auf, die unsere Unternehmensgeschichte b
 
 | Dokument | Beschreibung |
 |----------|-------------|
-| [Firmenzertifikat (PDF)](/companies-house/ubuntu-software-design-ltd-certificate.pdf) | Gründungsurkunde |
-| [Firmenzertifikat (Bild)](/companies-house/ubuntu-design-ltd-certificate.png) | Scan der Urkunde |
-| [Jahresmeldung 2012](/companies-house/ar01-2012-03-07-shareholders.pdf) | Gesellschafterliste |
-| [Jahresmeldung 2011](/companies-house/ar01-2011-03-24-shareholders.pdf) | Gesellschafterliste |
-| [Jahresmeldung 2010](/companies-house/ar01-2010-04-20-shareholders.pdf) | Gesellschafterliste |
-| [Löschungsantrag](/companies-house/ds01-2012-06-29-strike-off.pdf) | Freiwillige Auflösung |
+| [Firmenzertifikat (PDF)](/companies-house-uk/ubuntu-software-design-ltd-certificate.pdf) | Gründungsurkunde |
+| [Firmenzertifikat (Bild)](/companies-house-uk/ubuntu-design-ltd-certificate.png) | Scan der Urkunde |
+| [Jahresmeldung 2012](/companies-house-uk/ar01-2012-03-07-shareholders.pdf) | Gesellschafterliste |
+| [Jahresmeldung 2011](/companies-house-uk/ar01-2011-03-24-shareholders.pdf) | Gesellschafterliste |
+| [Jahresmeldung 2010](/companies-house-uk/ar01-2010-04-20-shareholders.pdf) | Gesellschafterliste |
+| [Löschungsantrag](/companies-house-uk/ds01-2012-06-29-strike-off.pdf) | Freiwillige Auflösung |
 
 ## Über den Namen „Ubuntu“
 

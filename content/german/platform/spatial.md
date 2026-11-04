@@ -130,8 +130,6 @@ Das Zeitfenster ist offen. Wir nutzen es und bauen.
 ## In Aktion erleben
 
 - [Robotik & Automatisierung →](/applications/robotics)
-- [Simulation & Training →](/applications/simulation)
-- [Digitale Zwillinge →](/applications/digital-twins)
 - [Fertigung →](/applications/manufacturing)
 - [Bauwesen →](/applications/construction)
 
