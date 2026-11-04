@@ -190,7 +190,7 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
 
 ### Content
 
-- [ ] Translation backlog: `task translate:content:status` lists many English pages changed since the last checkpoint (platform/*, pkg/*, …). Translate to de/zh/ja/vi, then `task translate:content:done`.
+- [x] Translation backlog: `task translate:content:status` lists many English pages changed since the last checkpoint (platform/*, pkg/*, …). Translate to de/zh/ja/vi, then `task translate:content:done`. **Done:** 228 missing pages translated (de/zh/ja 66 each, vi 30) and 37 stale ones re-translated, each checked against its English page (shortcodes, link targets); 3 Vietnamese orphans removed (`translate clean`); checkpoint moved (`translate done`) and the `last-translation` tag pushed, which CI's weekly check compares against (it was never on the remote before). Two fixes on the way: placeholder restore, and claude-cli run outside the repo.
 - [x] Google Workspace MCP draft post is dated 2024-12-15: probably the same year typo as the DJI post (fixed to 2025-12-24). Set the real date when publishing. **Done:** date fixed to 2025-12-15 (en + vi); still `draft: true`.
 - [x] README top lists personal LAN URLs (`http://192.168.0.156:1313/`): keep or remove. **Done:** removed (`task hugo:dev:lan` prints the current LAN URL).
 
@@ -203,7 +203,7 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
 
 ### Tooling
 
-- [ ] The "cmd/translate - DO NOT RUN" note below looks stale: `task translate:*` builds and uses cmd/translate and CLAUDE.md documents it. Verify the mutating commands, then remove the warning.
+- [x] The "cmd/translate - DO NOT RUN" note below looks stale: `task translate:*` builds and uses cmd/translate and CLAUDE.md documents it. Verify the mutating commands, then remove the warning. **Done:** removed: status, missing, orphans, clean (asks before deleting) and done all used on the real backlog.
 - [x] Two publish targets: `.github/workflows/release-pages.yml` deploys to GitHub Pages on every push to main, while production is Cloudflare Pages. Keep both or drop GitHub Pages. **Done:** dropped GitHub Pages (workflow removed, Pages disabled): it served a duplicate copy of the site; CI still builds Hugo in `taskfile.yml`.
 - [x] `internal/browser.FindPlaywrightBinary` means two things: Gmail calls it expecting our `cmd/playwright` (`open --url`), but it prefers `node_modules/.bin/playwright` (npm CLI, different syntax) when present. Make Gmail call our tool explicitly. **Done:** Gmail's browser mode now opens compose in the default (signed-in) browser directly; the CLI shell-out never worked (`open --url` isn't our CLI's syntax) and is gone, as is the binary lookup.
 - [x] `bun install` reports "Blocked 1 postinstall": check `bun pm untrusted` and trust it if it's needed. **Done:** it's `@parcel/watcher` compiling from source; the prebuilt binary is used, so it stays blocked.
@@ -216,6 +216,8 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
 - [x] autotranslate left `[[NOTRANSLATE_n]]` placeholders in output at random (map-order restore of nested placeholders broke relref links); restores newest-first now, refuses to write leftovers, regression tests added.
 - [x] `browser.GetProjectRoot` never matched `.git` (checked it as a file).
 - [x] Hugo module `min` raised to 0.158.0 (what Hugo Plate needs).
+
+- [ ] `translate done` moves the `last-translation` tag locally only: push it too (`git push -f origin last-translation`), or CI's weekly check has nothing to compare against. Fix when translate moves into mise.
 
 ### Decided (leave as is)
 
@@ -268,13 +270,6 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
 ---
 
 ## Broken/Incomplete
-
-### cmd/translate - DO NOT RUN
-
-Current workflow: Claude Code + Taskfile shell scripts (translate:status, translate:done, etc.)
-
-The manual workflow is prototyping what cmd/translate should eventually do.
-Once patterns are solid from manual use, codify them into cmd/translate.
 
 ---
 
