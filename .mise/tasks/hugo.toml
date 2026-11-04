@@ -1,0 +1,15 @@
+# Hugo by hand: the dev server, a local preview of the production build, and a clean. The site's build is root:build
+# (CI and Cloudflare Pages); upgrading Hugo is upgrade:hugo. Tool tasks only: misecheck holds them to the rules every
+# task is (one line, usage passed by name, no POSIX shell).
+
+["hugo:dev"]
+description = "The Hugo dev server with drafts and future posts, on every address (a phone on the LAN too: mise run lanip:ip)"
+run = 'hugo server --buildDrafts --buildFuture --bind 0.0.0.0'
+
+["hugo:preview"]
+description = "The production build, served locally"
+run = 'hugo server -e production --minify'
+
+["hugo:clean"]
+description = "Hugo's build output removed (public/, resources/, .hugo_build.lock), on any OS"
+run = 'git clean -fdX -- public resources .hugo_build.lock'

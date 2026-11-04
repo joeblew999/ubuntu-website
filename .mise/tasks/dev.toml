@@ -1,0 +1,32 @@
+# The local dev processes, Hugo and the tools beside it, run by process-compose from process-compose.yaml, with its
+# dashboard on :8099. Tool tasks only: misecheck holds them to the rules every task is.
+#   mise run dev:up      start them (dev:down stops them)
+
+["dev:up"]
+description = "Every dev process (Hugo and the tools beside it, process-compose.yaml), with process-compose's dashboard on :8099"
+run = 'process-compose up -p 8099'
+
+["dev:up-detached"]
+description = "Every dev process in the background (no dashboard)"
+run = 'process-compose up -p 8099 -D'
+
+["dev:attach"]
+description = "The dashboard, attached to the running dev processes"
+run = 'process-compose attach -p 8099'
+
+["dev:down"]
+description = "Every dev process stopped"
+run = 'process-compose down -p 8099'
+
+["dev:logs"]
+description = "The dev processes' logs"
+run = 'process-compose logs -p 8099'
+
+["dev:status"]
+description = "Each dev process and its state"
+run = 'process-compose process list -p 8099'
+
+["dev:restart"]
+description = "One dev process restarted (hugo, say)"
+usage = 'arg "<process>" help="The process, as process-compose.yaml names it"'
+run = 'process-compose process restart "{{usage.process}}" -p 8099'

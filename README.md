@@ -42,7 +42,7 @@ task          # or: task info
 
 ```bash
 mise trust && mise run root:setup   # pinned tools (mise) + npm packages (aube) + Go modules
-mise run root:up                    # Hugo + tools via process-compose (mise run root:down to stop)
+mise run dev:up                     # Hugo + tools via process-compose (mise run dev:down to stop)
 ```
 
 Pushing to `main` deploys to Cloudflare Pages; other branches get preview deployments.
@@ -54,10 +54,10 @@ Pushing to `main` deploys to Cloudflare Pages; other branches get preview deploy
 ## 🛠️ Development Tasks
 
 ```bash
-mise run root:dev       # Hugo dev server
+mise run hugo:dev       # Hugo dev server
 mise run root:build     # Production build
-mise run root:preview   # Preview production build
-mise run root:clean     # Clean artifacts
+mise run hugo:preview   # Preview production build
+mise run hugo:clean     # Clean artifacts
 mise run upgrade:all    # Upgrade tools, Go modules, the theme, the actions (Hugo: mise run upgrade:hugo)
 mise run root:ci        # Everything CI checks
 

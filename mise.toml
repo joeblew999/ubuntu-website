@@ -10,8 +10,6 @@
 #   mise run root:test          the Go: vet and tests of every package, and the Workers build (js/wasm) vetted
 #   mise run root:build         the site, as production builds it
 #   mise run root:pages         Cloudflare Pages' build: root:build, with only the tools it runs installed
-#   mise run root:up            the dev processes (Hugo + tools), process-compose; root:down stops them
-#   mise run root:dev           just the Hugo dev server
 #   mise tasks                  every task, with its file
 #
 # New machine: mise trust && mise install, then the domain's own first steps (e.g. .mise/tasks/google-mcp.toml's).
@@ -36,7 +34,7 @@ hugo-extended = "0.169.0"
 # (package.json, aube-lock.yaml, build approvals in aube-workspace.yaml), and only that.
 node = "26.13.0"
 aube = "2.9.0"
-# Dev process orchestration (root:up / process-compose.yaml); not in Homebrew core.
+# Dev process orchestration (dev:up / process-compose.yaml); not in Homebrew core.
 process-compose = "1.124.0"
 # GitHub CLI (tools:gh:*, release tasks).
 gh = "2.103.3"
@@ -113,47 +111,6 @@ run = 'hugo -e production --gc --minify'
 [tasks."root:pages"]
 description = "Cloudflare Pages' build, production and preview: its build command is npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages. It installs only the tools root:build runs, not every pin, then runs it"
 run = 'mise install hugo-extended node aube && mise run --skip-tools root:build'
-
-[tasks."root:dev"]
-description = "The Hugo dev server with drafts and future posts, on every address (a phone on the LAN too: mise run lanip:ip)"
-run = 'hugo server --buildDrafts --buildFuture --bind 0.0.0.0'
-
-[tasks."root:preview"]
-description = "The production build, served locally"
-run = 'hugo server -e production --minify'
-
-[tasks."root:clean"]
-description = "Hugo's build output removed (public/, resources/, .hugo_build.lock), on any OS"
-run = 'git clean -fdX -- public resources .hugo_build.lock'
-
-[tasks."root:up"]
-description = "Every dev process (Hugo and the tools beside it, process-compose.yaml), with process-compose's dashboard on :8099"
-run = 'process-compose up -p 8099'
-
-[tasks."root:up-detached"]
-description = "Every dev process in the background (no dashboard)"
-run = 'process-compose up -p 8099 -D'
-
-[tasks."root:attach"]
-description = "The dashboard, attached to the running dev processes"
-run = 'process-compose attach -p 8099'
-
-[tasks."root:down"]
-description = "Every dev process stopped"
-run = 'process-compose down -p 8099'
-
-[tasks."root:logs"]
-description = "The dev processes' logs"
-run = 'process-compose logs -p 8099'
-
-[tasks."root:status"]
-description = "Each dev process and its state"
-run = 'process-compose process list -p 8099'
-
-[tasks."root:restart"]
-description = "One dev process restarted (hugo, say)"
-usage = 'arg "<process>" help="The process, as process-compose.yaml names it"'
-run = 'process-compose process restart "{{usage.process}}" -p 8099'
 
 [tasks."root:check-taskfiles"]
 description = "The Taskfiles still parse, until their tasks have all moved here (TODO.md)"

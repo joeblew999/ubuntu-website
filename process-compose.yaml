@@ -1,8 +1,8 @@
 version: "0.5"
 
 # Process-Compose orchestrates local development processes
-# Start: mise run root:up (or process-compose up -p 8099)
-# Stop: mise run root:down (or Ctrl+C)
+# Start: mise run dev:up (or process-compose up -p 8099)
+# Stop: mise run dev:down (or Ctrl+C)
 # Docs: https://f1bonacc1.github.io/process-compose/
 
 processes:
