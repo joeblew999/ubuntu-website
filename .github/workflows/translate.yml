@@ -81,16 +81,16 @@ jobs:
 
       - name: Build translate
         run: |
-          mkdir -p $HOME/.local/bin
-          go build -o $HOME/.local/bin/translate ./cmd/translate
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          mkdir -p "$HOME/.local/bin"
+          go build -o "$HOME/.local/bin/translate" ./cmd/translate
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Check Translation Status
         id: check
         run: |
           set +e
           task ci:translate > report.md 2>&1
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
           cat report.md
           exit 0
 

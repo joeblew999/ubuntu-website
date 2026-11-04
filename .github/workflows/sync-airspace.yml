@@ -59,7 +59,7 @@ jobs:
 
       - name: Check for changes
         id: check_changes
-        run: task airspace:check >> $GITHUB_OUTPUT
+        run: task airspace:check >> "$GITHUB_OUTPUT"
 
       - name: Upload to R2
         if: steps.check_changes.outputs.has_changes == 'true'
