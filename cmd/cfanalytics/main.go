@@ -1,7 +1,7 @@
 // Command cfanalytics reports the site's traffic from Cloudflare Web Analytics, against the last report
 // (.analytics-state.json): mise run cfanalytics:report by hand, and cfanalytics:issue, the weekly workflow's, as markdown
 // for a GitHub issue when traffic changed a lot. Each command is a file of its own and a task of
-// .mise/tasks/cfanalytics.toml. Flags, anywhere: --days, -v, --webhook (Slack/Discord). CLOUDFLARE_API_TOKEN from .env.
+// .mise/tasks/cfanalytics.toml. Flags, anywhere: --days, -v, --webhook (Slack/Discord). UBUNTU_WEBSITE_CF_TOKEN from .env.
 package main
 
 import (

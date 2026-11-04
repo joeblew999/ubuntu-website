@@ -1,24 +1,24 @@
-# R2, the bucket of assets too large for Pages (ubuntu-website-assets, public at
-# https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev): wrangler's, as tool tasks. The airspace tiles go up with
-# airspace:upload. Needs CLOUDFLARE_API_TOKEN with R2 permissions (.env).
+# R2, the bucket of assets too large for the site's Worker (ubuntu-website-assets, public at
+# https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev): wrangler's, on the repo's own login (mise-cloudflare
+# run-wrangler: no token). The airspace tiles go up with airspace:upload.
 
 ["r2:status"]
 description = "The account's R2 buckets"
-run = 'wrangler r2 bucket list'
+run = 'mise-cloudflare run-wrangler r2 bucket list'
 
 ["r2:list"]
 description = "What's in the bucket"
-run = 'wrangler r2 object list ubuntu-website-assets'
+run = 'mise-cloudflare run-wrangler r2 object list ubuntu-website-assets'
 
 ["r2:upload"]
 description = "A file uploaded to the bucket under <key> (then at the public URL/<key>)"
 usage = 'arg "<key>" help="Its path in the bucket"; arg "<file>" help="The local file"'
-run = 'wrangler r2 object put "ubuntu-website-assets/{{usage.key}}" --file "{{usage.file}}" --remote'
+run = 'mise-cloudflare run-wrangler r2 object put "ubuntu-website-assets/{{usage.key}}" --file "{{usage.file}}" --remote'
 
 ["r2:cors-set"]
-description = "The bucket's CORS rules applied from r2-cors.json (browsers need them for the tiles)"
-run = 'wrangler r2 bucket cors set ubuntu-website-assets --file ./r2-cors.json --force'
+description = "The bucket's CORS rules applied from cloudflare/r2-cors.json (browsers need them for the tiles)"
+run = 'mise-cloudflare run-wrangler r2 bucket cors set ubuntu-website-assets --file ./cloudflare/r2-cors.json --force'
 
 ["r2:cors-get"]
 description = "The bucket's CORS rules"
-run = 'wrangler r2 bucket cors list ubuntu-website-assets'
+run = 'mise-cloudflare run-wrangler r2 bucket cors list ubuntu-website-assets'

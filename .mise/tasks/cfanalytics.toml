@@ -1,7 +1,7 @@
 # The site's traffic from Cloudflare Web Analytics, against the last report (.analytics-state.json). Each task runs one
 # command of the cfanalytics binary, cmd/cfanalytics; flags pass through:
 #   mise run cfanalytics:report --days 30 -v
-# The weekly one is .github/workflows/monitor-cfanalytics.yml: mise run cfanalytics:issue. CLOUDFLARE_API_TOKEN from .env.
+# The weekly one is .github/workflows/monitor-cfanalytics.yml: mise run cfanalytics:issue. UBUNTU_WEBSITE_CF_TOKEN from .env.
 
 ["cfanalytics:build"]
 description = "Build cfanalytics (cmd/cfanalytics) into bin/: the cfanalytics:* tasks run it"

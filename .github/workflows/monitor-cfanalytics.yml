@@ -3,7 +3,7 @@
 # artifact). A change over 20% opens an issue, or is a comment on the one already open. The Go itself is built, vetted
 # and held to its tasks by core-ci (mise run root:ci).
 #
-# Secret CLOUDFLARE_API_TOKEN (Account Analytics:Read); variables CF_ACCOUNT_ID, CF_WEB_ANALYTICS_SITE_TAG.
+# Secret CLOUDFLARE_API_TOKEN (Account Analytics:Read), as UBUNTU_WEBSITE_CF_TOKEN; variables CF_ACCOUNT_ID, CF_WEB_ANALYTICS_SITE_TAG.
 name: monitor-cfanalytics
 
 on:
@@ -39,7 +39,7 @@ jobs:
         id: check
         continue-on-error: true
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          UBUNTU_WEBSITE_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
           CF_WEB_ANALYTICS_SITE_TAG: ${{ vars.CF_WEB_ANALYTICS_SITE_TAG }}
         run: |

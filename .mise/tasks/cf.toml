@@ -1,46 +1,22 @@
-# Cloudflare: what has no wrangler command of its own is the cf binary, cmd/cf/<command>.go (Cloudflare's API with
-# CLOUDFLARE_API_TOKEN from .env); the rest is wrangler's, as tool tasks here. Deploys happen on git push (Cloudflare
-# Pages' Git integration, its build command root:pages). R2: r2:*; the webhook Worker: workers:*; dashboards: url:cf-*.
+# Cloudflare beyond the site's Worker (whose login, deploys and previews are mise-cloudflare's: mise run cloudflare): the
+# zone's cache and Email Routing, with Cloudflare's own CLI, cf (pinned in mise.toml), on its own login (cf:login, once;
+# no token in .env). A forward is added once in a while, so it's cf's own command, not a task:
+#   cf email-routing rules create --zone 867fb5996096b895b47114b6564ee0fb --name "Forward <from>" \
+#     --matchers '[{"type":"literal","field":"to","value":"<from>"}]' --actions '[{"type":"forward","value":["<to>"]}]'
 
-["cf:build"]
-description = "Build cf (cmd/cf) into bin/: the cf:* tasks run it"
-run = 'go build -o bin/ ./cmd/cf'
+["cf:login"]
+description = "cf's own login (opens the browser): once per machine"
+run = 'cf auth login'
 
 ["cf:purge"]
 description = "Everything in the CDN cache for ubuntusoftware.net purged"
-depends = ["cf:build"]
-run = 'cf purge'
+run = 'cf cache purge --zone 867fb5996096b895b47114b6564ee0fb --body @cloudflare/purge-everything.json --force'
 
 ["cf:email-status"]
-description = "Email Routing for ubuntusoftware.net: on or off, its rules (from → to), its destinations"
-depends = ["cf:build"]
-run = 'cf email-status'
-
-["cf:email-add"]
-description = "Mail to <from> forwarded to <to> (a new destination is emailed to verify first)"
-usage = 'arg "<from>" help="An address of ubuntusoftware.net"; arg "<to>" help="Where to forward it"'
-depends = ["cf:build"]
-run = 'cf email-add "{{usage.from}}" "{{usage.to}}"'
+description = "Email Routing for ubuntusoftware.net: its settings, its rules (from → to), its destination addresses"
+run = 'cf email-routing settings get --zone 867fb5996096b895b47114b6564ee0fb && cf email-routing rules list-account --zone 867fb5996096b895b47114b6564ee0fb && cf email-routing addresses list'
 
 ["cf:email-remove"]
-description = "The Email Routing rule for <from> removed"
-usage = 'arg "<from>" help="The address whose rule to remove"'
-depends = ["cf:build"]
-run = 'cf email-remove "{{usage.from}}"'
-
-["cf:preview"]
-description = "The latest preview deployment: its URL and branch, opened in the browser"
-depends = ["cf:build"]
-run = 'cf preview'
-
-["cf:deployments"]
-description = "The Pages project's deployments (wrangler)"
-run = 'wrangler pages deployment list --project-name=ubuntu-website'
-
-["cf:tail"]
-description = "The latest deployment's logs, as they come (wrangler)"
-run = 'wrangler pages deployment tail --project-name=ubuntu-website'
-
-["cf:secrets"]
-description = "The Pages project's secrets, by name (wrangler)"
-run = 'wrangler pages secret list --project-name=ubuntu-website'
+description = "An Email Routing rule removed, by its id (cf:email-status lists them)"
+usage = 'arg "<rule-id>" help="The rule id"'
+run = 'cf email-routing rules delete "{{usage.rule_id}}" --zone 867fb5996096b895b47114b6564ee0fb --force'

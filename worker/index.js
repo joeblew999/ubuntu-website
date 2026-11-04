@@ -1,70 +1,33 @@
 /**
- * Cloudflare Worker: Web3Forms → MailerLite Webhook Handler
+ * The site's Worker: the Hugo build's pages, from its static assets (public/, wrangler.jsonc's assets), and under
+ * /api/ the routes that need code. Only /api/* runs this script (assets.run_worker_first); every other request is an
+ * asset, served by Cloudflare without it.
  *
- * This worker receives webhook POSTs from Web3Forms and adds subscribers
- * to MailerLite. Deploy to Cloudflare Workers for serverless operation.
- *
- * Environment Variables (set via wrangler.toml or dashboard):
- *   MAILERLITE_API_KEY   - Your MailerLite API key (secret)
- *   MAILERLITE_GROUP_ID  - Group ID to assign subscribers to
- *
- * Endpoints:
- *   POST /webhook  - Receive Web3Forms submission
- *   GET  /health   - Health check
- *   GET  /         - Info page
+ *   GET  /api/health              health check
+ *   POST /api/webhook/mailerlite  Web3Forms' submission → a MailerLite subscriber
  */
 
 const MAILERLITE_API = 'https://connect.mailerlite.com/api';
 
 export default {
-	async fetch(request, env, ctx) {
+	async fetch(request, env) {
 		const url = new URL(request.url);
-
-		// Route handling
 		switch (url.pathname) {
-			case '/':
-				return handleInfo();
-			case '/health':
-				return handleHealth();
-			case '/webhook':
-				return handleWebhook(request, env);
+			case '/api/health':
+				return new Response('OK', { status: 200 });
+			case '/api/webhook/mailerlite':
+				return handleMailerLite(request, env);
 			default:
-				return new Response('Not Found', { status: 404 });
+				return env.ASSETS.fetch(request);
 		}
 	},
 };
 
 /**
- * Info page - shows worker status
+ * Web3Forms' submission, POSTed to /api/webhook/mailerlite: its email (and name, company) added to MailerLite, in
+ * MAILERLITE_GROUP_ID's group when there is one. MAILERLITE_API_KEY is the Worker's secret.
  */
-function handleInfo() {
-	return new Response(
-		JSON.stringify({
-			name: 'mailerlite-webhook',
-			version: '1.0.0',
-			endpoints: {
-				'/': 'Info (this page)',
-				'/health': 'Health check',
-				'/webhook': 'POST - Receive Web3Forms submission',
-			},
-		}),
-		{
-			headers: { 'Content-Type': 'application/json' },
-		}
-	);
-}
-
-/**
- * Health check endpoint
- */
-function handleHealth() {
-	return new Response('OK', { status: 200 });
-}
-
-/**
- * Main webhook handler - receives Web3Forms submissions
- */
-async function handleWebhook(request, env) {
+async function handleMailerLite(request, env) {
 	// Only accept POST
 	if (request.method !== 'POST') {
 		return new Response('Method not allowed', { status: 405 });

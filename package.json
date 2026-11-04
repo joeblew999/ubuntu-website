@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "zeon.studio",
   "scripts": {
+    "build": "mise run root:build",
     "format": "prettier -w .",
     "postinstall": "node -e \"const fs=require('fs'),p='node_modules/.bin/tailwindcss';try{fs.lstatSync(p).isSymbolicLink()||((fs.unlinkSync(p)),fs.symlinkSync('../@tailwindcss/cli/dist/index.mjs',p))}catch(e){}\""
   },
@@ -16,6 +17,7 @@
     "prettier-plugin-go-template": "0.0.15",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwind-bootstrap-grid": "^7.0.0",
-    "tailwindcss": "^4.3.0"
+    "tailwindcss": "^4.3.0",
+    "wrangler": "4.156.1"
   }
 }

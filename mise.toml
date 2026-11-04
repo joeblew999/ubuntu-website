@@ -29,7 +29,6 @@ npm.package_manager = "aube"
 [tools]
 # Local, CI and Cloudflare Pages (root:pages installs it there); see CLAUDE.md Hugo Version.
 hugo-extended = "0.169.0"
-"npm:wrangler" = "4.156.1"
 # node is the one JavaScript runtime (Hugo's Tailwind, the theme generator); aube installs the site's npm packages
 # (package.json, aube-lock.yaml, build approvals in aube-workspace.yaml), and only that.
 node = "26.13.0"
@@ -51,19 +50,23 @@ actionlint = "1.7.12"
 shellcheck = "0.11.0"
 # The workflows' actions pinned to commit SHAs (root:check-actions, in root:ci), and updated (upgrade:actions).
 pinact = "5.0.2"
+# Cloudflare's own CLI (its API on its own login, no token in .env): cache purge, Email Routing (cf:*). Beta; the version
+# mise-cloudflare pins too.
+"npm:cf" = "1.0.0-beta.26"
 # Git LFS: static/videos/*.mp4 are LFS files (.gitattributes).
 git-lfs = "3.8.1"
 # Go module upgrades incl. major versions (upgrade:modules).
 "aqua:oligot/go-mod-upgrade" = "0.13.0"
 
 [env]
-# API keys and tokens (DEEPL_API_KEY, CLOUDFLARE_API_TOKEN, MAILERLITE_API_KEY, …) from .env, gitignored; none in
-# CI. The secret ones are redacted from task output (redactions, above).
+# API keys and tokens (DEEPL_API_KEY, UBUNTU_WEBSITE_CF_TOKEN, MAILERLITE_API_KEY, …) from .env, gitignored; none in
+# CI. Never CLOUDFLARE_API_TOKEN or CF_API_TOKEN: wrangler would use either over the repo's own login. The secret ones are redacted from task output (redactions, above).
 _.file = ".env"
 # Google Cloud project (number) that owns the OAuth client. Not secret.
 UBUNTU_WEBSITE_GCP_PROJECT = "130034768106"
-# Each <binary>:build puts its binary here; the tasks run it by name.
-_.path = ["{{config_root}}/bin"]
+# Each <binary>:build puts its binary here, and aube the npm packages' (wrangler, pinned in package.json): the tasks run
+# them by name.
+_.path = ["{{config_root}}/bin", "{{config_root}}/node_modules/.bin"]
 
 [task_config]
 # The task files, one per Go binary (mise loads this folder by default; named here so the control plane says so).

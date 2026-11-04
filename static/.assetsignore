@@ -1,0 +1,5 @@
+# Files Hugo copies into public/ that the Worker's assets never include (wrangler.jsonc's assets): local data that's
+# gitignored and too big for an asset (25 MiB). R2 serves the airspace data (airspace:upload); the cache is youtube's.
+airspace/*.geojson
+airspace/tiles/
+videos/cache/

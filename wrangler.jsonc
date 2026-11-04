@@ -1,0 +1,19 @@
+{
+  // The site: a Cloudflare Worker serving the Hugo build (public/, made by mise run root:build) as static assets, and
+  // worker/index.js for /api/* (the MailerLite webhook). mise-cloudflare runs it: mise run cloudflare shows where it
+  // is and what to run next (its login, deploys, previews; docs/mise-cloudflare/README.md).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ubuntusoftware-net",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "vars": { "MAILERLITE_GROUP_ID": "173641063022462964" },
+  "secrets": { "required": ["MAILERLITE_API_KEY"] },
+  "previews": {}
+}

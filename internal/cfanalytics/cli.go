@@ -48,9 +48,9 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
-	token := os.Getenv("CLOUDFLARE_API_TOKEN")
+	token := os.Getenv("UBUNTU_WEBSITE_CF_TOKEN")
 	if token == "" {
-		fmt.Fprintln(stderr, "Error: CLOUDFLARE_API_TOKEN environment variable not set")
+		fmt.Fprintln(stderr, "Error: UBUNTU_WEBSITE_CF_TOKEN not set (.env): a Cloudflare API token, named so no Cloudflare tool reads it (wrangler would use CLOUDFLARE_API_TOKEN or CF_API_TOKEN over the repo's login)")
 		fmt.Fprintln(stderr, "")
 		fmt.Fprintln(stderr, "Create a token at: https://dash.cloudflare.com/profile/api-tokens")
 		fmt.Fprintln(stderr, "Required permissions: Account Analytics:Read")

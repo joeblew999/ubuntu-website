@@ -410,7 +410,7 @@ func (c *CloudflareAutomation) SetupAPIToken(envFile string) error {
 	c.Log("")
 	c.Log("Saving token to %s...", envFile)
 
-	if err := appendToEnvFile(envFile, "CLOUDFLARE_API_TOKEN", token); err != nil {
+	if err := appendToEnvFile(envFile, "UBUNTU_WEBSITE_CF_TOKEN", token); err != nil {
 		return fmt.Errorf("could not save token: %w", err)
 	}
 
