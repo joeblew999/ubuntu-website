@@ -1,4 +1,3 @@
-// Package airspace provides tile generation for FAA airspace data.
 package airspace
 
 // =============================================================================
@@ -18,7 +17,6 @@ const (
 
 // Data files use underscores for Hugo data access compatibility.
 const (
-	FileSyncETags   = "sync_etags.json"   // ETag cache for change detection
 	FileSyncResult  = "sync_result.json"  // Last sync result (for pipeline idempotency)
 	FileSyncHistory = "sync_history.json" // Rolling sync history
 	FileManifest    = "manifest.json"     // Global manifest

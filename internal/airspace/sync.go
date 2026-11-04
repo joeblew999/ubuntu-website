@@ -9,13 +9,8 @@ import (
 	"time"
 )
 
-// ETagStore holds ETags for each dataset to detect changes.
-type ETagStore struct {
-	ETags     map[string]string `json:"etags"`
-	UpdatedAt time.Time         `json:"updated_at"`
-}
-
-// SyncResult records the outcome of a sync run.
+// SyncResult records the outcome of a sync run (sync_result.json): which datasets this run downloaded, which tile,
+// manifest and upload then act on (doc.go, rules 5 and 6).
 type SyncResult struct {
 	Timestamp   time.Time              `json:"timestamp"`
 	Duration    string                 `json:"duration"`
@@ -26,16 +21,19 @@ type SyncResult struct {
 	Datasets    map[string]DatasetSync `json:"datasets"`
 	TotalBytes  int64                  `json:"total_bytes"`
 	TotalSizeMB float64                `json:"total_size_mb"`
+
+	// Published is the manifest in R2 the run compared with (doc.go, rule 2), nil if R2 had none.
+	Published *ManifestUSA `json:"-"`
 }
 
 // DatasetSync records per-dataset sync metrics.
 type DatasetSync struct {
-	Status     string  `json:"status"` // "unchanged", "updated", "missing", "error"
+	Status     string  `json:"status"` // "unchanged" (at the published version), "updated" (downloaded), "error"
 	DurationMs int64   `json:"duration_ms,omitempty"`
 	SizeBytes  int64   `json:"size_bytes,omitempty"`
 	SizeMB     float64 `json:"size_mb,omitempty"`
 	Features   int     `json:"features,omitempty"`
-	ETag       string  `json:"etag,omitempty"`
+	Version    string  `json:"version,omitempty"` // The FAA's version of it (doc.go, rule 1)
 	Error      string  `json:"error,omitempty"`
 }
 
@@ -57,6 +55,8 @@ type SyncOptions struct {
 	SkipLarge bool
 	Timeout   time.Duration
 	Datasets  []string // Which datasets to sync (nil = default set)
+
+	PublishedURL string // The manifest in R2 that records what's published (doc.go, rule 2)
 }
 
 // DefaultSyncOptions returns sensible defaults.
@@ -68,14 +68,17 @@ func DefaultSyncOptions() SyncOptions {
 		SkipLarge: true,
 		Timeout:   5 * time.Minute,
 		Datasets:  DatasetOrder,
+
+		PublishedURL: PublishedURL,
 	}
 }
 
-// Sync downloads FAA data with ETag-based change detection.
+// Sync downloads the datasets whose FAA version isn't the one published in R2, or every one with Force (doc.go, rules
+// 1 to 4), and records the run: sync_result.json, which tile, manifest and upload read, and sync_history.json. A
+// dataset it couldn't version or download is in the result as "error", and Pipeline fails on it.
 func Sync(opts SyncOptions) (*SyncResult, error) {
 	syncStart := time.Now()
 
-	etagFile := filepath.Join(opts.DataDir, FileSyncETags)
 	historyFile := filepath.Join(opts.DataDir, FileSyncHistory)
 	resultFile := filepath.Join(opts.DataDir, FileSyncResult)
 
@@ -87,15 +90,20 @@ func Sync(opts SyncOptions) (*SyncResult, error) {
 		return nil, fmt.Errorf("creating data dir: %w", err)
 	}
 
-	// Load existing ETags and history
-	store := LoadETags(etagFile)
 	history := LoadSyncHistory(historyFile)
 	client := &http.Client{Timeout: opts.Timeout}
+
+	// Rule 2: what R2 serves, and the versions it was built from.
+	published, err := FetchPublished(client, opts.PublishedURL)
+	if err != nil {
+		return nil, err
+	}
 
 	// Track results
 	result := &SyncResult{
 		Timestamp: time.Now().UTC(),
 		Datasets:  make(map[string]DatasetSync),
+		Published: published,
 	}
 	var totalBytes int64
 
@@ -103,81 +111,42 @@ func Sync(opts SyncOptions) (*SyncResult, error) {
 		dsStart := time.Now()
 		ds := Datasets[key]
 		outPath := filepath.Join(opts.OutputDir, ds.GeoJSON)
-		dsResult := DatasetSync{}
-
-		// Check if we need to download
-		needsDownload := opts.Force
-		var newETag string
-
-		if !needsDownload {
-			// Check if file exists locally
-			if _, err := os.Stat(outPath); os.IsNotExist(err) {
-				needsDownload = true
-				dsResult.Status = "missing"
-			}
+		failed := func(err error) {
+			result.Datasets[key] = DatasetSync{Status: "error", Error: err.Error(), DurationMs: time.Since(dsStart).Milliseconds()}
 		}
 
-		if !needsDownload {
-			// Check for changes using ETag or Last-Modified header
-			checkURL := ds.BaseURL
-			if ds.ETagURL != "" {
-				checkURL = ds.ETagURL
-			}
-			newETag, needsDownload = CheckETag(client, checkURL, store.ETags[key])
-			if needsDownload {
-				dsResult.Status = "changed"
-			} else {
-				dsResult.Status = "unchanged"
-				dsResult.ETag = store.ETags[key]
-				dsResult.DurationMs = time.Since(dsStart).Milliseconds()
-				result.Datasets[key] = dsResult
-				result.Skipped++
-				continue
-			}
+		// Rule 1: the FAA's version of it.
+		version, err := SourceVersion(client, ds)
+		if err != nil {
+			failed(err) // rule 4
+			continue
 		}
 
-		// Download the dataset
-		var err error
+		// Rule 3: at the published version, R2 already serves it, whether or not this machine has a file of it.
+		if !opts.Force && version == published.publishedVersion(key) {
+			result.Datasets[key] = DatasetSync{Status: "unchanged", Version: version, DurationMs: time.Since(dsStart).Milliseconds()}
+			result.Skipped++
+			continue
+		}
+
+		// Changed, never published, or forced: downloaded whole (rule 1: the FAA has no delta).
 		if ds.IsPaginated {
 			err = DownloadPaginated(client, ds, outPath)
 		} else {
 			err = DownloadDirect(client, ds.BaseURL, outPath)
 		}
-
 		if err != nil {
-			dsResult.Status = "error"
-			dsResult.Error = err.Error()
-			dsResult.DurationMs = time.Since(dsStart).Milliseconds()
-			result.Datasets[key] = dsResult
+			failed(err) // rule 4
 			continue
 		}
 
-		// Update ETag for change tracking
-		if newETag != "" {
-			store.ETags[key] = newETag
-			dsResult.ETag = newETag
-		} else {
-			// For paginated downloads, do HEAD to get current ETag
-			checkURL := ds.BaseURL
-			if ds.ETagURL != "" {
-				checkURL = ds.ETagURL
-			}
-			if etag, _ := CheckETag(client, checkURL, ""); etag != "" {
-				store.ETags[key] = etag
-				dsResult.ETag = etag
-			}
-		}
-
-		// Record metrics
+		dsResult := DatasetSync{Status: "updated", Version: version}
 		if info, err := os.Stat(outPath); err == nil {
 			sizeBytes := info.Size()
-			sizeMB := float64(sizeBytes) / (1024 * 1024)
 			totalBytes += sizeBytes
 			dsResult.SizeBytes = sizeBytes
-			dsResult.SizeMB = sizeMB
+			dsResult.SizeMB = float64(sizeBytes) / (1024 * 1024)
 		}
-
-		dsResult.Status = "updated"
 		dsResult.DurationMs = time.Since(dsStart).Milliseconds()
 		result.Datasets[key] = dsResult
 		result.Updated++
@@ -190,12 +159,6 @@ func Sync(opts SyncOptions) (*SyncResult, error) {
 	result.HasChanges = result.Updated > 0
 	result.TotalBytes = totalBytes
 	result.TotalSizeMB = float64(totalBytes) / (1024 * 1024)
-
-	// Save ETags
-	store.UpdatedAt = time.Now()
-	if err := SaveETags(etagFile, store); err != nil {
-		return result, fmt.Errorf("saving etags: %w", err)
-	}
 
 	// Update and save history
 	if result.HasChanges {
@@ -225,60 +188,6 @@ func Sync(opts SyncOptions) (*SyncResult, error) {
 	}
 
 	return result, nil
-}
-
-// CheckETag does a HEAD request and compares ETag.
-// Returns (newETag, needsDownload).
-func CheckETag(client *http.Client, url, oldETag string) (string, bool) {
-	req, err := http.NewRequest("HEAD", url, nil)
-	if err != nil {
-		return "", true // Download on error
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", true // Download on error
-	}
-	defer resp.Body.Close()
-
-	newETag := resp.Header.Get("ETag")
-	if newETag == "" {
-		// No ETag support, check Last-Modified instead
-		newETag = resp.Header.Get("Last-Modified")
-	}
-
-	if newETag == "" {
-		return "", true // No way to check, always download
-	}
-
-	return newETag, newETag != oldETag
-}
-
-// LoadETags loads the ETag store from disk.
-func LoadETags(path string) ETagStore {
-	store := ETagStore{
-		ETags: make(map[string]string),
-	}
-
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return store
-	}
-
-	json.Unmarshal(data, &store)
-	if store.ETags == nil {
-		store.ETags = make(map[string]string)
-	}
-	return store
-}
-
-// SaveETags saves the ETag store to disk.
-func SaveETags(path string, store ETagStore) error {
-	data, err := json.MarshalIndent(store, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, data, 0644)
 }
 
 // LoadSyncHistory loads sync history from disk.

@@ -1,7 +1,8 @@
 # FAA Airspace Data Sync Workflow
 #
-# Syncs FAA airspace data from ArcGIS to Cloudflare R2.
-# Uses ETag tracking to only download changed files.
+# Syncs FAA airspace data from ArcGIS to Cloudflare R2: only the datasets whose FAA version (their layer's
+# dataLastEditDate) isn't the one the manifest in R2 records, so most weeks it stops after a few small requests.
+# Nothing is cached between runs: what's published is read from R2 itself. The rules: internal/airspace/doc.go.
 # Uses pure Go tiler (gotiler) - no external dependencies like tippecanoe.
 #
 # Schedule: Weekly on Thursday (aligned with AIRAC cycle midpoint)
@@ -40,20 +41,11 @@ jobs:
           version: 2026.9.15
           cache: true
 
-
-
-      - name: Restore sync cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: data/airspace/sync_etags.json
-          key: airspace-sync-${{ github.run_id }}
-          restore-keys: |
-            airspace-sync-
-
       - name: Run pipeline
         id: pipeline
         run: |
-          # mise run airspace:pipeline: sync → tile (if changed) → manifest, with the Go tiler (no tippecanoe needed)
+          # mise run airspace:pipeline: sync → tile → manifest, only the datasets the FAA changed since R2's manifest,
+          # with the Go tiler (no tippecanoe needed); a dataset that fails to download fails the run
           mise run airspace:pipeline --tiler gotiler ${{ inputs.force == 'true' && '--force' || '' }}
 
       - name: Check for changes
@@ -69,13 +61,6 @@ jobs:
       - name: Skip notification
         if: steps.check_changes.outputs.has_changes != 'true'
         run: echo "No changes detected - pipeline skipped tile/manifest/upload (idempotent)"
-
-      - name: Save sync cache
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        if: always()
-        with:
-          path: data/airspace/sync_etags.json
-          key: airspace-sync-${{ github.run_id }}
 
       - name: Summary
         run: mise run airspace:summary

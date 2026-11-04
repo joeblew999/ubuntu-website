@@ -1,6 +1,6 @@
 // Command airspace manages the FAA airspace data behind the BVLOS demo (layouts/fleet/airspace-demo.html): FAA
-// ArcGIS → GeoJSON (ETag-checked) → PMTiles → R2. Each command is a file of its own and a task of
-// .mise/tasks/airspace.toml:
+// ArcGIS → GeoJSON → PMTiles → R2, only the datasets the FAA changed since what R2 has (the sync rules: the
+// internal/airspace package doc). Each command is a file of its own and a task of .mise/tasks/airspace.toml:
 //
 //	mise run airspace:pipeline    sync → tile → manifest, each only if something changed (local dev)
 //	mise run airspace:upload      the tiles and manifests to R2 (production)

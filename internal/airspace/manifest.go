@@ -48,6 +48,10 @@ type ManifestLayer struct {
 	DefaultVisible bool          `json:"default_visible"`
 	RenderRules    []RenderRule  `json:"render_rules"`
 	Legend         []LegendEntry `json:"legend,omitempty"`
+
+	// SourceVersion is the FAA version these tiles were built from (doc.go, rules 1 and 2): what the next sync
+	// compares the FAA's with.
+	SourceVersion string `json:"source_version,omitempty"`
 }
 
 // RenderRule defines how to style features.
@@ -74,32 +78,35 @@ type ManifestSource struct {
 	UpdateCycle string            `json:"update_cycle"`
 }
 
-// LayerMetrics holds computed metrics for a layer.
+// LayerMetrics holds computed metrics for a layer, and the FAA version they're of.
 type LayerMetrics struct {
 	SizeMB   float64
 	Features int
+	Version  string
 }
 
-// GenerateManifests creates both global and USA manifests.
-func GenerateManifests(dataDir, tilesDir, geoJSONDir string) error {
+// GenerateManifests creates both global and USA manifests, describing every layer in R2 (doc.go, rule 5): a layer
+// the run downloaded (run's "updated") from this machine's files and the run's version of it; any other from the
+// published manifest, which is what R2 still serves for it; one in neither (nothing published yet) from this
+// machine's files, with no version, so the next sync downloads it.
+func GenerateManifests(dataDir, tilesDir, geoJSONDir string, run SyncResult, published *ManifestUSA) error {
 	timestamp := time.Now().UTC().Format(time.RFC3339)
 
 	// Collect metrics for each layer
 	layerMetrics := make(map[string]LayerMetrics)
 	for _, key := range DatasetOrder {
 		ds := Datasets[key]
-		pmTilesPath := filepath.Join(tilesDir, ds.PMTiles)
-		geoJSONPath := filepath.Join(geoJSONDir, ds.GeoJSON)
+		if p, ok := published.layer(key); ok && run.Datasets[key].Status != "updated" {
+			layerMetrics[key] = LayerMetrics{p.SizeMB, p.Features, p.SourceVersion}
+			continue
+		}
 
 		var sizeMB float64
-		var features int
-
-		if info, err := os.Stat(pmTilesPath); err == nil {
+		if info, err := os.Stat(filepath.Join(tilesDir, ds.PMTiles)); err == nil {
 			sizeMB = float64(info.Size()) / (1024 * 1024)
 		}
-		features = CountGeoJSONFeatures(geoJSONPath)
-
-		layerMetrics[key] = LayerMetrics{sizeMB, features}
+		features := CountGeoJSONFeatures(filepath.Join(geoJSONDir, ds.GeoJSON))
+		layerMetrics[key] = LayerMetrics{sizeMB, features, run.Datasets[key].Version}
 	}
 
 	// Create global manifest
@@ -270,7 +277,31 @@ func createUSAManifest(timestamp string, metrics map[string]LayerMetrics) Manife
 		},
 	}
 
+	for _, key := range DatasetOrder {
+		if layer, ok := usaManifest.Layers[manifestKey(key)]; ok {
+			layer.SourceVersion = metrics[key].Version
+			usaManifest.Layers[manifestKey(key)] = layer
+		}
+	}
+
 	return usaManifest
+}
+
+// manifestKey is a dataset's layer key in the manifest: its own key, but for uas, which the demo calls laanc.
+func manifestKey(dataset string) string {
+	if dataset == "uas" {
+		return "laanc"
+	}
+	return dataset
+}
+
+// layer is the manifest's layer of a dataset, if it has one.
+func (m *ManifestUSA) layer(dataset string) (ManifestLayer, bool) {
+	if m == nil {
+		return ManifestLayer{}, false
+	}
+	l, ok := m.Layers[manifestKey(dataset)]
+	return l, ok
 }
 
 // CountGeoJSONFeatures counts features in a GeoJSON file.

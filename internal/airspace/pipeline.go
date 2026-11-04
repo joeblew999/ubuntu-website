@@ -61,7 +61,7 @@ func Pipeline(opts PipelineOptions, tiler Tiler) (*PipelineResult, error) {
 	result.TileCount = tileCount
 
 	// Step 3: Manifest
-	if err := GenerateManifests(DirData, DirPMTiles, DirGeoJSON); err != nil {
+	if err := GenerateManifests(DirData, DirPMTiles, DirGeoJSON, *syncResult, syncResult.Published); err != nil {
 		return nil, fmt.Errorf("manifest: %w", err)
 	}
 

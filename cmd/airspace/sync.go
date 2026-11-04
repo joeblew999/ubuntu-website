@@ -9,10 +9,11 @@ import (
 	"github.com/joeblew999/ubuntu-website/internal/airspace"
 )
 
-// sync is airspace sync, the task airspace:sync.
+// sync is airspace sync, the task airspace:sync: the datasets whose FAA version isn't the one published in R2
+// downloaded, or every one with --force (the sync rules: internal/airspace doc.go).
 func sync() {
 	fs := flag.NewFlagSet("sync", flag.ExitOnError)
-	force := fs.Bool("force", false, "Force re-download even if unchanged")
+	force := fs.Bool("force", false, "Download every dataset, changed or not (local files of an unchanged one)")
 	skipLarge := fs.Bool("skip-large", true, "Skip datasets >100MB (obstacles)")
 	timeout := fs.Duration("timeout", 5*time.Minute, "HTTP request timeout")
 	fs.Parse(os.Args[1:])
@@ -22,7 +23,7 @@ func sync() {
 	if *force {
 		fmt.Println("Mode: FORCE (re-downloading all)")
 	} else {
-		fmt.Println("Mode: Smart (ETag-based diff)")
+		fmt.Println("Mode: the datasets whose FAA version isn't the published one")
 	}
 	fmt.Println()
 
@@ -44,11 +45,9 @@ func sync() {
 	for key, ds := range result.Datasets {
 		switch ds.Status {
 		case "updated":
-			fmt.Printf("[%s] ✓ updated (%.1f MB)\n", key, ds.SizeMB)
+			fmt.Printf("[%s] ✓ downloaded, FAA version %s (%.1f MB)\n", key, ds.Version, ds.SizeMB)
 		case "unchanged":
-			fmt.Printf("[%s] unchanged\n", key)
-		case "missing":
-			fmt.Printf("[%s] downloaded (was missing)\n", key)
+			fmt.Printf("[%s] unchanged: R2 has FAA version %s\n", key, ds.Version)
 		case "error":
 			fmt.Printf("[%s] ERROR: %s\n", key, ds.Error)
 		}

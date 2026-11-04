@@ -1,6 +1,7 @@
-# The FAA airspace data behind the BVLOS demo (/fleet/airspace-demo/): FAA ArcGIS → GeoJSON (ETag-checked, so a sync
-# with nothing new changes nothing) → PMTiles (tippecanoe if installed, else the Go tiler) → R2. Each task runs one
-# command of the airspace binary, cmd/airspace/<command>.go; misecheck holds the two together.
+# The FAA airspace data behind the BVLOS demo (/fleet/airspace-demo/): FAA ArcGIS → GeoJSON → PMTiles (tippecanoe if
+# installed, else the Go tiler) → R2, only the datasets the FAA changed since what R2 has, so a run with nothing new
+# changes nothing (the sync rules: internal/airspace/doc.go). Each task runs one command of the airspace binary,
+# cmd/airspace/<command>.go; misecheck holds the two together.
 #   mise run airspace:pipeline            sync + tile + manifest, locally (no upload)
 #   mise run airspace:upload              the tiles and manifests to R2 (on the repo's login; in CI, the workflow's token)
 # The weekly one is .github/workflows/sync-airspace.yml. Serving tiles locally: pmtiles-server:serve.
@@ -16,8 +17,8 @@ depends = ["airspace:build"]
 run = 'airspace pipeline{% if usage.force %} --force{% endif %}{% if usage.tiler %} --tiler "{{usage.tiler}}"{% endif %}'
 
 ["airspace:sync"]
-description = "The FAA datasets downloaded, only those whose ETag changed"
-usage = 'flag "--force" help="Download even if unchanged"; flag "--skip-large <bool>" help="Skip the datasets over 100MB (default true)"; flag "--timeout <duration>" help="HTTP timeout (default 5m)"'
+description = "The FAA datasets downloaded, only those whose FAA version isn't the one published in R2 (internal/airspace/doc.go)"
+usage = 'flag "--force" help="Download every dataset, changed or not"; flag "--skip-large <bool>" help="Skip the datasets over 100MB (default true)"; flag "--timeout <duration>" help="HTTP timeout (default 5m)"'
 depends = ["airspace:build"]
 run = 'airspace sync{% if usage.force %} --force{% endif %}{% if usage.skip_large %} --skip-large={{usage.skip_large}}{% endif %}{% if usage.timeout %} --timeout {{usage.timeout}}{% endif %}'
 
@@ -33,9 +34,9 @@ depends = ["airspace:build"]
 run = 'airspace manifest'
 
 ["airspace:upload"]
-description = "The tiles and manifests uploaded to R2 (--test: the endpoints only)"
+description = "The tiles the last sync built, then the manifests, uploaded to R2 (--test: the endpoints only). wrangler is the npm package's (root:deps): in CI on the workflow's token, here through mise-cloudflare on the repo's login"
 usage = 'flag "--test" help="Test the endpoints, upload nothing"'
-depends = ["airspace:build"]
+depends = ["airspace:build", "root:deps"]
 run = 'airspace upload{% if usage.test %} --test{% endif %}'
 
 ["airspace:upload-list"]

@@ -1,4 +1,3 @@
-// Package airspace provides tile generation for FAA airspace data.
 package airspace
 
 // TileConfig holds settings for tile generation.

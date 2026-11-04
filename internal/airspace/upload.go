@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
-// UploadToR2 uploads PMTiles and manifests to Cloudflare R2.
-// Reads from the manifest to know what files to upload.
+// UploadToR2 uploads to Cloudflare R2 the tiles the last sync's datasets were built into (sync_result.json's
+// "updated"), then the manifests, last (doc.go, rule 6): the published versions move only once their tiles are up.
+// Any other layer's tiles in R2 are already at the version the manifest records, so they stay as they are; tiles on
+// this machine from an older run never overwrite newer ones there.
 func UploadToR2() error {
 	manifestPath := filepath.Join(DirData, FileUSAManifest)
 
@@ -33,13 +35,23 @@ func UploadToR2() error {
 		return fmt.Errorf("loading manifest: %w", err)
 	}
 
-	// Upload PMTiles from manifest
-	fmt.Println("=== PMTiles (from manifest) ===")
-	for _, layer := range manifest.Layers {
+	run := LoadSyncResult(filepath.Join(DirData, FileSyncResult))
+
+	// Upload the PMTiles this run built
+	fmt.Println("=== PMTiles (this run's) ===")
+	for _, key := range DatasetOrder {
+		layer, ok := manifest.layer(key)
+		if !ok {
+			continue
+		}
+		if run.Datasets[key].Status != "updated" {
+			fmt.Printf("  unchanged: %s (R2 has it at %s)\n", layer.File, layer.SourceVersion)
+			continue
+		}
 		filePath := filepath.Join(DirPMTiles, layer.File)
 		if _, err := os.Stat(filePath); err != nil {
-			fmt.Printf("  SKIP: %s (file not found)\n", layer.File)
-			continue
+			// The manifest would record a version whose tiles never went up (rule 6).
+			return fmt.Errorf("%s was downloaded but not tiled (%s): run mise run airspace:pipeline", key, layer.File)
 		}
 
 		info, _ := os.Stat(filePath)
@@ -52,7 +64,7 @@ func UploadToR2() error {
 		}
 	}
 
-	// Upload manifests
+	// Upload the manifests, last (rule 6)
 	fmt.Println("\n=== Manifests ===")
 	manifestFiles := []string{FileManifest, FileUSAManifest}
 	for _, name := range manifestFiles {
@@ -113,8 +125,8 @@ func TestR2Endpoints() error {
 	return fmt.Errorf("some endpoints failed")
 }
 
-// wranglerCmd is how wrangler runs here: in CI, wrangler itself, on the CLOUDFLARE_API_TOKEN the workflow gives it (no
-// one is there to log in); anywhere else, through mise-cloudflare on the repo's own login (no token).
+// wranglerCmd is how wrangler runs here: in CI, wrangler itself (the npm package: airspace:upload depends on
+// root:deps), on the CLOUDFLARE_API_TOKEN the workflow gives it (no one is there to log in); anywhere else, through mise-cloudflare on the repo's own login (no token).
 func wranglerCmd() []string {
 	if ci := os.Getenv("CI"); ci != "" && ci != "false" && ci != "0" {
 		return []string{"wrangler"}

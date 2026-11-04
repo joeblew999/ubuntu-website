@@ -393,58 +393,47 @@ Interactive US airspace visualization for drone fleet operations. Displays FAA c
 
 **Architecture:**
 ```
-FAA ArcGIS APIs → Go sync → GeoJSON → tippecanoe → PMTiles → R2 → Frontend
-                     ↓
-              ETag tracking (idempotent)
-                     ↓
-              sync-history.json (cron tuning)
+FAA ArcGIS FeatureServers → Go sync → GeoJSON → PMTiles (tippecanoe, or the Go tiler) → R2 → Frontend
+        ↑ each layer's dataLastEditDate (the FAA's version)       ↓
+        └──── compared with the versions R2's manifest_usa.json records (what's published)
 ```
 
-**Data Flow:**
-1. `airspace sync` checks ETags against FAA sources
-2. If changed: downloads GeoJSON (378K features for UAS = 422MB)
-3. `airspace:tile` converts to PMTiles (123MB for UAS)
-4. `r2:airspace:upload` pushes to Cloudflare R2
-5. Frontend loads PMTiles progressively (manifest-driven)
+**The sync rules** (in full: the package doc, `internal/airspace/doc.go`; tested in `sync_test.go`):
+1. A dataset's version is its FeatureServer layer's `editingInfo.dataLastEditDate`. The FAA has no delta (query-only layers, each republished whole every 28-day AIRAC cycle), so a changed dataset is downloaded whole.
+2. What's published is R2's `airspace/manifest_usa.json`: each layer's `source_version`. Nothing is cached between runs; CI, a laptop and a fresh clone see the same.
+3. Sync downloads only the datasets whose version isn't the published one (all of them the first time, or with `--force`), even with no local file of an unchanged one.
+4. A failed version check or download fails the pipeline (an ArcGIS error page answered with HTTP 200, fewer features than the service counts).
+5. The manifest takes this run's layers from its files, every other layer from the published manifest.
+6. Upload sends only this run's tiles, then the manifests last, so the published versions move only once their tiles are up.
 
 **Key Commands:**
 ```bash
-# Sync pipeline (idempotent - skips if no FAA changes)
-mise run airspace:sync              # Check for changes, download if needed
-mise run airspace:pipeline          # Sync + tile + manifest (no upload)
-mise run airspace:upload            # Then R2
-
-# Data inspection
+mise run airspace:pipeline          # Sync + tile + manifest, only what changed (no upload)
+mise run airspace:upload            # This run's tiles, then the manifests, to R2
+mise run airspace:sync --force      # Download every dataset (local files of unchanged ones too)
+mise run airspace:tile              # Convert GeoJSON to PMTiles
 mise run airspace:status            # Show local data files
 mise run airspace:history           # Show sync history (for cron tuning)
-go run ./cmd/airspace history   # Same, direct
-
-# Manual operations
-mise run airspace:sync --force      # Force download all
-mise run airspace:tile              # Convert GeoJSON to PMTiles
-task r2:airspace:upload         # Upload PMTiles to R2
 ```
 
 **Files:**
 | File | Purpose |
 |------|---------|
-| `data/airspace/etags.json` | ETag cache for change detection |
-| `data/airspace/sync-result.json` | Last sync result (for pipeline idempotency) |
-| `data/airspace/sync-history.json` | Rolling history of sync runs |
+| `data/airspace/sync_result.json` | Last sync: which datasets it downloaded, at which version (tile, manifest, upload read it) |
+| `data/airspace/sync_history.json` | Rolling history of sync runs |
 | `data/airspace/manifest.json` | Global manifest (regions) |
-| `data/airspace/usa-manifest.json` | USA regional manifest (layers) |
+| `data/airspace/manifest_usa.json` | USA regional manifest (layers): the demo page reads this one at build time; R2's copy records what's published |
 | `static/airspace/*.geojson` | Downloaded FAA data (gitignored) |
 | `static/airspace/tiles/*.pmtiles` | Generated tiles (gitignored) |
 
 **Sync Timing:**
-- No changes: ~7-10 seconds (HEAD requests only)
-- UAS changed: ~5-10 minutes (422MB download + tile gen)
+- No changes: a few seconds (six small requests: five layers' versions, R2's manifest)
+- UAS changed: ~5-10 minutes (381K features, ~440MB download + tile gen)
 - All changed: ~10-15 minutes
 
 **GitHub Actions:** `.github/workflows/sync-airspace.yml`
-- Runs weekly (Thursday 06:00 UTC, aligned with AIRAC cycle)
-- Caches ETags between runs
-- Only tiles/uploads if changes detected
+- Runs weekly (Thursday 06:00 UTC); the FAA changes once per 28-day cycle, so most runs stop after the version check
+- Only downloads, tiles and uploads the datasets that changed
 
 **Why PMTiles?**
 - Single-file format for vector tiles (no tile server needed)
@@ -452,9 +441,8 @@ task r2:airspace:upload         # Upload PMTiles to R2
 - 422MB GeoJSON → 123MB PMTiles (compression + tiling)
 
 **Limitations:**
-- FAA only supports Query API (no sync/change tracking)
-- Must download ALL features even for 1 change
-- PMTiles regeneration is full rebuild (no incremental)
+- FAA only supports Query API (no sync/change tracking): a changed dataset is downloaded whole
+- PMTiles regeneration of a changed dataset is a full rebuild (no incremental)
 
 **R2 Bucket:** `ubuntu-website-assets`
 **R2 Public URL:** `https://pub-97cfaeb734ae474c80c79c3e3cc6dbee.r2.dev/airspace/`

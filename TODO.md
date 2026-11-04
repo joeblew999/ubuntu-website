@@ -29,7 +29,11 @@ Created (Dec 2024); moving the repo there is deferred, as people are looking at 
 
 ## Follow-ups
 
-None open. A follow-up goes here, ticked when done.
+A follow-up goes here, ticked when done.
+
+- [ ] **Airspace: the demo page shows the committed manifest**, not R2's: `layouts/fleet/airspace-demo.html` reads `data/airspace/manifest_usa.json` at build time, and the weekly sync doesn't commit the new one (`contents: read`), so the page's "Updated" date and feature counts lag the tiles in R2. Either the workflow commits the manifest back (a push to main, so a deploy), or the page reads R2's at run time.
+- [ ] **Airspace: the `obstacles` dataset downloads the wrong thing**: its FAA item (`c6a62360…`) is Class_Airspace, not obstacles. It's off by default (`DatasetOrder`; only `airspace:sync --skip-large=false` takes it). Find the FAA's obstacle data (the Digital Obstacle File), or drop the dataset.
+- [ ] **R2 leftover**: `airspace/usa-manifest.json` (2025-12-24, the manifest's old name). Delete once `airspace/manifest_usa.json` is up: `mise run cloudflare:run-wrangler r2 object delete ubuntu-website-assets/airspace/usa-manifest.json --remote`.
 
 ---
 
