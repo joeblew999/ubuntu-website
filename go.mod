@@ -6,6 +6,7 @@ require (
 	github.com/bounoable/deepl v0.8.0
 	github.com/cli/go-gh/v2 v2.17.0
 	github.com/fogleman/gg v1.3.0
+	github.com/joeblew999/mise-check v0.1.0
 	github.com/mailerlite/mailerlite-go v1.3.0
 	github.com/mxschmitt/playwright-go v0.6201.1
 	github.com/paulmach/orb v0.14.0

@@ -110,6 +110,9 @@ func (p *ClaudeCLIProvider) SupportsLanguage(langCode string) bool {
 func (p *ClaudeCLIProvider) callCLI(ctx context.Context, prompt string) (string, error) {
 	// Use claude CLI with --print flag for non-interactive output
 	cmd := exec.CommandContext(ctx, p.cliBinary, "--print", "-p", prompt)
+	// Outside the repo: a translation needs nothing of the project, and in an untrusted project directory claude
+	// exits with an error about its .claude/settings.json.
+	cmd.Dir = os.TempDir()
 
 	output, err := cmd.Output()
 	if err != nil {

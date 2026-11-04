@@ -42,3 +42,6 @@ jobs:
 
       - name: Test Hugo build task
         run: task hugo:build
+
+      - name: mise.toml and the Go its tasks run, lined up (misecheck)
+        run: mise run root:check-mise
