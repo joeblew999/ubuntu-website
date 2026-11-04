@@ -4,4 +4,4 @@
 # overrides it on one machine: mise-cloudflare's own checkout pins its build there (local).
 
 [tools]
-"github:joeblew999/mise-cloudflare" = "0.1.41"
+"github:joeblew999/mise-cloudflare" = "0.1.42"
