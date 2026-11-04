@@ -24,7 +24,6 @@ type CLIOptions struct {
 	DryRun       bool
 	Verbose      bool
 	APIKey       string
-	BundlePath   string
 }
 
 // Run is the main entry point for the autotranslate CLI.
@@ -38,15 +37,12 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 	fs.BoolVar(&opts.DryRun, "dry-run", false, "Show what would be translated without actually translating")
 	fs.BoolVar(&opts.Verbose, "verbose", false, "Verbose output")
 	fs.StringVar(&opts.APIKey, "api-key", "", "API key (or use DEEPL_API_KEY/CLAUDE_API_KEY env var)")
-	fs.StringVar(&opts.BundlePath, "bundle", "tokibundle", "Path to tokibundle directory for ARB translation")
 
 	fs.Usage = func() {
 		fmt.Fprintf(stderr, "Usage: autotranslate [flags] <command> [args]\n\n")
 		fmt.Fprintf(stderr, "Commands:\n")
 		fmt.Fprintf(stderr, "  file <source-file> <target-lang>   Translate a single file\n")
 		fmt.Fprintf(stderr, "  missing <target-lang>              Translate all missing files for language\n")
-		fmt.Fprintf(stderr, "  arb <target-lang>                  Translate ARB catalog entries (toki workflow)\n")
-		fmt.Fprintf(stderr, "  arb-status                         Show ARB translation status\n")
 		fmt.Fprintf(stderr, "  languages                          List supported languages\n")
 		fmt.Fprintf(stderr, "  status                             Show API status and usage\n")
 		fmt.Fprintf(stderr, "\nFlags:\n")
@@ -82,16 +78,6 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return cli.runMissingTranslation(fs.Arg(1))
-
-	case "arb":
-		if fs.NArg() < 2 {
-			fmt.Fprintf(stderr, "Usage: autotranslate arb <target-lang>\n")
-			return 1
-		}
-		return cli.runARBTranslation(fs.Arg(1))
-
-	case "arb-status":
-		return cli.runARBStatus()
 
 	case "languages":
 		return cli.runListLanguages()
@@ -477,235 +463,6 @@ func (c *cliRunner) runStatus() int {
 	return 0
 }
 
-func (c *cliRunner) runARBTranslation(targetLang string) int {
-	ctx := context.Background()
-
-	// Find the tokibundle directory
-	bundle := c.opts.BundlePath
-	if _, err := os.Stat(bundle); os.IsNotExist(err) {
-		fmt.Fprintf(c.stderr, "Error: tokibundle directory not found at %s\n", bundle)
-		fmt.Fprintf(c.stderr, "Run 'toki generate' first to create the ARB catalogs\n")
-		return 1
-	}
-
-	// Try both naming conventions: catalog_en.arb (toki) and en.arb
-	sourceARBPath := filepath.Join(bundle, "catalog_en.arb")
-	if _, err := os.Stat(sourceARBPath); os.IsNotExist(err) {
-		sourceARBPath = filepath.Join(bundle, "en.arb")
-	}
-
-	// Load source ARB (English)
-	sourceARB, err := LoadARB(sourceARBPath)
-	if err != nil {
-		fmt.Fprintf(c.stderr, "Error loading source ARB: %v\n", err)
-		return 1
-	}
-
-	// Load or create target ARB (try catalog_xx.arb first, then xx.arb)
-	targetARBPath := filepath.Join(bundle, "catalog_"+targetLang+".arb")
-	if _, err := os.Stat(targetARBPath); os.IsNotExist(err) {
-		// Try without catalog_ prefix
-		altPath := filepath.Join(bundle, targetLang+".arb")
-		if _, err := os.Stat(altPath); err == nil {
-			targetARBPath = altPath
-		}
-		// Otherwise use catalog_ prefix for new files
-	}
-	var targetARB *ARBFile
-	if _, err := os.Stat(targetARBPath); os.IsNotExist(err) {
-		// Create new target ARB with same structure but empty messages
-		targetARB = &ARBFile{
-			Locale:           targetLang,
-			Messages:         make(map[string]string),
-			Metadata:         make(map[string]any),
-			CustomAttributes: sourceARB.CustomAttributes,
-		}
-		// Copy message IDs with empty values
-		for id := range sourceARB.Messages {
-			targetARB.Messages[id] = ""
-		}
-		// Copy metadata
-		for k, v := range sourceARB.Metadata {
-			targetARB.Metadata[k] = v
-		}
-	} else {
-		targetARB, err = LoadARB(targetARBPath)
-		if err != nil {
-			fmt.Fprintf(c.stderr, "Error loading target ARB: %v\n", err)
-			return 1
-		}
-		// Add any new message IDs from source
-		for id := range sourceARB.Messages {
-			if _, exists := targetARB.Messages[id]; !exists {
-				targetARB.Messages[id] = ""
-			}
-		}
-	}
-
-	// Count what needs translation
-	sourceStats := GetARBStats(sourceARB)
-	targetStats := GetARBStats(targetARB)
-
-	fmt.Fprintf(c.stdout, "ARB Translation: en → %s\n", targetLang)
-	fmt.Fprintf(c.stdout, "Source (en):     %d messages\n", sourceStats.TotalMessages)
-	fmt.Fprintf(c.stdout, "Target (%s):    %d translated, %d empty (%.1f%% complete)\n",
-		targetLang, targetStats.TranslatedCount, targetStats.EmptyCount, targetStats.CompletenessPerc)
-
-	if targetStats.EmptyCount == 0 {
-		fmt.Fprintf(c.stdout, "\n✓ All messages already translated!\n")
-		return 0
-	}
-
-	if c.opts.DryRun {
-		fmt.Fprintf(c.stdout, "\n[dry-run] Would translate %d messages\n", targetStats.EmptyCount)
-		return 0
-	}
-
-	// Get provider
-	provider, err := c.getProvider()
-	if err != nil {
-		fmt.Fprintf(c.stderr, "Error: %v\n", err)
-		return 1
-	}
-
-	if !provider.SupportsLanguage(targetLang) {
-		fmt.Fprintf(c.stderr, "Error: language '%s' not supported by %s\n", targetLang, provider.Name())
-		return 1
-	}
-
-	fmt.Fprintf(c.stdout, "\nTranslating %d messages using %s...\n\n", targetStats.EmptyCount, provider.Name())
-
-	// Translate using the ARB translator
-	arbTranslator := NewARBTranslator(provider)
-	translated, err := arbTranslator.TranslateARB(ctx, sourceARB, targetARB, targetLang, c.opts.Verbose,
-		func(done, total int) {
-			if !c.opts.Verbose {
-				fmt.Fprintf(c.stdout, "\r  Progress: %d/%d messages (%.0f%%)", done, total, float64(done)/float64(total)*100)
-			}
-		})
-
-	if err != nil {
-		fmt.Fprintf(c.stderr, "\nError during translation: %v\n", err)
-		// Save partial progress
-		if translated > 0 {
-			fmt.Fprintf(c.stdout, "Saving %d translated messages...\n", translated)
-			if saveErr := SaveARB(targetARBPath, targetARB); saveErr != nil {
-				fmt.Fprintf(c.stderr, "Error saving ARB: %v\n", saveErr)
-			}
-		}
-		return 1
-	}
-
-	fmt.Fprintf(c.stdout, "\n\n")
-
-	// Save the translated ARB
-	if err := SaveARB(targetARBPath, targetARB); err != nil {
-		fmt.Fprintf(c.stderr, "Error saving ARB: %v\n", err)
-		return 1
-	}
-
-	finalStats := GetARBStats(targetARB)
-	fmt.Fprintf(c.stdout, "✓ Translated %d messages\n", translated)
-	fmt.Fprintf(c.stdout, "✓ Saved to %s\n", targetARBPath)
-	fmt.Fprintf(c.stdout, "  Completeness: %.1f%% (%d/%d)\n",
-		finalStats.CompletenessPerc, finalStats.TranslatedCount, finalStats.TotalMessages)
-	fmt.Fprintf(c.stdout, "\nNext step: run 'toki apply -t %s' to apply translations to markdown files\n", targetLang)
-	return 0
-}
-
-func (c *cliRunner) runARBStatus() int {
-	bundle := c.opts.BundlePath
-	if _, err := os.Stat(bundle); os.IsNotExist(err) {
-		fmt.Fprintf(c.stderr, "Error: tokibundle directory not found at %s\n", bundle)
-		fmt.Fprintf(c.stderr, "Run 'toki generate' first to create the ARB catalogs\n")
-		return 1
-	}
-
-	fmt.Fprintln(c.stdout, "========================================")
-	fmt.Fprintln(c.stdout, "ARB Translation Status")
-	fmt.Fprintf(c.stdout, "Bundle: %s\n", bundle)
-	fmt.Fprintln(c.stdout, "========================================")
-	fmt.Fprintln(c.stdout)
-
-	// Find all ARB files
-	entries, err := os.ReadDir(bundle)
-	if err != nil {
-		fmt.Fprintf(c.stderr, "Error reading bundle directory: %v\n", err)
-		return 1
-	}
-
-	var sourceARB *ARBFile
-	type langStatus struct {
-		code  string
-		stats ARBStats
-	}
-	var statuses []langStatus
-
-	for _, entry := range entries {
-		if !strings.HasSuffix(entry.Name(), ".arb") {
-			continue
-		}
-
-		arbPath := filepath.Join(bundle, entry.Name())
-		arb, err := LoadARB(arbPath)
-		if err != nil {
-			fmt.Fprintf(c.stderr, "Warning: could not load %s: %v\n", entry.Name(), err)
-			continue
-		}
-
-		// Handle both naming conventions: catalog_xx.arb and xx.arb
-		langCode := strings.TrimSuffix(entry.Name(), ".arb")
-		langCode = strings.TrimPrefix(langCode, "catalog_")
-		stats := GetARBStats(arb)
-
-		if langCode == "en" {
-			sourceARB = arb
-		}
-
-		statuses = append(statuses, langStatus{code: langCode, stats: stats})
-	}
-
-	if sourceARB == nil {
-		fmt.Fprintf(c.stderr, "Error: no catalog_en.arb or en.arb found in bundle\n")
-		return 1
-	}
-
-	// Print status table
-	fmt.Fprintf(c.stdout, "%-10s %8s %8s %8s %10s\n", "Language", "Total", "Done", "Empty", "Complete")
-	fmt.Fprintf(c.stdout, "%-10s %8s %8s %8s %10s\n", "--------", "-----", "----", "-----", "--------")
-
-	for _, s := range statuses {
-		bar := ""
-		pct := s.stats.CompletenessPerc
-		switch {
-		case pct == 100:
-			bar = "✓ Complete"
-		case pct >= 75:
-			bar = fmt.Sprintf("%.0f%%", pct)
-		case pct >= 50:
-			bar = fmt.Sprintf("%.0f%%", pct)
-		case pct > 0:
-			bar = fmt.Sprintf("%.0f%%", pct)
-		default:
-			bar = "Not started"
-		}
-
-		fmt.Fprintf(c.stdout, "%-10s %8d %8d %8d %10s\n",
-			s.code,
-			s.stats.TotalMessages,
-			s.stats.TranslatedCount,
-			s.stats.EmptyCount,
-			bar)
-	}
-
-	fmt.Fprintln(c.stdout)
-	fmt.Fprintln(c.stdout, "Commands:")
-	fmt.Fprintln(c.stdout, "  autotranslate arb <lang>      Translate empty entries for language")
-	fmt.Fprintln(c.stdout, "  toki apply -t <lang>          Apply translations to markdown")
-	return 0
-}
-
-// sourceToTargetPath converts English source path to target language path
 func (c *cliRunner) sourceToTargetPath(sourcePath, targetLang string) string {
 	// Load Hugo config to get target directory name
 	config := translate.DefaultConfig()

@@ -6,7 +6,7 @@
 //	mise run autotranslate:missing vi --provider claude-cli  the same, with the Claude CLI
 //	mise run autotranslate:file content/english/blog/post.md de --dry-run
 //
-// Flags, anywhere: --provider (deepl, claude, claude-cli), --dry-run, --verbose, --api-key, --bundle.
+// Flags, anywhere: --provider (deepl, claude, claude-cli), --dry-run, --verbose, --api-key.
 package main
 
 import (
@@ -27,10 +27,6 @@ func main() {
 		file()
 	case "missing":
 		missing()
-	case "arb":
-		arb()
-	case "arb-status":
-		arbStatus()
 	case "languages":
 		languages()
 	case "status":

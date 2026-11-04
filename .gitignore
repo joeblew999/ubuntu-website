@@ -18,7 +18,7 @@ go.sum
 *.test
 *.out
 
-# Toki (translation bundles)
+# tokibundle/: catalogs of the old toki ARB experiment (no longer used): never committed
 tokibundle/
 
 # Environment

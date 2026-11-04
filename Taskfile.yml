@@ -43,11 +43,6 @@ includes:
   # Domain modules
   cf: ./taskfiles/Taskfile.cf.yml
 
-  # Tools (git exposed at top-level for convenience: git:deploy, git:status)
-  git:
-    taskfile: ./taskfiles/tools/Taskfile.git.yml
-  tools: ./taskfiles/Taskfile.tools.yml
-
   # MCP servers
   google-mcp: ./taskfiles/tools/Taskfile.google-mcp.yml
 
@@ -65,9 +60,6 @@ includes:
 
   # R2 object storage (large static assets)
   r2: ./taskfiles/Taskfile.cf-r2.yml
-
-  # Toki i18n toolkit (fork: joeblew999/toki)
-  toki: ./taskfiles/Taskfile.toki.yml
 
 # =============================================================================
 # Environment
@@ -225,17 +217,6 @@ tasks:
   # ===========================================================================
   # Workflows call these tasks - all logic stays in Taskfile.
   # Note: ci:cfanalytics uses its binary via its taskfile (sitecheck is mise: mise run sitecheck:issue)
-
-  ci:health:
-    desc: "[Monitor] Health - Run health checks for CI"
-    cmds:
-      - task: git:check:health
-
-  ci:health:test-fail:
-    desc: "[Monitor] Health - Force failure to test notifications"
-    cmds:
-      - echo "Simulating health check failure..."
-      - exit 1
 
   # ===========================================================================
   # Code Quality

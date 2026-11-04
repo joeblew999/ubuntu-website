@@ -19,16 +19,6 @@ description = "Every page missing in a language translated: missing <lang>"
 depends = ["autotranslate:build"]
 run = 'autotranslate missing'
 
-["autotranslate:arb"]
-description = "A tokibundle's ARB strings translated: arb <lang>"
-depends = ["autotranslate:build"]
-run = 'autotranslate arb'
-
-["autotranslate:arb-status"]
-description = "The ARB strings' state per language"
-depends = ["autotranslate:build"]
-run = 'autotranslate arb-status'
-
 ["autotranslate:languages"]
 description = "The languages the provider can translate to"
 depends = ["autotranslate:build"]
