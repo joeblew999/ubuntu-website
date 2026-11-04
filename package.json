@@ -6,8 +6,7 @@
   "author": "zeon.studio",
   "scripts": {
     "build": "mise run root:build",
-    "format": "prettier -w .",
-    "postinstall": "node -e \"const fs=require('fs'),p='node_modules/.bin/tailwindcss';try{fs.lstatSync(p).isSymbolicLink()||((fs.unlinkSync(p)),fs.symlinkSync('../@tailwindcss/cli/dist/index.mjs',p))}catch(e){}\""
+    "format": "prettier -w ."
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",

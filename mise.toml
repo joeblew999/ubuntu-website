@@ -117,7 +117,6 @@ depends = ["root:deps"]
 run = 'hugo -e production --gc --minify'
 
 [tasks."root:cloudflare-build"]
-description = "Cloudflare's build of the Worker (Workers Builds, production and every branch's preview): its build command is npx -y @jdxcode/mise@<min_version> run --skip-tools root:cloudflare-build. It installs only the tools root:build runs, not every pin, then runs it; wrangler deploys what it built"
-alias = "root:pages"
-run = 'mise install hugo-extended node aube && mise run --skip-tools root:build'
+description = "Cloudflare's build of the Worker (Workers Builds, production and every branch's preview): its build command is npx -y @jdxcode/mise@<min_version> run --skip-tools root:cloudflare-build. Cloudflare's image brings node and installs the npm packages itself (pnpm, from pnpm-lock.yaml), so this installs only Hugo, then the build without root:deps; wrangler deploys what it built"
+run = 'mise install hugo-extended && mise run --skip-tools --skip-deps root:build'
 
