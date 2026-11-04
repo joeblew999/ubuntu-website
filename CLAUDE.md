@@ -10,7 +10,7 @@ USE MISE: every task is `mise run <task>` (`mise tasks` lists them), and the roo
 
 ### Tools: mise installs and runs
 
-- Every third-party tool (hugo, node, aube, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq, git-lfs, go-mod-upgrade) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
+- Every third-party tool (hugo, node, aube, process-compose, gh, terraform, google-mcp-server, fnox, jq, git-lfs, go-mod-upgrade) is pinned in `mise.toml`; wrangler is pinned in `package.json` (aube installs it; mise-cloudflare requires it there). Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
 - Tasks call tools by name and never install them (no `brew install`, `curl | bash`, `go install` for third-party tools): mise installs every pin (`mise install`, or `mise run root:setup`).
 - New tool → add it to `[tools]` in `mise.toml` with an exact version.
 
@@ -22,7 +22,8 @@ USE MISE: every task is `mise run <task>` (`mise tasks` lists them), and the roo
 - **misecheck holds it together** (`github.com/joeblew999/mise-check`; `mise_test.go`, `mise run root:check-mise`, in CI): `mise.toml` and every `.mise/tasks/*.toml`, each task file strictly against its own binary, both ways: every task's command is there, every command is run by a task, every flag on both sides, every task name the binary's Go prints is a task. A new task file is checked as soon as it exists.
 - Examples: `.mise/tasks/google-mcp.toml` ↔ `cmd/google-mcp/`, `.mise/tasks/theme.toml` ↔ `cmd/theme/`, `.mise/tasks/sitecheck.toml` ↔ `cmd/sitecheck/` (its scheduled workflow, `monitor-sitecheck.yml`, runs `mise run sitecheck:issue`).
 - **No scripts, no shell logic**: there is no `scripts/` folder. Where each piece goes: a step on the whole repo that only runs a tool → a `root:*` task in `mise.toml` (`root:build` is `hugo …`); anything with logic → Go, a command of its domain's binary (`cmd/<binary>/<command>.go`) with its task in that binary's `.mise/tasks/<binary>.toml` (the theme scripts became `cmd/theme/update.go`, `css.go`); a file from upstream that we run unmodified sits beside the Go that runs it (`cmd/theme/themeGenerator.js`). Taskfile shell moves the same way as each domain migrates.
-- **Cloudflare Pages builds with the control plane**: its build command (project setting) is `MISE_TRUSTED_CONFIG_PATHS=$PWD npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages`; `root:pages` installs only hugo-extended, node and aube, then runs `root:build`, the same build CI runs. Production and preview are the same build (Hugo's build environment is production either way). `wrangler.toml` `[vars]` holds the build's variables (`SKIP_DEPENDENCY_INSTALL`: the image's own npm install is skipped; aube installs). `min_version` in `mise.toml` is the mise version CI and Cloudflare run.
+- **The site is a Cloudflare Worker, run by mise-cloudflare** (moving off Pages, Cloudflare's dead end; TODO.md has the steps left): `wrangler.jsonc` serves the Hugo build (`public/`) as static assets and `worker/index.js` for `/api/*` (`/api/health`, `/api/webhook/mailerlite`, Web3Forms → MailerLite). mise-cloudflare (pinned in `.mise/config.toml`; `mise run cloudflare` says where it is and what's next; `docs/mise-cloudflare/README.md`; the `cloudflare` skill) owns its login (a wrangler profile, `ubuntusoftware-net`: no API token), its secret (`MAILERLITE_API_KEY`), deploys and previews; never run wrangler bare, run it through `mise run cloudflare:run-wrangler`. `package.json`'s `build` script is `mise run root:build`, which mise-cloudflare runs before serving and deploying. `static/.assetsignore` keeps the local airspace data and video cache out of the assets (25 MiB a file). Until the domain moves, `www.ubuntusoftware.net` is still Cloudflare Pages, whose build command (project setting) is `MISE_TRUSTED_CONFIG_PATHS=$PWD npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages` (hugo-extended, node and aube only, then `root:build`). `min_version` in `mise.toml` is the mise version CI and Cloudflare run.
+- **Cloudflare tokens**: none for the Worker (the repo's login). This repo's own tools that call Cloudflare's API (cfanalytics) read `UBUNTU_WEBSITE_CF_TOKEN` from `.env`, named so no Cloudflare tool reads it: wrangler takes `CLOUDFLARE_API_TOKEN` and `CF_API_TOKEN` over any login, and mise-cloudflare refuses either. The zone's cache and Email Routing are Cloudflare's own CLI, `cf` (`cf:*` tasks, on `cf:login`).
 
 **Upgrading** (`.mise/tasks/upgrade.toml`, `cmd/upgrade`):
 
@@ -472,7 +473,7 @@ The airspace demo page auto-detects the local server and falls back to R2 if una
 
 ### Cloudflare R2 (Large Assets)
 
-R2 object storage for static assets that exceed Cloudflare Pages' 25MB file limit.
+R2 object storage for static assets over the Worker's 25 MiB a file (the airspace tiles and data). CORS (`cloudflare/r2-cors.json`, `mise run r2:cors-set`) allows production, the Worker's workers.dev URL and every branch preview's (`https://*-ubuntusoftware-net.gedw99.workers.dev`), and localhost.
 
 **Tasks:** `.mise/tasks/r2.toml` (wrangler's, as tool tasks)
 
