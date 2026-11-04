@@ -183,7 +183,9 @@ Upgrade commands are in CLAUDE.md ("Upgrading: always through Taskfile"). Tick i
   - [ ] Most tasks become one line: a call to an existing Go CLI (`go run ./cmd/google calendar today`) or a tool directly (`hugo --gc --minify`, `gh …`); flags via `usage`. Of 486 tasks, ~86 (install/version/build-the-tool) and ~25 (help/info/installer tests) disappear because mise does that; 23 open-a-URL shortcuts shrink to a few.
   - [ ] New Go only for multi-step logic that must also run on Windows (e.g. the theme updater, `scripts/theme-update.sh`).
   - [ ] Callers: 6 CI workflows, process-compose.yaml, CLAUDE.md/README, Go strings that say `task …`; then delete Taskfile.yml and the `task` pin.
-  - [ ] The checker in this repo (a copy of mise_test.go's TestMise) and a task that runs it on our mise file, in CI; Go that runs our tasks (`task …` strings in internal/, e2e checks) names them in full and is checked as callers.
+  - [x] The checker is its own Go module now, **github.com/joeblew999/mise-check v0.1.0** (CI on Linux/macOS/Windows, an example/ it proves itself on, TestBroken: nine ways of breaking it, each caught). mise-cloudflare uses it (981d0db); so does this repo: `mise_test.go` + `mise run root:check-mise`, in CI (`taskfile.yml`).
+  - [x] mise.toml's `google:*` tasks are one line each: `go run ./cmd/google-mcp <command>` (a file per command; same output as the bash they replaced, checked live).
+  - [ ] As Taskfile tasks move into mise: set `GO_CALLERS` so Go that names tasks (`internal/claude`, hints like "run mise run google:auth") is checked too.
 - [x] **Global mise config**: `~/.config/mise/config.toml` got patch bumps at 2026-11-03 13:59 for ast-grep, cargo-binstall, git-lfs, pnpm, usage (during the project upgrade; cause unclear). Keep or revert. `task tools:upgrade` now passes an explicit project-only tool list. **Done:** kept (patch bumps of your own global tools; the project task can't touch them any more).
 
 ### Content
