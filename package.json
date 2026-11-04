@@ -5,9 +5,6 @@
   "license": "MIT",
   "author": "zeon.studio",
   "scripts": {
-    "dev": "bash scripts/theme-css.sh && hugo server",
-    "build": "bash scripts/theme-css.sh && hugo --gc --minify --templateMetrics --templateMetricsHints --forceSyncStatic",
-    "preview": "bash scripts/theme-css.sh && hugo server --disableFastRender --navigateToChanged --templateMetrics --templateMetricsHints --watch --forceSyncStatic -e production --minify",
     "format": "prettier -w .",
     "postinstall": "node -e \"const fs=require('fs'),p='node_modules/.bin/tailwindcss';try{fs.lstatSync(p).isSymbolicLink()||((fs.unlinkSync(p)),fs.symlinkSync('../@tailwindcss/cli/dist/index.mjs',p))}catch(e){}\""
   },

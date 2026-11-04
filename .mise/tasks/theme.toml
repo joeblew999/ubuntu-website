@@ -1,0 +1,31 @@
+# The Hugo Plate theme: a Hugo Module, vendored in _vendor/ (its exact commits in _vendor/modules.txt), with our
+# layouts/ overriding some of its templates, and data/theme.json its colors and fonts. Each task runs one command of
+# the theme binary, cmd/theme/<command>.go; misecheck holds the two together (mise run root:check-mise).
+#   mise run theme:update                    to the latest upstream (run again, it changes nothing new)
+#   mise run theme:update --ref <commit>     Hugo Plate pinned to a commit, or rolled back
+# Then review the diff, push a branch, check its Cloudflare preview build, merge to main.
+
+["theme:build"]
+description = "Build theme (cmd/theme) into bin/: the theme:* tasks run it"
+run = 'go build -o bin/ ./cmd/theme'
+
+["theme:update"]
+description = "Update Hugo Plate + the gethugothemes modules from upstream (--ref pins Hugo Plate), with its generator, npm packages, CSS, template merges and a production build"
+usage = 'flag "--ref <commit>" help="Pin Hugo Plate to this commit (or roll back); default, the latest"'
+depends = ["theme:build"]
+run = 'theme update{% if usage.ref %} --ref "{{usage.ref}}"{% endif %}'
+
+["theme:status"]
+description = "The theme's modules and the commit each is pinned to (_vendor/modules.txt)"
+depends = ["theme:build"]
+run = 'theme status'
+
+["theme:css"]
+description = "assets/css/generated-theme.css from data/theme.json, by Hugo Plate's own generator (cmd/theme/themeGenerator.js): commit the result"
+depends = ["theme:build"]
+run = 'theme css'
+
+["theme:check"]
+description = "assets/css/generated-theme.css is what data/theme.json makes (root:ci runs it): the builds use it as committed"
+depends = ["theme:build"]
+run = 'theme check'

@@ -9,10 +9,14 @@
 #   mise run root:check-mise    misecheck on this file and every task file: each held to its own binary, both ways
 #   mise run root:test          the Go: vet and tests of every package, and the Workers build (js/wasm) vetted
 #   mise run root:build         the site, as production builds it
+#   mise run root:pages         Cloudflare Pages' build: root:build, with only the tools it runs installed
 #   mise tasks                  every task, with its file
 #
 # New machine: mise trust && mise install, then the domain's own first steps (e.g. .mise/tasks/google-mcp.toml's).
 # Not yet moved here: the Taskfiles (task …), domain by domain (TODO.md).
+
+# The mise CI (core-ci.yml) and Cloudflare Pages (its build command, root:pages) run, exactly; anywhere else, at least.
+min_version = "2026.9.15"
 
 [settings]
 # The `go` line in go.mod is the Go pin; this makes `mise install` honour it.
@@ -21,7 +25,7 @@ idiomatic_version_file_enable_tools = ["go"]
 [tools]
 # CI + Taskfile tools (were installed by separate GitHub Actions / npm -g)
 task = "3.54.0"
-# Keep equal to Cloudflare Pages' HUGO_VERSION (production + preview); see CLAUDE.md Hugo Version.
+# Local, CI and Cloudflare Pages (root:pages installs it there); see CLAUDE.md Hugo Version.
 hugo-extended = "0.169.0"
 "npm:wrangler" = "4.156.1"
 bun = "1.4.4"
@@ -36,7 +40,7 @@ terraform = "1.17.1"
 "github:ngs/google-mcp-server" = "0.8.0"
 # Resolves the server's GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET from the keychain (fnox.toml).
 fnox = "1.46.0"
-# JSON in scripts/theme-update.sh and task tools:upgrade.
+# JSON in task tools:upgrade.
 jq = "1.8.2"
 # Go module upgrades incl. major versions (task go:upgrade).
 "aqua:oligot/go-mod-upgrade" = "0.13.0"
@@ -56,8 +60,8 @@ description = "misecheck (github.com/joeblew999/mise-check) on every mise file h
 run = 'go test . -run "^TestMise$" -count=1 -v'
 
 [tasks."root:ci"]
-description = "What CI runs, and the same here: misecheck, the Go, the site's production build (and, until they're gone, the Taskfiles parsed). CI's workflow runs only this task"
-depends = ["root:check-mise", "root:test", "root:test-worker", "root:build", "root:check-taskfiles"]
+description = "What CI runs, and the same here: misecheck, the Go, the theme CSS current, the site's production build (and, until they're gone, the Taskfiles parsed). CI's workflow runs only this task"
+depends = ["root:check-mise", "root:test", "root:test-worker", "theme:check", "root:build", "root:check-taskfiles"]
 
 [tasks."root:test"]
 description = "The Go: go vet and the tests of every package"
@@ -72,14 +76,14 @@ run = 'go vet ./cmd/worker-tiler'
 description = "The site's npm packages (Tailwind and its plugins), from bun.lock"
 run = 'bun install --frozen-lockfile'
 
-[tasks."root:theme-css"]
-description = "assets/css/generated-theme.css from data/theme.json, by Hugo Plate's own generator (scripts/theme-css.sh)"
-run = 'bash scripts/theme-css.sh'
-
 [tasks."root:build"]
-description = "The site as production builds it (hugo -e production --gc --minify) into public/: refLinksErrorLevel makes a broken relref fail it"
-depends = ["root:deps", "root:theme-css"]
+description = "The site as production builds it (hugo -e production --gc --minify) into public/, with the theme CSS as committed (theme:check): refLinksErrorLevel makes a broken relref fail it. Preview builds are the same build"
+depends = ["root:deps"]
 run = 'hugo -e production --gc --minify'
+
+[tasks."root:pages"]
+description = "Cloudflare Pages' build, production and preview: its build command is npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages. It installs only the tools root:build runs, not every pin, then runs it"
+run = 'mise install hugo-extended node bun && mise run --skip-tools root:build'
 
 [tasks."root:check-taskfiles"]
 description = "The Taskfiles still parse, until their tasks have all moved here (TODO.md)"

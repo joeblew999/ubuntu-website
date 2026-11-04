@@ -43,7 +43,6 @@ version: '3'
 includes:
   # Domain modules
   hugo: ./taskfiles/Taskfile.hugo.yml
-  theme: ./taskfiles/Taskfile.theme.yml
   go: ./taskfiles/Taskfile.go.yml
   cf: ./taskfiles/Taskfile.cf.yml
   translate: ./taskfiles/Taskfile.translate.yml
@@ -249,7 +248,7 @@ tasks:
       - task: tools:upgrade
       - task: go:upgrade
         vars: { FORCE: 'true' }
-      - task: theme:update
+      - mise run theme:update
       - 'echo "Hugo is separate (it also needs Cloudflare): task hugo:upgrade"'
 
   # Third-party tools (hugo, bun, wrangler, process-compose, ...) are pinned in mise.toml.
