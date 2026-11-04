@@ -1,38 +1,15 @@
-# taskfile - Taskfile Validation
-#
-# Validates Taskfile works correctly.
-# Tests includes mechanism and variable expansion.
-# Runs on push to main and PRs to catch issues early.
-
-name: taskfile
+# core-ci: the repo's checks, as the control plane, mise.toml, defines them. CI runs mise run root:ci and nothing else,
+# so a check is added in one place (a task root:ci depends on) and runs the same here and on any machine.
+name: core-ci
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'Taskfile.yml'
-      - 'taskfiles/**'
-      - '.github/workflows/taskfile.yml'
-      # misecheck: mise.toml and the Go its tasks run
-      - 'mise.toml'
-      - '.mise/**'
-      - 'mise_test.go'
-      - 'go.mod'
-      - 'go.sum'
-      - 'cmd/**'
   pull_request:
-    paths:
-      - 'Taskfile.yml'
-      - 'taskfiles/**'
-      - '.github/workflows/taskfile.yml'
-      # misecheck: mise.toml and the Go its tasks run
-      - 'mise.toml'
-      - '.mise/**'
-      - 'mise_test.go'
-      - 'go.mod'
-      - 'go.sum'
-      - 'cmd/**'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
@@ -45,17 +22,5 @@ jobs:
           version: 2026.9.15
           cache: true
 
-
-
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Validate Taskfile syntax
-        run: task --list
-
-      - name: Test Hugo build task
-        run: task hugo:build
-
-      - name: mise.toml and the Go its tasks run, lined up (misecheck)
-        run: mise run root:check-mise
+      - name: mise run root:ci (mise.toml says what that is)
+        run: mise run root:ci

@@ -5,7 +5,10 @@
 # one per Go binary, .mise/tasks/<binary>.toml: tasks named <binary>:<command>, each running <binary> <command>
 # (cmd/<binary>/<command>.go), built into bin/ by <binary>:build. They carry no tools or env of their own.
 #
+#   mise run root:ci            what CI runs, the same here: every check below (CI's workflow runs only this)
 #   mise run root:check-mise    misecheck on this file and every task file: each held to its own binary, both ways
+#   mise run root:test          the Go: vet and tests of every package, and the Workers build (js/wasm) vetted
+#   mise run root:build         the site, as production builds it
 #   mise tasks                  every task, with its file
 #
 # New machine: mise trust && mise install, then the domain's own first steps (e.g. .mise/tasks/google-mcp.toml's).
@@ -51,3 +54,33 @@ includes = [".mise/tasks"]
 [tasks."root:check-mise"]
 description = "misecheck (github.com/joeblew999/mise-check) on every mise file here: this one, and each .mise/tasks/<binary>.toml strictly against cmd/<binary>/ (each command a task, each task's command there, the task names its Go prints all tasks): one line each, usage passed by name, no POSIX shell syntax"
 run = 'go test . -run "^TestMise$" -count=1 -v'
+
+[tasks."root:ci"]
+description = "What CI runs, and the same here: misecheck, the Go, the site's production build (and, until they're gone, the Taskfiles parsed). CI's workflow runs only this task"
+depends = ["root:check-mise", "root:test", "root:test-worker", "root:build", "root:check-taskfiles"]
+
+[tasks."root:test"]
+description = "The Go: go vet and the tests of every package"
+run = 'go vet ./... && go test ./... -count=1'
+
+[tasks."root:test-worker"]
+description = "The Workers build of cmd/worker-tiler (js/wasm), vetted: go vet ./... doesn't build it"
+env = { GOOS = "js", GOARCH = "wasm" }
+run = 'go vet ./cmd/worker-tiler'
+
+[tasks."root:deps"]
+description = "The site's npm packages (Tailwind and its plugins), from bun.lock"
+run = 'bun install --frozen-lockfile'
+
+[tasks."root:theme-css"]
+description = "assets/css/generated-theme.css from data/theme.json, by Hugo Plate's own generator (scripts/theme-css.sh)"
+run = 'bash scripts/theme-css.sh'
+
+[tasks."root:build"]
+description = "The site as production builds it (hugo -e production --gc --minify) into public/: refLinksErrorLevel makes a broken relref fail it"
+depends = ["root:deps", "root:theme-css"]
+run = 'hugo -e production --gc --minify'
+
+[tasks."root:check-taskfiles"]
+description = "The Taskfiles still parse, until their tasks have all moved here (TODO.md)"
+run = 'task --list-all'

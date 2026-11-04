@@ -22,7 +22,8 @@ Key points:
 
 ### mise tasks: the layout (all tasks move here from the Taskfiles)
 
-- **`mise.toml` is the control plane**: tool pins, settings, env (`bin/` on PATH), tasks that act on the whole repo (`root:check-mise`), and `[task_config] includes = [".mise/tasks"]`.
+- **`mise.toml` is the control plane**: tool pins, settings, env (`bin/` on PATH), tasks that act on the whole repo (`root:*`), and `[task_config] includes = [".mise/tasks"]`.
+- **CI runs the control plane, nothing else** (SSOT): `.github/workflows/core-ci.yml` is `mise run root:ci`, and `root:ci` depends on every check (`root:check-mise`, `root:test`, `root:test-worker`, `root:build`, `root:check-taskfiles`). A new check is a task `root:ci` depends on; `mise run root:ci` locally does exactly what CI does.
 - **One task file per Go binary: `.mise/tasks/<binary>.toml`.** Tasks are `<binary>:<command>`, each one line running `<binary> <command>`, i.e. `cmd/<binary>/<command>.go` (a file per command, holding the function named for it); `<binary>:build` builds it into `bin/`, and the others `depends` on it. Flags are declared in the task's `usage` and passed by name (`{% if usage.x %} --x{% endif %}`); no shell syntax; logic in Go, not in the TOML. A domain that only runs tools (hugo, wrangler) gets a task file with no binary.
 - **misecheck holds it together** (`github.com/joeblew999/mise-check`; `mise_test.go`, `mise run root:check-mise`, in CI): `mise.toml` and every `.mise/tasks/*.toml`, each task file strictly against its own binary, both ways: every task's command is there, every command is run by a task, every flag on both sides, every task name the binary's Go prints is a task. A new task file is checked as soon as it exists.
 - Example: `.mise/tasks/google-mcp.toml` ↔ `cmd/google-mcp/`.
@@ -50,7 +51,7 @@ Each is safe to re-run: with nothing new upstream it changes nothing.
 
 | Category | Purpose | Examples |
 |----------|---------|----------|
-| `core-` | P0 - must pass for merge | `core-taskfile.yml`, `core-tools.yml` |
+| `core-` | P0 - must pass for merge | `core-ci.yml` (`mise run root:ci`) |
 | `monitor-` | Scheduled health checks | `monitor-analytics.yml`, `monitor-sitecheck.yml` |
 | `syndication-` | Content distribution | `syndication-bluesky.yml` |
 | `release-` | Build & release pipelines | `release-tools.yml` |
