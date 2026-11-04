@@ -17,8 +17,8 @@ const (
 	// Fallback values if SITE_URL env var not set
 	fallbackSiteURL = "https://www.ubuntusoftware.net"
 
-	defaultNodes = 56 // Use all available nodes
-	defaultWait  = 8  // Seconds to wait for global responses
+	DefaultNodes = 56 // Use all available nodes
+	DefaultWait  = 8  // Seconds to wait for global responses
 	apiBase      = "https://check-host.net"
 	StateFile    = ".sitecheck-state.json"
 )

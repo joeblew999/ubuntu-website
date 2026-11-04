@@ -1,0 +1,57 @@
+# monitor-sitecheck: is the site reachable from around the world? Every 6 hours (or by hand) it runs
+# mise run sitecheck:issue (.mise/tasks/sitecheck.toml, cmd/sitecheck): check-host.net's nodes check the site over
+# HTTP, compared with the last run's state (kept as an artifact), and an issue is opened when that finds a problem.
+# No secrets (check-host.net needs none); the repo variable SITE_URL checks another site. The Go itself is built,
+# vetted and held to its tasks by core-ci (mise run root:ci).
+name: monitor-sitecheck
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: 2026.9.15
+          cache: true
+
+      - name: Previous state
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: sitecheck-state
+          path: .
+          if_no_artifact_found: ignore
+          workflow_conclusion: success
+          search_artifacts: true
+
+      - name: mise run sitecheck:issue (fails when it finds a problem; its report in report.md)
+        id: check
+        continue-on-error: true
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: mise run sitecheck:issue --report report.md
+
+      - name: Save state
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitecheck-state
+          path: .sitecheck-state.json
+          retention-days: 90
+          overwrite: true
+          include-hidden-files: true
+
+      - name: Open an issue
+        if: steps.check.outcome == 'failure' && hashFiles('report.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "Site Alert: Reachability issue detected" --body-file report.md --label "site-monitor,automated"

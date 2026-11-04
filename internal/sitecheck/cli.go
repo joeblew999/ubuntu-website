@@ -3,77 +3,44 @@
 // Uses the check-host.net API to verify a URL is accessible from
 // different geographic regions (US, EU, Asia, etc.).
 //
-// This file contains the CLI entry point. The main.go in cmd/sitecheck
-// just imports and calls Run().
+// This file holds what cmd/sitecheck's commands call: Check, All and Report.
 package sitecheck
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"strings"
 	"time"
 )
 
-// Run is the main entry point for the sitecheck CLI.
-// Returns exit code (0 = success, 1 = error or issues detected).
-func Run(args []string, version string, stdout, stderr io.Writer) int {
-	// Initialize config from environment
+// URL is what the checks check unless told otherwise: SITE_URL's robots.txt (the site's, without SITE_URL).
+func URL() string {
 	initConfig()
+	return defaultURL
+}
 
-	fs := flag.NewFlagSet("sitecheck", flag.ContinueOnError)
-	fs.SetOutput(stderr)
+// Check runs one check (http, dns, tcp or redirect) of target from up to nodes global locations, waiting wait seconds
+// for their results, and reports whether it passed.
+func Check(checkType, target string, nodes, wait int, stdout, stderr io.Writer) bool {
+	initConfig()
+	return runCheck(checkType, target, nodes, wait, stdout, stderr)
+}
 
-	urlFlag := fs.String("url", defaultURL, "URL to check (for HTTP) or domain (for DNS/TCP)")
-	typeFlag := fs.String("type", "http", "Check type: http, dns, tcp, redirect, or all")
-	nodesFlag := fs.Int("nodes", defaultNodes, "Maximum number of global nodes to check from")
-	waitFlag := fs.Int("wait", defaultWait, "Seconds to wait for results")
-	githubIssue := fs.Bool("github-issue", false, "Output markdown for GitHub Issue (exits 1 if issues detected)")
-	ver := fs.Bool("version", false, "Print version and exit")
-
-	if err := fs.Parse(args[1:]); err != nil {
-		return 1
-	}
-
-	if *ver {
-		fmt.Fprintf(stdout, "sitecheck %s\n", version)
-		return 0
-	}
-
-	checkType := strings.ToLower(*typeFlag)
-
-	// GitHub Issue mode: run HTTP check and output markdown
-	if *githubIssue {
-		return runGitHubIssueMode(*urlFlag, *nodesFlag, *waitFlag, stdout, stderr)
-	}
-
-	if checkType == "all" {
-		// Run all checks sequentially
-		allPassed := true
-		for _, ct := range []string{"dns", "tcp", "redirect", "http"} {
-			fmt.Fprintf(stdout, "=== %s Check ===\n", strings.ToUpper(ct))
-			passed := runCheck(ct, *urlFlag, *nodesFlag, *waitFlag, stdout, stderr)
-			if !passed {
-				allPassed = false
-			}
-			fmt.Fprintln(stdout)
+// All runs every check, dns, tcp, redirect and http, one after the other, and reports whether all passed.
+func All(target string, nodes, wait int, stdout, stderr io.Writer) bool {
+	initConfig()
+	allPassed := true
+	for _, ct := range []string{"dns", "tcp", "redirect", "http"} {
+		fmt.Fprintf(stdout, "=== %s Check ===\n", strings.ToUpper(ct))
+		if !runCheck(ct, target, nodes, wait, stdout, stderr) {
+			allPassed = false
 		}
-		if !allPassed {
-			return 1
-		}
+		fmt.Fprintln(stdout)
+	}
+	if allPassed {
 		fmt.Fprintln(stdout, "Summary: All checks passed")
-		return 0
 	}
-
-	if _, ok := checkEndpoints[checkType]; !ok {
-		fmt.Fprintf(stderr, "Unknown check type: %s (use http, dns, tcp, redirect, or all)\n", checkType)
-		return 1
-	}
-
-	if !runCheck(checkType, *urlFlag, *nodesFlag, *waitFlag, stdout, stderr) {
-		return 1
-	}
-	return 0
+	return allPassed
 }
 
 // runCheck executes a single check type and returns true if passed
@@ -155,47 +122,32 @@ func runCheck(checkType, targetURL string, maxNodes, waitSecs int, stdout, stder
 	return len(failures) < 3
 }
 
-// runGitHubIssueMode runs HTTP check in GitHub Issue mode
-// Outputs markdown report and returns exit code (1 if issues detected)
-func runGitHubIssueMode(targetURL string, maxNodes, waitSecs int, stdout, stderr io.Writer) int {
-	host := prepareHost("http", targetURL)
+// Report runs the HTTP check and compares it with the previous run's (.sitecheck-state.json), then saves this one's:
+// a markdown report for a GitHub issue, and whether it found an issue (failures, more of them, or slower responses).
+func Report(target string, nodes, wait int, stderr io.Writer) (report string, issues bool, err error) {
+	initConfig()
+	host := prepareHost("http", target)
 
-	// Initiate HTTP check
-	requestID, _, err := initiateCheck("http", host, maxNodes)
+	requestID, _, err := initiateCheck("http", host, nodes)
 	if err != nil {
-		fmt.Fprintf(stderr, "Failed to initiate check: %v\n", err)
-		return 1
+		return "", false, fmt.Errorf("failed to initiate check: %w", err)
 	}
 
-	time.Sleep(time.Duration(waitSecs) * time.Second)
+	time.Sleep(time.Duration(wait) * time.Second)
 
-	// Get results
 	results, err := getResults(requestID, "http")
 	if err != nil {
-		fmt.Fprintf(stderr, "Failed to get results: %v\n", err)
-		return 1
+		return "", false, fmt.Errorf("failed to get results: %w", err)
 	}
 
-	// Build current state
 	current := buildState("http", results)
-
-	// Load previous state
 	previous, _ := LoadState()
+	report, issues = generateMarkdownReport(current, previous, results, requestID)
 
-	// Generate markdown report
-	report, hasIssues := generateMarkdownReport(current, previous, results, requestID)
-	fmt.Fprintln(stdout, report)
-
-	// Save current state
 	if err := SaveState(current); err != nil {
 		fmt.Fprintf(stderr, "Warning: failed to save state: %v\n", err)
 	}
-
-	// Exit 1 if issues detected (triggers GitHub Issue creation)
-	if hasIssues {
-		return 1
-	}
-	return 0
+	return report, issues, nil
 }
 
 // generateMarkdownReport creates markdown output and returns whether issues were detected

@@ -20,7 +20,6 @@ version: '3'
 #   git:*       - Git operations
 #   translate:* - Translation workflow
 #   cfanalytics:* - Cloudflare Web Analytics (cmd/cfanalytics)
-#   sitecheck:* - Site reachability checks (cmd/sitecheck)
 #   genlogo:*   - Logo/branding generation (cmd/genlogo)
 #   mailerlite:* - MailerLite subscriber management (cmd/mailerlite)
 #   vanityimport:* - Go vanity import packages (cmd/vanityimport)
@@ -48,7 +47,6 @@ includes:
   translate: ./taskfiles/Taskfile.translate.yml
   autotranslate: ./taskfiles/Taskfile.autotranslate.yml
   cfanalytics: ./taskfiles/Taskfile.cfanalytics.yml
-  sitecheck: ./taskfiles/Taskfile.sitecheck.yml
   genlogo: ./taskfiles/Taskfile.genlogo.yml
   mailerlite: ./taskfiles/Taskfile.mailerlite.yml
   google: ./taskfiles/Taskfile.google.yml
@@ -306,7 +304,7 @@ tasks:
   # CI Interface (called by GitHub Actions workflows)
   # ===========================================================================
   # Workflows call these tasks - all logic stays in Taskfile.
-  # Note: ci:cfanalytics and ci:sitecheck use binaries via their respective taskfiles
+  # Note: ci:cfanalytics uses its binary via its taskfile (sitecheck is mise: mise run sitecheck:issue)
 
   ci:health:
     desc: "[Monitor] Health - Run health checks for CI"
@@ -324,12 +322,6 @@ tasks:
     deps: [cfanalytics:check:deps]
     cmds:
       - '{{.HOME}}/.local/bin/cfanalytics{{exeExt}} -github-issue'
-
-  ci:sitecheck:
-    desc: "[Monitor] Sitecheck - Run site check for CI"
-    deps: [sitecheck:check:deps]
-    cmds:
-      - '{{.HOME}}/.local/bin/sitecheck{{exeExt}} -github-issue'
 
   ci:translate:
     desc: "[Monitor] Translate - Check translation status for CI"

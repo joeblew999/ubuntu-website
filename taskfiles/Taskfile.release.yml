@@ -1,14 +1,13 @@
 # Release Utilities
 #
 # Utility tasks for managing release builds.
-# Each tool Taskfile (sitecheck, analytics, etc.) has release:build tasks.
+# Each tool Taskfile (analytics, etc.) has release:build tasks.
 #
 # Usage:
 #   task release:clean  - Remove all built binaries
 #   task release:list   - List built binaries
 #
 # Build commands (in respective tool Taskfiles):
-#   task sitecheck:release:build   - Build sitecheck for current platform
 #   task analytics:release:build   - Build analytics for current platform
 #   task translate:release:build   - Build translate for current platform
 #   task genlogo:release:build     - Build genlogo for current platform
