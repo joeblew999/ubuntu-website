@@ -16,27 +16,29 @@ Key points:
 
 ### Tools: mise installs, Taskfile runs
 
-- Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq) is pinned in `mise.toml`. Go is pinned by the `go` line in `go.mod`. CI installs the same pins via `jdx/mise-action`.
+- Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
 - Taskfiles call tools by name and never install them (no `brew install`, `curl | bash`, `bun add -g`, `go install` for third-party tools). A `check:deps` for a mise tool runs `mise install <tool>`.
 - New tool → add it to `[tools]` in `mise.toml` with an exact version.
 
 ### mise tasks: the layout (all tasks move here from the Taskfiles)
 
 - **`mise.toml` is the control plane**: tool pins, settings, env (`bin/` on PATH), tasks that act on the whole repo (`root:*`), and `[task_config] includes = [".mise/tasks"]`.
-- **CI runs the control plane, nothing else** (SSOT): `.github/workflows/core-ci.yml` is `mise run root:ci`, and `root:ci` depends on every check (`root:check-mise`, `root:test`, `root:test-worker`, `root:build`, `root:check-taskfiles`). A new check is a task `root:ci` depends on; `mise run root:ci` locally does exactly what CI does.
+- **CI runs the control plane, nothing else** (SSOT): `.github/workflows/core-ci.yml` is `mise run root:ci`, and `root:ci` depends on every check (`root:check-mise`, `root:test`, `root:test-worker`, `theme:check`, `root:build`, `root:check-taskfiles`). A new check is a task `root:ci` depends on; `mise run root:ci` locally does exactly what CI does.
 - **One task file per Go binary: `.mise/tasks/<binary>.toml`.** Tasks are `<binary>:<command>`, each one line running `<binary> <command>`, i.e. `cmd/<binary>/<command>.go` (a file per command, holding the function named for it); `<binary>:build` builds it into `bin/`, and the others `depends` on it. Flags are declared in the task's `usage` and passed by name (`{% if usage.x %} --x{% endif %}`); no shell syntax; logic in Go, not in the TOML. A domain that only runs tools (hugo, wrangler) gets a task file with no binary.
 - **misecheck holds it together** (`github.com/joeblew999/mise-check`; `mise_test.go`, `mise run root:check-mise`, in CI): `mise.toml` and every `.mise/tasks/*.toml`, each task file strictly against its own binary, both ways: every task's command is there, every command is run by a task, every flag on both sides, every task name the binary's Go prints is a task. A new task file is checked as soon as it exists.
-- Example: `.mise/tasks/google-mcp.toml` ↔ `cmd/google-mcp/`.
+- Examples: `.mise/tasks/google-mcp.toml` ↔ `cmd/google-mcp/`, `.mise/tasks/theme.toml` ↔ `cmd/theme/`.
+- **No scripts, no shell logic**: there is no `scripts/` folder. Where each piece goes: a step on the whole repo that only runs a tool → a `root:*` task in `mise.toml` (`root:build` is `hugo …`); anything with logic → Go, a command of its domain's binary (`cmd/<binary>/<command>.go`) with its task in that binary's `.mise/tasks/<binary>.toml` (the theme scripts became `cmd/theme/update.go`, `css.go`); a file from upstream that we run unmodified sits beside the Go that runs it (`cmd/theme/themeGenerator.js`). Taskfile shell moves the same way as each domain migrates.
+- **Cloudflare Pages builds with the control plane**: its build command (project setting) is `MISE_TRUSTED_CONFIG_PATHS=$PWD npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages`; `root:pages` installs only hugo-extended, node and bun, then runs `root:build`, the same build CI runs. Production and preview are the same build (Hugo's build environment is production either way). `min_version` in `mise.toml` is the mise version CI and Cloudflare run.
 
 **Upgrading: always through Taskfile** (mise only pins/installs underneath):
 
 | What | Command |
 |------|---------|
 | **Everything except Hugo** (the three rows below Hugo, in order) | `task upgrade` |
-| Tools in `mise.toml` + Go (`go` line in `go.mod`) | `task tools:upgrade` |
+| Tools in `mise.toml` + Go (`toolchain` line in `go.mod`) | `task tools:upgrade` |
 | Go module dependencies (`go-mod-upgrade`, incl. major versions; build/vet/test after) | `task go:upgrade` (interactive) or `FORCE=true` |
-| Hugo (mise pin + Cloudflare `HUGO_VERSION`) | `task hugo:upgrade` → branch + Cloudflare preview → `task cf:hugo-version ENV=production` → main |
-| Theme: Hugo Plate + gethugothemes modules, and the npm packages they need | `task theme:update` |
+| Hugo (the mise pin; Cloudflare builds with it too) | `task hugo:upgrade` → branch + Cloudflare preview → main |
+| Theme: Hugo Plate + gethugothemes modules, and the npm packages they need | `mise run theme:update` |
 
 Each is safe to re-run: with nothing new upstream it changes nothing.
 - New machine: `task setup` (= `mise trust && mise install`, then `bun install` + `go mod download`).
@@ -593,31 +595,27 @@ Correct paths:
 
 ### Hugo Version
 
-**Current:** the `hugo-extended` pin in `mise.toml` (the only place the version is written in the repo)
-**Hugo Plate requires:** v0.158+ extended (upstream uses `.Locale`/`.Label`/`hugo.Data`)
+**Current:** the `hugo-extended` pin in `mise.toml`, the only place: local, CI and Cloudflare Pages (`root:pages` installs it there) all use it. No Cloudflare `HUGO_VERSION`.
+**Hugo Plate requires:** v0.165+ extended (its `theme.toml` `min_version`)
 
-Two places must stay aligned:
-1. **Local + CI**: `hugo-extended` pin in `mise.toml`
-2. **Cloudflare Pages**: `HUGO_VERSION`, a **secret** in both production and preview (with `wrangler.toml` in the repo, builds only see secrets; plain dashboard variables are ignored). Set with `task cf:hugo-version ENV=preview|production`.
-
-**Upgrade:** `task hugo:upgrade` (pins, proves a production build, switches preview) → commit on a branch, push, check the Cloudflare preview build → `task cf:hugo-version ENV=production` → merge to main.
+**Upgrade:** `task hugo:upgrade` (pins, proves a production build) → commit on a branch, push, check the Cloudflare preview build (it builds with the new pin) → merge to main.
 
 Hugo >= 0.165 removed `tailwindcss` from the default `security.exec.allow`; `hugo.toml` re-adds it (`[security.exec]`, per gohugoio/hugo#15178, reported upstream as zeon-studio/hugoplate#250). Hugo then requires `tailwindcss` to be the npm package (`bun install`), not a standalone binary on PATH.
 
 ### Updating Hugo Plate (repeatable)
 
-Hugo Plate doesn't tag releases ([issue #188](https://github.com/zeon-studio/hugoplate/issues/188)). It and the gethugothemes modules are Hugo Modules, vendored in `_vendor/`; the exact commits are in `_vendor/modules.txt` (`task theme:status`). Not in `go.mod`: that file belongs to the Go code and `go mod tidy` strips Hugo's entries.
+Hugo Plate doesn't tag releases ([issue #188](https://github.com/zeon-studio/hugoplate/issues/188)). It and the gethugothemes modules are Hugo Modules, vendored in `_vendor/`; the exact commits are in `_vendor/modules.txt` (`mise run theme:status`). Not in `go.mod`: that file belongs to the Go code and `go mod tidy` strips Hugo's entries.
 
 ```bash
-task theme:update              # latest upstream (re-run is a no-op when nothing changed)
-task theme:update REF=<sha>    # pin Hugo Plate to a commit, or roll back
+mise run theme:update                 # latest upstream (re-run is a no-op when nothing changed)
+mise run theme:update --ref <sha>     # pin Hugo Plate to a commit, or roll back
 ```
 
-`scripts/theme-update.sh` does: `hugo mod get -u` + `hugo mod vendor` (go.mod restored) → syncs `scripts/themeGenerator.js` from that commit (unmodified) → bumps/adds npm packages to match upstream's `package.json` → regenerates `assets/css/generated-theme.css` → lists changed theme templates our `layouts/` override (upstream fixes we don't get) → production build. Then review `git diff -- _vendor package.json`, push a branch, check the Cloudflare preview build, merge to main.
+`theme update` (`cmd/theme/update.go`) does: `hugo mod get -u` + `hugo mod vendor` (go.mod restored) → syncs `cmd/theme/themeGenerator.js` from that commit (unmodified) → bumps/adds npm packages to match upstream's `package.json` → regenerates `assets/css/generated-theme.css` → 3-way merges upstream's changes into the templates our `layouts/` override (conflicts to `.theme-merge/`) → production build. Then review `git diff -- _vendor package.json cmd/theme layouts`, push a branch, check the Cloudflare preview build, merge to main.
 
 **Don't use upstream's `themeUpdate.js`** (`curl …/tarball/main | tar`): unpinned, no checksums, and it copies templates without the npm packages/build steps they need (that's how `tailwind-bootstrap-grid` broke the build).
 
-**Theme CSS:** upstream generates colors/fonts from `data/theme.json` with `scripts/themeGenerator.js`. Its paths assume `exampleSite/` or `themes/<name>/`, so `scripts/theme-css.sh` runs it unmodified in a temp dir and writes `assets/css/generated-theme.css`. It runs before every Hugo build: `task hugo:*` (dep `theme:css`), process-compose, `scripts/build.sh` (Cloudflare), CI. After editing `data/theme.json`: `task theme:css` and commit the CSS.
+**Theme CSS:** upstream generates colors/fonts from `data/theme.json` with its `themeGenerator.js` (kept unmodified in `cmd/theme/`). Its paths assume `exampleSite/` or `themes/<name>/`, so `theme css` runs it in a temp dir shaped like that and writes `assets/css/generated-theme.css`, which is committed: builds use it as it is, and `theme:check` (in `root:ci`) fails if it isn't what `data/theme.json` makes. After editing `data/theme.json`: `mise run theme:css` and commit the CSS.
 
 ### Hugo Source code
 

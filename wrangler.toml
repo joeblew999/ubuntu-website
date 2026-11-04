@@ -2,6 +2,6 @@ name = "ubuntusoftware-net"
 compatibility_date = "2024-01-01"
 
 # Cloudflare Pages configuration
-# HUGO_VERSION is set as a secret via: wrangler pages secret put HUGO_VERSION
+# Build command (project setting): mise runs root:pages, the control plane's build (mise.toml; CLAUDE.md)
 # The 'public' directory is deployed to Cloudflare Pages
 pages_build_output_dir = "public"

@@ -59,15 +59,16 @@ tasks:
     cmds:
       - |
         set -euo pipefail
-        # Project tools only (not ~/.config/mise globals); go is pinned by go.mod, hugo needs Cloudflare too.
+        # Project tools only (not ~/.config/mise globals); go is pinned by go.mod's toolchain line, hugo is task hugo:upgrade.
         tools=$(mise ls --no-global --current --json | jq -r 'keys[] | select(. != "go" and . != "hugo-extended")' | tr '\n' ' ')
         mise upgrade --bump $tools
-        go_pin=$(sed -n 's/^go //p' go.mod)
+        # go.mod's toolchain line is the Go we build with; its go line is the minimum, raised only by what needs it.
+        go_pin=$(sed -n 's/^toolchain go//p' go.mod)
         go_latest=$(mise latest go)
         if [ "$go_pin" != "$go_latest" ]; then
-          go mod edit -go=$go_latest -toolchain=none
+          go mod edit -toolchain=go$go_latest
           go mod tidy
-          echo "go $go_pin → $go_latest (go.mod)"
+          echo "toolchain go$go_pin → go$go_latest (go.mod)"
         fi
         mise install
         hugo_pin=$(mise config get -f mise.toml tools.hugo-extended)

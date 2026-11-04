@@ -85,11 +85,11 @@ tasks:
   # ===========================================================================
 
   upgrade:
-    desc: Upgrade Hugo (VERSION=x.y.z, default latest) - pin, build check, Cloudflare preview
+    desc: Upgrade Hugo (VERSION=x.y.z, default latest) - pin, build check
     summary: |
-      Hugo is pinned in mise.toml (local + CI) and in Cloudflare Pages' HUGO_VERSION (production
-      and preview). This pins the new version, proves a production build, and switches preview.
-      Production switches only after the preview build of your branch passes (printed at the end).
+      Hugo is pinned in mise.toml, the only place: local, CI and Cloudflare Pages (root:pages
+      installs it there). This pins the new version and proves a production build; the Cloudflare
+      preview build of your branch then builds with it too (printed at the end).
     dir: '{{.ROOT_DIR}}'
     vars:
       VERSION: '{{.VERSION | default ""}}'
@@ -109,12 +109,8 @@ tasks:
         fi
         grep -E "^WARN|Pages |Total in" "$out.log" || true
         rm -rf "$out" "$out.log"
-      - task: ':cf:hugo-version'
-        vars: { ENV: preview }
-      - |
         echo ""
-        echo "Next: commit on a branch and push it; when the Cloudflare preview build passes:"
-        echo "  task cf:hugo-version ENV=production && merge the branch to main"
+        echo "Next: commit on a branch and push it; when its Cloudflare preview build passes, merge it to main"
 
   # ===========================================================================
   # Clean

@@ -1,6 +1,8 @@
 module github.com/joeblew999/ubuntu-website
 
-go 1.27.3
+go 1.27.0
+
+toolchain go1.27.3
 
 require (
 	github.com/bounoable/deepl v0.8.0
