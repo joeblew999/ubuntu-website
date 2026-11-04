@@ -16,7 +16,7 @@ Key points:
 
 ### Tools: mise installs, Taskfile runs
 
-- Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
+- Every third-party tool (task, hugo, bun, node, wrangler, process-compose, gh, terraform, google-mcp-server, fnox, jq, git-lfs, go-mod-upgrade) is pinned in `mise.toml`. Go is pinned by the `toolchain` line in `go.mod` (its `go` line is the minimum language version). CI installs the same pins via `jdx/mise-action`; Cloudflare Pages installs only the build's (`root:pages`).
 - Taskfiles call tools by name and never install them (no `brew install`, `curl | bash`, `bun add -g`, `go install` for third-party tools). A `check:deps` for a mise tool runs `mise install <tool>`.
 - New tool → add it to `[tools]` in `mise.toml` with an exact version.
 

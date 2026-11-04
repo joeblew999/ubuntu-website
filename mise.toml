@@ -42,6 +42,8 @@ terraform = "1.17.1"
 fnox = "1.46.0"
 # JSON in task tools:upgrade.
 jq = "1.8.2"
+# Git LFS: static/videos/*.mp4 are LFS files (.gitattributes).
+git-lfs = "3.8.1"
 # Go module upgrades incl. major versions (task go:upgrade).
 "aqua:oligot/go-mod-upgrade" = "0.13.0"
 
