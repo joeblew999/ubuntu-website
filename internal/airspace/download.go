@@ -31,16 +31,31 @@ func DownloadDirect(client *http.Client, downloadURL, outPath string) error {
 	return err
 }
 
-// DownloadPaginated handles ArcGIS FeatureServer pagination.
+// arcgisError is the error ArcGIS answers in place of features, with HTTP 200 (throttling, a bad query, the service
+// down): {"error": {"code": 499, "message": "..."}}.
+type arcgisError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+// DownloadPaginated handles ArcGIS FeatureServer pagination. It fails, writing nothing, on an error ArcGIS answers in
+// place of a page, and when the pages hold fewer features than the service counts: an empty or partial file would be
+// tiled into nothing, or into a map with holes.
 func DownloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 	type FeatureCollection struct {
-		Type     string `json:"type"`
-		Features []any  `json:"features"`
+		Type     string       `json:"type"`
+		Features []any        `json:"features"`
+		Error    *arcgisError `json:"error,omitempty"`
+	}
+
+	want, err := featureCount(client, ds)
+	if err != nil {
+		return err
 	}
 
 	collection := FeatureCollection{
 		Type:     "FeatureCollection",
-		Features: make([]any, 0),
+		Features: make([]any, 0, want),
 	}
 
 	offset := 0
@@ -70,6 +85,9 @@ func DownloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 			return fmt.Errorf("decode page at offset %d: %w", offset, err)
 		}
 		resp.Body.Close()
+		if page.Error != nil {
+			return fmt.Errorf("ArcGIS error at offset %d: %d %s", offset, page.Error.Code, page.Error.Message)
+		}
 
 		collection.Features = append(collection.Features, page.Features...)
 
@@ -77,6 +95,9 @@ func DownloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 			break
 		}
 		offset += ds.PageSize
+	}
+	if len(collection.Features) < want {
+		return fmt.Errorf("got %d of the %d features the service counts", len(collection.Features), want)
 	}
 
 	f, err := os.Create(outPath)
@@ -87,6 +108,33 @@ func DownloadPaginated(client *http.Client, ds Dataset, outPath string) error {
 
 	encoder := json.NewEncoder(f)
 	return encoder.Encode(collection)
+}
+
+// featureCount is how many features the service holds (returnCountOnly), the number a full download must reach.
+func featureCount(client *http.Client, ds Dataset) (int, error) {
+	params := url.Values{"where": {"1=1"}, "returnCountOnly": {"true"}, "f": {"json"}}
+	resp, err := client.Get(ds.BaseURL + "?" + params.Encode())
+	if err != nil {
+		return 0, fmt.Errorf("count features: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("count features: HTTP %d", resp.StatusCode)
+	}
+	var body struct {
+		Count *int         `json:"count"`
+		Error *arcgisError `json:"error"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return 0, fmt.Errorf("count features: %w", err)
+	}
+	if body.Error != nil {
+		return 0, fmt.Errorf("count features: ArcGIS error %d %s", body.Error.Code, body.Error.Message)
+	}
+	if body.Count == nil || *body.Count == 0 {
+		return 0, fmt.Errorf("count features: the service reports none")
+	}
+	return *body.Count, nil
 }
 
 // Download downloads all specified datasets.

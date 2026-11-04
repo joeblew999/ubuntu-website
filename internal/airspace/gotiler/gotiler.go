@@ -66,6 +66,9 @@ func (g *GoTiler) Tile(inputPath, outputPath string, config airspace.TileConfig)
 	if err != nil {
 		return fmt.Errorf("parsing geojson: %w", err)
 	}
+	if len(fc.Features) == 0 {
+		return fmt.Errorf("%s has no features (an empty download?)", inputPath)
+	}
 
 	// Determine zoom range
 	minZoom := config.MinZoom

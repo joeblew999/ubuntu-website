@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 // PipelineOptions configures the pipeline.
@@ -34,6 +35,17 @@ func Pipeline(opts PipelineOptions, tiler Tiler) (*PipelineResult, error) {
 		return nil, fmt.Errorf("sync: %w", err)
 	}
 	result.SyncResult = syncResult
+
+	// A dataset that failed to download fails the pipeline: tiling around it would hide why.
+	var failed []string
+	for _, key := range DatasetOrder {
+		if ds, ok := syncResult.Datasets[key]; ok && ds.Status == "error" {
+			failed = append(failed, key+": "+ds.Error)
+		}
+	}
+	if len(failed) > 0 {
+		return nil, fmt.Errorf("sync: %s", strings.Join(failed, "; "))
+	}
 
 	// Check if we should continue
 	if !syncResult.HasChanges && !opts.Force {
