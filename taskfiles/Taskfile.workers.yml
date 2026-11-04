@@ -11,7 +11,7 @@
 #
 # Prerequisites:
 #   - Cloudflare account
-#   - Wrangler CLI (task wrangler:check:deps)
+#   - Wrangler CLI (pinned in mise.toml)
 
 version: '3'
 

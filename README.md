@@ -41,8 +41,8 @@ task          # or: task info
 ## 🚀 Quick Start
 
 ```bash
-task setup      # mise install (pinned tools) + npm packages (aube) + Go modules
-task dev:up     # Hugo + tools via process-compose (task dev:down to stop)
+mise trust && mise run root:setup   # pinned tools (mise) + npm packages (aube) + Go modules
+mise run root:up                    # Hugo + tools via process-compose (mise run root:down to stop)
 ```
 
 Pushing to `main` deploys to Cloudflare Pages; other branches get preview deployments.
@@ -54,11 +54,12 @@ Pushing to `main` deploys to Cloudflare Pages; other branches get preview deploy
 ## 🛠️ Development Tasks
 
 ```bash
-task dev           # Hugo dev server
-task build         # Production build
-task preview       # Preview production build
-task clean         # Clean artifacts
-task upgrade       # Upgrade tools, Go modules and the theme (Hugo: task hugo:upgrade)
+mise run root:dev       # Hugo dev server
+mise run root:build     # Production build
+mise run root:preview   # Preview production build
+mise run root:clean     # Clean artifacts
+mise run upgrade:all    # Upgrade tools, Go modules, the theme, the actions (Hugo: mise run upgrade:hugo)
+mise run root:ci        # Everything CI checks
 
 task cf:status     # Cloudflare Pages deployment status
 ```

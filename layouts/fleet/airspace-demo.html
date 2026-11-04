@@ -172,7 +172,7 @@
             })
             .catch(() => {
                 console.log('Airspace Demo: Local pmtiles-server not available, using R2');
-                console.log('  Hint: Run "task pmtiles:server" to enable local tile serving');
+                console.log('  Hint: Run "mise run pmtiles-server:serve" to enable local tile serving');
                 TILES_BASE = R2_TILES;
             });
     } else {

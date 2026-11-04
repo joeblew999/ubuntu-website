@@ -1,0 +1,34 @@
+# Upgrading what the repo is built with, each step repeatable: with nothing new upstream it changes nothing. Each
+# upgrade:<command> runs the upgrade binary's command, cmd/upgrade/<command>.go; misecheck holds them together.
+#   mise run upgrade:all            every step but Hugo's, in order (then review the diff, mise run root:ci, commit)
+#   mise run upgrade:hugo           Hugo, then a branch and its Cloudflare preview build, then main
+
+["upgrade:build"]
+description = "Build upgrade (cmd/upgrade) into bin/: the upgrade:* tasks run it"
+run = 'go build -o bin/ ./cmd/upgrade'
+
+["upgrade:all"]
+description = "Every upgrade but Hugo's, in order: the tools and Go, the Go modules (all of them), the theme, the workflows' actions"
+run = 'mise run upgrade:tools && mise run upgrade:modules --force && mise run theme:update && mise run upgrade:actions'
+
+["upgrade:tools"]
+description = "Every tool mise.toml pins to its latest version, and Go to its latest (go.mod's toolchain line), installed; Hugo is upgrade:hugo"
+depends = ["upgrade:build"]
+run = 'upgrade tools'
+
+["upgrade:modules"]
+description = "The Go modules, major versions too (go-mod-upgrade: it asks which, unless --force), go mod tidy, the deprecated ones named; then the Go vetted and tested"
+usage = 'flag "--force" help="Upgrade every module without asking"; flag "--ignore <regexp>" help="Modules to leave alone"'
+depends = ["upgrade:build"]
+run = 'upgrade modules{% if usage.force %} --force{% endif %}{% if usage.ignore %} --ignore "{{usage.ignore}}"{% endif %} && mise run root:test && mise run root:test-worker'
+
+["upgrade:hugo"]
+description = "Hugo pinned to its latest (or --to) in mise.toml, the one place local, CI and Cloudflare take it from, and a production build proved; then a branch's Cloudflare preview, then main"
+usage = 'flag "--to <version>" help="The Hugo version to pin; default, the latest"'
+depends = ["upgrade:build"]
+run = 'upgrade hugo{% if usage.to %} --to "{{usage.to}}"{% endif %}'
+
+["upgrade:actions"]
+description = "The workflows' actions to their latest releases at least a week old (.github/pinact.yaml), pinned to SHAs; GitHub's API with your gh login"
+env = { PINACT_GITHUB_TOKEN = "{{ exec(command='gh auth token') }}" }
+run = 'pinact run --update'

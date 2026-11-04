@@ -15,67 +15,7 @@ includes:
   git:
     taskfile: ./tools/Taskfile.git.yml
     optional: false
-  task:
-    taskfile: ./tools/Taskfile.task.yml
-    optional: false
   gh:
     taskfile: ./tools/Taskfile.gh.yml
     optional: true  # gh not required for basic operations
-  wrangler:
-    taskfile: ./tools/Taskfile.wrangler.yml
-    optional: true  # Only needed for Cloudflare operations
-  pc:
-    taskfile: ./tools/Taskfile.process-compose.yml
-    optional: true  # Optional local dev tool
 
-tasks:
-  # ===========================================================================
-  # Checks (check:* - diagnostics for this module)
-  # ===========================================================================
-
-  check:deps:
-    desc: Ensure all tools are installed
-    cmds:
-      - task: git:check:deps
-      - task: task:check:deps
-
-  check:validate:
-    desc: Validate all tools work
-    cmds:
-      - task: git:check:validate
-
-  check:health:
-    desc: Health check all tools
-    cmds:
-      - task: git:check:health
-
-  # ===========================================================================
-  # Upgrade (mise pins the tools; this is the front door)
-  # ===========================================================================
-
-  upgrade:
-    desc: Upgrade this project's mise-pinned tools + Go (go.mod) (Hugo is separate - task hugo:upgrade)
-    dir: '{{.ROOT_DIR}}'
-    cmds:
-      - |
-        set -euo pipefail
-        # Project tools only (not ~/.config/mise globals); go is pinned by go.mod's toolchain line, hugo is task hugo:upgrade.
-        tools=$(mise ls --no-global --current --json | jq -r 'keys[] | select(. != "go" and . != "hugo-extended")' | tr '\n' ' ')
-        mise upgrade --bump $tools
-        # go.mod's toolchain line is the Go we build with; its go line is the minimum, raised only by what needs it.
-        go_pin=$(sed -n 's/^toolchain go//p' go.mod)
-        go_latest=$(mise latest go)
-        if [ "$go_pin" != "$go_latest" ]; then
-          go mod edit -toolchain=go$go_latest
-          go mod tidy
-          echo "toolchain go$go_pin → go$go_latest (go.mod)"
-        fi
-        mise install
-        hugo_pin=$(mise config get -f mise.toml tools.hugo-extended)
-        hugo_latest=$(mise latest hugo-extended)
-        if [ "$hugo_pin" != "$hugo_latest" ]; then
-          echo ""
-          echo "Hugo $hugo_pin → $hugo_latest available: task hugo:upgrade"
-        fi
-        echo ""
-        echo "Review: git diff -- mise.toml go.mod; then build/test and commit."

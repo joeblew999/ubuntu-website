@@ -1,0 +1,36 @@
+# The site's pages and dashboards, opened in the browser on any OS. Each url:<command> runs the url binary's command,
+# cmd/url/<command>.go; misecheck holds them together.
+
+["url:build"]
+description = "Build url (cmd/url) into bin/: the url:* tasks run it"
+run = 'go build -o bin/ ./cmd/url'
+
+["url:dev"]
+description = "Open the local Hugo dev server (http://localhost:1313)"
+depends = ["url:build"]
+run = 'url dev'
+
+["url:prod"]
+description = "Open the production site (www.ubuntusoftware.net)"
+depends = ["url:build"]
+run = 'url prod'
+
+["url:preview"]
+description = "Open Cloudflare Pages' own address for the site (ubuntu-website.pages.dev)"
+depends = ["url:build"]
+run = 'url preview'
+
+["url:commit"]
+description = "Open the Cloudflare preview deployment of this commit"
+depends = ["url:build"]
+run = 'url commit'
+
+["url:search-console"]
+description = "Open Google Search Console"
+depends = ["url:build"]
+run = 'url search-console'
+
+["url:cf-analytics"]
+description = "Open Cloudflare Web Analytics for the site"
+depends = ["url:build"]
+run = 'url cf-analytics'

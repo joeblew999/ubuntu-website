@@ -15,6 +15,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/joeblew999/ubuntu-website/internal/hugobuild"
 )
 
 // Upstream packages we deliberately don't use (process-compose runs the dev processes instead).
@@ -84,8 +86,8 @@ func update(args []string) {
 	}
 
 	fmt.Println("==> Production build")
-	if err := productionBuild(); err != nil {
-		fail(err.Error())
+	if err := hugobuild.Production(); err != nil {
+		fail(err.Error() + ": fix it before committing")
 	}
 
 	fmt.Println()
@@ -294,32 +296,4 @@ func swapPrefix(s, from, to string) string {
 		return to + rest
 	}
 	return s
-}
-
-// productionBuild is hugo -e production --gc --minify, into a temporary folder: its warnings and its summary shown,
-// its errors if it fails.
-func productionBuild() error {
-	tmp, err := os.MkdirTemp("", "theme-build-")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tmp)
-	log, err := exec.Command("hugo", "-e", "production", "--gc", "--minify", "-d", filepath.Join(tmp, "public")).CombinedOutput()
-	lines := strings.Split(string(log), "\n")
-	if err != nil {
-		shown := 0
-		for _, l := range lines {
-			if (strings.HasPrefix(l, "ERROR") || strings.HasPrefix(l, "Error")) && shown < 5 {
-				fmt.Println("    " + l)
-				shown++
-			}
-		}
-		return fmt.Errorf("the production build fails (hugo -e production): fix it before committing")
-	}
-	for _, l := range lines {
-		if strings.HasPrefix(l, "WARN") || strings.Contains(l, "Pages ") || strings.Contains(l, "Total in") {
-			fmt.Println("    " + l)
-		}
-	}
-	return nil
 }

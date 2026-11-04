@@ -1,8 +1,8 @@
 version: "0.5"
 
 # Process-Compose orchestrates local development processes
-# Start: task dev:up (or process-compose up)
-# Stop: task dev:down (or Ctrl+C)
+# Start: mise run root:up (or process-compose up -p 8099)
+# Stop: mise run root:down (or Ctrl+C)
 # Docs: https://f1bonacc1.github.io/process-compose/
 
 processes:
@@ -85,7 +85,7 @@ processes:
   # PMTiles server for airspace demo (Hugo can't handle range requests)
   # Serves tiles from static/airspace/tiles/ on port 8765
   pmtiles-server:
-    command: task pmtiles:server
+    command: mise run pmtiles-server:serve
     readiness_probe:
       http_get:
         host: 127.0.0.1

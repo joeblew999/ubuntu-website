@@ -41,8 +41,6 @@ version: '3'
 
 includes:
   # Domain modules
-  hugo: ./taskfiles/Taskfile.hugo.yml
-  go: ./taskfiles/Taskfile.go.yml
   cf: ./taskfiles/Taskfile.cf.yml
   translate: ./taskfiles/Taskfile.translate.yml
   autotranslate: ./taskfiles/Taskfile.autotranslate.yml
@@ -51,23 +49,11 @@ includes:
   mailerlite: ./taskfiles/Taskfile.mailerlite.yml
   google: ./taskfiles/Taskfile.google.yml
   youtube: ./taskfiles/Taskfile.youtube.yml
-  url: ./taskfiles/Taskfile.url.yml
-
-  # Infrastructure modules
-  lanip: ./taskfiles/Taskfile.lanip.yml
 
   # Tools (git exposed at top-level for convenience: git:deploy, git:status)
   git:
     taskfile: ./taskfiles/tools/Taskfile.git.yml
   tools: ./taskfiles/Taskfile.tools.yml
-
-  # Release builds
-  release: ./taskfiles/Taskfile.release.yml
-
-  # Development workflow
-  dev: ./taskfiles/Taskfile.dev.yml
-  pc: ./taskfiles/tools/Taskfile.process-compose.yml
-  wrangler: ./taskfiles/tools/Taskfile.wrangler.yml
 
   # MCP servers
   google-mcp: ./taskfiles/tools/Taskfile.google-mcp.yml
@@ -86,7 +72,6 @@ includes:
 
   # Airspace demo (BVLOS development)
   airspace: ./taskfiles/Taskfile.airspace.yml
-  pmtiles: ./taskfiles/Taskfile.pmtiles.yml
 
   # R2 object storage (large static assets)
   r2: ./taskfiles/Taskfile.cf-r2.yml
@@ -220,13 +205,13 @@ tasks:
         echo "  Settings: https://dash.cloudflare.com/{{.CF_ACCOUNT_ID}}/pages/view/{{.PROJECT_NAME}}/settings/production"
         echo ""
         echo "Quick Commands:"
-        echo "  task setup             - Install pinned tools (mise) + dependencies"
+        echo "  mise run root:setup    - Install pinned tools (mise) + dependencies"
         echo "  task dev               - Start development server"
-        echo "  task url:dev           - Open local dev in browser"
+        echo "  mise run url:dev       - Open local dev in browser"
         echo "  task build             - Build production site"
         echo "  task git:deploy        - Commit and deploy to production"
         echo "  task cf:status         - Check deployment status"
-        echo "  task url:prod          - Open production site"
+        echo "  mise run url:prod      - Open production site"
         echo "  task help              - Show all available tasks"
         echo "========================================"
 
@@ -239,67 +224,11 @@ tasks:
   # Setup & Installation
   # ===========================================================================
 
-  upgrade:
-    desc: Upgrade everything except Hugo - tools, Go version + modules, theme, GitHub Actions (each step is re-runnable)
-    cmds:
-      - task: tools:upgrade
-      - task: go:upgrade
-        vars: { FORCE: 'true' }
-      - mise run theme:update
-      - mise run root:upgrade-actions
-      - 'echo "Hugo is separate (it also needs Cloudflare): task hugo:upgrade"'
-
   # Third-party tools (hugo, node, aube, wrangler, process-compose, ...) are pinned in mise.toml.
   # Taskfiles call them by name and never install them; add new tools to mise.toml.
-  setup:
-    desc: Complete setup - install pinned tools (mise) and dependencies
-    cmds:
-      - task: install:tools
-      - task: install:deps
-
-  install:tools:
-    desc: Install every tool pinned in mise.toml
-    preconditions:
-      - sh: command -v mise
-        msg: "mise not found. Install: https://mise.jdx.dev/getting-started.html"
-    cmds:
-      - mise trust
-      - mise install
-
-  install:deps:
-    desc: Install dependencies
-    cmds:
-      - mise run root:deps
-      - go mod download
-
   # ===========================================================================
   # Aliases (backward compatibility)
   # ===========================================================================
-
-  dev:
-    desc: "[alias] Start Hugo development server"
-    cmds:
-      - task: hugo:dev
-
-  dev:lan:
-    desc: "[alias] Start Hugo dev server with LAN IP"
-    cmds:
-      - task: hugo:dev:lan
-
-  build:
-    desc: "[alias] Build production site"
-    cmds:
-      - task: hugo:build
-
-  preview:
-    desc: "[alias] Preview production build"
-    cmds:
-      - task: hugo:preview
-
-  clean:
-    desc: "[alias] Clean build artifacts"
-    cmds:
-      - task: hugo:clean
 
   # ===========================================================================
   # CI Interface (called by GitHub Actions workflows)
@@ -346,17 +275,3 @@ tasks:
   # Code Quality
   # ===========================================================================
 
-  fmt:
-    desc: Format code
-    cmds:
-      - go fmt ./...
-
-  lint:
-    desc: Lint code
-    cmds:
-      - go vet ./...
-
-  test:
-    desc: Run tests
-    cmds:
-      - go test ./... -v

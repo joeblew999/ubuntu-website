@@ -1,0 +1,13 @@
+# A local PMTiles server for the airspace demo: Hugo's dev server doesn't handle the HTTP range requests PMTiles needs,
+# and the demo page uses this one when it's running (else R2). process-compose runs it (pmtiles-server, disabled by
+# default). The binary is one main.go, cmd/pmtiles-server; misecheck holds the two together.
+
+["pmtiles-server:build"]
+description = "Build pmtiles-server (cmd/pmtiles-server) into bin/"
+run = 'go build -o bin/ ./cmd/pmtiles-server'
+
+["pmtiles-server:serve"]
+description = "Serve static/airspace/tiles on :8765, with range requests and CORS"
+usage = 'flag "--dir <dir>" help="Folder of .pmtiles files (default static/airspace/tiles)"; flag "--port <port>" help="Port (default 8765)"'
+depends = ["pmtiles-server:build"]
+run = 'pmtiles-server{% if usage.dir %} --dir "{{usage.dir}}"{% endif %}{% if usage.port %} --port {{usage.port}}{% endif %}'

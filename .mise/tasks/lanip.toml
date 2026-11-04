@@ -1,0 +1,11 @@
+# This machine's LAN IP: open the dev server from a phone at http://<ip>:1313 (the dev config's relative URLs work
+# from any address). The lanip binary is one main.go, cmd/lanip; misecheck holds the two together.
+
+["lanip:build"]
+description = "Build lanip (cmd/lanip) into bin/: lanip:ip runs it"
+run = 'go build -o bin/ ./cmd/lanip'
+
+["lanip:ip"]
+description = "This machine's LAN IP"
+depends = ["lanip:build"]
+run = 'lanip'

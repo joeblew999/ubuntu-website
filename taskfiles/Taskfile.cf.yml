@@ -26,9 +26,9 @@ tasks:
   # ===========================================================================
 
   check:deps:
-    desc: Ensure wrangler CLI is available
+    desc: Ensure wrangler CLI is available (pinned in mise.toml)
     cmds:
-      - task: :wrangler:check:deps
+      - wrangler --version
 
   check:validate:
     desc: Validate wrangler can access Cloudflare

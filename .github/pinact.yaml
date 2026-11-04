@@ -1,5 +1,5 @@
 # pinact (pinned in mise.toml): every action the workflows use is pinned to a commit SHA, with its version as a comment;
-# root:check-actions, in root:ci, fails on one that isn't. root:upgrade-actions (task upgrade) updates them, only to
+# root:check-actions, in root:ci, fails on one that isn't. upgrade:actions (upgrade:all) updates them, only to
 # releases at least a week old, so a compromised release has time to be caught first.
 version: 3
 min_age:

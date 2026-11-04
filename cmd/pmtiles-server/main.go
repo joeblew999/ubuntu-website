@@ -4,10 +4,10 @@
 // which PMTiles requires for efficient tile loading. This server runs alongside
 // Hugo to serve PMTiles files with proper range request support.
 //
-// Usage:
+// Usage, its task in .mise/tasks/pmtiles-server.toml:
 //
-//	pmtiles-server [options]
-//	pmtiles-server -dir static/airspace/tiles -port 8765
+//	mise run pmtiles-server:serve                 static/airspace/tiles on :8765
+//	mise run pmtiles-server:serve --port 8766
 //
 // The server adds proper CORS headers so the frontend can access tiles
 // from a different port than Hugo (1313).

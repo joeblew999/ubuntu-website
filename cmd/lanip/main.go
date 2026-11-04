@@ -1,7 +1,5 @@
-// lanip prints the local LAN IP address.
-// Cross-platform (macOS, Linux, Windows).
-//
-// Usage: go run ./cmd/lanip
+// lanip prints the local LAN IP address, to open the dev server from a phone (http://<ip>:1313).
+// Cross-platform (macOS, Linux, Windows). Its task is mise run lanip:ip (.mise/tasks/lanip.toml).
 package main
 
 import (
