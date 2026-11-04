@@ -95,11 +95,11 @@ func update(args []string) {
 		fail(fmt.Sprintf("%d template conflict(s): resolve the files in .theme-merge/ into layouts/, then run it again", conflicts))
 	}
 	untracked, _ := output("git", "ls-files", "--others", "--exclude-standard", "--", "_vendor")
-	if run("git", "diff", "--quiet", "--", "_vendor", "package.json", "aube-lock.yaml", generator, themeCSS, "layouts") == nil && untracked == "" {
+	if run("git", "diff", "--quiet", "--", "_vendor", "package.json", "pnpm-lock.yaml", generator, themeCSS, "layouts") == nil && untracked == "" {
 		fmt.Printf("✓ Already up to date (hugoplate %s)\n", sha)
 		return
 	}
-	fmt.Println("✓ Updated. Review: git diff --stat -- _vendor package.json aube-lock.yaml cmd/theme assets/css layouts")
+	fmt.Println("✓ Updated. Review: git diff --stat -- _vendor package.json pnpm-lock.yaml cmd/theme assets/css layouts")
 	fmt.Println("  Ship: push a branch, check the Cloudflare preview build, then merge to main.")
 }
 

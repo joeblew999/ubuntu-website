@@ -20,9 +20,9 @@ func UploadToR2() error {
 		return fmt.Errorf("manifest not found: %s (run 'airspace manifest' first)", manifestPath)
 	}
 
-	// Check wrangler is available
-	if _, err := exec.LookPath("wrangler"); err != nil {
-		return fmt.Errorf("wrangler not found in PATH (npm install -g wrangler)")
+	// Check wrangler is available, as wranglerCmd runs it
+	if _, err := exec.LookPath(wranglerCmd()[0]); err != nil {
+		return fmt.Errorf("%s not found in PATH: run this through its task, mise run airspace:upload", wranglerCmd()[0])
 	}
 
 	fmt.Printf("Uploading airspace data to r2://%s/airspace/\n\n", R2Bucket)
@@ -113,8 +113,18 @@ func TestR2Endpoints() error {
 	return fmt.Errorf("some endpoints failed")
 }
 
+// wranglerCmd is how wrangler runs here: in CI, wrangler itself, on the CLOUDFLARE_API_TOKEN the workflow gives it (no
+// one is there to log in); anywhere else, through mise-cloudflare on the repo's own login (no token).
+func wranglerCmd() []string {
+	if ci := os.Getenv("CI"); ci != "" && ci != "false" && ci != "0" {
+		return []string{"wrangler"}
+	}
+	return []string{"mise-cloudflare", "run-wrangler"}
+}
+
 func wranglerPut(r2Key, filePath string) error {
-	cmd := exec.Command("wrangler", "r2", "object", "put", r2Key, "--file", filePath, "--remote")
+	w := wranglerCmd()
+	cmd := exec.Command(w[0], append(w[1:], "r2", "object", "put", r2Key, "--file", filePath, "--remote")...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()

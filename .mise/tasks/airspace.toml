@@ -2,7 +2,7 @@
 # with nothing new changes nothing) → PMTiles (tippecanoe if installed, else the Go tiler) → R2. Each task runs one
 # command of the airspace binary, cmd/airspace/<command>.go; misecheck holds the two together.
 #   mise run airspace:pipeline            sync + tile + manifest, locally (no upload)
-#   mise run airspace:upload              the tiles and manifests to R2 (CLOUDFLARE_API_TOKEN from .env)
+#   mise run airspace:upload              the tiles and manifests to R2 (on the repo's login; in CI, the workflow's token)
 # The weekly one is .github/workflows/sync-airspace.yml. Serving tiles locally: pmtiles-server:serve.
 
 ["airspace:build"]
@@ -39,8 +39,8 @@ depends = ["airspace:build"]
 run = 'airspace upload{% if usage.test %} --test{% endif %}'
 
 ["airspace:upload-list"]
-description = "What's in R2 under airspace/"
-run = 'wrangler r2 object list ubuntu-website-assets --prefix airspace/'
+description = "What's in R2 under airspace/ (Cloudflare's cf, on its login: wrangler has no object list)"
+run = 'cf r2 objects list --bucket-name ubuntu-website-assets --prefix airspace/'
 
 ["airspace:status"]
 description = "The local data files"

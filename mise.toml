@@ -9,12 +9,13 @@
 #   mise run root:check-mise    misecheck on this file and every task file: each held to its own binary, both ways
 #   mise run root:test          the Go: vet and tests of every package, and the Workers build (js/wasm) vetted
 #   mise run root:build         the site, as production builds it
-#   mise run root:pages         Cloudflare Pages' build: root:build, with only the tools it runs installed
+#   mise run root:cloudflare-build   Cloudflare's build of the Worker: root:build, with only the tools it runs installed
 #   mise tasks                  every task, with its file
 #
 # New machine: mise trust && mise run root:setup, then a domain's own first steps (e.g. mise run google-mcp:setup).
 
-# The mise CI (core-ci.yml) and Cloudflare Pages (its build command, root:pages) run, exactly; anywhere else, at least.
+# The mise CI (core-ci.yml) and Cloudflare's Workers Builds (its build command, root:cloudflare-build) run, exactly;
+# anywhere else, at least.
 min_version = "2026.9.15"
 
 # Values never shown in task output: the secrets .env and CI pass in, by name.
@@ -27,10 +28,10 @@ idiomatic_version_file_enable_tools = ["go"]
 npm.package_manager = "aube"
 
 [tools]
-# Local, CI and Cloudflare Pages (root:pages installs it there); see CLAUDE.md Hugo Version.
+# Local, CI and Cloudflare's Workers Builds (root:cloudflare-build installs it there); see CLAUDE.md Hugo Version.
 hugo-extended = "0.169.0"
 # node is the one JavaScript runtime (Hugo's Tailwind, the theme generator); aube installs the site's npm packages
-# (package.json, aube-lock.yaml, build approvals in aube-workspace.yaml), and only that.
+# (package.json, pnpm-lock.yaml in pnpm's format, build approvals in aube-workspace.yaml), and only that.
 node = "26.13.0"
 aube = "2.9.0"
 # Dev process orchestration (dev:up / process-compose.yaml); not in Homebrew core.
@@ -106,7 +107,8 @@ env = { GOOS = "js", GOARCH = "wasm" }
 run = 'go vet ./cmd/worker-tiler'
 
 [tasks."root:deps"]
-description = "The site's npm packages (Tailwind and its plugins), with aube from aube-lock.yaml: it fails if the lockfile and package.json disagree, and on any dependency build script not reviewed (aube-workspace.yaml)"
+alias = "setup"
+description = "The site's npm packages (Tailwind, its plugins, wrangler), with aube from pnpm-lock.yaml (mise-cloudflare's setup, too): it fails if the lockfile and package.json disagree, and on any dependency build script not reviewed (aube-workspace.yaml)"
 run = 'aube install --frozen-lockfile'
 
 [tasks."root:build"]
@@ -114,7 +116,8 @@ description = "The site as production builds it (hugo -e production --gc --minif
 depends = ["root:deps"]
 run = 'hugo -e production --gc --minify'
 
-[tasks."root:pages"]
-description = "Cloudflare Pages' build, production and preview: its build command is npx -y @jdxcode/mise@<min_version> run --skip-tools root:pages. It installs only the tools root:build runs, not every pin, then runs it"
+[tasks."root:cloudflare-build"]
+description = "Cloudflare's build of the Worker (Workers Builds, production and every branch's preview): its build command is npx -y @jdxcode/mise@<min_version> run --skip-tools root:cloudflare-build. It installs only the tools root:build runs, not every pin, then runs it; wrangler deploys what it built"
+alias = "root:pages"
 run = 'mise install hugo-extended node aube && mise run --skip-tools root:build'
 

@@ -8,7 +8,7 @@ import (
 )
 
 // hugo is upgrade hugo [--to <version>], the task upgrade:hugo: Hugo pinned to that version (the latest without --to)
-// in mise.toml, the one place local, CI and Cloudflare Pages take it from, and a production build proved with it.
+// in mise.toml, the one place local, CI and Cloudflare's builds take it from, and a production build proved with it.
 // Then a branch's Cloudflare preview build proves it there, before main.
 func hugo(args []string) {
 	fs := flag.NewFlagSet("hugo", flag.ExitOnError)

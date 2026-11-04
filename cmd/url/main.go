@@ -1,6 +1,6 @@
 // Command url opens the site's pages and dashboards in the browser, on any OS: the local dev server (mise run url:dev),
-// production, the Cloudflare preview of main and of this commit, Google Search Console, and Cloudflare's dashboards
-// (Web Analytics, the Pages project, the domain, AI Crawl Control, R2).
+// production, the Worker's own address and this branch's preview, Google Search Console, and Cloudflare's dashboards
+// (Web Analytics, the Worker, the domain, AI Crawl Control, R2).
 // Each command is a file of its own and a task of .mise/tasks/url.toml (url:<command>).
 package main
 
@@ -19,7 +19,7 @@ const (
 
 func main() {
 	if len(os.Args) < 2 {
-		fail("usage: url dev | prod | preview | commit | search-console | cf-analytics | cf-pages | cf-domain | cf-ai | cf-r2")
+		fail("usage: url dev | prod | preview | branch | search-console | cf-analytics | cf-worker | cf-domain | cf-ai | cf-r2")
 	}
 	switch cmd := os.Args[1]; cmd {
 	case "dev":
@@ -28,14 +28,14 @@ func main() {
 		prod()
 	case "preview":
 		preview()
-	case "commit":
-		commit()
+	case "branch":
+		branch()
 	case "search-console":
 		searchConsole()
 	case "cf-analytics":
 		cfAnalytics()
-	case "cf-pages":
-		cfPages()
+	case "cf-worker":
+		cfWorker()
 	case "cf-domain":
 		cfDomain()
 	case "cf-ai":

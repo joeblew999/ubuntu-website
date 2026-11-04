@@ -7,8 +7,8 @@ description = "The account's R2 buckets"
 run = 'mise-cloudflare run-wrangler r2 bucket list'
 
 ["r2:list"]
-description = "What's in the bucket"
-run = 'mise-cloudflare run-wrangler r2 object list ubuntu-website-assets'
+description = "What's in the bucket (Cloudflare's cf, on its login: wrangler has no object list)"
+run = 'cf r2 objects list --bucket-name ubuntu-website-assets'
 
 ["r2:upload"]
 description = "A file uploaded to the bucket under <key> (then at the public URL/<key>)"

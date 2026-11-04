@@ -1,6 +1,6 @@
 # Ubuntu Software Website
 
-Multi-language website built with Hugo Plate, featuring automated translation and deployment to Cloudflare Pages.
+Multi-language website built with Hugo Plate, featuring automated translation, served by a Cloudflare Worker (static assets, run by [mise-cloudflare](https://github.com/joeblew999/mise-cloudflare)).
 
 http://localhost:1313
 
@@ -45,7 +45,7 @@ mise trust && mise run root:setup   # pinned tools (mise) + npm packages (aube) 
 mise run dev:up                     # Hugo + tools via process-compose (mise run dev:down to stop)
 ```
 
-Pushing to `main` deploys to Cloudflare Pages; other branches get preview deployments.
+Pushing to `main` deploys the Worker (Cloudflare's Workers Builds); every other branch gets a preview (`mise run url:branch`). `mise run cloudflare` shows where the Worker is and what's next.
 
 ## 📋 Prerequisites
 
@@ -61,7 +61,7 @@ mise run hugo:clean     # Clean artifacts
 mise run upgrade:all    # Upgrade tools, Go modules, the theme, the actions (Hugo: mise run upgrade:hugo)
 mise run root:ci        # Everything CI checks
 
-task cf:status     # Cloudflare Pages deployment status
+mise run cloudflare   # The Worker: deployed, its login, what's next
 ```
 
 ## 🌐 Translation Workflow
@@ -93,7 +93,7 @@ task cf:status     # Cloudflare Pages deployment status
 ├── mise.toml               # Pinned tools
 ├── mise.toml               # The control plane: tool pins, env, repo-wide tasks
 ├── .mise/tasks/            # A task file per Go binary (cmd/<binary>), checked by misecheck
-└── wrangler.toml           # Cloudflare Pages config
+└── wrangler.jsonc          # The Worker: public/ as assets, worker/index.js for /api/*
 ```
 
 ## 🔧 Configuration
@@ -107,7 +107,7 @@ Secrets are never committed:
 
 - [Hugo Plate Template](https://github.com/zeon-studio/hugoplate)
 - [Hugo Documentation](https://gohugo.io/documentation/)
-- [Cloudflare Pages Docs](https://developers.cloudflare.com/pages/)
+- [Cloudflare Workers static assets](https://developers.cloudflare.com/workers/static-assets/)
 - [Task Documentation](https://taskfile.dev/)
 
 ## 📄 License
