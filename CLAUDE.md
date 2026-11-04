@@ -725,5 +725,5 @@ This Project is a web site for my company. I have various info here about me and
 
 **Bundle ID Pattern:** `net.ubuntusoftware.<appname>` (e.g., `net.ubuntusoftware.cad`)
 
-See [DEEPLINK.md](DEEPLINK.md) for full App Store deployment plan.
+See [notes/deeplink.md](notes/deeplink.md) for the App Store deployment plan. Product and business notes are in `notes/`.
 
