@@ -5,7 +5,10 @@
         "origins": [
           "https://www.ubuntusoftware.net",
           "https://ubuntusoftware.net",
-          "http://localhost:1313"
+          "https://ubuntusoftware-net.gedw99.workers.dev",
+          "https://*-ubuntusoftware-net.gedw99.workers.dev",
+          "http://localhost:1313",
+          "http://localhost:8787"
         ],
         "methods": ["GET", "HEAD"],
         "headers": ["*"]
