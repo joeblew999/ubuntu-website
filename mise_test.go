@@ -25,7 +25,7 @@ func TestMise(t *testing.T) {
 		c := misecheck.Config{MiseFile: file}
 		binary := strings.TrimSuffix(filepath.Base(file), ".toml")
 		if st, err := os.Stat(filepath.Join("cmd", binary)); err == nil && st.IsDir() {
-			c.GoCmd, c.GoLayout, c.GoBinaries, c.GoCallers = "cmd", "file", binary, filepath.Join("cmd", binary)
+			c.GoCmd, c.GoLayout, c.GoBinaries, c.GoCallers = "cmd", "file", []string{binary}, filepath.Join("cmd", binary)
 		}
 		t.Run(filepath.Base(file), func(t *testing.T) { misecheck.Check(t, c) })
 	}
