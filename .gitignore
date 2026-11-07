@@ -68,3 +68,5 @@ static/airspace/tiles/
 # Binaries built by mise tasks (google:build) and release builds
 /bin/
 .cloudflare/
+# mise's override for one machine: mise-check's own checkout pins its build there (local)
+.mise/config.local.toml
