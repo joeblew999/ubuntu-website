@@ -1,6 +1,8 @@
 # Ubuntu Software Website
 
-Multi-language website built with Hugo Plate, featuring automated translation, served by a Cloudflare Worker (static assets, run by [mise-cloudflare](https://github.com/joeblew999/mise-cloudflare)).
+**The problem.** A company's website in five languages (English, German, Chinese, Japanese, Vietnamese) drifts a page at a time. An English page changes and nobody can say which of its four translations are now stale or missing; a menu links to a page one language doesn't have; a link breaks. And everything around the pages is a step someone has to remember, done a little differently on every machine: the build, the deploy and a preview of a change, the form that adds a sign-up to the mailing list, new blog posts on Bluesky, noticing that the site is down or that its traffic has changed.
+
+**What ubuntu-website does.** It is [www.ubuntusoftware.net](https://www.ubuntusoftware.net): Hugo builds it on the Hugo Plate theme, from the English pages in `content/english/` and their translations, and a Cloudflare Worker serves the build, with `/api/*` for what needs code (a Web3Forms sign-up added to MailerLite). Every step is a mise task, every tool pinned. `mise run translate:content` says which English pages changed since the last translation and which to translate next, and every Monday a workflow opens an issue for what's missing or stale. `mise run root:ci`, the one thing GitHub's CI runs, builds the site as production does and checks that every link in it lands. A push to `main` deploys it through Cloudflare's Workers Builds, and every other branch gets a preview, run by [mise-cloudflare](https://github.com/joeblew999/mise-cloudflare). Scheduled workflows check the live site from around the world every 6 hours, report a big change in its traffic every Sunday, and post new blog posts to Bluesky.
 
 http://localhost:1313
 

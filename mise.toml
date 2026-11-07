@@ -48,7 +48,7 @@ terraform = "1.17.1"
 # over AminForou/mcp-gsc (always full write scope, no releases, MCP only) and the others (TODO.md).
 "npm:search-console-mcp" = "2.1.4"
 # Resolves the Google servers' GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET from the keychain (fnox.toml).
-fnox = "1.46.0"
+fnox = { version = "1.47.0", workflow = "release.yml" }
 # JSON, by hand (the Go parses its own).
 jq = "1.8.2"
 # The GitHub workflows, linted (root:check-workflows, in root:ci); actionlint checks their run steps with shellcheck.
@@ -68,11 +68,11 @@ git-lfs = "3.8.1"
 # API keys and tokens (DEEPL_API_KEY, UBUNTU_WEBSITE_CF_TOKEN, MAILERLITE_API_KEY, …) from .env, gitignored; none in
 # CI. Never CLOUDFLARE_API_TOKEN or CF_API_TOKEN: wrangler would use either over the repo's own login. The secret ones are redacted from task output (redactions, above).
 _.file = ".env"
-# Google Cloud project (number) that owns the OAuth client. Not secret.
-UBUNTU_WEBSITE_GCP_PROJECT = "130034768106"
 # Each <binary>:build puts its binary here, and aube the npm packages' (wrangler, pinned in package.json): the tasks run
 # them by name.
 _.path = ["{{config_root}}/bin", "{{config_root}}/node_modules/.bin"]
+# Google Cloud project (number) that owns the OAuth client. Not secret.
+UBUNTU_WEBSITE_GCP_PROJECT = "130034768106"
 
 [task_config]
 # The task files, one per Go binary (mise loads this folder by default; named here so the control plane says so).
